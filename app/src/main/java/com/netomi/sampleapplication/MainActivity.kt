@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.netomi.chat.ui.NCWChatActivity
+import com.netomi.chat.ui.view.NCWChatActivity
 
 class MainActivity :AppCompatActivity(), View.OnClickListener {
     private lateinit var btnChat:Button

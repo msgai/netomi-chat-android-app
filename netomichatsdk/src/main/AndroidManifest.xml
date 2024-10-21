@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:name="NCWApplication"
+        android:name=".ui.init.NCWApplication"
         android:allowBackup="true"
         android:supportsRtl="true">
-        <activity android:name=".ui.NCWChatActivity"/>
+        <activity android:name=".ui.view.NCWChatActivity"/>
     </application>
 </manifest>

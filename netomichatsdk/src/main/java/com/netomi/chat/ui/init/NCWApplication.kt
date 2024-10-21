@@ -1,9 +1,7 @@
-package com.netomi.chat
+package com.netomi.chat.ui.init
 import android.app.Application
-import dagger.hilt.android.HiltAndroidApp
 
 
-@HiltAndroidApp
 class NCWApplication: Application() {
 
     override fun onCreate() {
