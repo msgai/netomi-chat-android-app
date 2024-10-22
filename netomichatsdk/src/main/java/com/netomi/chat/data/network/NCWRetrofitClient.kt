@@ -34,14 +34,25 @@ object NCWRetrofitClient {
 
     private val BASE_URL = "https://pickmedevapi.appskeeper.in"  // Replace with your base URL
 
-    // OkHttpClient with custom timeout configuration
+    /**
+     * Configured OkHttpClient with connection and read timeouts,
+     * and a `HttpLoggingInterceptor` for logging network activity.
+     *
+     * - **Connection Timeout:** 30 seconds.
+     * - **Read Timeout:** 30 seconds.
+     * - **Logging:** Logs request and response details at the `BODY` level.
+     */
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
          .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
         .readTimeout(30, TimeUnit.SECONDS)
         .build()
-
-    // Lazy initialization of the Retrofit instance
+    /**
+     * Lazy-initialized Retrofit instance.
+     *
+     * The Retrofit instance is created only when `getInstance()` is called
+     * for the first time, ensuring efficient resource usage.
+     */
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -50,7 +61,14 @@ object NCWRetrofitClient {
             .build()
     }
 
-    // Public method to expose the Retrofit instance
+    /**
+     * Provides the singleton instance of the Retrofit client.
+     *
+     * This method returns the initialized Retrofit instance, ensuring that the same instance
+     * is used throughout the Chat SDK for network operations.
+     *
+     * @return The singleton Retrofit instance.
+     */
     fun getInstance(): Retrofit = retrofit
 
 }
