@@ -1,5 +1,10 @@
 package com.netomi.chat.data.network
 
+import android.content.Context
+import com.netomi.chat.data.apiconstant.NCWApiConstant.HEADER_BEARER
+import com.netomi.chat.utils.AppSharedPreferences
+import com.netomi.chat.utils.NCWAppConstant
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
@@ -37,7 +42,6 @@ object NCWRetrofitClient {
 
     private val BASE_URL = "https://pickmedevapi.appskeeper.in"  // Replace with your base URL
 
-    // OkHttpClient with custom timeout configuration and added AuthInterceptor
     /**
      * Configured OkHttpClient with connection and read timeouts,
      * and a `HttpLoggingInterceptor` for logging network activity.
@@ -45,10 +49,8 @@ object NCWRetrofitClient {
      * - **Connection Timeout:** 30 seconds.
      * - **Read Timeout:** 30 seconds.
      * - **Logging:** Logs request and response details at the `BODY` level.
+     * - **Authorization:** Handles adding an Authorization header through `AuthInterceptor`.
      */
-
-
-
 
     private fun getOkHttpClient(context: Context): OkHttpClient {
         return OkHttpClient.Builder()
@@ -65,13 +67,8 @@ object NCWRetrofitClient {
      * This method returns the initialized Retrofit instance, ensuring that the same instance
      * is used throughout the Chat SDK for network operations.
      *
+     * @param context The context used for retrieving the session token.
      * @return The singleton Retrofit instance.
-     */
-    /**
-     * Lazy-initialized Retrofit instance.
-     *
-     * The Retrofit instance is created only when `getInstance()` is called
-     * for the first time, ensuring efficient resource usage.
      */
     fun getInstance(context: Context): Retrofit {
         return Retrofit.Builder()
@@ -81,7 +78,12 @@ object NCWRetrofitClient {
             .build()
     }
 
-    // Add Authorization header
+    /**
+     * Interceptor for adding Authorization headers to network requests.
+     *
+     * This interceptor retrieves the session token from shared preferences
+     * and adds it to the Authorization header if available.
+     */
     class AuthInterceptor(private val context: Context) : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {
             val sessionToken = AppSharedPreferences(context).getString(NCWAppConstant.SESSION_TOKEN)
