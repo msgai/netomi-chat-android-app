@@ -12,10 +12,28 @@ import androidx.lifecycle.Observer
 import com.netomi.chat.R
 import com.netomi.chat.model.AppConfigurationResponseModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
-import com.netomi.chat.utils.BaseResponse
+import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
 
+/**
+ * Activity responsible for displaying the chat interface and handling user interactions.
+ *
+ * This activity is part of the Chat SDK and serves as the entry point for users to interact
+ * with the chat. It uses **ViewModel** to manage UI-related data in a lifecycle-aware manner.
+ *
+ * ## Responsibilities:
+ * Display chat messages and update the chat log in real-time.
+ * Allow the user to send new messages through a UI form.
+ * Observe the **`NCWChatViewModel`** for LiveData updates to keep the UI synchronized.
+ *
+ * ## Architecture:
+ * **View Layer (Activity):** Displays the UI and handles user events.
+ *
+ * ## Usage:
+ * This activity is intended to be launched by the host application or as part of the Chat SDK.
+ *
+ */
 class NCWChatActivity : AppCompatActivity() {
     private val chatViewModel: NCWChatViewModel by viewModels()
 
@@ -46,19 +64,20 @@ class NCWChatActivity : AppCompatActivity() {
     }
 
     private fun observeChatMessages() {
+        // Observe the chat messages LiveData from the ViewModel
         chatViewModel.chatMessages.observe(this, Observer { messages ->
-            handleApiCallback(messages as State<BaseResponse<Any>>)
+            handleApiCallback(messages as State<NCWBaseResponse<Any>>)
         })
 
         // Observe app configuration changes
         chatViewModel.appAppConfiguration.observe(this, Observer {
 
-            handleApiCallback(it as State<BaseResponse<Any>>)
+            handleApiCallback(it as State<NCWBaseResponse<Any>>)
         })
 
     }
 
-    private fun handleApiCallback(response: State<BaseResponse<Any>>) {
+    private fun handleApiCallback(response: State<NCWBaseResponse<Any>>) {
         when (response) {
             is State.Loading -> {
                 Toast.makeText(this, "Loading..", Toast.LENGTH_SHORT).show()
@@ -82,12 +101,12 @@ class NCWChatActivity : AppCompatActivity() {
     }
 
 
-    private fun onApiSucess(apiResponse: BaseResponse<Any>, apiConstant: String) {
+    private fun onApiSucess(apiResponse: NCWBaseResponse<Any>, apiConstant: String) {
 
         when (apiConstant) {
             Routes.ROUTE_APP_CONFIG -> {
 
-                apiResponse as BaseResponse<AppConfigurationResponseModel>
+                apiResponse as NCWBaseResponse<AppConfigurationResponseModel>
 
                Log.d("Response", "ttetetee "+apiResponse.data.config)
             }
