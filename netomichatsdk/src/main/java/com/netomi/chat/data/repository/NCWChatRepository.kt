@@ -1,9 +1,12 @@
 package com.netomi.chat.data.repository
+import android.util.Log
 import com.netomi.chat.data.network.BaseService
 import com.netomi.chat.data.network.NCWApiInterface
 import com.netomi.chat.data.network.NCWRetrofitClient
+import com.netomi.chat.model.AppConfigurationResponseModel
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.utils.BaseResponse
+import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
 
 
@@ -15,7 +18,7 @@ class NCWChatRepository :BaseService() {
     fun getChatHistory(): State<BaseResponse<ArrayList<NCWMessage>>> {
             val response = apiInterface.fetchChatHistory()
             return if (response.isSuccessful && response.body()!=null) {
-                State.success(data = response.body()!!)
+                State.success(data = response.body()!!,Routes.ROUTE_GET_CHAT)
             } else {
                 val errorBody = response.errorBody()
                 if (errorBody != null) {
@@ -30,7 +33,7 @@ class NCWChatRepository :BaseService() {
      fun sendMessage(message: NCWMessage): State<BaseResponse<Boolean>>  {
             val response = apiInterface.sendMessage(message)
            return if (response.isSuccessful && response.body()!=null) {
-               State.success(data = response.body()!!)
+               State.success(data = response.body()!!,Routes.ROUTE_SEND_CHAT)
             } else {
                val errorBody = response.errorBody()
                if (errorBody != null) {
@@ -39,5 +42,23 @@ class NCWChatRepository :BaseService() {
                    State.error(mapApiException(response.code()), code = response.code())
                }
            }
+    }
+
+
+
+ // Test App config API
+   suspend  fun getAppConfiguration(): State<BaseResponse<AppConfigurationResponseModel>> {
+        val response =  apiInterface.getAppConfiguration()
+        return if(response.isSuccessful && response.body()!=null) {
+            State.success(data = response.body()!!, Routes.ROUTE_APP_CONFIG)
+        }else {
+            val errorBody = response.errorBody()
+            if (errorBody != null) {
+                State.error(parseError(errorBody), code = response.code())
+            } else {
+                State.error(mapApiException(response.code()), code = response.code())
+            }
+        }
+
     }
     }

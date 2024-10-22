@@ -28,13 +28,13 @@ abstract class BaseService{
                 return (response.body() as BaseResponse<*>).let {
                     when (it.code) {
                         in 100..199 -> {
-                            State.success(response.body()!!)
+                            State.success(response.body()!!,apiConstant)
                         }
                         in 200..299 -> {
-                            State.success(response.body()!!)
+                            State.success(response.body()!!,apiConstant)
                         }
                         in 300..399 -> {
-                            State.success(response.body()!!)
+                            State.success(response.body()!!,apiConstant)
                         }
                         in 400..499 -> {
                             State.error(it.message, it.code)

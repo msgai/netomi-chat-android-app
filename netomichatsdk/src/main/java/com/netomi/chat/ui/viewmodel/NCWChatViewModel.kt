@@ -1,12 +1,15 @@
 package com.netomi.chat.ui.viewmodel
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.netomi.chat.data.repository.NCWChatRepository
+import com.netomi.chat.model.AppConfigurationResponseModel
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.utils.BaseResponse
 import com.netomi.chat.utils.State
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class NCWChatViewModel: ViewModel() {
@@ -19,8 +22,21 @@ class NCWChatViewModel: ViewModel() {
     private val _sendMessages = SingleLiveEvent<State<BaseResponse<Boolean>>>()
     val sendMessages get() = _sendMessages
 
+    private var _appAppConfiguration = SingleLiveEvent<State<BaseResponse<AppConfigurationResponseModel>>>()
+    val appAppConfiguration get() = _appAppConfiguration
+
     init {
         loadChatHistory()
+    }
+
+    fun getAppConfig() {
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response=chatRepository.getAppConfiguration()
+            withContext(Dispatchers.Main) {
+                _appAppConfiguration.value = response // Use setValue on the Main thread
+            }
+        }
     }
 
     private fun loadChatHistory() {

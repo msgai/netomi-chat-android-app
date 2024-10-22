@@ -1,17 +1,21 @@
 package com.netomi.chat.data.network
 
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object NCWRetrofitClient {
 
-    private val BASE_URL = "https://api.example.com/"  // Replace with your base URL
+   // private val BASE_URL = "https://api.example.com/"  // Replace with your base URL
+
+    private val BASE_URL = "https://pickmedevapi.appskeeper.in"  // Replace with your base URL
 
     // OkHttpClient with custom timeout configuration
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
+         .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
         .readTimeout(30, TimeUnit.SECONDS)
         .build()
 
