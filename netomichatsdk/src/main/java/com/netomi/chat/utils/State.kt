@@ -6,7 +6,7 @@ package com.netomi.chat.utils
 sealed class State<T> {
     class Loading<T>(val apiConstant: String,val enum: Enum<LoadingType>?=LoadingType.LOADER) : State<T>()
 
-    data class Success<T>(val data: T) : State<T>()
+    data class Success<T>(val data: T,val apiConstant:String) : State<T>()
 
     data class Error<T>(val message: String, val code: Int? = null) : State<T>()
 
@@ -24,8 +24,8 @@ sealed class State<T> {
          * Returns [State.Success] instance.
          * @param data Data to emit with status.
          */
-        fun <T> success(data: T) =
-            Success(data)
+        fun <T> success(data: T,apiConstant: String) =
+            Success(data,apiConstant)
 
         /**
          * Returns [State.Error] instance.
@@ -41,7 +41,7 @@ sealed class State<T> {
          * Returns [State] from [Resource]
          */
         fun <T> fromResource(resource: Resource<T>,apiConstant: String): State<T> = when (resource) {
-            is Resource.Success -> success(resource.data)
+            is Resource.Success -> success(resource.data,apiConstant)
             is Resource.Failed -> error(resource.message, -1)
             is Resource.UnAuthorized -> unAuthorized(resource.message)
         }
