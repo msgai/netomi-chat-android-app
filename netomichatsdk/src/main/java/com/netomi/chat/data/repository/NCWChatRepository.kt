@@ -1,4 +1,5 @@
 package com.netomi.chat.data.repository
+import android.content.Context
 import android.util.Log
 import com.netomi.chat.data.network.BaseService
 import com.netomi.chat.data.network.NCWApiInterface
@@ -10,8 +11,9 @@ import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
 
 
-class NCWChatRepository :BaseService() {
-    private val apiInterface = NCWRetrofitClient.getInstance().create(NCWApiInterface::class.java)
+class NCWChatRepository(private val context: Context) :BaseService() {
+
+    private val apiInterface = NCWRetrofitClient.getInstance(context).create(NCWApiInterface::class.java)
 
 
     // Fetch chat history

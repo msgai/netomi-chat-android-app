@@ -1,6 +1,6 @@
 package com.netomi.chat.ui.viewmodel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.netomi.chat.data.repository.NCWChatRepository
 import com.netomi.chat.model.AppConfigurationResponseModel
@@ -12,9 +12,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class NCWChatViewModel: ViewModel() {
+class NCWChatViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val chatRepository = NCWChatRepository()
+    private val chatRepository = NCWChatRepository(application.applicationContext)
 
     private val _chatMessages = SingleLiveEvent<State<BaseResponse<ArrayList<NCWMessage>>>>()
     val chatMessages get() = _chatMessages
