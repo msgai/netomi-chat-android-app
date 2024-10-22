@@ -1,5 +1,7 @@
 package com.netomi.chat.ui.viewmodel
-import androidx.lifecycle.ViewModel
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.netomi.chat.data.repository.NCWChatRepository
 import com.netomi.chat.model.AppConfigurationResponseModel
@@ -28,54 +30,56 @@ import kotlinx.coroutines.withContext
  * The UI observes the `chatMessages` LiveData to update the chat log in real-time.
  *
  */
-class NCWChatViewModel: ViewModel() {
+class NCWChatViewModel(application: Application) : AndroidViewModel(application)
+{
+        private val chatRepository = NCWChatRepository(application.applicationContext)
 
-    private val chatRepository = NCWChatRepository()
+        private val _chatMessages = SingleLiveEvent<State<NCWBaseResponse<ArrayList<NCWMessage>>>>()
+        val chatMessages get() = _chatMessages
 
-    private val _chatMessages = SingleLiveEvent<State<NCWBaseResponse<ArrayList<NCWMessage>>>>()
-    val chatMessages get() = _chatMessages
+        private val _sendMessages = SingleLiveEvent<State<NCWBaseResponse<Boolean>>>()
+        val sendMessages get() = _sendMessages
 
-    private val _sendMessages = SingleLiveEvent<State<NCWBaseResponse<Boolean>>>()
-    val sendMessages get() = _sendMessages
+        private var _appAppConfiguration =
+            SingleLiveEvent<State<NCWBaseResponse<AppConfigurationResponseModel>>>()
+        val appAppConfiguration get() = _appAppConfiguration
 
-    private var _appAppConfiguration = SingleLiveEvent<State<NCWBaseResponse<AppConfigurationResponseModel>>>()
-    val appAppConfiguration get() = _appAppConfiguration
+        init {
+            loadChatHistory()
+        }
 
-    init {
-        loadChatHistory()
-    }
+        fun getAppConfig() {
 
-    fun getAppConfig() {
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val response=chatRepository.getAppConfiguration()
-            withContext(Dispatchers.Main) {
-                _appAppConfiguration.value = response // Use setValue on the Main thread
+            viewModelScope.launch(Dispatchers.IO) {
+                val response = chatRepository.getAppConfiguration()
+                withContext(Dispatchers.Main) {
+                    _appAppConfiguration.value = response // Use setValue on the Main thread
+                }
             }
         }
-    }
 
-    private fun loadChatHistory() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val messages = listOf(
-                NCWMessage("1", "User", "Hello!", System.currentTimeMillis()),
-                NCWMessage("2", "Bot", "Hi there!", System.currentTimeMillis())
-            )
-            //_chatMessages.value=messages
+        private fun loadChatHistory() {
+            viewModelScope.launch(Dispatchers.IO) {
+                val messages = listOf(
+                    NCWMessage("1", "User", "Hello!", System.currentTimeMillis()),
+                    NCWMessage("2", "Bot", "Hi there!", System.currentTimeMillis())
+                )
+                //_chatMessages.value=messages
+            }
         }
-    }
 
-    /**
-     * @param content The content of the message to be sent.
-     */
-    fun sendMessage(content: String) {
-        val newMessage = NCWMessage(
-            id = System.currentTimeMillis().toString(),
-            sender = "User",
-            content = content,
-            timestamp = System.currentTimeMillis()
-        )
-        val response=chatRepository.sendMessage(newMessage)
-        _sendMessages.value=response
-    }
+        /**
+         * @param content The content of the message to be sent.
+         */
+        fun sendMessage(content: String) {
+            val newMessage = NCWMessage(
+                id = System.currentTimeMillis().toString(),
+                sender = "User",
+                content = content,
+                timestamp = System.currentTimeMillis()
+            )
+            val response = chatRepository.sendMessage(newMessage)
+            _sendMessages.value = response
+        }
+
 }

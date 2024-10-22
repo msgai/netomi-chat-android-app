@@ -1,6 +1,8 @@
 package com.netomi.chat.data.repository
-import com.netomi.chat.data.network.NCWBaseService
+
+import android.content.Context
 import com.netomi.chat.data.network.NCWApiInterface
+import com.netomi.chat.data.network.NCWBaseService
 import com.netomi.chat.data.network.NCWRetrofitClient
 import com.netomi.chat.model.AppConfigurationResponseModel
 import com.netomi.chat.model.NCWMessage
@@ -24,48 +26,49 @@ import com.netomi.chat.utils.State
  * The **`NCWChatRepository`** is used by the **`NCWChatViewModel`** to perform data operations
  * such as loading chat history and sending new messages.
  */
-class NCWChatRepository :NCWBaseService() {
-    private val apiInterface = NCWRetrofitClient.getInstance().create(NCWApiInterface::class.java)
 
+
+class NCWChatRepository(private val context: Context) :NCWBaseService() {
+
+    private val apiInterface = NCWRetrofitClient.getInstance(context).create(NCWApiInterface::class.java)
 
     // Fetch chat history
     fun getChatHistory(): State<NCWBaseResponse<ArrayList<NCWMessage>>> {
-            val response = apiInterface.fetchChatHistory()
-            return if (response.isSuccessful && response.body()!=null) {
-                State.success(data = response.body()!!,Routes.ROUTE_GET_CHAT)
+        val response = apiInterface.fetchChatHistory()
+        return if (response.isSuccessful && response.body() != null) {
+            State.success(data = response.body()!!, Routes.ROUTE_GET_CHAT)
+        } else {
+            val errorBody = response.errorBody()
+            if (errorBody != null) {
+                State.error(parseError(errorBody), code = response.code())
             } else {
-                val errorBody = response.errorBody()
-                if (errorBody != null) {
-                    State.error(parseError(errorBody), code = response.code())
-                } else {
-                    State.error(mapApiException(response.code()), code = response.code())
-                }
+                State.error(mapApiException(response.code()), code = response.code())
             }
+        }
     }
 
     // Send a new message
-     fun sendMessage(message: NCWMessage): State<NCWBaseResponse<Boolean>>  {
-            val response = apiInterface.sendMessage(message)
-           return if (response.isSuccessful && response.body()!=null) {
-               State.success(data = response.body()!!,Routes.ROUTE_SEND_CHAT)
+    fun sendMessage(message: NCWMessage): State<NCWBaseResponse<Boolean>> {
+        val response = apiInterface.sendMessage(message)
+        return if (response.isSuccessful && response.body() != null) {
+            State.success(data = response.body()!!, Routes.ROUTE_SEND_CHAT)
+        } else {
+            val errorBody = response.errorBody()
+            if (errorBody != null) {
+                State.error(parseError(errorBody), code = response.code())
             } else {
-               val errorBody = response.errorBody()
-               if (errorBody != null) {
-                   State.error(parseError(errorBody), code = response.code())
-               } else {
-                   State.error(mapApiException(response.code()), code = response.code())
-               }
-           }
+                State.error(mapApiException(response.code()), code = response.code())
+            }
+        }
     }
 
 
-
- // Test App config API
-   suspend  fun getAppConfiguration(): State<NCWBaseResponse<AppConfigurationResponseModel>> {
-        val response =  apiInterface.getAppConfiguration()
-        return if(response.isSuccessful && response.body()!=null) {
+    // Test App config API
+    suspend fun getAppConfiguration(): State<NCWBaseResponse<AppConfigurationResponseModel>> {
+        val response = apiInterface.getAppConfiguration()
+        return if (response.isSuccessful && response.body() != null) {
             State.success(data = response.body()!!, Routes.ROUTE_APP_CONFIG)
-        }else {
+        } else {
             val errorBody = response.errorBody()
             if (errorBody != null) {
                 State.error(parseError(errorBody), code = response.code())
@@ -75,4 +78,6 @@ class NCWChatRepository :NCWBaseService() {
         }
 
     }
-    }
+}
+
+

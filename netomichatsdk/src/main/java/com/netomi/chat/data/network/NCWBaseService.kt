@@ -1,4 +1,5 @@
 package com.netomi.chat.data.network
+
 import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.State
 import okhttp3.ResponseBody

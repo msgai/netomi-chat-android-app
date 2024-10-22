@@ -1,10 +1,18 @@
 package com.netomi.chat.data.network
 
+import android.content.Context
+import com.netomi.chat.data.apiconstant.NCWApiConstant.HEADER_BEARER
+import com.netomi.chat.utils.AppSharedPreferences
+import com.netomi.chat.utils.NCWAppConstant
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+
+
 
 /**
  * Singleton class responsible for creating and providing a Retrofit instance.
@@ -41,23 +49,15 @@ object NCWRetrofitClient {
      * - **Connection Timeout:** 30 seconds.
      * - **Read Timeout:** 30 seconds.
      * - **Logging:** Logs request and response details at the `BODY` level.
+     * - **Authorization:** Handles adding an Authorization header through `AuthInterceptor`.
      */
-    private val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-         .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-        .readTimeout(30, TimeUnit.SECONDS)
-        .build()
-    /**
-     * Lazy-initialized Retrofit instance.
-     *
-     * The Retrofit instance is created only when `getInstance()` is called
-     * for the first time, ensuring efficient resource usage.
-     */
-    private val retrofit: Retrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
+
+    private fun getOkHttpClient(context: Context): OkHttpClient {
+        return OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+            .addInterceptor(AuthInterceptor(context))  // Adding the interceptor
             .build()
     }
 
@@ -67,8 +67,39 @@ object NCWRetrofitClient {
      * This method returns the initialized Retrofit instance, ensuring that the same instance
      * is used throughout the Chat SDK for network operations.
      *
+     * @param context The context used for retrieving the session token.
      * @return The singleton Retrofit instance.
      */
-    fun getInstance(): Retrofit = retrofit
+    fun getInstance(context: Context): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(getOkHttpClient(context))
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    /**
+     * Interceptor for adding Authorization headers to network requests.
+     *
+     * This interceptor retrieves the session token from shared preferences
+     * and adds it to the Authorization header if available.
+     */
+    class AuthInterceptor(private val context: Context) : Interceptor {
+        override fun intercept(chain: Interceptor.Chain): Response {
+            val sessionToken = AppSharedPreferences(context).getString(NCWAppConstant.SESSION_TOKEN)
+
+            // Start building the request
+            val requestBuilder = chain.request().newBuilder()
+                .header("Content-Type", "application/json")
+            if (sessionToken.isNotEmpty()) {
+                requestBuilder.header("Authorization", "$HEADER_BEARER $sessionToken")
+            }
+            // Build the request after all headers are set
+            val request = requestBuilder.build()
+            return chain.proceed(request)
+        }
+    }
+
+
 
 }
