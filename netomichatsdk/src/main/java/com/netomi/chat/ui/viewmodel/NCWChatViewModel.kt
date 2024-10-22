@@ -1,28 +1,46 @@
 package com.netomi.chat.ui.viewmodel
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.netomi.chat.data.repository.NCWChatRepository
 import com.netomi.chat.model.AppConfigurationResponseModel
 import com.netomi.chat.model.NCWMessage
-import com.netomi.chat.utils.BaseResponse
+import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.State
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * ViewModel for managing chat messages in the NCWChat application
+ *
+ * This class is responsible for holding and managing UI-related data for the chat activity.
+ * It ensures that the chat data survives configuration changes, such as screen rotations.
+ * Additionally, it provides methods to load chat history and send new messages.
+ *
+ * ## Responsibilities:
+ * Load and manage the list of chat messages.
+ * Expose chat messages through LiveData to be observed by the UI.
+ * Provide a method to send new messages and update the message list.
+ * Use `viewModelScope` to manage coroutines, ensuring proper lifecycle handling.
+ *
+ * ## Usage:
+ * This ViewModel should be used in conjunction with the `ChatActivity`.
+ * The UI observes the `chatMessages` LiveData to update the chat log in real-time.
+ *
+ */
+class NCWChatViewModel: ViewModel() {
 
 class NCWChatViewModel(application: Application) : AndroidViewModel(application) {
 
     private val chatRepository = NCWChatRepository(application.applicationContext)
 
-    private val _chatMessages = SingleLiveEvent<State<BaseResponse<ArrayList<NCWMessage>>>>()
+    private val _chatMessages = SingleLiveEvent<State<NCWBaseResponse<ArrayList<NCWMessage>>>>()
     val chatMessages get() = _chatMessages
 
-    private val _sendMessages = SingleLiveEvent<State<BaseResponse<Boolean>>>()
+    private val _sendMessages = SingleLiveEvent<State<NCWBaseResponse<Boolean>>>()
     val sendMessages get() = _sendMessages
 
-    private var _appAppConfiguration = SingleLiveEvent<State<BaseResponse<AppConfigurationResponseModel>>>()
+    private var _appAppConfiguration = SingleLiveEvent<State<NCWBaseResponse<AppConfigurationResponseModel>>>()
     val appAppConfiguration get() = _appAppConfiguration
 
     init {
@@ -49,7 +67,9 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    // Send a new message using viewModelScope
+    /**
+     * @param content The content of the message to be sent.
+     */
     fun sendMessage(content: String) {
         val newMessage = NCWMessage(
             id = System.currentTimeMillis().toString(),
