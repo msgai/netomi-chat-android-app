@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.netomi.chat.data.repository.NCWChatRepository
 import com.netomi.chat.model.AppConfigurationResponseModel
+import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.State
@@ -37,7 +38,7 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
         private val _chatMessages = SingleLiveEvent<State<NCWBaseResponse<ArrayList<NCWMessage>>>>()
         val chatMessages get() = _chatMessages
 
-        private val _sendMessages = SingleLiveEvent<State<NCWBaseResponse<Boolean>>>()
+        private val _sendMessages = SingleLiveEvent<NCWMessage>()
         val sendMessages get() = _sendMessages
 
         private var _appAppConfiguration =
@@ -61,12 +62,14 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
         private fun loadChatHistory() {
             viewModelScope.launch(Dispatchers.IO) {
                 val messages = listOf(
-                    NCWMessage("1", "User", "Hello!", System.currentTimeMillis()),
-                    NCWMessage("2", "Bot", "Hi there!", System.currentTimeMillis())
+                    NCWMessage("1", "User", "Hello!", timestamp = System.currentTimeMillis()),
+                    NCWMessage("2", "Bot", "Hi there!", timestamp = System.currentTimeMillis())
                 )
                 //_chatMessages.value=messages
             }
         }
+
+
 
         /**
          * @param content The content of the message to be sent.
@@ -74,12 +77,13 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
         fun sendMessage(content: String) {
             val newMessage = NCWMessage(
                 id = System.currentTimeMillis().toString(),
+                message = content,
+                timestamp = System.currentTimeMillis(),
+                type = MessageType.TEXT,
                 sender = "User",
-                content = content,
-                timestamp = System.currentTimeMillis()
             )
-            val response = chatRepository.sendMessage(newMessage)
-            _sendMessages.value = response
+           // val response = chatRepository.sendMessage(newMessage)
+            _sendMessages.value = newMessage
         }
 
 }
