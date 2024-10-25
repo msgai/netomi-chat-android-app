@@ -10,6 +10,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.netomi.chat.R
+import com.netomi.chat.config.NCWChatSdk
+import com.netomi.chat.config.NCWSdkConfig
 import com.netomi.chat.model.AppConfigurationResponseModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.NCWBaseResponse
@@ -40,6 +42,7 @@ class NCWChatActivity : AppCompatActivity() {
     private lateinit var chatLog: TextView
     private lateinit var inputField: EditText
     private lateinit var sendButton: Button
+    private var ncwSdkConfig:NCWSdkConfig?=null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +52,11 @@ class NCWChatActivity : AppCompatActivity() {
         chatLog = findViewById(R.id.chatLog)
         inputField = findViewById(R.id.inputField)
         sendButton = findViewById(R.id.sendButton)
+
+        ncwSdkConfig= NCWChatSdk.getConfig()
+        applyConfig()
+
+
 
         sendButton.setOnClickListener {
             val messageContent = inputField.text.toString()
@@ -61,6 +69,15 @@ class NCWChatActivity : AppCompatActivity() {
         observeChatMessages()
 
         chatViewModel.getAppConfig()
+    }
+
+    private fun applyConfig() {
+        ncwSdkConfig?.let {
+            val sendButtonStyle= it.sendButtonStyle
+            sendButton.setBackgroundColor(sendButtonStyle.backgroundColor)
+            sendButton.setTextColor(sendButtonStyle.textColor)
+            sendButton.textSize = sendButtonStyle.fontSize
+        }
     }
 
     private fun observeChatMessages() {
