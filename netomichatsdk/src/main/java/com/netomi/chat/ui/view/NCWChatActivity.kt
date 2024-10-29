@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.netomi.chat.R
+import com.netomi.chat.awsiot.AWSIoTManager
 import com.netomi.chat.config.NCWChatSdk
 import com.netomi.chat.config.NCWSdkConfig
 import com.netomi.chat.model.AppConfigurationResponseModel
@@ -55,6 +56,8 @@ class NCWChatActivity : AppCompatActivity() {
 
         ncwSdkConfig= NCWChatSdk.getConfig()
         applyConfig()
+        AWSIoTManager.connect()
+        AWSIoTManager.subscribeToTopic("chat_widget/b23963e4-56c5-4d8f-929e-2b0f1155b1f8/48fd2c5f-7e79-593b-bbef-9b1d7e450f86")
 
 
 
