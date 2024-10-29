@@ -45,27 +45,29 @@ class NCWChatActivity : AppCompatActivity() {
     private lateinit var sendButton: Button
     private var ncwSdkConfig:NCWSdkConfig?=null
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
 
         chatLog = findViewById(R.id.chatLog)
+
         inputField = findViewById(R.id.inputField)
+
         sendButton = findViewById(R.id.sendButton)
 
-        ncwSdkConfig= NCWChatSdk.getConfig()
+        ncwSdkConfig = NCWChatSdk.getConfig()
+
         applyConfig()
-        AWSIoTManager.connect()
-        AWSIoTManager.subscribeToTopic("chat_widget/b23963e4-56c5-4d8f-929e-2b0f1155b1f8/48fd2c5f-7e79-593b-bbef-9b1d7e450f86")
 
-
+        AWSIoTManager.connect(chatViewModel)
+        //AWSIoTManager.subscribeToTopic("chat_widget/b23963e4-56c5-4d8f-929e-2b0f1155b1f8/48fd2c5f-7e79-593b-bbef-9b1d7e450f86")
 
         sendButton.setOnClickListener {
             val messageContent = inputField.text.toString()
             if (messageContent.isNotEmpty()) {
-                chatViewModel.sendMessage(messageContent)
+               // chatViewModel.sendMessage(messageContent)
                 inputField.text.clear()
+                AWSIoTManager.publishMessage("topicOne",messageContent)
             }
         }
 
@@ -91,8 +93,11 @@ class NCWChatActivity : AppCompatActivity() {
 
         // Observe app configuration changes
         chatViewModel.appAppConfiguration.observe(this, Observer {
-
             handleApiCallback(it as State<NCWBaseResponse<Any>>)
+        })
+
+        chatViewModel.awsMessage.observe(this, Observer {
+            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
         })
 
     }
@@ -119,7 +124,6 @@ class NCWChatActivity : AppCompatActivity() {
         }
 
     }
-
 
     private fun onApiSucess(apiResponse: NCWBaseResponse<Any>, apiConstant: String) {
 

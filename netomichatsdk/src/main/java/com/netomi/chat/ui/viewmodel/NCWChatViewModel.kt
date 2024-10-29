@@ -30,8 +30,7 @@ import kotlinx.coroutines.withContext
  * The UI observes the `chatMessages` LiveData to update the chat log in real-time.
  *
  */
-class NCWChatViewModel(application: Application) : AndroidViewModel(application)
-{
+class NCWChatViewModel(application: Application) : AndroidViewModel(application) {
         private val chatRepository = NCWChatRepository(application.applicationContext)
 
         private val _chatMessages = SingleLiveEvent<State<NCWBaseResponse<ArrayList<NCWMessage>>>>()
@@ -40,9 +39,12 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
         private val _sendMessages = SingleLiveEvent<State<NCWBaseResponse<Boolean>>>()
         val sendMessages get() = _sendMessages
 
-        private var _appAppConfiguration =
-            SingleLiveEvent<State<NCWBaseResponse<AppConfigurationResponseModel>>>()
+        private var _appAppConfiguration = SingleLiveEvent<State<NCWBaseResponse<AppConfigurationResponseModel>>>()
         val appAppConfiguration get() = _appAppConfiguration
+
+
+    private var _awsMessage = SingleLiveEvent<String>()
+    val awsMessage get() = _awsMessage
 
         init {
             loadChatHistory()
