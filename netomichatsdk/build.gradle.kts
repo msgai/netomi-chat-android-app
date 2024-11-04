@@ -65,6 +65,12 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
 
+    //aws IOT
+    implementation ("com.amazonaws:aws-android-sdk-iot:2.77.0")
+    implementation ("com.amazonaws:aws-android-sdk-core:2.77.0")
+    //implementation ("com.amazonaws:aws-android-sdk-auth-core:2.66.0")
+
+
 
 
 }
