@@ -27,6 +27,9 @@ import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.ui.init.NCWChatSdk
+import com.netomi.chat.config.NCWChatSdk
+import com.netomi.chat.config.NCWSdkConfig
+import com.netomi.chat.model.AppConfigurationResponseModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.Routes
@@ -67,6 +70,8 @@ class NCWChatActivity : AppCompatActivity() {
     private var photoUri: Uri? = null
     private lateinit var headerView: ConstraintLayout
 
+    private lateinit var sendButton: Button
+    private var ncwSdkConfig:NCWSdkConfig?=null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -103,6 +108,11 @@ class NCWChatActivity : AppCompatActivity() {
             }
         }
 
+        ncwSdkConfig= NCWChatSdk.getConfig()
+        applyConfig()
+
+
+
         sendButton.setOnClickListener {
             val messageContent = inputField.text.toString()
             if (messageContent.isNotEmpty()) {
@@ -138,6 +148,15 @@ class NCWChatActivity : AppCompatActivity() {
         ))
         messageList.add(NCWMessage( sender = "BOT", type = MessageType.TEXT, message = "Hi, how are you?", timestamp = System.currentTimeMillis()))
         messageAdapter.notifyDataSetChanged()
+    }
+
+    private fun applyConfig() {
+        ncwSdkConfig?.let {
+            val sendButtonStyle= it.sendButtonStyle
+            sendButton.setBackgroundColor(sendButtonStyle.backgroundColor)
+            sendButton.setTextColor(sendButtonStyle.textColor)
+            sendButton.textSize = sendButtonStyle.fontSize
+        }
     }
 
     private fun observeChatMessages() {
