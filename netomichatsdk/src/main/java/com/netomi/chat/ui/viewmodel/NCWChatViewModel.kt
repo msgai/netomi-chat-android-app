@@ -48,6 +48,10 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
         SingleLiveEvent<State<GetConversationIdResponse>>()
     val getConversationId get() = _getConversationId
 
+
+    private var _awsMessage = SingleLiveEvent<String>()
+    val awsMessage get() = _awsMessage
+
         init {
             loadChatHistory()
         }
@@ -62,8 +66,6 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
                 //_chatMessages.value=messages
             }
         }
-
-
 
         /**
          * @param content The content of the message to be sent.

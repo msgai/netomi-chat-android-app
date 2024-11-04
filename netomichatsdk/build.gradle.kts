@@ -70,6 +70,12 @@ dependencies {
     // Annotation processor for Glide
     kapt("com.github.bumptech.glide:compiler:4.15.1")
 
+    //aws IOT
+    implementation ("com.amazonaws:aws-android-sdk-iot:2.77.0")
+    implementation ("com.amazonaws:aws-android-sdk-core:2.77.0")
+    //implementation ("com.amazonaws:aws-android-sdk-auth-core:2.66.0")
+
+
 
 
 }

@@ -109,13 +109,15 @@ class NCWChatActivity : AppCompatActivity() {
        ncwSdkConfig= NCWChatSdk.getConfig()
       //  applyConfig()
 
-
+        AWSIoTManager.connect(chatViewModel)
+        //AWSIoTManager.subscribeToTopic("chat_widget/b23963e4-56c5-4d8f-929e-2b0f1155b1f8/48fd2c5f-7e79-593b-bbef-9b1d7e450f86")
 
         sendButton.setOnClickListener {
             val messageContent = inputField.text.toString()
             if (messageContent.isNotEmpty()) {
                 chatViewModel.sendMessage(messageContent)
                 inputField.text.clear()
+                AWSIoTManager.publishMessage("topicOne",messageContent)
             }
         }
 
@@ -170,6 +172,10 @@ class NCWChatActivity : AppCompatActivity() {
             messageAdapter.notifyDataSetChanged()
         })
 
+
+        chatViewModel.awsMessage.observe(this, Observer {
+            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+        })
 
     }
 
