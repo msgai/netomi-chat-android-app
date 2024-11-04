@@ -3,35 +3,35 @@ package com.netomi.chat.ui.view
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import com.netomi.chat.R
-import com.netomi.chat.model.AppConfigurationResponseModel
+import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
+import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.NCWAppUtils
-import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
+import com.netomi.chat.utils.ThemeUtils
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -58,30 +58,50 @@ class NCWChatActivity : AppCompatActivity() {
     private val chatViewModel: NCWChatViewModel by viewModels()
 
     private lateinit var inputField: EditText
-    private lateinit var sendButton: Button
+    private lateinit var sendButton: ImageView
 
     private lateinit var messageAdapter: ChatAdapter
-    private lateinit var messages: MutableList<NCWMessage>
+    private lateinit var messageList: MutableList<NCWMessage>
     private lateinit var recyclerView: RecyclerView
     private lateinit var uploadButton: ImageView
     private var photoUri: Uri? = null
+    private lateinit var headerView: ConstraintLayout
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
-
+        headerView = findViewById(R.id.header)
         inputField = findViewById(R.id.inputField)
-        sendButton = findViewById(R.id.btnSend)
+        sendButton = findViewById(R.id.imgSend)
         recyclerView = findViewById(R.id.recyclerView)
-        uploadButton = findViewById(R.id.imgAttach)
+        uploadButton = findViewById(R.id.imgAttachment)
 
         // Initialize the message list and adapter
-        messages = mutableListOf()
-        messageAdapter = ChatAdapter(messages)
+        messageList = mutableListOf()
+        messageAdapter = ChatAdapter(messageList)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = messageAdapter
 
+        val botRef=intent.getStringExtra("botRefId")
+     //   chatViewModel.getConversationId(botRef)
+
+        val  themeData=NCWChatSdk.getThemeData()
+        if (themeData != null) {
+            if (themeData.theme?.gradient == true) {
+                val directionIndex = themeData.theme.gradientDirection.coerceIn(0, GradientDrawable.Orientation.values().size - 1)
+
+                val gradient = GradientDrawable(
+                    GradientDrawable.Orientation.values()[directionIndex],
+                    themeData.theme?.gradientColors?.map { Color.parseColor(it) }?.toIntArray() ?: null
+                )
+                headerView.background = gradient
+            }
+            else{
+                ThemeUtils.applyTheme(themeResponse = themeData, headerView)
+            }
+        }
 
         sendButton.setOnClickListener {
             val messageContent = inputField.text.toString()
@@ -93,73 +113,80 @@ class NCWChatActivity : AppCompatActivity() {
 
         // Set up the upload button to show options for camera or gallery
         uploadButton.setOnClickListener {
-
             requestPermissionsAndShowMediaOptions()
         }
 
         observeChatMessages()
 
-        chatViewModel.getAppConfig()
+       // chatViewModel.getAppConfig()
 
          getDummyChat()
 
-        val suggestions = listOf("Yes", "No", "Maybe", "More Info")
-        populateSuggestionChips(suggestions)
-    }
-    private fun populateSuggestionChips(suggestions: List<String>) {
-        val chipGroup = findViewById<ChipGroup>(R.id.chipGroupSuggestions)
-        chipGroup.removeAllViews() // Clear previous chips if any
 
-        suggestions.forEach { suggestion ->
-            val chip = Chip(this).apply {
-                text = suggestion
-                isClickable = true
-                isCheckable = false
-                setChipBackgroundColorResource( android.R.color.darker_gray)
-                setTextColor(ContextCompat.getColor(this@NCWChatActivity, android.R.color.white))
-                setOnClickListener {
-                    // Handle suggestion chip click
-                    handleChipClick(suggestion)
-                }
-            }
-            chipGroup.addView(chip)
-        }
+
+
+
     }
 
-    private fun handleChipClick(suggestion: String) {
-        // Send suggestion text as a chat message or perform the corresponding action
-    }
 
     private fun getDummyChat() {
-        messages.add(NCWMessage(
+        messageList.add(NCWMessage(
             sender = "User",
             type = MessageType.TEXT,
             message = "Hello!",
             timestamp = System.currentTimeMillis(),
         ))
-        messages.add(NCWMessage( sender = "BOT", type = MessageType.TEXT, message = "Hi, how are you?", timestamp = System.currentTimeMillis()))
+        messageList.add(NCWMessage( sender = "BOT", type = MessageType.TEXT, message = "Hi, how are you?", timestamp = System.currentTimeMillis()))
         messageAdapter.notifyDataSetChanged()
     }
 
     private fun observeChatMessages() {
         // Observe the chat messages LiveData from the ViewModel
         chatViewModel.chatMessages.observe(this, Observer { messages ->
-            handleApiCallback(messages as State<NCWBaseResponse<Any>>)
+           // handleApiCallback(messages as State<NCWBaseResponse<Any>>)
+        })
+
+        chatViewModel.getConversationId.observe(this, Observer { it ->
+           handleApiCallback(it as State<Any>)
         })
 
         chatViewModel.sendMessages.observe(this, Observer { message ->
-            messages.add(message)
+            messageList.add(message)
             messageAdapter.notifyDataSetChanged()
-
         })
 
         // Observe app configuration changes
         chatViewModel.appAppConfiguration.observe(this, Observer {
 
-            handleApiCallback(it as State<NCWBaseResponse<Any>>)
+           // handleApiCallback(it as State<NCWBaseResponse<Any>>)
         })
 
     }
+
+    private fun handleApiCallback(response: State<Any>) {
+        when (response) {
+            is State.Loading -> {
+                Toast.makeText(this, "Loading..", Toast.LENGTH_SHORT).show()
+            }
+
+            is State.Success -> {
+                //Toast.makeText(this, "Success..", Toast.LENGTH_SHORT).show()
+                // chatLog.text=response.data.data.toString()
+                onApiSucess(response.data, response.apiConstant)
+            }
+
+            is State.Error -> {
+                Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
+            }
+
+            else -> {
+                Toast.makeText(this, "Else..", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+
+
     private fun requestPermissionsAndShowMediaOptions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val permissions = arrayOf(
@@ -252,43 +279,27 @@ class NCWChatActivity : AppCompatActivity() {
     // Add media message (image or video) to the chat
     private fun addMediaMessage(uri: Uri, type: MessageType) {
         val newMessage = NCWMessage(sender = "User",type = type, message = uri.toString(),timestamp = System.currentTimeMillis())
-        messages.add(newMessage)
-        messageAdapter.notifyItemInserted(messages.size - 1)
-        recyclerView.scrollToPosition(messages.size - 1) // Scroll to the latest message
-    }
-
-    private fun handleApiCallback(response: State<NCWBaseResponse<Any>>) {
-        when (response) {
-            is State.Loading -> {
-                Toast.makeText(this, "Loading..", Toast.LENGTH_SHORT).show()
-            }
-
-            is State.Success -> {
-                //Toast.makeText(this, "Success..", Toast.LENGTH_SHORT).show()
-                // chatLog.text=response.data.data.toString()
-                onApiSucess(response.data, response.apiConstant)
-            }
-
-            is State.Error -> {
-                Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
-            }
-
-            else -> {
-                Toast.makeText(this, "Else..", Toast.LENGTH_SHORT).show()
-            }
-        }
-
+        messageList.add(newMessage)
+        messageAdapter.notifyItemInserted(messageList.size - 1)
+        recyclerView.scrollToPosition(messageList.size - 1) // Scroll to the latest message
     }
 
 
-    private fun onApiSucess(apiResponse: NCWBaseResponse<Any>, apiConstant: String) {
+
+    private fun onApiSucess(apiResponse: Any, apiConstant: String) {
 
         when (apiConstant) {
-            Routes.ROUTE_APP_CONFIG -> {
+            Routes.ROUTE_GET_CONVERSATION_ID -> {
 
-                apiResponse as NCWBaseResponse<AppConfigurationResponseModel>
 
-               Log.d("Response", "ttetetee "+apiResponse.data.config)
+                val conversationID = apiResponse as GetConversationIdResponse
+                if (conversationID != null) {
+                    // Use conversationID as needed
+                    Log.d("ConversationID", "Fetched conversation ID: ${conversationID.conversationID}")
+                } else {
+                    // Handle the case where conversationID is null
+                    Log.d("ConversationID", "Conversation ID is null")
+                }
             }
 
 

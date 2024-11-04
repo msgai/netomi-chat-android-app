@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.view.NCWChatActivity
 
 class MainActivity :AppCompatActivity(), View.OnClickListener {
+
     private lateinit var btnChat:Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,7 +22,9 @@ class MainActivity :AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         when(v?.id){
             R.id.btn_chat->{
-                startActivity((Intent(this, NCWChatActivity::class.java)))
+
+                NCWChatSdk.launch(this)
+               // startActivity((Intent(this, NCWChatActivity::class.java)))
             }
         }
     }
