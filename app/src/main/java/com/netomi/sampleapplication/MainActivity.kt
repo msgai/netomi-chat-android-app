@@ -1,15 +1,13 @@
 package com.netomi.sampleapplication
 
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.netomi.chat.config.NCWChatSdk
 import com.netomi.chat.config.NCWSdkConfig
-import com.netomi.chat.ui.view.NCWChatActivity
+import com.netomi.chat.ui.init.NCWChatSdk
 
 class MainActivity :AppCompatActivity(), View.OnClickListener {
     private lateinit var btnChat:Button
@@ -23,8 +21,11 @@ class MainActivity :AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         when(v?.id){
             R.id.btn_chat->{
-                initializeChatSdk()
-                startActivity((Intent(this, NCWChatActivity::class.java)))
+
+                NCWChatSdk.launch(this)
+               // startActivity((Intent(this, NCWChatActivity::class.java)))
+//                initializeChatSdk()
+//                startActivity((Intent(this, NCWChatActivity::class.java)))
             }
         }
     }

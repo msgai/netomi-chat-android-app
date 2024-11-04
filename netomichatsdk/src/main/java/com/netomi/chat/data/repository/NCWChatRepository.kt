@@ -4,7 +4,7 @@ import android.content.Context
 import com.netomi.chat.data.network.NCWApiInterface
 import com.netomi.chat.data.network.NCWBaseService
 import com.netomi.chat.data.network.NCWRetrofitClient
-import com.netomi.chat.model.AppConfigurationResponseModel
+import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.Routes
@@ -62,22 +62,25 @@ class NCWChatRepository(private val context: Context) :NCWBaseService() {
         }
     }
 
-
-    // Test App config API
-    suspend fun getAppConfiguration(): State<NCWBaseResponse<AppConfigurationResponseModel>> {
-        val response = apiInterface.getAppConfiguration()
-        return if (response.isSuccessful && response.body() != null) {
-            State.success(data = response.body()!!, Routes.ROUTE_APP_CONFIG)
-        } else {
-            val errorBody = response.errorBody()
-            if (errorBody != null) {
-                State.error(parseError(errorBody), code = response.code())
+    // API to get ConversationId
+    suspend fun getConversationId(botRef: String?): State<GetConversationIdResponse> {
+        return try {
+            val response = apiInterface.getConversationId(botRef)
+            if (response.isSuccessful && response.body() != null) {
+                State.success(data = response.body()!!, Routes.ROUTE_GET_CONVERSATION_ID)
             } else {
-                State.error(mapApiException(response.code()), code = response.code())
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    State.error(parseError(errorBody), code = response.code())
+                } else {
+                    State.error(mapApiException(response.code()), code = response.code())
+                }
             }
+        } catch (e: Exception) {
+            State.error(e.message.toString(), code =500)
         }
-
     }
+
 }
 
 

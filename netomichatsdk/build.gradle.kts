@@ -65,6 +65,11 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
 
+    // Core Glide library for image loading and caching
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    // Annotation processor for Glide
+    kapt("com.github.bumptech.glide:compiler:4.15.1")
+
     //aws IOT
     implementation ("com.amazonaws:aws-android-sdk-iot:2.77.0")
     implementation ("com.amazonaws:aws-android-sdk-core:2.77.0")
