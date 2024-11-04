@@ -11,9 +11,9 @@ import java.util.UUID
 
 object AWSIoTManager {
     // AWS IoT Credentials and Endpoint
-    private val accessKeyId = "ASIA34SGY5SBLM2UE7LC"  // Replace with your access key
-    private val secretAccessKey = "QvmaKlfFaFKNlb4xK4R07dO9ciRxnTV33Hh8iuwW"  // Replace with your secret key
-    private val sessionToken = "IQoJb3JpZ2luX2VjEOT//////////wEaCXVzLWVhc3QtMSJHMEUCICBM85cy883AyjSFPACz90IJYgfPj9rM4qfi09KwojPGAiEAlV7cVgnfg9Ktalx5ITnGjKeWWcG0MEQGtDncqxgtstEqmAIIXBADGgw4MTcyNjU5NjIxMTQiDNHGa2VcQwmvR6tKxCr1AVh4M9zKf4H3ojjogmzgIAtoiO4k3rghu3cb0yrBI8wuGgDPMVXfzInWX10obwQHmlqn9s10awizyIZiNiM67mBuzG6b2jG7DNLcpwCctvDahvT4AVykBf5sXVRmFvysHQw+H985Le+oT2bSq1CovrrYTKqWsQqHtKrly++lK3EyNpc63D7pH2aYccgKl4hFYF5QfrKJK3DlR20qGeHcxbkXfd4CXJQId6ljGvhkPXbrjycXf8Xt50fchC8MPAGhD/W3N5w1psg4t3Uv1J8BqTbaevyVixyuhkr13azvbge+u/wZCMkjlttKFWKf3enBIpBMFaO4MMqHg7kGOp0BlBfhHqlAGf2SG19JrIAwu9XDu8p7UxqUXdP9Z0kuXifzkYmmahNjFSVDoxdRq9LbXR4ynV1QIclcbsjjOG3lT5gVZQKUaNagaowZNqJQJMoU/ZZQ0Grdi0ux6cRkFjs4Y02f+pzs92DjkYWN92tvFzBkg5f+oLNjadrxfDR03JiDqmG5x52BDmHJdKFTcbm0T358Pw4DqvVvfrYy7Q=="  // Replace with your session token
+    private val accessKeyId = "ASIA34SGY5SBM7JUANJL"  // Replace with your access key
+    private val secretAccessKey = "kJJUxWLU6F5PrP5HN8zx/SSIBdtPJ1ikC6ejjHSe"  // Replace with your secret key
+    private val sessionToken = "IQoJb3JpZ2luX2VjEPv//////////wEaCXVzLWVhc3QtMSJHMEUCIG0mDreh5RKVirTNc3TDUy2pjV8U06FQx7CU33nYc965AiEAy12IPeyhdYTJyOA9lXlEwe4jplWfBXDsYhqSs9oOt5QqmAIIdBADGgw4MTcyNjU5NjIxMTQiDCUIYKvhcJAJ4WSdASr1AS1zjSAeGF50claNpfUJ4YyIU7vamOnPFw7/NfYDApT92WrTAM79cAfwm2NOrH/aJcF79sSNRTL7i49HXLpd8i7367j1Ubj/PvsPZ+SMN9Y4aBPF5W8D3AcQsQYC2NkQOW9d+GuJiiDdnLVDbWbNVHQOdx37c8mGw0qBXTH4Cia8lKGMK/EV3HNTSZv5wUqOI0uhLrmV1NEfgFFmTqXDKy3upQ/UQm/oPy/MSHlBfT8bACUKNH+Z6t2H87I/orDQceyKMTDxlG0YJeCpkTnvvJVVNjffYnz7uB2+ndUEphe8J8gTI/HnGqG+0w/vqEbk9FBpvQ9HMO6eiLkGOp0BLI6CMix5bmpAmm37UfHC0iW54pmOhDvGsL50dKfzXZ8Ro+VasTDSq2QhFJlAFEunWVd5od10l3Z8X+VYOr/fU0P5f9YY02Xhe/XG/VlM+olDCd5iNNu/GJYTpOtnM+e0u+GSXsDpXNp2NeJf7+dV+Vyz8vo0RyXw8Zu42NvnyA/hRjguyhl2Be+KdEliqTC+SY5bvYSO9+DyjhvvJQ=="
     private val iotEndpoint = "a10jvu4u60lghw-ats.iot.us-east-1.amazonaws.com"  // Replace with your IoT endpoint
 
     private var connectionStatus = 0
@@ -27,7 +27,7 @@ object AWSIoTManager {
      */
     fun connect(chatViewModel: NCWChatViewModel) {
         // Optional: Set keep-alive interval
-        mqttManager.setKeepAlive(10)  // Optional: Set keep-alive interval
+        mqttManager.setKeepAlive(60)  // 60
 
         mqttManager.isAutoReconnect = true  // Enable automatic reconnection
 
