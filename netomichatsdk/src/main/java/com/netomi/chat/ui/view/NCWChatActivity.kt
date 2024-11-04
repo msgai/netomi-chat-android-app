@@ -26,10 +26,9 @@ import com.netomi.chat.R
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
-import com.netomi.chat.ui.init.NCWChatSdk
-import com.netomi.chat.config.NCWChatSdk
+
 import com.netomi.chat.config.NCWSdkConfig
-import com.netomi.chat.model.AppConfigurationResponseModel
+import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.Routes
@@ -70,7 +69,6 @@ class NCWChatActivity : AppCompatActivity() {
     private var photoUri: Uri? = null
     private lateinit var headerView: ConstraintLayout
 
-    private lateinit var sendButton: Button
     private var ncwSdkConfig:NCWSdkConfig?=null
 
 
@@ -92,7 +90,7 @@ class NCWChatActivity : AppCompatActivity() {
         val botRef=intent.getStringExtra("botRefId")
      //   chatViewModel.getConversationId(botRef)
 
-        val  themeData=NCWChatSdk.getThemeData()
+        val  themeData= NCWChatSdk.getThemeData()
         if (themeData != null) {
             if (themeData.theme?.gradient == true) {
                 val directionIndex = themeData.theme.gradientDirection.coerceIn(0, GradientDrawable.Orientation.values().size - 1)
@@ -108,8 +106,8 @@ class NCWChatActivity : AppCompatActivity() {
             }
         }
 
-        ncwSdkConfig= NCWChatSdk.getConfig()
-        applyConfig()
+       ncwSdkConfig= NCWChatSdk.getConfig()
+      //  applyConfig()
 
 
 
@@ -127,8 +125,6 @@ class NCWChatActivity : AppCompatActivity() {
         }
 
         observeChatMessages()
-
-       // chatViewModel.getAppConfig()
 
          getDummyChat()
 
@@ -150,14 +146,14 @@ class NCWChatActivity : AppCompatActivity() {
         messageAdapter.notifyDataSetChanged()
     }
 
-    private fun applyConfig() {
+/*    private fun applyConfig() {
         ncwSdkConfig?.let {
             val sendButtonStyle= it.sendButtonStyle
             sendButton.setBackgroundColor(sendButtonStyle.backgroundColor)
             sendButton.setTextColor(sendButtonStyle.textColor)
             sendButton.textSize = sendButtonStyle.fontSize
         }
-    }
+    }*/
 
     private fun observeChatMessages() {
         // Observe the chat messages LiveData from the ViewModel
@@ -174,11 +170,6 @@ class NCWChatActivity : AppCompatActivity() {
             messageAdapter.notifyDataSetChanged()
         })
 
-        // Observe app configuration changes
-        chatViewModel.appAppConfiguration.observe(this, Observer {
-
-           // handleApiCallback(it as State<NCWBaseResponse<Any>>)
-        })
 
     }
 

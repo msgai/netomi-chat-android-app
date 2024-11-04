@@ -6,7 +6,6 @@ object Routes {
     private const val CONTENTS = "contents/"
     private const val API = "api/"
 
-    const val ROUTE_APP_CONFIG = CONTENTS + VERSION_V1 + "app-config"
     const val ROUTE_GET_CHAT = CONTENTS + VERSION_V1 + "app_chat"
     const val ROUTE_SEND_CHAT = CONTENTS + VERSION_V1 + "send_chat"
 
