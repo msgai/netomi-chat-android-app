@@ -5,16 +5,28 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="8dp">
 
+
+    <ImageView
+        android:id="@+id/img_bot"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:visibility="visible"
+android:layout_marginTop="4dp"
+        android:src="@drawable/ic_profile"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <!-- Text Message -->
     <TextView
         android:id="@+id/receiverMessageText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
+        android:layout_marginStart="5dp"
         android:textColor="@android:color/black"
         android:textSize="16sp"
         android:background="@drawable/bg_receiver_message"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/img_bot"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 

@@ -24,10 +24,6 @@ object ThemeUtils {
                     theme.textColor?.let { color ->
                         view.setTextColor(parseColor(color))
                     }
-                    theme.subtitle?.let { subtitle ->
-                        view.text = subtitle
-                    }
-                    // Add more TextView-specific theme settings here
                 }
 
                 is Button -> {
