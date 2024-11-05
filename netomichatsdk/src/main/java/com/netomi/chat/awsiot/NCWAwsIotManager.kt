@@ -9,43 +9,49 @@ import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import java.util.UUID
 
-object AWSIoTManager {
-    // AWS IoT Credentials and Endpoint
-    private val accessKeyId = "ASIA34SGY5SBM7JUANJL"  // Replace with your access key
-    private val secretAccessKey = "kJJUxWLU6F5PrP5HN8zx/SSIBdtPJ1ikC6ejjHSe"  // Replace with your secret key
-    private val sessionToken = "IQoJb3JpZ2luX2VjEPv//////////wEaCXVzLWVhc3QtMSJHMEUCIG0mDreh5RKVirTNc3TDUy2pjV8U06FQx7CU33nYc965AiEAy12IPeyhdYTJyOA9lXlEwe4jplWfBXDsYhqSs9oOt5QqmAIIdBADGgw4MTcyNjU5NjIxMTQiDCUIYKvhcJAJ4WSdASr1AS1zjSAeGF50claNpfUJ4YyIU7vamOnPFw7/NfYDApT92WrTAM79cAfwm2NOrH/aJcF79sSNRTL7i49HXLpd8i7367j1Ubj/PvsPZ+SMN9Y4aBPF5W8D3AcQsQYC2NkQOW9d+GuJiiDdnLVDbWbNVHQOdx37c8mGw0qBXTH4Cia8lKGMK/EV3HNTSZv5wUqOI0uhLrmV1NEfgFFmTqXDKy3upQ/UQm/oPy/MSHlBfT8bACUKNH+Z6t2H87I/orDQceyKMTDxlG0YJeCpkTnvvJVVNjffYnz7uB2+ndUEphe8J8gTI/HnGqG+0w/vqEbk9FBpvQ9HMO6eiLkGOp0BLI6CMix5bmpAmm37UfHC0iW54pmOhDvGsL50dKfzXZ8Ro+VasTDSq2QhFJlAFEunWVd5od10l3Z8X+VYOr/fU0P5f9YY02Xhe/XG/VlM+olDCd5iNNu/GJYTpOtnM+e0u+GSXsDpXNp2NeJf7+dV+Vyz8vo0RyXw8Zu42NvnyA/hRjguyhl2Be+KdEliqTC+SY5bvYSO9+DyjhvvJQ=="
-    private val iotEndpoint = "a10jvu4u60lghw-ats.iot.us-east-1.amazonaws.com"  // Replace with your IoT endpoint
+object NCWAwsIotManager {
 
+    private lateinit var mqttManager: AWSIotMqttManager
+    private lateinit var awsCredentialsProvider: AWSCredentialsProvider
     private var connectionStatus = 0
-    // Initialize AWS IoT MQTT Manager with unique Client ID
-    private val clientId = UUID.randomUUID().toString()
 
-    private val mqttManager = AWSIotMqttManager(clientId, iotEndpoint)
 
     /**
-     * Connects to the AWS IoT Broker.
+     * Initialize the IoT Manager with provided credentials.
      */
-    fun connect(chatViewModel: NCWChatViewModel) {
-        // Optional: Set keep-alive interval
-        mqttManager.setKeepAlive(60)  // 60
+    fun initialize(
+        accessKey: String,
+        secretKey: String,
+        sessionToken: String,
+        iotEndpoint: String
+    ) {
+        // Initialize AWS IoT MQTT Manager with unique Client ID
+        val clientId = UUID.randomUUID().toString()
+        mqttManager = AWSIotMqttManager(clientId, iotEndpoint)
 
-        mqttManager.isAutoReconnect = true  // Enable automatic reconnection
-
-        val awsCredentialsProvider = object : AWSCredentialsProvider {
+        // Set up credentials provider
+        awsCredentialsProvider = object : AWSCredentialsProvider {
             override fun getCredentials(): BasicSessionCredentials {
                 return BasicSessionCredentials(
-                    accessKeyId,
-                    secretAccessKey,
+                    accessKey,
+                    secretKey,
                     sessionToken
                 )
             }
 
             override fun refresh() {
-                // Add logic if you need to refresh credentials
+                // Implement refresh logic if needed
             }
         }
+    }
 
-        // Connect using the session credentials wrapped in an AWSCredentialsProvider
+    /**
+     * Connects to the AWS IoT Broker.
+     */
+    fun connect(chatViewModel: NCWChatViewModel) {
+        mqttManager.setKeepAlive(60)
+        mqttManager.isAutoReconnect = true
+
         mqttManager.connect(awsCredentialsProvider) { status, throwable ->
             when (status) {
                 AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus.Connecting ->{

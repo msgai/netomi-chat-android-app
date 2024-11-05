@@ -2,9 +2,11 @@ package com.netomi.chat.data.network
 
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.NCWMessage
+import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.Routes.ROUTE_GET_CONVERSATION_ID
+import com.netomi.chat.utils.Routes.ROUTE_GET_MQTT_CREDENTIALS
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -60,8 +62,30 @@ interface NCWApiInterface {
         @Path("botRefId") botRefId: String
     ): Response<ThemeResponse>
 
+    /**
+     * Fetches the Conversation ID from the NCW server.
+     *
+     * This method sends a **GET** request to retrieve the Conversation ID.
+     * It returns a **Retrofit Call** that wraps a list of `GetConversationIdResponse` objects.
+     * The caller needs to execute the call synchronously or asynchronously.
+     * @param botRef A string representing the bot Reference ID we will get this from AI Studio
+     * @return A `Response` object wrapping a Object of `GetConversationIdResponse` objects.
+     */
     @GET(ROUTE_GET_CONVERSATION_ID)
     suspend fun getConversationId(@Query("botRef") botRef: String?): Response<GetConversationIdResponse>
+
+
+    /**
+     * Fetches the AWS MQTT Credentials from the NCW server.
+     *
+     * This method sends a **GET** request to retrieve the AWS MQTT Credentials.
+     * It returns a **Retrofit Call** that wraps a list of `MQTTCredentialsResponse` objects.
+     * The caller needs to execute the call synchronously or asynchronously.
+     * @param botRef A string representing the bot Reference ID we will get this from AI Studio
+     * @return A `Response` object wrapping a Object of `MQTTCredentialsResponse` objects.
+     */
+    @GET(ROUTE_GET_MQTT_CREDENTIALS)
+    suspend fun getAWSMQTTCredentials(@Query("botRef") botRef: String?): Response<MQTTCredentialsResponse>
 
 
 }
