@@ -23,13 +23,17 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.netomi.chat.R
-import com.netomi.chat.awsiot.AWSIoTManager
+import com.netomi.chat.awsiot.NCWAwsIotManager
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 
 import com.netomi.chat.config.NCWSdkConfig
+import com.netomi.chat.model.awsmqtt.NCWAwsCredentials
+import com.netomi.chat.model.mqtt.Credentials
+import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.ui.init.NCWChatSdk
+import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.Routes
@@ -59,6 +63,7 @@ import java.util.Date
  */
 class NCWChatActivity : AppCompatActivity() {
     private val chatViewModel: NCWChatViewModel by viewModels()
+    private val ncwAwsCredentialsViewModel: NCWAwsCredentialsViewModel by viewModels()
 
     private lateinit var inputField: EditText
     private lateinit var sendButton: ImageView
@@ -70,7 +75,7 @@ class NCWChatActivity : AppCompatActivity() {
     private var photoUri: Uri? = null
     private lateinit var headerView: ConstraintLayout
 
-    private var ncwSdkConfig:NCWSdkConfig?=null
+    private var ncwSdkConfig: NCWSdkConfig? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,29 +93,32 @@ class NCWChatActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = messageAdapter
 
-        val botRef=intent.getStringExtra("botRefId")
-     //   chatViewModel.getConversationId(botRef)
+        val botRef = intent.getStringExtra("botRefId")
+        chatViewModel.getConversationId(botRef)
+        chatViewModel.getAWSMQTTCredentials(botRef)
 
-        val  themeData= NCWChatSdk.getThemeData()
+        val themeData = NCWChatSdk.getThemeData()
         if (themeData != null) {
             if (themeData.theme?.gradient == true) {
-                val directionIndex = themeData.theme.gradientDirection.coerceIn(0, GradientDrawable.Orientation.values().size - 1)
+                val directionIndex = themeData.theme.gradientDirection.coerceIn(
+                    0,
+                    GradientDrawable.Orientation.values().size - 1
+                )
 
                 val gradient = GradientDrawable(
                     GradientDrawable.Orientation.values()[directionIndex],
-                    themeData.theme?.gradientColors?.map { Color.parseColor(it) }?.toIntArray() ?: null
+                    themeData.theme?.gradientColors?.map { Color.parseColor(it) }?.toIntArray()
+                        ?: null
                 )
                 headerView.background = gradient
-            }
-            else{
+            } else {
                 ThemeUtils.applyTheme(themeResponse = themeData, headerView)
             }
         }
 
-       ncwSdkConfig= NCWChatSdk.getConfig()
-      //  applyConfig()
+        ncwSdkConfig = NCWChatSdk.getConfig()
+        //  applyConfig()
 
-        AWSIoTManager.connect(chatViewModel)
         //AWSIoTManager.subscribeToTopic("chat_widget/b23963e4-56c5-4d8f-929e-2b0f1155b1f8/48fd2c5f-7e79-593b-bbef-9b1d7e450f86")
 
         sendButton.setOnClickListener {
@@ -118,7 +126,7 @@ class NCWChatActivity : AppCompatActivity() {
             if (messageContent.isNotEmpty()) {
                 chatViewModel.sendMessage(messageContent)
                 inputField.text.clear()
-                AWSIoTManager.publishMessage("topicOne",messageContent)
+                NCWAwsIotManager.publishMessage("topicOne", messageContent)
             }
         }
 
@@ -129,44 +137,54 @@ class NCWChatActivity : AppCompatActivity() {
 
         observeChatMessages()
 
-         getDummyChat()
-
-
-
+        getDummyChat()
 
 
     }
 
 
     private fun getDummyChat() {
-        messageList.add(NCWMessage(
-            sender = "User",
-            type = MessageType.TEXT,
-            message = "Hello!",
-            timestamp = System.currentTimeMillis(),
-        ))
-        messageList.add(NCWMessage( sender = "BOT", type = MessageType.TEXT, message = "Hi, how are you?", timestamp = System.currentTimeMillis()))
+        messageList.add(
+            NCWMessage(
+                sender = "User",
+                type = MessageType.TEXT,
+                message = "Hello!",
+                timestamp = System.currentTimeMillis(),
+            )
+        )
+        messageList.add(
+            NCWMessage(
+                sender = "BOT",
+                type = MessageType.TEXT,
+                message = "Hi, how are you?",
+                timestamp = System.currentTimeMillis()
+            )
+        )
         messageAdapter.notifyDataSetChanged()
     }
 
-/*    private fun applyConfig() {
-        ncwSdkConfig?.let {
-            val sendButtonStyle= it.sendButtonStyle
-            sendButton.setBackgroundColor(sendButtonStyle.backgroundColor)
-            sendButton.setTextColor(sendButtonStyle.textColor)
-            sendButton.textSize = sendButtonStyle.fontSize
-        }
-    }*/
+    /*    private fun applyConfig() {
+            ncwSdkConfig?.let {
+                val sendButtonStyle= it.sendButtonStyle
+                sendButton.setBackgroundColor(sendButtonStyle.backgroundColor)
+                sendButton.setTextColor(sendButtonStyle.textColor)
+                sendButton.textSize = sendButtonStyle.fontSize
+            }
+        }*/
 
     private fun observeChatMessages() {
         // Observe the chat messages LiveData from the ViewModel
         chatViewModel.chatMessages.observe(this, Observer { messages ->
-           // handleApiCallback(messages as State<NCWBaseResponse<Any>>)
+            // handleApiCallback(messages as State<NCWBaseResponse<Any>>)
         })
 
         chatViewModel.getConversationId.observe(this, Observer { it ->
-           handleApiCallback(it as State<Any>)
+            handleApiCallback(it as State<Any>)
         })
+
+        chatViewModel.getAWSMQTTCredentials.observe(this) {
+            handleApiCallback(it as State<Any>)
+        }
 
         chatViewModel.sendMessages.observe(this, Observer { message ->
             messageList.add(message)
@@ -189,7 +207,7 @@ class NCWChatActivity : AppCompatActivity() {
             is State.Success -> {
                 //Toast.makeText(this, "Success..", Toast.LENGTH_SHORT).show()
                 // chatLog.text=response.data.data.toString()
-                onApiSucess(response.data, response.apiConstant)
+                onApiSuccess(response.data, response.apiConstant)
             }
 
             is State.Error -> {
@@ -201,7 +219,6 @@ class NCWChatActivity : AppCompatActivity() {
             }
         }
     }
-
 
 
     private fun requestPermissionsAndShowMediaOptions() {
@@ -220,15 +237,16 @@ class NCWChatActivity : AppCompatActivity() {
         }
     }
 
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        val allGranted = permissions.values.all { it }
-        if (allGranted) {
-            showMediaOptions()
-        } else {
-            Toast.makeText(this, "Permissions are required to upload media", Toast.LENGTH_SHORT).show()
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val allGranted = permissions.values.all { it }
+            if (allGranted) {
+                showMediaOptions()
+            } else {
+                Toast.makeText(this, "Permissions are required to upload media", Toast.LENGTH_SHORT)
+                    .show()
+            }
         }
-    }
-
 
 
     // Function to show camera and gallery options
@@ -236,33 +254,35 @@ class NCWChatActivity : AppCompatActivity() {
         NCWAppUtils.showMediaOptionDialog(this, {
             openCamera()
         },
-        {
-            openGallery()
-        }
+            {
+                openGallery()
+            }
         )
     }
 
 
     private fun openCamera() {
-        val imageFile =createImageFile()
-       photoUri = imageFile?.let {
-           FileProvider.getUriForFile(this, "${applicationContext.packageName}.fileprovider",
-               it
-           )
-       }
+        val imageFile = createImageFile()
+        photoUri = imageFile?.let {
+            FileProvider.getUriForFile(
+                this, "${applicationContext.packageName}.fileprovider",
+                it
+            )
+        }
         cameraLauncherMain.launch(photoUri)
     }
 
 
-    private val cameraLauncherMain = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success) {
-            photoUri?.let { uri ->
-                addMediaMessage(uri, MessageType.IMAGE)
+    private val cameraLauncherMain =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            if (success) {
+                photoUri?.let { uri ->
+                    addMediaMessage(uri, MessageType.IMAGE)
+                }
+            } else {
+                Toast.makeText(this, "Failed to capture image", Toast.LENGTH_SHORT).show()
             }
-        } else {
-            Toast.makeText(this, "Failed to capture image", Toast.LENGTH_SHORT).show()
         }
-    }
 
 
     private fun createImageFile(): File? {
@@ -281,46 +301,77 @@ class NCWChatActivity : AppCompatActivity() {
 
 
     // Handle the result of the gallery selection
-    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-            val selectedMediaUri: Uri? = result.data?.data
-            val type = contentResolver.getType(selectedMediaUri!!)
-            if (type!!.startsWith("image/")) {
-                addMediaMessage(selectedMediaUri, MessageType.IMAGE)
-            } else if (type.startsWith("video/")) {
-                addMediaMessage(selectedMediaUri, MessageType.VIDEO)
+    private val galleryLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                val selectedMediaUri: Uri? = result.data?.data
+                val type = contentResolver.getType(selectedMediaUri!!)
+                if (type!!.startsWith("image/")) {
+                    addMediaMessage(selectedMediaUri, MessageType.IMAGE)
+                } else if (type.startsWith("video/")) {
+                    addMediaMessage(selectedMediaUri, MessageType.VIDEO)
+                }
             }
         }
-    }
 
     // Add media message (image or video) to the chat
     private fun addMediaMessage(uri: Uri, type: MessageType) {
-        val newMessage = NCWMessage(sender = "User",type = type, message = uri.toString(),timestamp = System.currentTimeMillis())
+        val newMessage = NCWMessage(
+            sender = "User",
+            type = type,
+            message = uri.toString(),
+            timestamp = System.currentTimeMillis()
+        )
         messageList.add(newMessage)
         messageAdapter.notifyItemInserted(messageList.size - 1)
         recyclerView.scrollToPosition(messageList.size - 1) // Scroll to the latest message
     }
 
 
-
-    private fun onApiSucess(apiResponse: Any, apiConstant: String) {
+    private fun onApiSuccess(apiResponse: Any, apiConstant: String) {
 
         when (apiConstant) {
             Routes.ROUTE_GET_CONVERSATION_ID -> {
-
-
                 val conversationID = apiResponse as GetConversationIdResponse
                 if (conversationID != null) {
                     // Use conversationID as needed
-                    Log.d("ConversationID", "Fetched conversation ID: ${conversationID.conversationID}")
+                    Log.d(
+                        "ConversationID",
+                        "Fetched conversation ID: ${conversationID.conversationID}"
+                    )
                 } else {
                     // Handle the case where conversationID is null
                     Log.d("ConversationID", "Conversation ID is null")
                 }
             }
 
+            Routes.ROUTE_GET_MQTT_CREDENTIALS -> {
+                val mqttsCredentials = apiResponse as MQTTCredentialsResponse
+                Log.d(
+                    "MQTTCredentialsResponse",
+                    "Fetched MQTTCredentialsResponse: ${mqttsCredentials.credentials.accessKeyId}"
+                )
+                SaveAwsCredentials( mqttsCredentials.credentials)
+            }
+
 
         }
+
+    }
+
+    /**
+     * Save Aws Credentials in data store
+     */
+    private fun SaveAwsCredentials(mqttsCredentials: Credentials) {
+        // Save new credentials (example usage)
+        val newCredentials = NCWAwsCredentials(
+            accessKey = mqttsCredentials.accessKeyId,
+            secretKey = mqttsCredentials.secretAccessKey,
+            sessionToken = mqttsCredentials.SessionToken,
+            iotEndpoint = mqttsCredentials.IoTHostEndPoint
+        )
+        ncwAwsCredentialsViewModel.saveAwsCredentials(newCredentials)
+        ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel)
 
     }
 }

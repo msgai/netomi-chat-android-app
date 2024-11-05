@@ -75,6 +75,10 @@ dependencies {
     implementation ("com.amazonaws:aws-android-sdk-core:2.77.0")
     //implementation ("com.amazonaws:aws-android-sdk-auth-core:2.66.0")
 
+    //Data Store
+    implementation ("androidx.datastore:datastore-preferences:1.1.1")
+    implementation ("androidx.security:security-crypto:1.1.0-alpha06")
+
 
 
 
