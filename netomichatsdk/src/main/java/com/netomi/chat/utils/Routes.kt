@@ -10,4 +10,5 @@ object Routes {
     const val ROUTE_SEND_CHAT = CONTENTS + VERSION_V1 + "send_chat"
 
     const val ROUTE_GET_CONVERSATION_ID = API + "conversationId"
+    const val ROUTE_GET_MQTT_CREDENTIALS = API + "mqtt"
 }

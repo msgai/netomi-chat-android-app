@@ -6,6 +6,7 @@ import com.netomi.chat.data.network.NCWBaseService
 import com.netomi.chat.data.network.NCWRetrofitClient
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.NCWMessage
+import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
@@ -28,9 +29,10 @@ import com.netomi.chat.utils.State
  */
 
 
-class NCWChatRepository(private val context: Context) :NCWBaseService() {
+class NCWChatRepository(private val context: Context) : NCWBaseService() {
 
-    private val apiInterface = NCWRetrofitClient.getInstance(context).create(NCWApiInterface::class.java)
+    private val apiInterface =
+        NCWRetrofitClient.getInstance(context).create(NCWApiInterface::class.java)
 
     // Fetch chat history
     fun getChatHistory(): State<NCWBaseResponse<ArrayList<NCWMessage>>> {
@@ -77,7 +79,26 @@ class NCWChatRepository(private val context: Context) :NCWBaseService() {
                 }
             }
         } catch (e: Exception) {
-            State.error(e.message.toString(), code =500)
+            State.error(e.message.toString(), code = 500)
+        }
+    }
+
+    // Hit API to get AWS MQTT Credentials
+    suspend fun getAWSMQTTCredentials(botRef: String?): State<MQTTCredentialsResponse> {
+        return try {
+            val response = apiInterface.getAWSMQTTCredentials(botRef)
+            if (response.isSuccessful && response.body() != null) {
+                State.success(data = response.body()!!, Routes.ROUTE_GET_MQTT_CREDENTIALS)
+            } else {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    State.error(parseError(errorBody), code = response.code())
+                } else {
+                    State.error(mapApiException(response.code()), code = response.code())
+                }
+            }
+        } catch (e: Exception) {
+            State.error(e.message.toString(), code = 500)
         }
     }
 
