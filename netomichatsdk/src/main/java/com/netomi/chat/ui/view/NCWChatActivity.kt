@@ -28,7 +28,6 @@ import com.netomi.chat.awsiot.NCWAwsIotManager
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
-
 import com.netomi.chat.config.NCWSdkConfig
 import com.netomi.chat.model.awsmqtt.NCWAwsCredentials
 import com.netomi.chat.model.mqtt.Credentials
@@ -123,7 +122,7 @@ class NCWChatActivity : AppCompatActivity() {
         ncwSdkConfig = NCWChatSdk.getConfig()
         //  applyConfig()
 
-        AWSIoTManager.connect(chatViewModel)
+       // AWSIoTManager.connect(chatViewModel)
         //AWSIoTManager.subscribeToTopic("chat_widget/b23963e4-56c5-4d8f-929e-2b0f1155b1f8/48fd2c5f-7e79-593b-bbef-9b1d7e450f86")
 
         sendButton.setOnClickListener {
