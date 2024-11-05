@@ -13,6 +13,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -29,6 +30,7 @@ import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 
 import com.netomi.chat.config.NCWSdkConfig
+import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.NCWAppUtils
@@ -62,7 +64,9 @@ class NCWChatActivity : AppCompatActivity() {
 
     private lateinit var inputField: EditText
     private lateinit var sendButton: ImageView
+    private lateinit var tvHeader: TextView
 
+    private lateinit var close: ImageView
     private lateinit var messageAdapter: ChatAdapter
     private lateinit var messageList: MutableList<NCWMessage>
     private lateinit var recyclerView: RecyclerView
@@ -71,6 +75,8 @@ class NCWChatActivity : AppCompatActivity() {
     private lateinit var headerView: ConstraintLayout
 
     private var ncwSdkConfig:NCWSdkConfig?=null
+
+    private var  themeData: ThemeResponse?=null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,7 +87,8 @@ class NCWChatActivity : AppCompatActivity() {
         sendButton = findViewById(R.id.imgSend)
         recyclerView = findViewById(R.id.recyclerView)
         uploadButton = findViewById(R.id.imgAttachment)
-
+        tvHeader = findViewById(R.id.tvHeader)
+        close= findViewById(R.id.ivClose)
         // Initialize the message list and adapter
         messageList = mutableListOf()
         messageAdapter = ChatAdapter(messageList)
@@ -91,20 +98,20 @@ class NCWChatActivity : AppCompatActivity() {
         val botRef=intent.getStringExtra("botRefId")
      //   chatViewModel.getConversationId(botRef)
 
-        val  themeData= NCWChatSdk.getThemeData()
-        if (themeData != null) {
-            if (themeData.theme?.gradient == true) {
-                val directionIndex = themeData.theme.gradientDirection.coerceIn(0, GradientDrawable.Orientation.values().size - 1)
+        themeData= NCWChatSdk.getThemeData()
+        themeData?.let { theme ->
+            if (theme.theme?.gradient == true) {
+                val direction = GradientDrawable.Orientation.values()
+                    .getOrElse(theme.theme.gradientDirection) { GradientDrawable.Orientation.LEFT_RIGHT }
 
-                val gradient = GradientDrawable(
-                    GradientDrawable.Orientation.values()[directionIndex],
-                    themeData.theme?.gradientColors?.map { Color.parseColor(it) }?.toIntArray() ?: null
-                )
-                headerView.background = gradient
+                val gradientColors = theme.theme.gradientColors?.map { Color.parseColor(it) }?.toIntArray()
+                headerView.background = GradientDrawable(direction, gradientColors)
+            } else {
+                ThemeUtils.applyTheme(themeResponse = theme, headerView)
             }
-            else{
-                ThemeUtils.applyTheme(themeResponse = themeData, headerView)
-            }
+
+            tvHeader.text = theme.title
+            ThemeUtils.applyTheme(themeResponse = theme, tvHeader)
         }
 
        ncwSdkConfig= NCWChatSdk.getConfig()
@@ -127,6 +134,10 @@ class NCWChatActivity : AppCompatActivity() {
             requestPermissionsAndShowMediaOptions()
         }
 
+        close.setOnClickListener {
+finish()
+        }
+
         observeChatMessages()
 
          getDummyChat()
@@ -140,12 +151,12 @@ class NCWChatActivity : AppCompatActivity() {
 
     private fun getDummyChat() {
         messageList.add(NCWMessage(
-            sender = "User",
+            sender = "BOT",
             type = MessageType.TEXT,
-            message = "Hello!",
+            message = themeData?.initialFlows?.header,
             timestamp = System.currentTimeMillis(),
         ))
-        messageList.add(NCWMessage( sender = "BOT", type = MessageType.TEXT, message = "Hi, how are you?", timestamp = System.currentTimeMillis()))
+     //   messageList.add(NCWMessage( sender = "User", type = MessageType.TEXT, message = "Test", timestamp = System.currentTimeMillis()))
         messageAdapter.notifyDataSetChanged()
     }
 
@@ -171,6 +182,7 @@ class NCWChatActivity : AppCompatActivity() {
         chatViewModel.sendMessages.observe(this, Observer { message ->
             messageList.add(message)
             messageAdapter.notifyDataSetChanged()
+            recyclerView.scrollToPosition(messageList.size - 1)
         })
 
 
