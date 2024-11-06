@@ -15,7 +15,7 @@ class NCWAwsCredentialsViewModel(application: Application) : AndroidViewModel(ap
     /**
      * Initialize the AWS IOT
      */
-    fun initializeAwsIotManager(chatViewModel: NCWChatViewModel) {
+    fun initializeAwsIotManager(chatViewModel: NCWChatViewModel, topic: String) {
         val credentials = repository.getAWSCredentials()
         NCWAwsIotManager.initialize(
             accessKey = credentials.accessKey,
@@ -28,7 +28,7 @@ class NCWAwsCredentialsViewModel(application: Application) : AndroidViewModel(ap
          * Now that it's initialized, connect to IoT
          */
 
-        NCWAwsIotManager.connect(chatViewModel)
+        NCWAwsIotManager.connect(chatViewModel,topic)
     }
 
     /**

@@ -24,14 +24,17 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.netomi.chat.R
-import com.netomi.chat.awsiot.NCWAwsIotManager
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.config.NCWSdkConfig
+import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.awsmqtt.NCWAwsCredentials
 import com.netomi.chat.model.mqtt.Credentials
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
+import com.netomi.chat.model.send_message_paload.MessagePayload
+import com.netomi.chat.model.send_message_paload.RequestBody
+import com.netomi.chat.model.send_message_paload.WebhookPayload
 import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
@@ -82,6 +85,9 @@ class NCWChatActivity : AppCompatActivity() {
 
     private var  themeData: ThemeResponse?=null
 
+    var conversationID : String? = null
+    var botRefId : String? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,9 +105,9 @@ class NCWChatActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = messageAdapter
 
-        val botRef = intent.getStringExtra("botRefId")
-        chatViewModel.getConversationId(botRef)
-        chatViewModel.getAWSMQTTCredentials(botRef)
+        botRefId = intent.getStringExtra("botRefId")
+        chatViewModel.getConversationId(botRefId)
+        chatViewModel.getAWSMQTTCredentials(botRefId)
 
         themeData= NCWChatSdk.getThemeData()
         themeData?.let { theme ->
@@ -127,10 +133,33 @@ class NCWChatActivity : AppCompatActivity() {
 
         sendButton.setOnClickListener {
             val messageContent = inputField.text.toString()
-            if (messageContent.isNotEmpty()) {
+            /*  if (messageContent.isNotEmpty()) {
                 chatViewModel.sendMessage(messageContent)
                 inputField.text.clear()
                 NCWAwsIotManager.publishMessage("topicOne", messageContent)
+            }*/
+            if (messageContent.isNotEmpty()) {
+                val payload = WebhookPayload(
+                    botRefId = botRefId,
+                    requestBody = RequestBody(
+                        conversationId = "48fd2c5f-7e79-593b-bbef-9b1d7e450f86",
+                        messagePayload = MessagePayload(
+                            text = messageContent,
+                            label = "PROACTIVE_GREETING",
+                            messageId = "bea240c9-b62a-47ee-bd91-9ca27ceb1b32"
+                        ),
+                        /*  additionalAttributes = AdditionalAttributes(
+                        CUSTOM_ATTRIBUTES = listOf(
+                            CustomAttribute(type = "TEXT", name = "visitor_url", value = "https://aistudio-qa.netomi.com", scope = "LIFE_TIME")
+                        )
+                    )*/
+                    )
+                )
+                Log.e("Test","sdd"+payload)
+                chatViewModel.sendMessageAPI(payload)
+                inputField.text.clear()
+            //    NCWAwsIotManager.publishMessage("topicOne", messageContent)
+
             }
         }
 
@@ -173,8 +202,9 @@ finish()
 
     private fun observeChatMessages() {
         // Observe the chat messages LiveData from the ViewModel
-        chatViewModel.chatMessages.observe(this, Observer { messages ->
+        chatViewModel.sendMessage.observe(this, Observer { messages ->
             // handleApiCallback(messages as State<NCWBaseResponse<Any>>)
+            handleApiCallback(messages as State<Any>)
         })
 
         chatViewModel.getConversationId.observe(this, Observer { it ->
@@ -205,8 +235,6 @@ finish()
             }
 
             is State.Success -> {
-                //Toast.makeText(this, "Success..", Toast.LENGTH_SHORT).show()
-                // chatLog.text=response.data.data.toString()
                 onApiSuccess(response.data, response.apiConstant)
             }
 
@@ -333,12 +361,13 @@ finish()
 
         when (apiConstant) {
             Routes.ROUTE_GET_CONVERSATION_ID -> {
-                val conversationID = apiResponse as GetConversationIdResponse
-                if (conversationID != null) {
+                val response = apiResponse as GetConversationIdResponse
+                if (response != null) {
                     // Use conversationID as needed
+                    conversationID=response.conversationID
                     Log.d(
                         "ConversationID",
-                        "Fetched conversation ID: ${conversationID.conversationID}"
+                        "Fetched conversation ID: $conversationID"
                     )
                 } else {
                     // Handle the case where conversationID is null
@@ -353,6 +382,14 @@ finish()
                     "Fetched MQTTCredentialsResponse: ${mqttsCredentials.credentials.accessKeyId}"
                 )
                 SaveAwsCredentials( mqttsCredentials.credentials)
+            }
+
+            Routes.ROUTE_SEND_CHAT -> {
+                val sendMessageResponse = apiResponse as SendMessageResponse
+                Log.d(
+                    "MQTTCredentialsResponse",
+                    "Fetched MQTTCredentialsResponse: ${sendMessageResponse}"
+                )
             }
 
 
@@ -372,7 +409,9 @@ finish()
             iotEndpoint = mqttsCredentials.IoTHostEndPoint
         )
         ncwAwsCredentialsViewModel.saveAwsCredentials(newCredentials)
-        ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel)
+
+        val topic="chat_widget/$botRefId/$conversationID"
+        ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel,topic)
 
     }
 }
