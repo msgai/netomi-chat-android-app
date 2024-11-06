@@ -1,7 +1,6 @@
 package com.netomi.chat.data.repository
 
 import android.content.Context
-import android.util.Log
 import com.netomi.chat.data.network.NCWApiInterface
 import com.netomi.chat.data.network.NCWBaseService
 import com.netomi.chat.data.network.NCWRetrofitClient
@@ -9,7 +8,7 @@ import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
-import com.netomi.chat.model.send_message_paload.WebhookPayload
+import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State

@@ -13,10 +13,11 @@ object NCWChatSdk {
 
     private var themeData: ThemeResponse? = null
 
+
     fun launch(context: Context,botRefId:String="b23963e4-56c5-4d8f-929e-2b0f1155b1f8") {
         NCWChatTheme(
             context,
-            "b23963e4-56c5-4d8f-929e-2b0f1155b1f8",
+            botRefId,
             onThemeReceived = { themeResponse ->
                 themeData = themeResponse
                 Log.e("NCWChatSdk", "Theme data received: $themeData")

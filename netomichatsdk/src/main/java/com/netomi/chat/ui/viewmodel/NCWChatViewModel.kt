@@ -10,7 +10,7 @@ import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
-import com.netomi.chat.model.send_message_paload.WebhookPayload
+import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.State
 import kotlinx.coroutines.Dispatchers

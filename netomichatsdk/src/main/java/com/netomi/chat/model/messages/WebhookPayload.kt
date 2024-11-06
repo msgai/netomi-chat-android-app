@@ -1,4 +1,4 @@
-package com.netomi.chat.model.send_message_paload
+package com.netomi.chat.model.messages
 
 data class WebhookPayload(
     val botRefId: String? = null,

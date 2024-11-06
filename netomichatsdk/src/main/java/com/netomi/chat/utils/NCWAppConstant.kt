@@ -12,4 +12,7 @@ object NCWAppConstant {
     const val AWS_SESSION_TOKEN="SESSION_TOKEN"
     const val AWS_IOT_ENDPOINT="IOT_ENDPOINT"
 
+    const val TYPE_TEXT="ai.msg.domain.responses.core.Text"
+    const val TYPE_CAROUSEL="ai.msg.domain.responses.core.Carousel"
+
 }

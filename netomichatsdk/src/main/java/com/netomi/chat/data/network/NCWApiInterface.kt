@@ -3,17 +3,15 @@ package com.netomi.chat.data.network
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.SendMessageResponse
+import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
-import com.netomi.chat.model.send_message_paload.WebhookPayload
 import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.Routes.ROUTE_GET_CONVERSATION_ID
 import com.netomi.chat.utils.Routes.ROUTE_GET_MQTT_CREDENTIALS
-import com.netomi.chat.utils.Routes.ROUTE_SEND_CHAT
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -58,11 +56,6 @@ interface NCWApiInterface {
      * @return A `Response` object wrapping a `Boolean` response (indicating the operation's success or failure).
      *
      */
-    @Headers(
-        "Content-Type: application/json",
-        "origin: https://aistudio-qa.netomi.com",
-        "Referer: https://aistudio-qa.netomi.com"
-    )
     @POST("api/webhook-message")
     suspend fun sendMessage(@Body message: WebhookPayload?): Response<SendMessageResponse>
 

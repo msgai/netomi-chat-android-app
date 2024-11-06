@@ -15,10 +15,10 @@ object ThemeUtils {
         themeResponse?.let { theme ->
 
             when (view) {
-                is ConstraintLayout->{
-                   theme.theme?.color?.let { color ->
-                view.setBackgroundColor(parseColor(color))
-            }
+                is ConstraintLayout -> {
+                    theme.theme?.color?.takeIf { color -> color.isNotEmpty() }?.let { color ->
+                        view.setBackgroundColor(parseColor(color))
+                    }
                 }
                 is TextView -> {
                     theme.textColor?.let { color ->

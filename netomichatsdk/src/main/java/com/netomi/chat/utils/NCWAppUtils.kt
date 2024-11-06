@@ -2,7 +2,10 @@ package com.netomi.chat.utils
 
 import android.app.Activity
 import android.content.Context
+import android.os.Build
+import android.text.Html
 import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 
@@ -20,6 +23,15 @@ object NCWAppUtils {
         val inputMethodManager =
             context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.showSoftInput(context.currentFocus, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    fun setHtmText(html:String,txtView:TextView){
+
+        txtView.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
+        } else {
+            Html.fromHtml(html)
+        }
     }
 
 

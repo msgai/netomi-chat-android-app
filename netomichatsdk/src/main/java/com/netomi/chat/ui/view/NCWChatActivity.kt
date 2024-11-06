@@ -23,6 +23,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import com.netomi.chat.R
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.MessageType
@@ -30,15 +31,17 @@ import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.config.NCWSdkConfig
 import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.awsmqtt.NCWAwsCredentials
+import com.netomi.chat.model.messages.GenericChannelResponse
 import com.netomi.chat.model.mqtt.Credentials
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
-import com.netomi.chat.model.send_message_paload.MessagePayload
-import com.netomi.chat.model.send_message_paload.RequestBody
-import com.netomi.chat.model.send_message_paload.WebhookPayload
+import com.netomi.chat.model.messages.MessagePayload
+import com.netomi.chat.model.messages.RequestBody
+import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
+import com.netomi.chat.utils.NCWAppConstant.TYPE_CAROUSEL
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
@@ -46,6 +49,7 @@ import com.netomi.chat.utils.ThemeUtils
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.UUID
 
 /**
  * Activity responsible for displaying the chat interface and handling user interactions.
@@ -107,8 +111,6 @@ class NCWChatActivity : AppCompatActivity() {
 
         botRefId = intent.getStringExtra("botRefId")
         chatViewModel.getConversationId(botRefId)
-        chatViewModel.getAWSMQTTCredentials(botRefId)
-
         themeData= NCWChatSdk.getThemeData()
         themeData?.let { theme ->
             if (theme.theme?.gradient == true) {
@@ -118,7 +120,8 @@ class NCWChatActivity : AppCompatActivity() {
                 val gradientColors = theme.theme.gradientColors?.map { Color.parseColor(it) }?.toIntArray()
                 headerView.background = GradientDrawable(direction, gradientColors)
             } else {
-                ThemeUtils.applyTheme(themeResponse = theme, headerView)
+
+               ThemeUtils.applyTheme(themeResponse = theme, headerView)
             }
 
             tvHeader.text = theme.title
@@ -126,27 +129,19 @@ class NCWChatActivity : AppCompatActivity() {
         }
 
         ncwSdkConfig = NCWChatSdk.getConfig()
-        //  applyConfig()
-
-       // AWSIoTManager.connect(chatViewModel)
-        //AWSIoTManager.subscribeToTopic("chat_widget/b23963e4-56c5-4d8f-929e-2b0f1155b1f8/48fd2c5f-7e79-593b-bbef-9b1d7e450f86")
 
         sendButton.setOnClickListener {
             val messageContent = inputField.text.toString()
-            /*  if (messageContent.isNotEmpty()) {
-                chatViewModel.sendMessage(messageContent)
-                inputField.text.clear()
-                NCWAwsIotManager.publishMessage("topicOne", messageContent)
-            }*/
             if (messageContent.isNotEmpty()) {
+                val messageId = UUID.randomUUID().toString()
                 val payload = WebhookPayload(
                     botRefId = botRefId,
                     requestBody = RequestBody(
-                        conversationId = "48fd2c5f-7e79-593b-bbef-9b1d7e450f86",
+                        conversationId = conversationID,
                         messagePayload = MessagePayload(
                             text = messageContent,
-                            label = "PROACTIVE_GREETING",
-                            messageId = "bea240c9-b62a-47ee-bd91-9ca27ceb1b32"
+                            label = "Option 1",
+                            messageId = messageId
                         ),
                         /*  additionalAttributes = AdditionalAttributes(
                         CUSTOM_ATTRIBUTES = listOf(
@@ -155,11 +150,10 @@ class NCWChatActivity : AppCompatActivity() {
                     )*/
                     )
                 )
-                Log.e("Test","sdd"+payload)
+
+                chatViewModel.sendMessage(messageContent)
                 chatViewModel.sendMessageAPI(payload)
                 inputField.text.clear()
-            //    NCWAwsIotManager.publishMessage("topicOne", messageContent)
-
             }
         }
 
@@ -169,7 +163,7 @@ class NCWChatActivity : AppCompatActivity() {
         }
 
         close.setOnClickListener {
-finish()
+                finish()
         }
 
         observeChatMessages()
@@ -183,11 +177,10 @@ finish()
     private fun getDummyChat() {
         messageList.add(NCWMessage(
             sender = "BOT",
-            type = MessageType.TEXT,
+            type =MessageType.TEXT,
             message = themeData?.initialFlows?.header,
             timestamp = System.currentTimeMillis(),
         ))
-     //   messageList.add(NCWMessage( sender = "User", type = MessageType.TEXT, message = "Test", timestamp = System.currentTimeMillis()))
         messageAdapter.notifyDataSetChanged()
     }
 
@@ -216,17 +209,77 @@ finish()
         }
 
         chatViewModel.sendMessages.observe(this, Observer { message ->
-            messageList.add(message)
-            messageAdapter.notifyDataSetChanged()
-            recyclerView.scrollToPosition(messageList.size - 1)
+            updateMessageList(message)
         })
 
 
-        chatViewModel.awsMessage.observe(this, Observer {
-            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-        })
+        chatViewModel.awsMessage.observe(this, Observer { jsonMessage ->
+            val gson = Gson()
+            try {
+                val response = gson.fromJson(jsonMessage, GenericChannelResponse::class.java)
 
+              /*  // Process each attachment and convert it into NCWMessage if valid
+                val newMessages = response.attachments?.mapNotNull { attachment ->
+                    val messageType = attachment?.attachment?.type?.let { MessageType.fromTypeName(it) }
+                    messageType?.let { type ->
+                        NCWMessage(
+                            sender = "BOT",
+                            type = type,
+                            message = attachment.attachment?.text,
+                            timestamp = System.currentTimeMillis(),
+                            largeImageUrl = attachment.attachment?.largeImageUrl
+                        )
+                    }
+                } ?: emptyList()
+
+                // Update message list with new messages if any
+                if (newMessages.isNotEmpty()) {
+                    updateMessageList(newMessages)
+                }*/
+                val newMessages = response.attachments?.mapNotNull { attachment ->
+                    // Check if the attachment type is not Carousel
+                    if (attachment.attachment?.type == TYPE_CAROUSEL) {
+                        // Skip this attachment by returning null
+                        null
+                    } else {
+                        // Process valid message types
+                        val messageType = attachment?.attachment?.type?.let { MessageType.fromTypeName(it) }
+                        messageType?.let { type ->
+                            NCWMessage(
+                                sender = "BOT",
+                                type = type,
+                                message = attachment.attachment?.text,
+                                timestamp = System.currentTimeMillis(),
+                                largeImageUrl = attachment.attachment?.largeImageUrl
+                            )
+                        }
+                    }
+                } ?: emptyList()
+
+                 // Update message list with new messages if any
+                if (newMessages.isNotEmpty()) {
+                    updateMessageList(newMessages)
+                }
+            } catch (e: Exception) {
+                Log.e("ParsingError", "Failed to parse JSON: ${e.localizedMessage}")
+            }
+        })
     }
+
+    // Helper function to update the adapter and scroll to the latest message
+    private fun updateMessageList(newMessages: List<NCWMessage>) {
+        messageList.addAll(newMessages)
+        messageAdapter.notifyDataSetChanged()
+        recyclerView.scrollToPosition(messageList.size - 1)
+    }
+
+    // Overloaded helper function for a single message
+    private fun updateMessageList(newMessage: NCWMessage) {
+        messageList.add(newMessage)
+        messageAdapter.notifyDataSetChanged()
+        recyclerView.scrollToPosition(messageList.size - 1)
+    }
+
 
     private fun handleApiCallback(response: State<Any>) {
         when (response) {
@@ -338,7 +391,7 @@ finish()
                 if (type!!.startsWith("image/")) {
                     addMediaMessage(selectedMediaUri, MessageType.IMAGE)
                 } else if (type.startsWith("video/")) {
-                    addMediaMessage(selectedMediaUri, MessageType.VIDEO)
+                   // addMediaMessage(selectedMediaUri, MessageType.VIDEO)
                 }
             }
         }
@@ -365,6 +418,7 @@ finish()
                 if (response != null) {
                     // Use conversationID as needed
                     conversationID=response.conversationID
+                    chatViewModel.getAWSMQTTCredentials(botRefId)
                     Log.d(
                         "ConversationID",
                         "Fetched conversation ID: $conversationID"
