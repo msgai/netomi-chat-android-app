@@ -7,7 +7,7 @@
 
     <!-- Header with menu, logo, text, and cross icon -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/header"
+        android:id="@+id/constHeader"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:padding="10dp"
@@ -61,11 +61,11 @@
 
     <!-- RecyclerView for chat messages -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+        android:id="@+id/rvChat"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/header"
+        app:layout_constraintTop_toBottomOf="@id/constHeader"
         app:layout_constraintBottom_toTopOf="@id/tvTypingIndicator"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -92,12 +92,12 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomText"
+        app:layout_constraintBottom_toTopOf="@id/tvBottom"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/imgMenuOption"
+            android:id="@+id/ivMenuOption"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="8dp"
@@ -122,8 +122,8 @@
             android:layout_marginBottom="1dp"
             app:cardCornerRadius="8dp"
             app:cardBackgroundColor="#E6E6E6"
-            app:layout_constraintStart_toEndOf="@id/imgMenuOption"
-            app:layout_constraintEnd_toStartOf="@id/imgSend"
+            app:layout_constraintStart_toEndOf="@id/ivMenuOption"
+            app:layout_constraintEnd_toStartOf="@id/ivSend"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
 
@@ -132,7 +132,7 @@
                 android:layout_height="wrap_content">
 
                 <androidx.appcompat.widget.AppCompatEditText
-                    android:id="@+id/inputField"
+                    android:id="@+id/edtMessage"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
@@ -142,12 +142,12 @@
                     android:inputType="textMultiLine"
                     android:background="@android:color/transparent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/imgAttachment"
+                    app:layout_constraintEnd_toStartOf="@id/ivAttachment"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent" />
 
                 <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/imgAttachment"
+                    android:id="@+id/ivAttachment"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="8dp"
@@ -164,7 +164,7 @@
         </androidx.cardview.widget.CardView>
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/imgSend"
+            android:id="@+id/ivSend"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_marginStart="8dp"
@@ -179,7 +179,7 @@
 
     <!-- Centered text at the bottom of the screen -->
     <TextView
-        android:id="@+id/bottomText"
+        android:id="@+id/tvBottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"

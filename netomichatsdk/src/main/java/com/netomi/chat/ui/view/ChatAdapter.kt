@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.netomi.chat.R
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
+import com.netomi.chat.utils.NCWAppConstant.USER
 
 class ChatAdapter(private val messages: List<NCWMessage>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -21,7 +22,7 @@ class ChatAdapter(private val messages: List<NCWMessage>) : RecyclerView.Adapter
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (messages[position].sender.equals("User"))
+        return if (messages[position].sender.equals(USER))
             VIEW_TYPE_SENDER else VIEW_TYPE_RECEIVER
     }
 
@@ -47,7 +48,7 @@ class ChatAdapter(private val messages: List<NCWMessage>) : RecyclerView.Adapter
     override fun getItemCount(): Int = messages.size
 
     class SenderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val messageText: TextView = itemView.findViewById(R.id.senderMessageText)
+        private val messageText: TextView = itemView.findViewById(R.id.tvSenderMessage)
         private val imageView: ImageView = itemView.findViewById(R.id.senderImage)
         private val videoView: VideoView = itemView.findViewById(R.id.senderVideo)
         private val senderImageCard: CardView = itemView.findViewById(R.id.senderImageCard)
@@ -80,7 +81,7 @@ class ChatAdapter(private val messages: List<NCWMessage>) : RecyclerView.Adapter
     }
 
     class ReceiverViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val messageText: TextView = itemView.findViewById(R.id.receiverMessageText)
+        private val messageText: TextView = itemView.findViewById(R.id.tvReceiverMessage)
         private val imageView: ImageView = itemView.findViewById(R.id.receiverImage)
         private val videoView: VideoView = itemView.findViewById(R.id.receiverVideo)
 

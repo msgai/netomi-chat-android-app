@@ -22,7 +22,7 @@ class MainActivity :AppCompatActivity(), View.OnClickListener {
         when(v?.id){
             R.id.btn_chat->{
 
-                NCWChatSdk.launch(this)
+                NCWChatSdk.launch(this,"b23963e4-56c5-4d8f-929e-2b0f1155b1f8")
                // startActivity((Intent(this, NCWChatActivity::class.java)))
 //                initializeChatSdk()
 //                startActivity((Intent(this, NCWChatActivity::class.java)))

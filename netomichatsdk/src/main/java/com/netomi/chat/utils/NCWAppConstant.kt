@@ -11,5 +11,9 @@ object NCWAppConstant {
     const val AWS_SECRET_KEY="SECRET_KEY"
     const val AWS_SESSION_TOKEN="SESSION_TOKEN"
     const val AWS_IOT_ENDPOINT="IOT_ENDPOINT"
+    const val BOT_REFERENCE_ID="botRefId"
+    const val USER="User"
+
+
 
 }

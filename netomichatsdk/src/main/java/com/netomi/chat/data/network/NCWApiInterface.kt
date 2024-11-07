@@ -57,6 +57,13 @@ interface NCWApiInterface {
     @POST("chat/send")
     fun sendMessage(@Body message: NCWMessage): Response<NCWBaseResponse<Boolean>>
 
+    /**
+     * Fetches the SDK theme configuration from the server based on the provided bot reference ID.
+     *
+     * @param botRefId The unique identifier for the bot whose theme configuration is to be retrieved.
+     * @return A [Response] object containing the [ThemeResponse] with the theme details.
+     *         The response status and data can be checked to determine if the request was successful.
+     */
     @GET("json-config/{botRefId}.json")
     suspend fun getSdkTheme(
         @Path("botRefId") botRefId: String
