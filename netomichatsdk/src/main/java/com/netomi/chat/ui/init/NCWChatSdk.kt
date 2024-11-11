@@ -6,6 +6,7 @@ import android.util.Log
 import com.netomi.chat.config.NCWSdkConfig
 import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.ui.view.NCWChatActivity
+import com.netomi.chat.utils.NCWAppConstant
 
 
 object NCWChatSdk {
@@ -14,7 +15,17 @@ object NCWChatSdk {
     private var themeData: ThemeResponse? = null
 
 
-    fun launch(context: Context,botRefId:String="b23963e4-56c5-4d8f-929e-2b0f1155b1f8") {
+    /**
+     * Launches the NCW chat activity with a specified bot reference ID, initializing the chat theme.
+     *
+     * @param context The context from which the activity is launched.
+     * @param botRefId The bot reference ID for initializing the chat.
+     *
+     * This function first initializes the chat theme by calling `NCWChatTheme`, which fetches theme data asynchronously.
+     * - If the theme data is successfully retrieved (`onThemeReceived` callback), it updates the `themeData` variable with the theme details,
+     *   and sets up the chat UI with the received theme by calling `setupChatWithTheme`.
+     */
+    fun launch(context: Context,botRefId:String) {
         NCWChatTheme(
             context,
             botRefId,
@@ -23,7 +34,7 @@ object NCWChatSdk {
                 Log.e("NCWChatSdk", "Theme data received: $themeData")
                 setupChatWithTheme(themeData)
                 val intent=Intent(context, NCWChatActivity::class.java)
-                intent.putExtra("botRefId",botRefId)
+                intent.putExtra(NCWAppConstant.BOT_REFERENCE_ID,botRefId)
                 context.startActivity(intent)
             },
             onError = { message ->

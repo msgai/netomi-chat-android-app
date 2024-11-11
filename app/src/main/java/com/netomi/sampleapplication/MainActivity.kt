@@ -21,9 +21,8 @@ class MainActivity :AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         when(v?.id){
             R.id.btn_chat->{
-               // "ee63a9ce-319a-4761-9390-4e7b76c942f9" Appinbevt Bot 2
-              //  "b23963e4-56c5-4d8f-929e-2b0f1155b1f8"
-                NCWChatSdk.launch(this,"53e804cd-12ba-45cb-b41d-52413ead4dd4")
+
+                NCWChatSdk.launch(this,"b23963e4-56c5-4d8f-929e-2b0f1155b1f8")
                // startActivity((Intent(this, NCWChatActivity::class.java)))
 //                initializeChatSdk()
 //                startActivity((Intent(this, NCWChatActivity::class.java)))

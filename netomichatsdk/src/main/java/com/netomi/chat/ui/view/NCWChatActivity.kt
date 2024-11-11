@@ -41,6 +41,7 @@ import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
+import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.TYPE_CAROUSEL
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.Routes
@@ -74,21 +75,19 @@ class NCWChatActivity : AppCompatActivity() {
     private val chatViewModel: NCWChatViewModel by viewModels()
     private val ncwAwsCredentialsViewModel: NCWAwsCredentialsViewModel by viewModels()
 
-    private lateinit var inputField: EditText
-    private lateinit var sendButton: ImageView
-    private lateinit var tvHeader: TextView
-
-    private lateinit var close: ImageView
+    private lateinit var messageInputField: EditText
+    private lateinit var sendMessageIcon: ImageView
+    private lateinit var headerTextView: TextView
+    private lateinit var closeIcon: ImageView
     private lateinit var messageAdapter: ChatAdapter
     private lateinit var messageList: MutableList<NCWMessage>
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var uploadButton: ImageView
+    private lateinit var chatRecyclerView: RecyclerView
+    private lateinit var attachmentIcon: ImageView
+    private lateinit var headerContainer: ConstraintLayout
+
     private var photoUri: Uri? = null
-    private lateinit var headerView: ConstraintLayout
-
     private var ncwSdkConfig: NCWSdkConfig? = null
-
-    private var  themeData: ThemeResponse?=null
+    private var themeData: ThemeResponse? = null
 
     private var conversationID : String? = null
     private var botRefId : String? = null
@@ -97,103 +96,143 @@ class NCWChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
-        headerView = findViewById(R.id.header)
-        inputField = findViewById(R.id.inputField)
-        sendButton = findViewById(R.id.imgSend)
-        recyclerView = findViewById(R.id.recyclerView)
-        uploadButton = findViewById(R.id.imgAttachment)
-        tvHeader = findViewById(R.id.tvHeader)
-        close= findViewById(R.id.ivClose)
-        // Initialize the message list and adapter
-        messageList = mutableListOf()
-        messageAdapter = ChatAdapter(messageList)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = messageAdapter
 
-        botRefId = intent.getStringExtra("botRefId")
-        chatViewModel.getConversationId(botRefId)
-        themeData= NCWChatSdk.getThemeData()
-        themeData?.let { theme ->
-            if (theme.theme?.gradient == true) {
-                val direction = GradientDrawable.Orientation.values()
-                    .getOrElse(theme.theme.gradientDirection) { GradientDrawable.Orientation.LEFT_RIGHT }
+        // Initialize views
+        initViews()
 
-                val gradientColors = theme.theme.gradientColors?.map { Color.parseColor(it) }?.toIntArray()
-                headerView.background = GradientDrawable(direction, gradientColors)
-            } else {
+        // Set up message adapter and recycler view
+        setupMessageList()
 
-               ThemeUtils.applyTheme(themeResponse = theme, headerView)
-            }
-
-            tvHeader.text = theme.title
-            ThemeUtils.applyTheme(themeResponse = theme, tvHeader)
-        }
-
+        // Load theme and config
+        themeData = NCWChatSdk.getThemeData()
         ncwSdkConfig = NCWChatSdk.getConfig()
 
-        sendButton.setOnClickListener {
-            val messageContent = inputField.text.toString()
-            if (messageContent.isNotEmpty()) {
-                val messageId = UUID.randomUUID().toString()
-                val payload = WebhookPayload(
-                    botRefId = botRefId,
-                    requestBody = RequestBody(
-                        conversationId = conversationID,
-                        messagePayload = MessagePayload(
-                            text = messageContent,
-                            label = "Option 1",
-                            messageId = messageId
-                        ),
-                        /*  additionalAttributes = AdditionalAttributes(
-                        CUSTOM_ATTRIBUTES = listOf(
-                            CustomAttribute(type = "TEXT", name = "visitor_url", value = "https://aistudio-qa.netomi.com", scope = "LIFE_TIME")
-                        )
-                    )*/
-                    )
-                )
-
-                chatViewModel.sendMessage(messageContent)
-                chatViewModel.sendMessageAPI(payload)
-                inputField.text.clear()
-            }
-        }
-
-        // Set up the upload button to show options for camera or gallery
-        uploadButton.setOnClickListener {
-            requestPermissionsAndShowMediaOptions()
-        }
-
-        close.setOnClickListener {
-                finish()
-        }
-
+        applyTheme(themeData)
         observeChatMessages()
+        loadInitialMessages()
 
-        getDummyChat()
+        val botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
+        chatViewModel.getConversationId(botRefId)
+        chatViewModel.getAWSMQTTCredentials(botRefId)
 
+        sendMessageIcon.setOnClickListener { sendMessage() }
+        attachmentIcon.setOnClickListener { requestPermissionsAndShowMediaOptions() }
+        closeIcon.setOnClickListener { finish() }
 
     }
 
+    /**
+     * Sends a user message in the chat.
+     * This function is triggered when the user presses the send icon. It retrieves
+     * the current input from `messageInputField`, clears the input field, and
+     * posts the message to the chat system.
+     */
+    private fun sendMessage() {
+        val messageContent = messageInputField.text.toString()
+        if (messageContent.isNotEmpty()) {
+            val messageId = UUID.randomUUID().toString()
+            val payload = WebhookPayload(
+                botRefId = botRefId,
+                requestBody = RequestBody(
+                    conversationId = conversationID,
+                    messagePayload = MessagePayload(
+                        text = messageContent,
+                        label = "Option 1",
+                        messageId = messageId
+                    ),
+                    /*  additionalAttributes = AdditionalAttributes(
+                    CUSTOM_ATTRIBUTES = listOf(
+                        CustomAttribute(type = "TEXT", name = "visitor_url", value = "https://aistudio-qa.netomi.com", scope = "LIFE_TIME")
+                    )
+                )*/
+                )
+            )
 
-    private fun getDummyChat() {
-        messageList.add(NCWMessage(
-            sender = "BOT",
-            type =MessageType.TEXT,
-            message = themeData?.initialFlows?.header,
-            timestamp = System.currentTimeMillis(),
-        ))
+            chatViewModel.sendMessage(messageContent)
+            chatViewModel.sendMessageAPI(payload)
+            messageInputField.text.clear()
+        }
+    }
+
+    /**
+     * This function adds a predefined message to the chat, such as the bot’s
+     * initial greeting or information, allowing the user to see context when
+     * they first open the chat.
+     */
+    private fun loadInitialMessages() {
+        messageList.add(
+            NCWMessage(
+                sender = "BOT",
+                type = MessageType.TEXT,
+                message = themeData?.initialFlows?.header,
+                timestamp = System.currentTimeMillis()
+            )
+        )
         messageAdapter.notifyDataSetChanged()
     }
 
-/*    private fun applyConfig() {
-        ncwSdkConfig?.let {
-            val sendButtonStyle= it.sendButtonStyle
-            sendButton.setBackgroundColor(sendButtonStyle.backgroundColor)
-            sendButton.setTextColor(sendButtonStyle.textColor)
-            sendButton.textSize = sendButtonStyle.fontSize
+    /**
+     * Applies theme styling to the chat UI based on the provided theme data.
+     * @param themeData The theme settings to be applied, containing gradient
+     * configuration, colors, and title.
+     */
+    private fun applyTheme(themeData: ThemeResponse?) {
+        themeData?.let { theme ->
+            // Apply gradient or default color to header
+            if (theme.theme?.gradient == true) {
+                val direction = GradientDrawable.Orientation.values()
+                    .getOrElse(theme.theme.gradientDirection) { GradientDrawable.Orientation.LEFT_RIGHT }
+                val gradientColors =
+                    theme.theme.gradientColors?.map { Color.parseColor(it) }?.toIntArray()
+                headerContainer.background = GradientDrawable(direction, gradientColors)
+            } else {
+                ThemeUtils.applyTheme(themeResponse = theme, headerTextView)
+            }
+            headerTextView.text = theme.title
         }
-    }*/
+    }
 
+    /**
+     * Initializes and binds UI components in the chat activity layout.
+     */
+    private fun initViews() {
+        headerContainer = findViewById(R.id.constHeader)
+        messageInputField = findViewById(R.id.edtMessage)
+        sendMessageIcon = findViewById(R.id.ivSend)
+        chatRecyclerView = findViewById(R.id.rvChat)
+        attachmentIcon = findViewById(R.id.ivAttachment)
+        headerTextView = findViewById(R.id.tvHeader)
+        closeIcon = findViewById(R.id.ivClose)
+    }
+
+    /**
+     * Sets up the message list in the chat UI by initializing the adapter and layout manager.
+     */
+    private fun setupMessageList() {
+        messageList = mutableListOf()
+        messageAdapter = ChatAdapter(messageList)
+        chatRecyclerView.layoutManager = LinearLayoutManager(this)
+        chatRecyclerView.adapter = messageAdapter
+    }
+
+
+    /*    private fun applyConfig() {
+            ncwSdkConfig?.let {
+                val sendButtonStyle= it.sendButtonStyle
+                sendButton.setBackgroundColor(sendButtonStyle.backgroundColor)
+                sendButton.setTextColor(sendButtonStyle.textColor)
+                sendButton.textSize = sendButtonStyle.fontSize
+            }
+        }*/
+
+    /**
+     * Observes LiveData from the ViewModel for various chat-related events.
+     * This function handles different chat message states, including new messages,
+     * conversation ID, AWS credentials, and other chat-related updates.
+     *
+     * It ensures that the UI is updated accordingly whenever a change occurs
+     * in the chat data or configuration.
+     */
     private fun observeChatMessages() {
         // Observe the chat messages LiveData from the ViewModel
         chatViewModel.sendMessage.observe(this, Observer { messages ->
@@ -201,15 +240,24 @@ class NCWChatActivity : AppCompatActivity() {
             handleApiCallback(messages as State<Any>)
         })
 
-        chatViewModel.getConversationId.observe(this, Observer { it ->
-            handleApiCallback(it as State<Any>)
+        chatViewModel.getConversationId.observe(this, Observer { conversationId ->
+            handleApiCallback(conversationId as State<Any>)
         })
 
-        chatViewModel.getAWSMQTTCredentials.observe(this) {
-            handleApiCallback(it as State<Any>)
+        chatViewModel.getAWSMQTTCredentials.observe(this) { credentials ->
+            handleApiCallback(credentials as State<Any>)
         }
 
         chatViewModel.sendMessages.observe(this, Observer { message ->
+            messageList.add(message) // Add the new message to the list
+            messageAdapter.notifyDataSetChanged() // Notify the adapter to refresh the view
+            chatRecyclerView.scrollToPosition(messageList.size - 1) // Scroll to the latest message
+        })
+
+
+        chatViewModel.awsMessage.observe(this, Observer {
+            // Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+        })
             updateMessageList(message)
         })
 
@@ -336,7 +384,6 @@ class NCWChatActivity : AppCompatActivity() {
     }
 
 
-
     private fun requestPermissionsAndShowMediaOptions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val permissions = arrayOf(
@@ -440,7 +487,7 @@ class NCWChatActivity : AppCompatActivity() {
         )
         messageList.add(newMessage)
         messageAdapter.notifyItemInserted(messageList.size - 1)
-        recyclerView.scrollToPosition(messageList.size - 1) // Scroll to the latest message
+        chatRecyclerView.scrollToPosition(messageList.size - 1) // Scroll to the latest message
     }
 
 
@@ -469,7 +516,7 @@ class NCWChatActivity : AppCompatActivity() {
                     "MQTTCredentialsResponse",
                     "Fetched MQTTCredentialsResponse: ${mqttsCredentials.credentials.accessKeyId}"
                 )
-                SaveAwsCredentials( mqttsCredentials.credentials)
+                SaveAwsCredentials(mqttsCredentials.credentials)
             }
 
             Routes.ROUTE_SEND_CHAT -> {

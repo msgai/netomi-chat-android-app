@@ -1,7 +1,6 @@
 package com.netomi.chat.ui.init
 
 import android.content.Context
-import android.util.Log
 import com.netomi.chat.data.network.NCWApiInterface
 import com.netomi.chat.data.network.NCWRetrofitClient
 import com.netomi.chat.model.theme.ThemeResponse
@@ -24,13 +23,11 @@ class NCWChatTheme(
     }
 
     private fun fetchSdkTheme() {
-        Log.e("CallAPI", "Taskkk")
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response = apiInterface.getSdkTheme(botReference)
                 if (response.isSuccessful) {
                     val themeResponse = response.body()
-                    Log.e("SdkTheme", "Fett" + themeResponse)
                     withContext(Dispatchers.Main) {
                         onThemeReceived(themeResponse)
                     }

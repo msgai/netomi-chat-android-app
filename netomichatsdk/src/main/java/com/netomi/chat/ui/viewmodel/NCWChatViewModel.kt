@@ -117,12 +117,10 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun getAWSMQTTCredentials(botRef: String?) {
-        Log.e("MQTTCredentialsResponse", "botRef " + botRef)
         viewModelScope.launch(Dispatchers.IO) {
             val response = chatRepository.getAWSMQTTCredentials(botRef)
 
             withContext(Dispatchers.Main) {
-                Log.e("MQTTCredentialsResponse", "response " + response)
                 _getAWSMQTTCredentials.value = response // Use setValue on the Main thread
             }
         }

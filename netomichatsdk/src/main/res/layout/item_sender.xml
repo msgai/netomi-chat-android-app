@@ -7,13 +7,13 @@
 
     <!-- Text Message -->
     <TextView
-        android:id="@+id/senderMessageText"
+        android:id="@+id/tvSenderMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:textColor="@android:color/white"
         android:textSize="16sp"
-        android:text="User nasjknjcd ccxcxcx"
+        android:text="User"
         android:background="@drawable/bg_sender_message"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -23,10 +23,6 @@
         app:layout_constraintBottom_toBottomOf="parent" />
 
 
-    <include
-        android:id="@+id/sender"
-        android:visibility="gone"
-        layout="@layout/carousel_item" />
 
     <!-- CardView for Image Message -->
     <androidx.cardview.widget.CardView
