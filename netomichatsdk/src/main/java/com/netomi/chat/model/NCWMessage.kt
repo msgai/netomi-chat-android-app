@@ -1,5 +1,7 @@
 package com.netomi.chat.model
 
+import com.netomi.chat.model.messages.CarouselElement
+
 data class NCWMessage(
     val message: String? = null,
     val imageUrl: String? = null,
@@ -9,7 +11,8 @@ data class NCWMessage(
     val timestamp: Long,
     val sender: String? = null,
     val largeImageUrl: String? = null,
-    )
+    val carouselItems: List<CarouselElement>? = null
+)
 
 enum class MessageType(val typeName: String) {
     TEXT("ai.msg.domain.responses.core.Text"),

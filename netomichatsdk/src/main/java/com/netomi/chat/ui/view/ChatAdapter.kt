@@ -1,7 +1,6 @@
 package com.netomi.chat.ui.view
 
 import android.net.Uri
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.VideoView
 import androidx.cardview.widget.CardView
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.netomi.chat.R
@@ -87,7 +87,7 @@ class ChatAdapter(private val messages: List<NCWMessage>) : RecyclerView.Adapter
         private val imageView: ImageView = itemView.findViewById(R.id.receiverImage)
         private val videoView: VideoView = itemView.findViewById(R.id.receiverVideo)
         private val imgBot: ImageView = itemView.findViewById(R.id.img_bot)
-
+        private val carouselRecyclerView: RecyclerView = itemView.findViewById(R.id.carouselRecyclerView)
 
         fun bind(message: NCWMessage) {
             // Show or hide views based on the message type
@@ -99,6 +99,7 @@ class ChatAdapter(private val messages: List<NCWMessage>) : RecyclerView.Adapter
                 imageView.visibility = View.GONE
                 videoView.visibility = View.GONE
                 imgBot.visibility = View.VISIBLE
+                carouselRecyclerView.visibility = View.GONE
             } else if (message.type == MessageType.IMAGE) {
                 imageView.visibility = View.VISIBLE
                // imageView.setImageURI(Uri.parse(message.message))
@@ -106,7 +107,26 @@ class ChatAdapter(private val messages: List<NCWMessage>) : RecyclerView.Adapter
                 messageText.visibility = View.GONE
                 videoView.visibility = View.GONE
                 imgBot.visibility = View.GONE
-            } /*else if (message.type == MessageType.VIDEO) {
+                carouselRecyclerView.visibility = View.GONE
+            }
+            else if (message.type == MessageType.CAROUSEL) {
+
+                // Initialize and bind carousel data to RecyclerView
+                carouselRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
+                val carouselAdapter = CarouselAdapter(message.carouselItems ?: emptyList())
+                carouselRecyclerView.adapter = carouselAdapter
+
+                carouselRecyclerView.visibility = View.VISIBLE
+                messageText.visibility = View.GONE
+                imageView.visibility = View.GONE
+                videoView.visibility = View.GONE
+                imgBot.visibility = View.GONE
+
+            }
+
+
+
+            /*else if (message.type == MessageType.VIDEO) {
                 videoView.visibility = View.VISIBLE
                 videoView.setVideoPath(message.message)
                 videoView.start()

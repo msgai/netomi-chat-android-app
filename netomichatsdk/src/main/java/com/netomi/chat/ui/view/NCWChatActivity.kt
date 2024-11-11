@@ -70,6 +70,7 @@ import java.util.UUID
  *
  */
 class NCWChatActivity : AppCompatActivity() {
+
     private val chatViewModel: NCWChatViewModel by viewModels()
     private val ncwAwsCredentialsViewModel: NCWAwsCredentialsViewModel by viewModels()
 
@@ -89,8 +90,8 @@ class NCWChatActivity : AppCompatActivity() {
 
     private var  themeData: ThemeResponse?=null
 
-    var conversationID : String? = null
-    var botRefId : String? = null
+    private var conversationID : String? = null
+    private var botRefId : String? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -236,7 +237,7 @@ class NCWChatActivity : AppCompatActivity() {
                 if (newMessages.isNotEmpty()) {
                     updateMessageList(newMessages)
                 }*/
-                val newMessages = response.attachments?.mapNotNull { attachment ->
+             /*   val newMessages = response.attachments?.mapNotNull { attachment ->
                     // Check if the attachment type is not Carousel
                     if (attachment.attachment?.type == TYPE_CAROUSEL) {
                         // Skip this attachment by returning null
@@ -254,12 +255,45 @@ class NCWChatActivity : AppCompatActivity() {
                             )
                         }
                     }
+                } ?: emptyList()*/
+
+
+                // Process each attachment and convert it into NCWMessage if valid
+                val newMessages = response.attachments?.mapNotNull { attachment ->
+                    val messageType = attachment?.attachment?.type?.let { MessageType.fromTypeName(it) }
+
+                    when (messageType) {
+                        MessageType.CAROUSEL -> {
+                            // For carousel type, map the elements and buttons into NCWMessages
+                            attachment?.attachment?.let { carouselAttachment ->
+                                NCWMessage(
+                                    sender = "BOT",
+                                    type = messageType,
+                                    timestamp = System.currentTimeMillis(),
+                                    carouselItems = carouselAttachment.elements // Attach carousel items
+                                )
+                            }
+                        }
+                        else -> {
+                            // For other types (e.g., TEXT, IMAGE), create regular NCWMessages
+                            messageType?.let { type ->
+                                NCWMessage(
+                                    sender = "BOT",
+                                    type = type,
+                                    message = attachment.attachment?.text,
+                                    timestamp = System.currentTimeMillis(),
+                                    largeImageUrl = attachment.attachment?.largeImageUrl
+                                )
+                            }
+                        }
+                    }
                 } ?: emptyList()
 
-                 // Update message list with new messages if any
+// Update message list with new messages if any
                 if (newMessages.isNotEmpty()) {
                     updateMessageList(newMessages)
                 }
+
             } catch (e: Exception) {
                 Log.e("ParsingError", "Failed to parse JSON: ${e.localizedMessage}")
             }
