@@ -23,20 +23,27 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import com.netomi.chat.R
-import com.netomi.chat.awsiot.NCWAwsIotManager
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.config.NCWSdkConfig
+import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.awsmqtt.NCWAwsCredentials
+import com.netomi.chat.model.messages.GenericChannelResponse
 import com.netomi.chat.model.mqtt.Credentials
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
+import com.netomi.chat.model.messages.MessagePayload
+import com.netomi.chat.model.messages.RequestBody
+import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
+import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
+import com.netomi.chat.utils.NCWAppConstant.TYPE_CAROUSEL
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
@@ -44,6 +51,7 @@ import com.netomi.chat.utils.ThemeUtils
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.UUID
 
 /**
  * Activity responsible for displaying the chat interface and handling user interactions.
@@ -81,6 +89,9 @@ class NCWChatActivity : AppCompatActivity() {
     private var photoUri: Uri? = null
     private var ncwSdkConfig: NCWSdkConfig? = null
     private var themeData: ThemeResponse? = null
+
+    private var conversationID : String? = null
+    private var botRefId : String? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -120,9 +131,27 @@ class NCWChatActivity : AppCompatActivity() {
     private fun sendMessage() {
         val messageContent = messageInputField.text.toString()
         if (messageContent.isNotEmpty()) {
+            val messageId = UUID.randomUUID().toString()
+            val payload = WebhookPayload(
+                botRefId = botRefId,
+                requestBody = RequestBody(
+                    conversationId = conversationID,
+                    messagePayload = MessagePayload(
+                        text = messageContent,
+                        label = "Option 1",
+                        messageId = messageId
+                    ),
+                    /*  additionalAttributes = AdditionalAttributes(
+                    CUSTOM_ATTRIBUTES = listOf(
+                        CustomAttribute(type = "TEXT", name = "visitor_url", value = "https://aistudio-qa.netomi.com", scope = "LIFE_TIME")
+                    )
+                )*/
+                )
+            )
+
             chatViewModel.sendMessage(messageContent)
+            chatViewModel.sendMessageAPI(payload)
             messageInputField.text.clear()
-            NCWAwsIotManager.publishMessage("topicOne", messageContent)
         }
     }
 
@@ -206,10 +235,10 @@ class NCWChatActivity : AppCompatActivity() {
      * in the chat data or configuration.
      */
     private fun observeChatMessages() {
-
-        chatViewModel.chatMessages.observe(this, Observer { messages ->
-            // Handle the incoming chat messages (for example, update UI or handle error states)
+        // Observe the chat messages LiveData from the ViewModel
+        chatViewModel.sendMessage.observe(this, Observer { messages ->
             // handleApiCallback(messages as State<NCWBaseResponse<Any>>)
+            handleApiCallback(messages as State<Any>)
         })
 
         chatViewModel.getConversationId.observe(this, Observer { conversationId ->
@@ -221,15 +250,111 @@ class NCWChatActivity : AppCompatActivity() {
         }
 
         chatViewModel.sendMessages.observe(this, Observer { message ->
-            messageList.add(message) // Add the new message to the list
-            messageAdapter.notifyDataSetChanged() // Notify the adapter to refresh the view
-            chatRecyclerView.scrollToPosition(messageList.size - 1) // Scroll to the latest message
+            updateMessageList(message)
         })
 
 
-        chatViewModel.awsMessage.observe(this, Observer {
-            // Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+
+
+
+        chatViewModel.awsMessage.observe(this, Observer { jsonMessage ->
+            val gson = Gson()
+            try {
+                val response = gson.fromJson(jsonMessage, GenericChannelResponse::class.java)
+
+              /*  // Process each attachment and convert it into NCWMessage if valid
+                val newMessages = response.attachments?.mapNotNull { attachment ->
+                    val messageType = attachment?.attachment?.type?.let { MessageType.fromTypeName(it) }
+                    messageType?.let { type ->
+                        NCWMessage(
+                            sender = "BOT",
+                            type = type,
+                            message = attachment.attachment?.text,
+                            timestamp = System.currentTimeMillis(),
+                            largeImageUrl = attachment.attachment?.largeImageUrl
+                        )
+                    }
+                } ?: emptyList()
+
+                // Update message list with new messages if any
+                if (newMessages.isNotEmpty()) {
+                    updateMessageList(newMessages)
+                }*/
+             /*   val newMessages = response.attachments?.mapNotNull { attachment ->
+                    // Check if the attachment type is not Carousel
+                    if (attachment.attachment?.type == TYPE_CAROUSEL) {
+                        // Skip this attachment by returning null
+                        null
+                    } else {
+                        // Process valid message types
+                        val messageType = attachment?.attachment?.type?.let { MessageType.fromTypeName(it) }
+                        messageType?.let { type ->
+                            NCWMessage(
+                                sender = "BOT",
+                                type = type,
+                                message = attachment.attachment?.text,
+                                timestamp = System.currentTimeMillis(),
+                                largeImageUrl = attachment.attachment?.largeImageUrl
+                            )
+                        }
+                    }
+                } ?: emptyList()*/
+
+
+                // Process each attachment and convert it into NCWMessage if valid
+                val newMessages = response.attachments?.mapNotNull { attachment ->
+                    val messageType = attachment?.attachment?.type?.let { MessageType.fromTypeName(it) }
+
+                    when (messageType) {
+                        MessageType.CAROUSEL -> {
+                            // For carousel type, map the elements and buttons into NCWMessages
+                            attachment?.attachment?.let { carouselAttachment ->
+                                NCWMessage(
+                                    sender = "BOT",
+                                    type = messageType,
+                                    timestamp = System.currentTimeMillis(),
+                                    carouselItems = carouselAttachment.elements // Attach carousel items
+                                )
+                            }
+                        }
+                        else -> {
+                            // For other types (e.g., TEXT, IMAGE), create regular NCWMessages
+                            messageType?.let { type ->
+                                NCWMessage(
+                                    sender = "BOT",
+                                    type = type,
+                                    message = attachment.attachment?.text,
+                                    timestamp = System.currentTimeMillis(),
+                                    largeImageUrl = attachment.attachment?.largeImageUrl
+                                )
+                            }
+                        }
+                    }
+                } ?: emptyList()
+
+            // Update message list with new messages if any
+                if (newMessages.isNotEmpty()) {
+                    updateMessageList(newMessages)
+                }
+
+            } catch (e: Exception) {
+                Log.e("ParsingError", "Failed to parse JSON: ${e.localizedMessage}")
+            }
         })
+    }
+
+    // Helper function to update the adapter and scroll to the latest message
+    private fun updateMessageList(newMessages: List<NCWMessage>) {
+        messageList.addAll(newMessages)
+        messageAdapter.notifyDataSetChanged()
+        chatRecyclerView.scrollToPosition(messageList.size - 1)
+    }
+
+    // Overloaded helper function for a single message
+    private fun updateMessageList(newMessage: NCWMessage) {
+        messageList.add(newMessage)
+        messageAdapter.notifyDataSetChanged()
+        chatRecyclerView.scrollToPosition(messageList.size - 1)
     }
 
 
@@ -342,7 +467,7 @@ class NCWChatActivity : AppCompatActivity() {
                 if (type!!.startsWith("image/")) {
                     addMediaMessage(selectedMediaUri, MessageType.IMAGE)
                 } else if (type.startsWith("video/")) {
-                    addMediaMessage(selectedMediaUri, MessageType.VIDEO)
+                   // addMediaMessage(selectedMediaUri, MessageType.VIDEO)
                 }
             }
         }
@@ -365,12 +490,14 @@ class NCWChatActivity : AppCompatActivity() {
 
         when (apiConstant) {
             Routes.ROUTE_GET_CONVERSATION_ID -> {
-                val conversationID = apiResponse as GetConversationIdResponse
-                if (conversationID != null) {
+                val response = apiResponse as GetConversationIdResponse
+                if (response != null) {
                     // Use conversationID as needed
+                    conversationID=response.conversationID
+                    chatViewModel.getAWSMQTTCredentials(botRefId)
                     Log.d(
                         "ConversationID",
-                        "Fetched conversation ID: ${conversationID.conversationID}"
+                        "Fetched conversation ID: $conversationID"
                     )
                 } else {
                     // Handle the case where conversationID is null
@@ -385,6 +512,14 @@ class NCWChatActivity : AppCompatActivity() {
                     "Fetched MQTTCredentialsResponse: ${mqttsCredentials.credentials.accessKeyId}"
                 )
                 SaveAwsCredentials(mqttsCredentials.credentials)
+            }
+
+            Routes.ROUTE_SEND_CHAT -> {
+                val sendMessageResponse = apiResponse as SendMessageResponse
+                Log.d(
+                    "MQTTCredentialsResponse",
+                    "Fetched MQTTCredentialsResponse: ${sendMessageResponse}"
+                )
             }
 
 
@@ -404,7 +539,9 @@ class NCWChatActivity : AppCompatActivity() {
             iotEndpoint = mqttsCredentials.IoTHostEndPoint
         )
         ncwAwsCredentialsViewModel.saveAwsCredentials(newCredentials)
-        ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel)
+
+        val topic="$CHAT_WIDGET/$botRefId/$conversationID"
+        ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel,topic)
 
     }
 }

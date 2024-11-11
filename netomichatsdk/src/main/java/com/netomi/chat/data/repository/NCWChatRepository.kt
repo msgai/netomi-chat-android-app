@@ -6,7 +6,9 @@ import com.netomi.chat.data.network.NCWBaseService
 import com.netomi.chat.data.network.NCWRetrofitClient
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.NCWMessage
+import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
+import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
@@ -50,19 +52,24 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
     }
 
     // Send a new message
-    fun sendMessage(message: NCWMessage): State<NCWBaseResponse<Boolean>> {
-        val response = apiInterface.sendMessage(message)
-        return if (response.isSuccessful && response.body() != null) {
-            State.success(data = response.body()!!, Routes.ROUTE_SEND_CHAT)
-        } else {
-            val errorBody = response.errorBody()
-            if (errorBody != null) {
-                State.error(parseError(errorBody), code = response.code())
+    suspend fun sendMessage(message: WebhookPayload): State<SendMessageResponse> {
+        return try {
+            val response = apiInterface.sendMessage(message)
+            if (response.isSuccessful && response.body() != null) {
+                State.success(data = response.body()!!, Routes.ROUTE_SEND_CHAT)
             } else {
-                State.error(mapApiException(response.code()), code = response.code())
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    State.error(parseError(errorBody), code = response.code())
+                } else {
+                    State.error(mapApiException(response.code()), code = response.code())
+                }
             }
+        } catch (e: Exception) {
+            State.error(e.message.toString(), code = 500)
         }
     }
+
 
     // API to get ConversationId
     suspend fun getConversationId(botRef: String?): State<GetConversationIdResponse> {

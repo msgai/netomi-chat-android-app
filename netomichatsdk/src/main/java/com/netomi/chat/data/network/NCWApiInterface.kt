@@ -2,6 +2,8 @@ package com.netomi.chat.data.network
 
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.NCWMessage
+import com.netomi.chat.model.SendMessageResponse
+import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.utils.NCWBaseResponse
@@ -54,8 +56,8 @@ interface NCWApiInterface {
      * @return A `Response` object wrapping a `Boolean` response (indicating the operation's success or failure).
      *
      */
-    @POST("chat/send")
-    fun sendMessage(@Body message: NCWMessage): Response<NCWBaseResponse<Boolean>>
+    @POST("api/webhook-message")
+    suspend fun sendMessage(@Body message: WebhookPayload?): Response<SendMessageResponse>
 
     /**
      * Fetches the SDK theme configuration from the server based on the provided bot reference ID.

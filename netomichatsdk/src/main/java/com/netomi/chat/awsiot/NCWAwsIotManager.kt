@@ -48,7 +48,7 @@ object NCWAwsIotManager {
     /**
      * Connects to the AWS IoT Broker.
      */
-    fun connect(chatViewModel: NCWChatViewModel) {
+    fun connect(chatViewModel: NCWChatViewModel, topic: String) {
         mqttManager.setKeepAlive(60)
         mqttManager.isAutoReconnect = true
 
@@ -63,7 +63,8 @@ object NCWAwsIotManager {
                 AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus.Connected -> {
                     connectionStatus = 1
                     Log.d("IoT", "Connected to AWS IoT")
-                    subscribeToTopic("topicOne", chatViewModel)
+                    //subscribeToTopic("topicOne", chatViewModel)
+                    subscribeToTopic(topic, chatViewModel)
                 }
 
                 AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus.ConnectionLost -> {

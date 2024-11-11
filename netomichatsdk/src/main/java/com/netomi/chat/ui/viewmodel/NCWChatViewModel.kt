@@ -8,7 +8,9 @@ import com.netomi.chat.data.repository.NCWChatRepository
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
+import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
+import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.State
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +43,10 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
 
     private val _sendMessages = SingleLiveEvent<NCWMessage>()
     val sendMessages get() = _sendMessages
+
+
+    private val _sendMessage = SingleLiveEvent<State<SendMessageResponse>>()
+    val sendMessage get() = _sendMessage
 
 
     private var _getConversationId =
@@ -82,6 +88,20 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
         )
         // val response = chatRepository.sendMessage(newMessage)
         _sendMessages.value = newMessage
+    }
+
+    fun sendMessageAPI(message: WebhookPayload) {
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.sendMessage(message)
+
+            withContext(Dispatchers.Main) {
+                Log.e("sendMessageAPI", "response " + response)
+                _sendMessage.value = response
+            }
+        }
+
+
     }
 
     fun getConversationId(botRef: String?) {

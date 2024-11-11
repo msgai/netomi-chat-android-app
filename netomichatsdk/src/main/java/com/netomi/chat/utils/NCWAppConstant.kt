@@ -13,7 +13,12 @@ object NCWAppConstant {
     const val AWS_IOT_ENDPOINT="IOT_ENDPOINT"
     const val BOT_REFERENCE_ID="botRefId"
     const val USER="User"
+    const val CHAT_WIDGET="chat_widget"
 
 
+
+
+    const val TYPE_TEXT="ai.msg.domain.responses.core.Text"
+    const val TYPE_CAROUSEL="ai.msg.domain.responses.core.Carousel"
 
 }

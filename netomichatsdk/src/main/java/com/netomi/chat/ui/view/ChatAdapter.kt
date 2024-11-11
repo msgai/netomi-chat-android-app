@@ -8,11 +8,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.VideoView
 import androidx.cardview.widget.CardView
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.netomi.chat.R
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.utils.NCWAppConstant.USER
+import com.netomi.chat.utils.NCWAppUtils
 
 class ChatAdapter(private val messages: List<NCWMessage>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -69,14 +72,14 @@ class ChatAdapter(private val messages: List<NCWMessage>) : RecyclerView.Adapter
                 messageText.visibility = View.GONE
                 videoView.visibility = View.GONE
                 senderImageCard.visibility = View.VISIBLE
-            } else if (message.type == MessageType.VIDEO) {
+            } /*else if (message.type == MessageType.VIDEO) {
                 videoView.visibility = View.VISIBLE
                 videoView.setVideoPath(message.message)
                 videoView.start()
                 messageText.visibility = View.GONE
                 imageView.visibility = View.GONE
                 senderImageCard.visibility = View.GONE
-            }
+            }*/
         }
     }
 
@@ -84,27 +87,53 @@ class ChatAdapter(private val messages: List<NCWMessage>) : RecyclerView.Adapter
         private val messageText: TextView = itemView.findViewById(R.id.tvReceiverMessage)
         private val imageView: ImageView = itemView.findViewById(R.id.receiverImage)
         private val videoView: VideoView = itemView.findViewById(R.id.receiverVideo)
+        private val imgBot: ImageView = itemView.findViewById(R.id.img_bot)
+        private val carouselRecyclerView: RecyclerView = itemView.findViewById(R.id.carouselRecyclerView)
 
         fun bind(message: NCWMessage) {
             // Show or hide views based on the message type
             if (message.type == MessageType.TEXT) {
-                messageText.visibility = View.VISIBLE
+                //messageText.text = Html.fromHtml(message.message?.trim() ?:"" , Html.FROM_HTML_MODE_LEGACY)
+                //messageText.visibility = View.VISIBLE
                 messageText.text = message.message
+                message.message?.let { NCWAppUtils.setHtmText(it,messageText) }
                 imageView.visibility = View.GONE
                 videoView.visibility = View.GONE
+                imgBot.visibility = View.VISIBLE
+                carouselRecyclerView.visibility = View.GONE
             } else if (message.type == MessageType.IMAGE) {
                 imageView.visibility = View.VISIBLE
-                imageView.setImageURI(Uri.parse(message.message))
-             //   Glide.with(itemView.context).load(message.content).into(imageView)
+               // imageView.setImageURI(Uri.parse(message.message))
+                Glide.with(itemView.context).load(message.largeImageUrl).into(imageView)
                 messageText.visibility = View.GONE
                 videoView.visibility = View.GONE
-            } else if (message.type == MessageType.VIDEO) {
+                imgBot.visibility = View.GONE
+                carouselRecyclerView.visibility = View.GONE
+            }
+            else if (message.type == MessageType.CAROUSEL) {
+
+                // Initialize and bind carousel data to RecyclerView
+                carouselRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
+                val carouselAdapter = CarouselAdapter(message.carouselItems ?: emptyList())
+                carouselRecyclerView.adapter = carouselAdapter
+
+                carouselRecyclerView.visibility = View.VISIBLE
+                messageText.visibility = View.GONE
+                imageView.visibility = View.GONE
+                videoView.visibility = View.GONE
+                imgBot.visibility = View.GONE
+
+            }
+
+
+
+            /*else if (message.type == MessageType.VIDEO) {
                 videoView.visibility = View.VISIBLE
                 videoView.setVideoPath(message.message)
                 videoView.start()
                 messageText.visibility = View.GONE
                 imageView.visibility = View.GONE
-            }
+            }*/
         }
     }
 }

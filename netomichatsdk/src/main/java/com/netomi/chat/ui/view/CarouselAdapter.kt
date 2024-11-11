@@ -5,16 +5,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.netomi.chat.R
-import com.netomi.chat.model.CarouselItem
+import com.netomi.chat.model.messages.CarouselElement
 
-class CarouselAdapter(private val items: List<CarouselItem>) : RecyclerView.Adapter<CarouselAdapter.CarouselViewHolder>() {
+class CarouselAdapter(private val items: List<CarouselElement>) : RecyclerView.Adapter<CarouselAdapter.CarouselViewHolder>() {
 
     inner class CarouselViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imageView: ImageView = itemView.findViewById(R.id.carouselImage)
-        val heading: TextView = itemView.findViewById(R.id.carouselHeading)
-        val detail: TextView = itemView.findViewById(R.id.carouselDetail)
+
+        val imgCarousel: ImageView = itemView.findViewById(R.id.imgCarousel)
+        val tvHeading: TextView = itemView.findViewById(R.id.tvHeading)
+        val tvDetail: TextView = itemView.findViewById(R.id.tvDetail)
+        val recyclerViewCarouselButton: RecyclerView = itemView.findViewById(R.id.recyclerViewCarouselButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CarouselViewHolder {
@@ -24,10 +28,12 @@ class CarouselAdapter(private val items: List<CarouselItem>) : RecyclerView.Adap
 
     override fun onBindViewHolder(holder: CarouselViewHolder, position: Int) {
         val item = items[position]
-        holder.imageView.setImageResource(item.imageRes)
-        holder.heading.text = item.heading
-        holder.detail.text = item.detail
-
+        holder.tvHeading.text = item.title
+        holder.tvDetail.text = item.description
+        Glide.with(holder.itemView.context).load(item.imageUrl).into(holder.imgCarousel)
+        holder.recyclerViewCarouselButton.layoutManager = LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
+        val carouselAdapter = CarouselButtonAdapter(item.buttons ?: emptyList())
+        holder.recyclerViewCarouselButton.adapter = carouselAdapter
 
     }
 
