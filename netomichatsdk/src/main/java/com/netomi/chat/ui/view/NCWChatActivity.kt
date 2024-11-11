@@ -42,6 +42,7 @@ import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
+import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
 import com.netomi.chat.utils.NCWAppConstant.TYPE_CAROUSEL
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.Routes
@@ -249,17 +250,11 @@ class NCWChatActivity : AppCompatActivity() {
         }
 
         chatViewModel.sendMessages.observe(this, Observer { message ->
-            messageList.add(message) // Add the new message to the list
-            messageAdapter.notifyDataSetChanged() // Notify the adapter to refresh the view
-            chatRecyclerView.scrollToPosition(messageList.size - 1) // Scroll to the latest message
-        })
-
-
-        chatViewModel.awsMessage.observe(this, Observer {
-            // Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-        })
             updateMessageList(message)
         })
+
+
+
 
 
         chatViewModel.awsMessage.observe(this, Observer { jsonMessage ->
@@ -337,7 +332,7 @@ class NCWChatActivity : AppCompatActivity() {
                     }
                 } ?: emptyList()
 
-// Update message list with new messages if any
+            // Update message list with new messages if any
                 if (newMessages.isNotEmpty()) {
                     updateMessageList(newMessages)
                 }
@@ -352,14 +347,14 @@ class NCWChatActivity : AppCompatActivity() {
     private fun updateMessageList(newMessages: List<NCWMessage>) {
         messageList.addAll(newMessages)
         messageAdapter.notifyDataSetChanged()
-        recyclerView.scrollToPosition(messageList.size - 1)
+        chatRecyclerView.scrollToPosition(messageList.size - 1)
     }
 
     // Overloaded helper function for a single message
     private fun updateMessageList(newMessage: NCWMessage) {
         messageList.add(newMessage)
         messageAdapter.notifyDataSetChanged()
-        recyclerView.scrollToPosition(messageList.size - 1)
+        chatRecyclerView.scrollToPosition(messageList.size - 1)
     }
 
 
@@ -545,7 +540,7 @@ class NCWChatActivity : AppCompatActivity() {
         )
         ncwAwsCredentialsViewModel.saveAwsCredentials(newCredentials)
 
-        val topic="chat_widget/$botRefId/$conversationID"
+        val topic="$CHAT_WIDGET/$botRefId/$conversationID"
         ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel,topic)
 
     }
