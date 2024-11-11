@@ -112,7 +112,7 @@ class NCWChatActivity : AppCompatActivity() {
         observeChatMessages()
         loadInitialMessages()
 
-        val botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
+        botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         chatViewModel.getConversationId(botRefId)
         chatViewModel.getAWSMQTTCredentials(botRefId)
 
@@ -541,6 +541,7 @@ class NCWChatActivity : AppCompatActivity() {
         ncwAwsCredentialsViewModel.saveAwsCredentials(newCredentials)
 
         val topic="$CHAT_WIDGET/$botRefId/$conversationID"
+        Log.e("Connect","ss"+topic)
         ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel,topic)
 
     }
