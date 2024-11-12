@@ -112,7 +112,7 @@ class NCWChatActivity : AppCompatActivity() {
         observeChatMessages()
         loadInitialMessages()
 
-        val botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
+        botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         chatViewModel.getConversationId(botRefId)
         chatViewModel.getAWSMQTTCredentials(botRefId)
 
@@ -129,7 +129,8 @@ class NCWChatActivity : AppCompatActivity() {
      * posts the message to the chat system.
      */
     private fun sendMessage() {
-        val messageContent = messageInputField.text.toString()
+       val messageContent = messageInputField.text.toString()
+       // val messageContent="custom node 1"
         if (messageContent.isNotEmpty()) {
             val messageId = UUID.randomUUID().toString()
             val payload = WebhookPayload(
@@ -304,7 +305,7 @@ class NCWChatActivity : AppCompatActivity() {
                 // Process each attachment and convert it into NCWMessage if valid
                 val newMessages = response.attachments?.mapNotNull { attachment ->
                     val messageType = attachment?.attachment?.type?.let { MessageType.fromTypeName(it) }
-
+                    Log.e("Videeee","messageType"+messageType)
                     when (messageType) {
                         MessageType.CAROUSEL -> {
                             // For carousel type, map the elements and buttons into NCWMessages
@@ -313,10 +314,44 @@ class NCWChatActivity : AppCompatActivity() {
                                     sender = "BOT",
                                     type = messageType,
                                     timestamp = System.currentTimeMillis(),
-                                    carouselItems = carouselAttachment.elements // Attach carousel items
+                                    carouselItems = carouselAttachment.elements ,// Attach carousel items
+                              quickReply = carouselAttachment.quickReply
                                 )
                             }
                         }
+
+                        MessageType.VIDEO -> {
+                            Log.e("Videeee","MessageType.VIDEO ")
+                            messageType?.let { type ->
+                                NCWMessage(
+                                    sender = "BOT",
+                                    type = type,
+                                    timestamp = System.currentTimeMillis(),
+                                    thumbnailUrl = attachment.attachment.thumbnailUrl,
+                                    quickReply = attachment.attachment.quickReply
+                                )
+                            }
+
+
+                        }
+
+                        MessageType.CARD -> {
+                            Log.e("Videeee","MessageType.Card ")
+                            messageType?.let { type ->
+                                NCWMessage(
+                                    sender = "BOT",
+                                    type = type,
+                                    timestamp = System.currentTimeMillis(),
+                                    title =  attachment.attachment.title,
+                                    message = attachment.attachment?.text,
+                                    buttons = attachment.attachment.buttons,
+                                    quickReply = attachment.attachment.quickReply
+                                )
+                            }
+
+
+                        }
+
                         else -> {
                             // For other types (e.g., TEXT, IMAGE), create regular NCWMessages
                             messageType?.let { type ->
@@ -325,7 +360,8 @@ class NCWChatActivity : AppCompatActivity() {
                                     type = type,
                                     message = attachment.attachment?.text,
                                     timestamp = System.currentTimeMillis(),
-                                    largeImageUrl = attachment.attachment?.largeImageUrl
+                                    largeImageUrl = attachment.attachment?.largeImageUrl,
+                                            quickReply = attachment.attachment.quickReply
                                 )
                             }
                         }
@@ -334,6 +370,7 @@ class NCWChatActivity : AppCompatActivity() {
 
             // Update message list with new messages if any
                 if (newMessages.isNotEmpty()) {
+                    Log.e("Videeee"," MessageType yoo ")
                     updateMessageList(newMessages)
                 }
 
@@ -541,6 +578,7 @@ class NCWChatActivity : AppCompatActivity() {
         ncwAwsCredentialsViewModel.saveAwsCredentials(newCredentials)
 
         val topic="$CHAT_WIDGET/$botRefId/$conversationID"
+        Log.e("Topicj","sss "+topic)
         ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel,topic)
 
     }
