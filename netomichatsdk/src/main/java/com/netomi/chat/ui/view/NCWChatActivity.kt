@@ -112,7 +112,7 @@ class NCWChatActivity : AppCompatActivity() {
         observeChatMessages()
         loadInitialMessages()
 
-        val botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
+        botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         chatViewModel.getConversationId(botRefId)
         //chatViewModel.getAWSMQTTCredentials(botRefId)
 
