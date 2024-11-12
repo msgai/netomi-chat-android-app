@@ -75,6 +75,7 @@ object NCWAwsIotManager {
                 AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus.Reconnecting ->{
                     connectionStatus = 3
                     Log.d("IoT", "Reconnecting to AWS IoT...")
+                    chatViewModel.getAWSMQTTCredentials("")
                 }
 
                 else -> Log.e("IoT", "Unknown connection status: $status")
