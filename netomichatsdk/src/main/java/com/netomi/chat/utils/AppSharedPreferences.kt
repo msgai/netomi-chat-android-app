@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 
 class AppSharedPreferences (context: Context) {
 
-    val sharedPreferences: SharedPreferences = context.getSharedPreferences(
+    private val sharedPreferences: SharedPreferences = context.getSharedPreferences(
         "NETOMI_SDK",
         Context.MODE_PRIVATE
     )
