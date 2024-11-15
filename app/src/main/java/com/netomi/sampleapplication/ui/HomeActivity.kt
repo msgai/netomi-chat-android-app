@@ -1,12 +1,15 @@
 package com.netomi.sampleapplication.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
 import com.netomi.sampleapplication.R
+import com.netomi.sampleapplication.utils.AppSharedPreferences
 
 class HomeActivity : AppCompatActivity() {
 
@@ -14,7 +17,8 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navView: NavigationView
     private lateinit var ivMenu: ImageView
-
+    private lateinit var logout: AppCompatTextView
+    private lateinit var preferences :AppSharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)  // Set the layout for this activity
@@ -26,12 +30,20 @@ class HomeActivity : AppCompatActivity() {
         ivMenu.setOnClickListener {
             drawerLayout.openDrawer(navView)  // Open the navigation drawer when the menu icon is clicked
         }
+        logout.setOnClickListener {
+            preferences.clearSharedPreference()
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finishAffinity()
+        }
     }
 
     // Initialize the views
     private fun initializeViews() {
+        preferences = AppSharedPreferences(this)
         drawerLayout = findViewById(R.id.drawerLayout)  // Find DrawerLayout by ID
         ivMenu = findViewById(R.id.ivMenu)  // Find the ImageView for the menu icon
         navView = findViewById(R.id.navView)  // Find the NavigationView for the drawer content
+        logout = findViewById(R.id.logout)  // Find the NavigationView for the drawer content
     }
 }

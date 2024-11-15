@@ -23,6 +23,8 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.netomi.sampleapplication.R
+import com.netomi.sampleapplication.constant.SharePreferenceConstant
+import com.netomi.sampleapplication.utils.AppSharedPreferences
 
 class LoginActivity : AppCompatActivity() {
 
@@ -44,9 +46,11 @@ class LoginActivity : AppCompatActivity() {
     private val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
     private val passwordPattern = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@\$!%*?&])[A-Za-z\\d@\$!%*?&]{8,}$"
 
+    private lateinit var preferences :AppSharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        preferences = AppSharedPreferences(this)
         setContentView(R.layout.activity_login)
 
         initViews() // Initialize all views
@@ -71,7 +75,10 @@ class LoginActivity : AppCompatActivity() {
         passwordToggle = findViewById(R.id.passwordToggle)
 
         // Set login button click listener
-        loginButton.setOnClickListener { startActivity(Intent(this, HomeActivity::class.java)) }
+        loginButton.setOnClickListener {
+            preferences.setBoolean(SharePreferenceConstant.LOGIN,true)
+            startActivity(Intent(this, HomeActivity::class.java))
+        }
     }
 
     // Set focus change listeners to update the background based on focus state

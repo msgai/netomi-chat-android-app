@@ -99,5 +99,27 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/header_layout"
-        app:menu="@menu/drawer"/>
+        app:menu="@menu/drawer">
+
+        <!-- Footer View -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="bottom"
+            android:padding="16dp">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/logout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/logout"
+                android:textSize="16sp"
+                android:textColor="@color/red"
+                android:fontFamily="@font/proxima_nova_alt_bold"
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:gravity="start"
+                android:padding="16dp" />
+        </LinearLayout>
+    </com.google.android.material.navigation.NavigationView>
 </androidx.drawerlayout.widget.DrawerLayout>
