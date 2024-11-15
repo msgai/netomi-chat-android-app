@@ -50,9 +50,16 @@ dependencies {
     implementation(project(":netomichatsdk"))
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.retrofit)
+    implementation(libs.okhttp)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp.logging.interceptor)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+
+
     //Dagger
     //implementation (libs.dagger.hilt)
     //kapt(libs.dagger.kapt)

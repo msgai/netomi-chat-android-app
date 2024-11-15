@@ -19,6 +19,23 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_end="32dp" />
 
+    <!-- Guidelines for vertical margins -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="20dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_end"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="20dp" />
+
+
+
     <!-- Logo -->
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/logoImageView"
@@ -50,48 +67,55 @@
         android:id="@+id/emailLabelTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
         android:fontFamily="@font/proxima_nova_alt_bold"
         android:text="@string/email"
         android:textColor="@android:color/black"
         android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@id/guideline_start"
         app:layout_constraintTop_toBottomOf="@id/loginTextView" />
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/emailTextInputLayout"
         android:layout_width="0dp"
         android:layout_height="54dp"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
         android:background="@drawable/rounded_edittext_background"
-        android:hint="@string/email"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/guideline_end"
+        app:layout_constraintStart_toStartOf="@id/guideline_start"
         app:layout_constraintTop_toBottomOf="@id/emailLabelTextView">
 
+        <!-- Email Icon -->
         <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/emailIcon"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_gravity="center"
             android:layout_marginStart="10dp"
-            android:src="@drawable/ic_email" />
+            android:src="@drawable/ic_email"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
+        <!-- Email EditText -->
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/emailEditText"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
-            android:layout_weight="1"
             android:background="@android:color/transparent"
             android:gravity="center|start"
             android:hint="@string/enter_your_email"
             android:inputType="textEmailAddress"
-            android:textColorHint="@color/charcoal_blue_50" />
-    </LinearLayout>
+            android:fontFamily="@font/proxima_nova_regular"
+            android:textColorHint="@color/charcoal_blue_50"
+            android:textSize="14sp"
+            app:layout_constraintStart_toEndOf="@id/emailIcon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/emailValidTextview"
@@ -111,49 +135,67 @@
         android:id="@+id/passwordLabelTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:fontFamily="@font/proxima_nova_alt_bold"
         android:text="@string/password"
         android:textColor="@android:color/black"
         android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@id/guideline_start"
         app:layout_constraintTop_toBottomOf="@id/emailValidTextview" />
 
-    <!-- Password Text Field -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/passwordTextInputLayout"
         android:layout_width="0dp"
         android:layout_height="54dp"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
         android:background="@drawable/rounded_edittext_background"
-        android:hint="@string/email"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/guideline_end"
+        app:layout_constraintStart_toStartOf="@id/guideline_start"
         app:layout_constraintTop_toBottomOf="@id/passwordLabelTextView">
 
+        <!-- Password Icon -->
         <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/passwordIcon"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_gravity="center"
             android:layout_marginStart="10dp"
-            android:src="@drawable/ic_password" />
+            android:src="@drawable/ic_password"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- Password EditText -->
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/passwordEditText"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
-            android:layout_weight="1"
             android:background="@android:color/transparent"
             android:gravity="center|start"
             android:hint="@string/enter_your_password"
+            android:textSize="14sp"
             android:inputType="textPassword"
-            android:textColorHint="@color/charcoal_blue_50" />
-    </LinearLayout>
+            android:fontFamily="@font/proxima_nova_regular"
+            android:textColorHint="@color/charcoal_blue_50"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/passwordToggle"
+            app:layout_constraintStart_toEndOf="@id/passwordIcon"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Password Toggle Icon -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/passwordToggle"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="10dp"
+            android:contentDescription="@string/password"
+            android:src="@drawable/ic_eye_hide"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/passwordValidTextview"
@@ -174,12 +216,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
         android:fontFamily="@font/proxima_nova_regular"
         android:text="@string/forgot_password"
         android:textColor="@color/charcoal_blue"
         android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/guideline_end"
         app:layout_constraintTop_toBottomOf="@id/passwordValidTextview" />
 
     <!-- Login Button -->
@@ -187,26 +228,26 @@
         android:id="@+id/loginButton"
         android:layout_width="0dp"
         android:layout_height="54dp"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
         android:background="@drawable/button_gradient"
         android:text="@string/login"
+        android:fontFamily="@font/proxima_nova_alt_bold"
         android:textColor="@android:color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/guideline_end"
+        app:layout_constraintStart_toStartOf="@id/guideline_start"
         app:layout_constraintTop_toBottomOf="@id/forgotPasswordTextView" />
 
     <!-- Signup Text -->
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/signupTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="1dp"
+        android:layout_height="12dp"
         android:layout_marginTop="16dp"
+        android:fontFamily="@font/proxima_nova_alt_bold"
         android:textColor="@color/charcoal_blue"
         android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/guideline_end"
+        app:layout_constraintStart_toStartOf="@id/guideline_start"
         app:layout_constraintTop_toBottomOf="@id/loginButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
