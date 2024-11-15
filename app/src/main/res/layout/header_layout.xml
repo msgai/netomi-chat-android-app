@@ -26,8 +26,8 @@
         android:textColor="@color/gray_black"
         android:textSize="18sp"
         android:layout_marginStart="10dp"
+        android:fontFamily="@font/proxima_nova_bold"
         app:layout_constraintStart_toEndOf="@+id/profile_image"
         app:layout_constraintTop_toTopOf="@id/profile_image"
-        app:layout_constraintBottom_toBottomOf="@+id/profile_image"
-        android:textStyle="bold"/>
+        app:layout_constraintBottom_toBottomOf="@+id/profile_image" />
 </androidx.constraintlayout.widget.ConstraintLayout>
