@@ -240,12 +240,14 @@
     <!-- Signup Text -->
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/signupTextView"
-        android:layout_width="1dp"
-        android:layout_height="12dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:fontFamily="@font/proxima_nova_alt_bold"
+        android:fontFamily="@font/proxima_nova_regular"
         android:textColor="@color/charcoal_blue"
         android:textSize="14sp"
+        android:text="amama"
+        android:gravity="center"
         app:layout_constraintEnd_toEndOf="@id/guideline_end"
         app:layout_constraintStart_toStartOf="@id/guideline_start"
         app:layout_constraintTop_toBottomOf="@id/loginButton" />
