@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -119,7 +118,6 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         chatViewModel.getConversationId(botRefId)
-        //chatViewModel.getAWSMQTTCredentials(botRefId)
 
         sendMessageIcon.setOnClickListener { sendMessage() }
         attachmentIcon.setOnClickListener { requestPermissionsAndShowMediaOptions() }
