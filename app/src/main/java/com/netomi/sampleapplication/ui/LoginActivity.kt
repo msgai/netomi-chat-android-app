@@ -23,6 +23,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.netomi.sampleapplication.R
+import com.netomi.sampleapplication.constant.AppConstant
 import com.netomi.sampleapplication.constant.SharePreferenceConstant
 import com.netomi.sampleapplication.utils.AppSharedPreferences
 
@@ -43,8 +44,7 @@ class LoginActivity : AppCompatActivity() {
     private var emailValidB = false
     private var passwordValidB = false
 
-    private val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
-    private val passwordPattern = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@\$!%*?&])[A-Za-z\\d@\$!%*?&]{8,}$"
+
 
     private lateinit var preferences :AppSharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -114,7 +114,7 @@ class LoginActivity : AppCompatActivity() {
 
     // Validate email format and update UI accordingly
     private fun validateEmail() {
-        emailValidB = emailEditText.text.toString().matches(emailPattern.toRegex())
+        emailValidB = emailEditText.text.toString().matches(AppConstant.emailPattern.toRegex())
         emailValid.visibility = if (emailValidB) View.GONE else View.VISIBLE
         emailValid.text = if (emailValidB) "" else getString(R.string.invalid_email_format)
         emailTextInputLayout.setBackgroundResource(
@@ -126,7 +126,7 @@ class LoginActivity : AppCompatActivity() {
 
     // Validate password format and update UI accordingly
     private fun validatePassword() {
-        passwordValidB = passwordEditText.text.toString().matches(passwordPattern.toRegex())
+        passwordValidB = passwordEditText.text.toString().matches(AppConstant.passwordPattern.toRegex())
         passwordValid.visibility = if (passwordValidB) View.GONE else View.VISIBLE
         passwordValid.text = if (passwordValidB) "" else getString(R.string.enter_valid_password)
         passwordTextInputLayout.setBackgroundResource(
@@ -160,12 +160,13 @@ class LoginActivity : AppCompatActivity() {
 
     // Set up the clickable "Create account" text
     private fun spannableString() {
-        val text = "Don’t have an account? Create account"
+        val text = getString(R.string.don_t_have_an_account_create_account)
         val spannableString = SpannableString(text)
 
         val clickableSpan = object : ClickableSpan() {
             override fun onClick(widget: View) {
-                Toast.makeText(this@LoginActivity, "Create Account Clicked", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity,
+                    getString(R.string.create_account_clicked), Toast.LENGTH_SHORT).show()
             }
 
             // Remove underline and set custom color for the clickable text

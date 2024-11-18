@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit
  */
 object AppRetrofitClient {
 
-    private val BASE_URL = "https://chatapps-qa.netomi.com"
+    private val BASE_URL = "https://www.google.com/"
 
 
 
