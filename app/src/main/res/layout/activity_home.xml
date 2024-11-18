@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!-- Main content -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <!-- Your main content here -->
+
+        <!-- Header with menu, logo, text, and cross icon -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constHeader"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:padding="10dp"
+            android:background="@color/white"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/ivMenu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_menu"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <TextView
+                android:id="@+id/tvHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="Welcome"
+                android:textColor="@color/gray_black"
+                android:textSize="14sp"
+                android:fontFamily="@font/proxima_nova_regular"
+                app:layout_constraintStart_toEndOf="@+id/ivMenu"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvHeaderOne"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="John Doe"
+                android:fontFamily="@font/proxima_nova_bold"
+                android:textColor="@color/gray_black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toEndOf="@+id/ivMenu"
+                app:layout_constraintTop_toBottomOf="@+id/tvHeader" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/netomiChat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true"
+            android:textSize="30sp"
+            android:textColor="@color/charcoal_blue"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="Netomi Chat AI"
+            android:layout_marginTop="150dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:alpha="0.4"
+            />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imgBot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_background"
+            app:layout_constraintTop_toBottomOf="@+id/netomiChat" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:layout_margin="40dp"
+            android:background="@drawable/float_button_gradient"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:src="@drawable/ic_chat"
+            android:layout_width="48dp"
+            android:layout_height="48dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Navigation View -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navView"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/header_layout"
+        app:menu="@menu/drawer">
+
+        <!-- Footer View -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="bottom"
+            android:padding="16dp">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/logout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/logout"
+                android:textSize="16sp"
+                android:textColor="@color/red"
+                android:fontFamily="@font/proxima_nova_alt_bold"
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:gravity="start"
+                android:padding="16dp" />
+        </LinearLayout>
+    </com.google.android.material.navigation.NavigationView>
+</androidx.drawerlayout.widget.DrawerLayout>
