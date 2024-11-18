@@ -83,6 +83,7 @@
             app:layout_constraintTop_toBottomOf="@+id/netomiChat" />
 
         <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/img_chat"
             android:layout_margin="40dp"
             android:background="@drawable/float_button_gradient"
             app:layout_constraintEnd_toEndOf="parent"
