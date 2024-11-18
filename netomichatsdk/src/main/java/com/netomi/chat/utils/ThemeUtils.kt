@@ -1,6 +1,9 @@
 package com.netomi.chat.utils
 
+import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -9,13 +12,27 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.bumptech.glide.Glide
 import com.netomi.chat.model.theme.ThemeResponse
 
-object ThemeUtils {
+object ThemeUtils
+{
 
-    fun applyTheme(themeResponse: ThemeResponse?, view: View) {
-        themeResponse?.let { theme ->
+    private var themeData: ThemeResponse? = null
+
+    // Set theme data globally
+    fun setThemeData(themeResponse: ThemeResponse) {
+        themeData = themeResponse
+    }
+    fun getThemeData():ThemeResponse?{
+        return themeData
+    }
+
+
+
+    fun applyTheme(view: View) {
+        themeData?.let { theme ->
 
             when (view) {
                 is ConstraintLayout -> {
+                    Log.e("ThemeVolor","sasasas"+ theme.theme?.color)
                     theme.theme?.color?.takeIf { color -> color.isNotEmpty() }?.let { color ->
                         view.setBackgroundColor(parseColor(color))
                     }
@@ -33,17 +50,15 @@ object ThemeUtils {
                     theme.title?.let { title ->
                         view.text = title
                     }
-                    // Add more Button-specific theme settings here
+
                 }
 
                 is ImageView -> {
                     theme.logoImage?.let { logoUrl ->
                         loadImageIntoView(view, logoUrl)
                     }
-                    // Add more ImageView-specific theme settings here
                 }
 
-                // Handle other view types as needed
                 else -> {
 
                 }
@@ -70,6 +85,68 @@ object ThemeUtils {
             Color.BLACK // default fallback color
         }
     }
+
+    /**
+     * Creates a gradient drawable based on the theme configuration.
+     * @param theme The theme settings with gradient configuration.
+     * @return A GradientDrawable with specified direction and colors.
+     */
+    fun createGradientDrawable(theme: ThemeResponse): GradientDrawable? {
+        val direction = GradientDrawable.Orientation.values()
+            .getOrElse(theme.theme?.gradientDirection ?: 0) { GradientDrawable.Orientation.LEFT_RIGHT }
+        val gradientColors = theme.theme?.gradientColors?.map { Color.parseColor(it) }?.toIntArray()
+        return gradientColors?.let { GradientDrawable(direction, it) }
+    }
+
+
+
+
+    /**
+     * Set dynamic tint color and background for an ImageView.
+     *
+     * @param imageView The ImageView to apply the tint and background to.
+     * @param color The color to set for the tint and background.
+     * @param isCircularBackground Boolean flag to determine if the background should be circular.
+     */
+    fun applyBackgroundAndTint(imageView: ImageView, color: String, isCircularBackground: Boolean) {
+
+        val parsedColor = Color.parseColor(color)
+
+        if (isCircularBackground) {
+            val drawable = GradientDrawable()
+            drawable.shape = GradientDrawable.OVAL  // Circular shape
+            drawable.setColor(parsedColor)  // Set the background color
+            drawable.cornerRadius = 50f  // Adjust the corner radius for rounded effect
+            imageView.background = drawable
+        } else {
+            imageView.imageTintList = ColorStateList.valueOf(parsedColor)
+        }
+    }
+
+    /**
+     * Applies a customizable GradientDrawable background to a TextView.
+     *
+     * @param textView The TextView to apply the background to.
+     * @param color The background color in hex format (e.g., "#4D39E9"). Defaults to "#4D39E9" if null.
+     * @param cornerRadii Array of corner radii in the order of top-left, top-right, bottom-right, and bottom-left.
+     */
+    fun applyBackgroundWithCorners(
+        textView: TextView,
+        color: String?,
+        cornerRadii: FloatArray = floatArrayOf(10f, 10f, 10f, 10f, 10f, 10f, 10f, 10f)
+    ) {
+        val parsedColor = Color.parseColor(color ?: "#374E57") // Default color if null
+        val backgroundDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            this.cornerRadii = cornerRadii
+            setColor(parsedColor)
+        }
+
+        textView.background = backgroundDrawable
+    }
+
+
+
 
     // Function to load an image into ImageView (e.g., using Glide or Coil)
     private fun loadImageIntoView(imageView: ImageView, imageUrl: String) {

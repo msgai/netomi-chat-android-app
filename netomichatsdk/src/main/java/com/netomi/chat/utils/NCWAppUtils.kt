@@ -7,6 +7,10 @@ import android.text.Html
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.netomi.chat.utils.NCWAppConstant.TIME_AM_PM
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 object NCWAppUtils {
@@ -25,6 +29,11 @@ object NCWAppUtils {
         inputMethodManager.showSoftInput(context.currentFocus, InputMethodManager.SHOW_IMPLICIT)
     }
 
+    fun formatTimestampToTime(timestamp: Long): String {
+        val dateFormat = SimpleDateFormat(TIME_AM_PM, Locale.getDefault())
+        val date = Date(timestamp)
+        return dateFormat.format(date)
+    }
     fun setHtmText(html:String,txtView:TextView){
 
         txtView.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
