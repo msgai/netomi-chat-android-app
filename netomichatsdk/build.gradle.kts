@@ -49,10 +49,12 @@ dependencies {
     implementation ("androidx.core:core-ktx:1.13.1")
     implementation ("androidx.appcompat:appcompat:1.7.0")
     implementation ("com.google.android.material:material:1.12.0")
+    // Unit Test cases
     testImplementation ("junit:junit:4.13.2")
     androidTestImplementation ("androidx.test.ext:junit:1.1.5")
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.6.1")
-
+    testImplementation ("org.mockito:mockito-core:2.28.2")
+    androidTestImplementation ("org.mockito:mockito-android:2.24.5")
 
     // ViewModel and LiveData
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")

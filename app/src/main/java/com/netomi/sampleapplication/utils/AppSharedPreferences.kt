@@ -1,4 +1,4 @@
-package com.netomi.chat.utils
+package com.netomi.sampleapplication.utils
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -6,7 +6,7 @@ import android.content.SharedPreferences
 class AppSharedPreferences (context: Context) {
 
     private val sharedPreferences: SharedPreferences = context.getSharedPreferences(
-        "NETOMI_SDK",
+        "APP_SAMPLE",
         Context.MODE_PRIVATE
     )
 

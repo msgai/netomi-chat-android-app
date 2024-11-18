@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -118,7 +119,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         chatViewModel.getConversationId(botRefId)
-        chatViewModel.getAWSMQTTCredentials(botRefId)
+        //chatViewModel.getAWSMQTTCredentials(botRefId)
 
         sendMessageIcon.setOnClickListener { sendMessage() }
         attachmentIcon.setOnClickListener { requestPermissionsAndShowMediaOptions() }
@@ -546,7 +547,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                     "MQTTCredentialsResponse",
                     "Fetched MQTTCredentialsResponse: ${mqttsCredentials.credentials.accessKeyId}"
                 )
-                SaveAwsCredentials(mqttsCredentials.credentials)
+                saveAwsCredentials(mqttsCredentials.credentials)
             }
 
             Routes.ROUTE_SEND_CHAT -> {
@@ -565,7 +566,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     /**
      * Save Aws Credentials in data store
      */
-    private fun SaveAwsCredentials(mqttsCredentials: Credentials) {
+    private fun saveAwsCredentials(mqttsCredentials: Credentials) {
         // Save new credentials (example usage)
         val newCredentials = NCWAwsCredentials(
             accessKey = mqttsCredentials.accessKeyId,
@@ -573,14 +574,10 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             sessionToken = mqttsCredentials.SessionToken,
             iotEndpoint = mqttsCredentials.IoTHostEndPoint
         )
-
         ncwAwsCredentialsViewModel.saveAwsCredentials(newCredentials)
 
-        val topic="$CHAT_WIDGET/$botRefId/$conversationID"
-        Log.e("Topic","sss "+topic)
-        ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel,topic)
+        val topic = "$CHAT_WIDGET/$botRefId/$conversationID"
+        ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)
 
     }
-
-
 }
