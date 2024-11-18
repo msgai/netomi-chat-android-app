@@ -32,6 +32,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var emailEditText: AppCompatEditText
     private lateinit var passwordEditText: AppCompatEditText
     private lateinit var signupTextView: AppCompatTextView
+    private lateinit var createAccount: AppCompatTextView
     private lateinit var forgotPasswordTextView: AppCompatTextView
     private lateinit var emailValid: AppCompatTextView
     private lateinit var passwordValid: AppCompatTextView
@@ -44,8 +45,6 @@ class LoginActivity : AppCompatActivity() {
     private var emailValidB = false
     private var passwordValidB = false
 
-
-
     private lateinit var preferences :AppSharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,12 +56,12 @@ class LoginActivity : AppCompatActivity() {
         setupFocusListeners() // Set up focus listeners for email and password fields
         setupTextWatchers() // Set up text watchers for validation
         setupPasswordToggle() // Set up password visibility toggle
-        spannableString() // Set up the clickable "Create account" text
         enableButton() // Enable/disable login button based on validations
     }
 
     // Initialize all the views
     private fun initViews() {
+        createAccount = findViewById(R.id.createAccount)
         signupTextView = findViewById(R.id.signupTextView)
         forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView)
         emailValid = findViewById(R.id.emailValidTextview)
@@ -78,6 +77,12 @@ class LoginActivity : AppCompatActivity() {
         loginButton.setOnClickListener {
             preferences.setBoolean(SharePreferenceConstant.LOGIN,true)
             startActivity(Intent(this, HomeActivity::class.java))
+            finishAffinity()
+        }
+
+        createAccount.setOnClickListener {
+            startActivity(Intent(this, SignupActivity::class.java))
+            finishAffinity()
         }
     }
 

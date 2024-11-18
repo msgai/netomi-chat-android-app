@@ -18,6 +18,9 @@ package com.netomi.sampleapplication.constant
 object AppConstant {
     val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
     val passwordPattern = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@\$!%*?&])[A-Za-z\\d@\$!%*?&]{8,}$"
+    val phonePattern = "^\\+?[0-9]{10,13}\$" // Example for international phone numbers
+
+
 
 
 }
