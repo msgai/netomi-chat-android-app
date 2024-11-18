@@ -7,38 +7,63 @@
     android:layout_margin="8dp"
     app:cardCornerRadius="5dp"
     app:cardElevation="4dp"
-
-    app:cardBackgroundColor="@android:color/white">
+    app:cardBackgroundColor="#FFFFFF">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="7dp"
 
         >
 
-        <!-- Image -->
-        <ImageView
-            android:id="@+id/imgCarousel"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardCarousel"
             android:layout_width="0dp"
             android:layout_height="150dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_dots"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="5dp"
+            app:cardElevation="4dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent">
 
+            <ImageView
+                android:id="@+id/imgCarousel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:adjustViewBounds="true" />
+        </androidx.cardview.widget.CardView>
+
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="5dp"
+            app:cardElevation="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardCarousel"
+
+          >
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:padding="10dp"
+                android:layout_height="wrap_content">
    
         <TextView
             android:id="@+id/tvHeading"
             android:layout_width="0dp"
             android:layout_marginStart="5dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+
             android:text="Carousel Heading"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
-            app:layout_constraintTop_toBottomOf="@id/imgCarousel"
+          app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
@@ -51,33 +76,26 @@
             android:layout_marginTop="4dp"
             android:text="This is a detail description for the carousel item."
             android:textSize="14sp"
-android:layout_marginBottom="10dp"
-            app:layout_constraintBottom_toTopOf="@+id/viewLine"
             android:textColor="@android:color/darker_gray"
             app:layout_constraintTop_toBottomOf="@id/tvHeading"
             app:layout_constraintStart_toStartOf="@+id/tvHeading"
             app:layout_constraintEnd_toEndOf="parent" />
 
 
-        <View
-            android:id="@+id/viewLine"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
 
-            android:background="@android:color/darker_gray"
-            app:layout_constraintBottom_toTopOf="@+id/recyclerViewCarouselButton" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.cardview.widget.CardView>
+
 
         <!-- RecyclerView for carousel button -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewCarouselButton"
+            android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-android:minHeight="60dp"
-
            android:scrollbars="vertical"
-           app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintTop_toBottomOf="@+id/cardDesc"
 
 
        />

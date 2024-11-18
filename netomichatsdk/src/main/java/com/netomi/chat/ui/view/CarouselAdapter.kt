@@ -35,15 +35,15 @@ class CarouselAdapter(private val items: List<CarouselElement>) : RecyclerView.A
         holder.tvHeading.text = item.title
         holder.tvDetail.text = item.subtitle
         Glide.with(holder.itemView.context).load(item.imageUrl).into(holder.imgCarousel)
-       // holder.recyclerViewCarouselButton.layoutManager = LinearLayoutManager(holder.itemView.context, LinearLayoutManager.VERTICAL, false)
-        holder.recyclerViewCarouselButton.layoutManager = LinearLayoutManager(holder.itemView.context).apply {
+      holder.recyclerViewCarouselButton.layoutManager = LinearLayoutManager(holder.itemView.context, LinearLayoutManager.VERTICAL, false)
+       /* holder.recyclerViewCarouselButton.layoutManager = LinearLayoutManager(holder.itemView.context).apply {
             stackFromEnd = true
            // reverseLayout = true
-        }
+        }*/
         val carouselAdapter = CarouselButtonAdapter(item.buttons ?: emptyList())
         holder.recyclerViewCarouselButton.adapter = carouselAdapter
         holder.recyclerViewCarouselButton.setHasFixedSize(true)
-        val colorHex = "#E6E6E6"  // replace with your dynamic color as needed
+       /* val colorHex = "#E6E6E6"  // replace with your dynamic color as needed
         val colorDrawable = ColorDrawable(Color.parseColor(colorHex))
 
 
@@ -51,7 +51,7 @@ class CarouselAdapter(private val items: List<CarouselElement>) : RecyclerView.A
         if (holder.recyclerViewCarouselButton.itemDecorationCount == 0) {
             val customDivider = CustomDividerItemDecoration(colorDrawable)
             holder.recyclerViewCarouselButton.addItemDecoration(customDivider)
-        }
+        }*/
 //        // Measure and set minimum height based on 3 buttons
 //        val maxButtonsHeight = calculateMaxButtonsHeight(holder.itemView.context)
 //        holder.itemView.minimumHeight = maxButtonsHeight

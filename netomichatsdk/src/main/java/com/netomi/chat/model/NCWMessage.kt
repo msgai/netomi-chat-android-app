@@ -17,7 +17,8 @@ data class NCWMessage(
     val quickReply: QuickReply? = null,
     val thumbnailUrl: String? = null,
     val title: String? = null,
-    var buttons : ArrayList<Buttons> = arrayListOf()
+    var buttons : ArrayList<Buttons> = arrayListOf(),
+    var isSameTimeMessage :Boolean=true
 )
 
 enum class MessageType(val typeName: String) {

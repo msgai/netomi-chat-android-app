@@ -56,8 +56,8 @@ data class QuickReply(
 )
 
 data class QuickReplyOption(
-    val label: String? = null,
-    val description: String? = null,
+    var label: String? = null,
+    var description: String? = null,
     val metadata: String? = null,
     val contentType: String? = null
 )
