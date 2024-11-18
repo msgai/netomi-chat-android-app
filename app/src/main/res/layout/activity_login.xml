@@ -196,7 +196,6 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/passwordValidTextview"
         android:layout_width="wrap_content"
@@ -240,16 +239,35 @@
     <!-- Signup Text -->
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/signupTextView"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:fontFamily="@font/proxima_nova_regular"
         android:textColor="@color/charcoal_blue"
         android:textSize="14sp"
-        android:text="amama"
+        android:text="@string/don_t_have_an_account_create_account"
         android:gravity="center"
-        app:layout_constraintEnd_toEndOf="@id/guideline_end"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintEnd_toStartOf="@+id/createAccount"
         app:layout_constraintStart_toStartOf="@id/guideline_start"
         app:layout_constraintTop_toBottomOf="@id/loginButton" />
+
+    <!-- Create Account Text -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/createAccount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/proxima_nova_alt_bold"
+        android:textColor="@color/charcoal_blue"
+        android:layout_marginStart="5dp"
+        android:textSize="14sp"
+        android:text="@string/create_account"
+        android:gravity="center"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintEnd_toEndOf="@id/guideline_end"
+        app:layout_constraintStart_toEndOf="@id/signupTextView"
+        app:layout_constraintTop_toTopOf="@id/signupTextView"
+        app:layout_constraintBottom_toBottomOf="@id/signupTextView" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
