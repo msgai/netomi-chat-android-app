@@ -273,7 +273,6 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         messageList.removeAt(position)
         onQuickReplyClicked(option)
 
-      //  messageAdapter.removeItem(position)
     }
 
     override fun onImageClick(imageUrl: String) {

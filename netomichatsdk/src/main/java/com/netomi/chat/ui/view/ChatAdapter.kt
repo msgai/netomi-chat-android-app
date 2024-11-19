@@ -183,6 +183,7 @@ class ChatAdapter(
             chipGroup.visibility = View.GONE
             cardViewCard.visibility = View.GONE
             cardVideo.visibility = View.GONE
+            chipRecyclerViewGroup.visibility = View.GONE
             tvTime.text=NCWAppUtils.formatTimestampToTime(message.timestamp)
             imgBot.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.INVISIBLE
             tvTime.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.GONE
