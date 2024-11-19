@@ -18,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -133,7 +134,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private fun sendMessage() {
         val messageContent = messageInputField.text.toString()
         if (messageContent.isNotEmpty()) {
-            val payload = createPayload(messageContent, "Option 1")
+            val payload = createPayload(messageContent, messageContent)
             chatViewModel.sendMessage(messageContent)
             chatViewModel.sendMessageAPI(payload)
             messageInputField.text.clear()
@@ -214,6 +215,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             // Apply gradient or default color to headerContainer
             theme.theme?.color?.takeIf { it.isNotEmpty() }?.let { color ->
                 window.statusBarColor = Color.parseColor(color)
+            } ?: run {
+                window.statusBarColor = ContextCompat.getColor(this, android.R.color.holo_blue_dark)
             }
             if (theme.theme?.gradient == true) {
                 headerContainer.background = ThemeUtils.createGradientDrawable(theme)
@@ -267,9 +270,10 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         chatRecyclerView.adapter = messageAdapter
     }
     override fun onQuickReply(option: QuickReplyOption?, position: Int) {
-
+        messageList.removeAt(position)
         onQuickReplyClicked(option)
-        messageAdapter.removeItem(position)
+
+      //  messageAdapter.removeItem(position)
     }
 
     override fun onImageClick(imageUrl: String) {

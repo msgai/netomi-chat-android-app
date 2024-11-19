@@ -72,13 +72,6 @@ class ChatAdapter(
 
     override fun getItemCount(): Int = messages.size
 
-    fun removeItem(position: Int) {
-        if (position in messages.indices) {
-            messages.removeAt(position)
-            notifyItemRemoved(position)
-        }
-    }
-
     class SenderViewHolder(itemView: View, private val themeData: ThemeResponse?) : RecyclerView.ViewHolder(itemView) {
         private val messageText: TextView = itemView.findViewById(R.id.tvSenderMessage)
         private val imageView: ImageView = itemView.findViewById(R.id.senderImage)
@@ -196,7 +189,7 @@ class ChatAdapter(
 
             when (message.type) {
                 MessageType.TEXT -> {
-                    message.message?.let { NCWAppUtils.setHtmText(it, messageText) }
+                    message.message?.let { NCWAppUtils.setPlainText(it, messageText) }
                     messageText.visibility = View.VISIBLE
                 }
 
