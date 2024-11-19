@@ -42,6 +42,14 @@ object NCWAppUtils {
             Html.fromHtml(html)
         }
     }
+    fun setPlainText(html: String, txtView: TextView) {
+        val plainText = html
+            .replace("<p>", "")
+            .replace("</p>", "")
+            .trim()
+
+        txtView.text = plainText
+    }
 
 
 
