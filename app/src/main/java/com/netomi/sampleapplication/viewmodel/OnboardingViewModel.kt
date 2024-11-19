@@ -1,4 +1,4 @@
-package com.netomi.sampleapplication.viewmode
+package com.netomi.sampleapplication.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

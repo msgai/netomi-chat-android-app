@@ -76,6 +76,7 @@ class LoginActivity : AppCompatActivity() {
         // Set login button click listener
         loginButton.setOnClickListener {
             preferences.setBoolean(SharePreferenceConstant.LOGIN,true)
+            preferences.setString(SharePreferenceConstant.NAME,"Guest User")
             startActivity(Intent(this, HomeActivity::class.java))
             finishAffinity()
         }
