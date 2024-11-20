@@ -34,7 +34,10 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         initializeViews()
 
         // Set header name and username based on stored preferences
-        val name = preferences.getString(SharePreferenceConstant.NAME)
+        var name = preferences.getString(SharePreferenceConstant.NAME)
+        if (name.equals("")){
+            name = "John Doe"
+        }
         tvHeaderOne.text = name
         userName.text = name
 
