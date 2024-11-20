@@ -15,7 +15,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constHeader"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
+            android:layout_height="60dp"
             android:padding="10dp"
             android:background="@color/white"
             app:layout_constraintTop_toTopOf="parent">
@@ -49,6 +49,7 @@
                 android:layout_marginStart="10dp"
                 android:textFontWeight="600"
                 android:text="John Doe"
+                android:layout_marginTop="5dp"
                 android:fontFamily="@font/proxima_nova_bold"
                 android:textColor="@color/gray_black"
                 android:textSize="14sp"
