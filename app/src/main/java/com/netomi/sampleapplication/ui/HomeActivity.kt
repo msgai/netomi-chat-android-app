@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.appcompat.widget.AppCompatImageView
@@ -51,7 +52,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         }
 
         imgChat.setOnClickListener{
-            NCWChatSdk.launch(this,"53e804cd-12ba-45cb-b41d-52413ead4dd4")
+            NCWChatSdk.launch(this,"60e915d0-3eda-4fda-8c50-2da9dc036edf")
         }
 
     }
@@ -98,6 +99,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
                 }
                 R.id.itemAgent -> {
                     drawerLayout.closeDrawers() // Close all open drawers
+                    Toast.makeText(this,R.string.under_development,Toast.LENGTH_SHORT).show()
                 }
             }
             // Close the drawer after an item is selected

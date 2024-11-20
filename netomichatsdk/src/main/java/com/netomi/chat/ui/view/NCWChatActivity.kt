@@ -18,6 +18,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -94,6 +95,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private lateinit var chatRecyclerView: RecyclerView
     private lateinit var attachmentIcon: ImageView
     private lateinit var headerContainer: ConstraintLayout
+    private lateinit var ivMenuOption: AppCompatImageView
+    private lateinit var ivMenu:ImageView
 
     private var photoUri: Uri? = null
     private var ncwSdkConfig: NCWSdkConfig? = null
@@ -131,7 +134,18 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             sendMessage()
         }
 
-        attachmentIcon.setOnClickListener { requestPermissionsAndShowMediaOptions() }
+        attachmentIcon.setOnClickListener {
+            //requestPermissionsAndShowMediaOptions()
+            Toast.makeText(this,R.string.under_development,Toast.LENGTH_SHORT).show()
+
+        }
+        ivMenuOption.setOnClickListener{
+            Toast.makeText(this,R.string.under_development,Toast.LENGTH_SHORT).show()
+        }
+        ivMenu.setOnClickListener {
+            Toast.makeText(this,R.string.under_development,Toast.LENGTH_SHORT).show()
+        }
+
         closeIcon.setOnClickListener { finish() }
 
     }
@@ -284,6 +298,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         headerTextView = findViewById(R.id.tvHeader)
         closeIcon = findViewById(R.id.ivClose)
         logoIcon = findViewById(R.id.ivLogo)
+        ivMenuOption=findViewById(R.id.ivMenuOption)
+        ivMenu=findViewById(R.id.ivMenu)
 
         messageInputField.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {

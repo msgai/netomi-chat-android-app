@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:text="John Doe"
         android:textColor="@color/gray_black"
-        android:textSize="18sp"
+        android:textSize="20sp"
         android:layout_marginStart="10dp"
         android:fontFamily="@font/proxima_nova_bold"
         app:layout_constraintStart_toEndOf="@+id/profileImage"

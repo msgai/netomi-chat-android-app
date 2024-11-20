@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NetomiSampleApplication</string>
+    <string name="app_name">NetomiSampleApp</string>
     <string name="login">Login</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
@@ -23,4 +23,5 @@
     <string name="enter_your_number">Enter your number</string>
     <string name="phone_number">Phone number</string>
     <string name="sign_up">Sign Up</string>
+    <string name="under_development">Under Development</string>
 </resources>
