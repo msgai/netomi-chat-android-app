@@ -207,7 +207,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             val options = flows.map { initialData ->
                 QuickReplyOption().apply {
                     label = initialData.label
-                    description = initialData.name
+                    metadata = initialData.name
                 }
             }
 
@@ -322,9 +322,11 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
      */
     private fun onQuickReplyClicked(option: QuickReplyOption?) {
         option?.label?.takeIf { it.isNotEmpty() }?.let { label ->
-            val payload = createPayload(label, label)
+            val payload = option.metadata?.let { createPayload(it, label) }
             chatViewModel.sendMessage(label)
-            chatViewModel.sendMessageAPI(payload)
+            if (payload != null) {
+                chatViewModel.sendMessageAPI(payload)
+            }
             messageInputField.text.clear()
         }
 

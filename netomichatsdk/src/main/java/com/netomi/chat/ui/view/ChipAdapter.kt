@@ -23,7 +23,7 @@ class ChipAdapter(private val items: List<QuickReplyOption>, private val onQuick
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
-        holder.tvOption.text = item.description
+        holder.tvOption.text = item.label
         holder.tvOption.setOnClickListener {
             onQuickReply(item)
         }
