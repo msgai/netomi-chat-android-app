@@ -190,8 +190,15 @@ class ChatAdapter(
 
             when (message.type) {
                 MessageType.TEXT -> {
-                    message.message?.let { NCWAppUtils.setPlainText(it, messageText) }
-                    messageText.visibility = View.VISIBLE
+                    message.message?.let {
+                        NCWAppUtils.setPlainText(it, messageText)
+                        messageText.visibility = View.VISIBLE
+                    } ?: run {
+                        messageText.visibility = View.GONE
+                        tvTime.visibility = View.GONE
+                        imgBot.visibility= View.INVISIBLE
+                    }
+
                 }
 
                 MessageType.IMAGE -> {
@@ -237,30 +244,22 @@ class ChatAdapter(
                 else -> {}
             }
 
-           /* message.quickReply?.options?.let { options ->
-                chipGroup.removeAllViews()
-                chipGroup.visibility = View.VISIBLE
-
-                options.forEach { option ->
-                    val chip = Chip(itemView.context).apply {
-                        text = option.label
-                        isClickable = true
-                        isCheckable = false
-                        setOnClickListener {
-                            Log.e("option.metadata", "" + option.metadata)
-
-                            onQuickReply(option)
-                        }
-                        chipBackgroundColor = ColorStateList.valueOf(whiteColor)
-                        setTextColor(blackColor)
-                        chipStrokeWidth = 1f
-                        chipCornerRadius = 10f
-                        chipStrokeColor = ColorStateList.valueOf(blackColor)
-                    }
-                    chipGroup.addView(chip)
+            // Quick Reply Handling
+            if (message.isQuickReplyVisible && message.quickReply?.options != null) {
+                if (chipRecyclerViewGroup.adapter == null) {
+                    chipRecyclerViewGroup.layoutManager =
+                        LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
                 }
-            }*/
-            message.quickReply?.options?.let {
+                val chipAdapter = ChipAdapter(message.quickReply.options) { selectedOption ->
+                    chatActionCallback.onQuickReply(selectedOption, position)
+                }
+                chipRecyclerViewGroup.adapter = chipAdapter
+                chipRecyclerViewGroup.visibility = View.VISIBLE
+            } else {
+                chipRecyclerViewGroup.visibility = View.GONE
+            }
+
+       /*     message.quickReply?.options?.let {
 
                 if (chipRecyclerViewGroup.adapter == null) {
                     chipRecyclerViewGroup.layoutManager =
@@ -274,7 +273,7 @@ class ChatAdapter(
                 chipRecyclerViewGroup.visibility = View.VISIBLE
 
 
-            }
+            }*/
 
             receiverImageCard.setOnClickListener {
                 message.largeImageUrl?.let { it1 -> chatActionCallback.onImageClick(it1) }

@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:id="@+id/rootLayout"
     android:background="@android:color/white">
 
     <!-- Header with menu, logo, text, and cross icon -->
@@ -73,7 +74,9 @@
         android:id="@+id/rvChat"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
+
+          android:padding="0dp"
+        android:background="@android:color/white"
         app:layout_constraintTop_toBottomOf="@id/constHeader"
         app:layout_constraintBottom_toTopOf="@id/layBottom"
         app:layout_constraintStart_toStartOf="parent"
