@@ -123,7 +123,14 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         chatViewModel.getConversationId(botRefId)
 
-        sendMessageIcon.setOnClickListener { sendMessage() }
+        sendMessageIcon.setOnClickListener {
+            if (!NCWAppUtils.isNetworkAvailable(this)) {
+                NCWAppUtils.showToast(this, "Please check your network and try again.")
+                return@setOnClickListener
+            }
+            sendMessage()
+        }
+
         attachmentIcon.setOnClickListener { requestPermissionsAndShowMediaOptions() }
         closeIcon.setOnClickListener { finish() }
 
