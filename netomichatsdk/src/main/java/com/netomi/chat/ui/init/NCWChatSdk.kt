@@ -4,9 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.netomi.chat.config.NCWSdkConfig
-import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.ui.view.NCWChatActivity
 import com.netomi.chat.utils.NCWAppConstant
+import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.ThemeUtils
 
 
@@ -24,21 +24,27 @@ object NCWChatSdk {
      *   for centralized access throughout the app.
      */
     fun launch(context: Context,botRefId:String) {
-        NCWChatTheme(
-            context,
-            botRefId,
-            onThemeReceived = { themeResponse ->
-                Log.e("NCWChatSdk", "Theme data received: $themeResponse")
-                themeResponse?.let { ThemeUtils.setThemeData(it) }
-                val intent=Intent(context, NCWChatActivity::class.java)
-                intent.putExtra(NCWAppConstant.BOT_REFERENCE_ID,botRefId)
-                context.startActivity(intent)
-            },
-            onError = { message ->
-                Log.e("NCWChatSdk", "Error fetching theme: $message")
-                // Handle the error appropriately
-            }
-        )
+
+        if(NCWAppUtils.isNetworkAvailable(context)) {
+            NCWChatTheme(
+                context,
+                botRefId,
+                onThemeReceived = { themeResponse ->
+                    Log.e("NCWChatSdk", "Theme data received: $themeResponse")
+                    themeResponse?.let { ThemeUtils.setThemeData(it) }
+                    val intent = Intent(context, NCWChatActivity::class.java)
+                    intent.putExtra(NCWAppConstant.BOT_REFERENCE_ID, botRefId)
+                    context.startActivity(intent)
+                },
+                onError = { message ->
+                    Log.e("NCWChatSdk", "Error fetching theme: $message")
+                    // Handle the error appropriately
+                }
+            )
+        }
+        else{
+            NCWAppUtils.showToast(context,"Unable to load chat at the moment. Please check your network and try again.")
+        }
     }
 
     // Store the NCW SDK configuration provided by the host app

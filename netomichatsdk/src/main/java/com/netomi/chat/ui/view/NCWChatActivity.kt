@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
+import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -46,9 +47,11 @@ import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.ChatActionCallback
 import com.netomi.chat.utils.NCWAppConstant.ARG_IMAGE_URL
+import com.netomi.chat.utils.NCWAppConstant.BOT
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
 import com.netomi.chat.utils.NCWAppConstant.INITIAL
+import com.netomi.chat.utils.NCWAppConstant.USER
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
@@ -135,9 +138,24 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         val messageContent = messageInputField.text.toString()
         if (messageContent.isNotEmpty()) {
             val payload = createPayload(messageContent, messageContent)
+            checkForPreviousQuickReply()
             chatViewModel.sendMessage(messageContent)
             chatViewModel.sendMessageAPI(payload)
             messageInputField.text.clear()
+        }
+    }
+
+     /**
+     * Checks the last message in the list to determine if it has visible quick replies.
+     * If quick replies are visible, it updates the visibility flag to `false`.
+     */
+    private fun checkForPreviousQuickReply() {
+        val lastIndex = messageList.lastIndex
+        if (lastIndex >= 0) {
+            val lastMessage = messageList[lastIndex]
+            if (lastMessage.isQuickReplyVisible && !lastMessage.quickReply?.options.isNullOrEmpty()) {
+                lastMessage.isQuickReplyVisible = false
+            }
         }
     }
 
@@ -189,13 +207,13 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             val options = flows.map { initialData ->
                 QuickReplyOption().apply {
                     label = initialData.label
-                    description = initialData.name
+                    metadata = initialData.name
                 }
             }
 
             messageList.add(
                 NCWMessage(
-                    sender = INITIAL,
+                    sender = BOT,
                     timestamp = System.currentTimeMillis(),
                     quickReply = QuickReply(options = ArrayList(options))
                 )
@@ -213,14 +231,22 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private fun applyTheme(themeData: ThemeResponse?) {
         themeData?.let { theme ->
             // Apply gradient or default color to headerContainer
-            theme.theme?.color?.takeIf { it.isNotEmpty() }?.let { color ->
-                window.statusBarColor = Color.parseColor(color)
-            } ?: run {
-                window.statusBarColor = ContextCompat.getColor(this, android.R.color.holo_blue_dark)
-            }
             if (theme.theme?.gradient == true) {
-                headerContainer.background = ThemeUtils.createGradientDrawable(theme)
+                // Set status bar to transparent to allow gradient visibility
+                window.apply {
+                    statusBarColor = Color.TRANSPARENT
+                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                }
+                val gradientDrawable = ThemeUtils.createGradientDrawable(theme)
+                headerContainer.background = gradientDrawable
+                val rootLayout = findViewById<View>(R.id.rootLayout)
+                rootLayout.background = gradientDrawable
             } else {
+                theme.theme?.color?.takeIf { it.isNotEmpty() }?.let { color ->
+                    window.statusBarColor = Color.parseColor(color)
+                } ?: run {
+                    window.statusBarColor = ContextCompat.getColor(this, android.R.color.holo_blue_dark)
+                }
                 ThemeUtils.applyTheme(headerContainer)
             }
             ThemeUtils.applyTheme(headerTextView)
@@ -270,7 +296,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         chatRecyclerView.adapter = messageAdapter
     }
     override fun onQuickReply(option: QuickReplyOption?, position: Int) {
-        messageList.removeAt(position)
+        messageList[position].isQuickReplyVisible = false
+     //   messageList.removeAt(position)
         onQuickReplyClicked(option)
 
     }
@@ -295,9 +322,11 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
      */
     private fun onQuickReplyClicked(option: QuickReplyOption?) {
         option?.label?.takeIf { it.isNotEmpty() }?.let { label ->
-            val payload = createPayload(label, label)
+            val payload = option.metadata?.let { createPayload(it, label) }
             chatViewModel.sendMessage(label)
-            chatViewModel.sendMessageAPI(payload)
+            if (payload != null) {
+                chatViewModel.sendMessageAPI(payload)
+            }
             messageInputField.text.clear()
         }
 
