@@ -35,25 +35,17 @@ object NCWAppUtils {
     fun formatTimestampToTime(timestamp: Long): String {
         val dateFormat = SimpleDateFormat(TIME_AM_PM, Locale.getDefault())
         val date = Date(timestamp)
-        return dateFormat.format(date)
+        return dateFormat.format(date).uppercase()
     }
-    fun setHtmText(html:String,txtView:TextView){
 
-        txtView.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
+
+    fun setHtmText(input: String): String {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(input, Html.FROM_HTML_MODE_LEGACY).toString().trim()
         } else {
-            Html.fromHtml(html)
+            Html.fromHtml(input).toString().trim()
         }
     }
-    fun setPlainText(html: String, txtView: TextView) {
-        val plainText = html
-            .replace("<p>", "")
-            .replace("</p>", "")
-            .trim()
-
-        txtView.text = plainText
-    }
-
 
 
     /**

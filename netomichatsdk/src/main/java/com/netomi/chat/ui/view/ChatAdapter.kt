@@ -191,7 +191,7 @@ class ChatAdapter(
             when (message.type) {
                 MessageType.TEXT -> {
                     message.message?.let {
-                        NCWAppUtils.setPlainText(it, messageText)
+                      messageText.text=NCWAppUtils.setHtmText(it)
                         messageText.visibility = View.VISIBLE
                     } ?: run {
                         messageText.visibility = View.GONE
