@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NetomiSampleApp</string>
+    <string name="app_name">NetomiApp</string>
     <string name="login">Login</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
