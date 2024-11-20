@@ -42,7 +42,11 @@ data class AttachmentContent(
     val largeImageUrl: String? = null,
     val quickReply: QuickReply? = null,
     val elements: List<CarouselElement>? = null,
-    val carouselImageAspectRatio: String? = null
+    val carouselImageAspectRatio: String? = null,
+    val thumbnailUrl: String? = null,
+    val title: String? = null,
+    var buttons : ArrayList<Buttons> = arrayListOf()
+
 )
 
 data class QuickReply(
@@ -52,9 +56,9 @@ data class QuickReply(
 )
 
 data class QuickReplyOption(
-    val label: String? = null,
-    val description: String? = null,
-    val metadata: String? = null,
+    var label: String? = null,
+    var description: String? = null,
+    var metadata: String? = null,
     val contentType: String? = null
 )
 
@@ -76,5 +80,15 @@ data class CarouselButton(
 
 data class CustomPayload(
     val TRANSLATE_LANGUAGE: String? = null
+)
+
+
+data class Buttons (
+
+ var type                : String?  = null,
+    var url                 : String?  = null,
+ var title               : String?  = null,
+   var messengerExtensions : Boolean? = null
+
 )
 

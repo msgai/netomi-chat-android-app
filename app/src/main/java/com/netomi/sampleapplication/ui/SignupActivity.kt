@@ -97,6 +97,7 @@ class SignupActivity : AppCompatActivity() {
             preferences.setBoolean(SharePreferenceConstant.LOGIN,true)
             preferences.setString(SharePreferenceConstant.NAME,nameEditText.text?.trim().toString())
             startActivity(Intent(this, HomeActivity::class.java))
+            finishAffinity()
         }
 
         loginTextView.setOnClickListener {

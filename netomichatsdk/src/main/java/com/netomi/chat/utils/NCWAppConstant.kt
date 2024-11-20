@@ -13,8 +13,13 @@ object NCWAppConstant {
     const val AWS_IOT_ENDPOINT="IOT_ENDPOINT"
     const val BOT_REFERENCE_ID="botRefId"
     const val USER="User"
+    const val INITIAL="Initial"
     const val CHAT_WIDGET="chat_widget"
 
+    const val BOT="BOT"
+
+    const val TIME_AM_PM="hh:mm a"
+    const val ARG_IMAGE_URL = "image_url"
 
 
 

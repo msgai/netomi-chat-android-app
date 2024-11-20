@@ -5,9 +5,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageButton
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
+import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.sampleapplication.R
 import com.netomi.sampleapplication.constant.SharePreferenceConstant
 import com.netomi.sampleapplication.utils.AppSharedPreferences
@@ -20,12 +23,10 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
     private lateinit var navView: NavigationView
     private lateinit var ivMenu: ImageView
     private lateinit var logout: AppCompatTextView
+    private lateinit var imgChat: AppCompatImageButton
+    private lateinit var preferences :AppSharedPreferences
     private lateinit var tvHeaderOne: AppCompatTextView
     private lateinit var userName: AppCompatTextView
-
-    // Shared Preferences for storing user data
-    private lateinit var preferences: AppSharedPreferences
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home) // Set the layout for HomeActivity
@@ -51,6 +52,11 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
             drawerLayout.closeDrawers() // Close all open drawers
             logoutFun()
         }
+
+        imgChat.setOnClickListener{
+            NCWChatSdk.launch(this,"53e804cd-12ba-45cb-b41d-52413ead4dd4")
+        }
+
     }
 
     /**
@@ -76,12 +82,11 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
     private fun initializeViews() {
         // Initialize shared preferences
         preferences = AppSharedPreferences(this)
-
-        // Bind main layout views
-        drawerLayout = findViewById(R.id.drawerLayout)
-        navView = findViewById(R.id.navView)
-        ivMenu = findViewById(R.id.ivMenu)
-        logout = findViewById(R.id.logout)
+        drawerLayout = findViewById(R.id.drawerLayout)  // Find DrawerLayout by ID
+        ivMenu = findViewById(R.id.ivMenu)  // Find the ImageView for the menu icon
+        navView = findViewById(R.id.navView)  // Find the NavigationView for the drawer content
+        logout = findViewById(R.id.logout)  // Find the NavigationView for the drawer content
+        imgChat=findViewById(R.id.img_chat)
         tvHeaderOne = findViewById(R.id.tvHeaderOne)
 
         // Bind navigation header views

@@ -8,6 +8,6 @@
         android:title="Home" />
     <item
         android:id="@+id/itemPayment"
-        android:title="Change Ai Agent" />
+        android:title="Change AI Agent" />
 
 </menu>
