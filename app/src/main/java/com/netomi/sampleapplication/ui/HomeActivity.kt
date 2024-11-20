@@ -89,6 +89,21 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         // Bind navigation header views
         val headerView = navView.getHeaderView(0) // Access the first header view of the NavigationView
         userName = headerView.findViewById(R.id.userName)
+
+        navView.setNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.itemHome -> {
+                    drawerLayout.closeDrawers() // Close all open drawers
+
+                }
+                R.id.itemAgent -> {
+                    drawerLayout.closeDrawers() // Close all open drawers
+                }
+            }
+            // Close the drawer after an item is selected
+            drawerLayout.closeDrawers()
+            true
+        }
     }
 
     /**
