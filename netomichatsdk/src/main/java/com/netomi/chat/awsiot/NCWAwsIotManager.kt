@@ -6,7 +6,9 @@ import com.amazonaws.auth.BasicSessionCredentials
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttClientStatusCallback
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttManager
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos
+import com.netomi.chat.R
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
+import com.netomi.chat.ui.viewmodel.SingleLiveEvent
 import java.util.UUID
 
 object NCWAwsIotManager {
@@ -14,7 +16,7 @@ object NCWAwsIotManager {
     private lateinit var mqttManager: AWSIotMqttManager
     private lateinit var awsCredentialsProvider: AWSCredentialsProvider
     private var connectionStatus = 0
-
+    private val connectionStatusLiveData = SingleLiveEvent<String>()
 
     /**
      * Initialize the IoT Manager with provided credentials.
@@ -57,28 +59,34 @@ object NCWAwsIotManager {
                 AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus.Connecting ->{
                     connectionStatus = 0
                     Log.d("IoT", "Connecting to AWS IoT...")
+                    connectionStatusLiveData.postValue(ConnectionStatus.CONNECTING.toString())
                 }
 
 
                 AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus.Connected -> {
                     connectionStatus = 1
                     Log.d("IoT", "Connected to AWS IoT")
-                    //subscribeToTopic("topicOne", chatViewModel)
+                    connectionStatusLiveData.postValue(ConnectionStatus.CONNECTED.toString())
                     subscribeToTopic(topic, chatViewModel)
                 }
 
                 AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus.ConnectionLost -> {
                     connectionStatus = 2
                     Log.e("IoT", "Connection lost", throwable)
+                    connectionStatusLiveData.postValue(ConnectionStatus.CONNECTION_LOST.toString())
                 }
 
                 AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus.Reconnecting ->{
                     connectionStatus = 3
                     Log.d("IoT", "Reconnecting to AWS IoT...")
+                    connectionStatusLiveData.postValue(ConnectionStatus.RE_CONNECTED.toString())
                     chatViewModel.getAWSMQTTCredentials("")
                 }
 
-                else -> Log.e("IoT", "Unknown connection status: $status")
+                else -> {
+                    Log.e("IoT", "Unknown connection status: $status")
+                    connectionStatusLiveData.postValue(ConnectionStatus.UNKNOWN.toString())
+                }
             }
         }
     }
@@ -107,5 +115,9 @@ object NCWAwsIotManager {
             Log.e("LOG_TAG", "Publish error.", e)
         }
     }
+
+    // Observe connection status from ViewModel or Activity
+    fun getConnectionStatusLiveData(): SingleLiveEvent<String> = connectionStatusLiveData
+
 
 }

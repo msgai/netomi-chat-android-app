@@ -22,11 +22,14 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.netomi.chat.R
+import com.netomi.chat.awsiot.ConnectionStatus
+import com.netomi.chat.awsiot.NCWAwsIotManager
 import com.netomi.chat.config.NCWSdkConfig
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.MessageType
@@ -97,7 +100,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private lateinit var headerContainer: ConstraintLayout
     private lateinit var ivMenuOption: AppCompatImageView
     private lateinit var ivMenu:ImageView
-
+    private lateinit var  connectionHeader:TextView
     private var photoUri: Uri? = null
     private var ncwSdkConfig: NCWSdkConfig? = null
     private var themeData: ThemeResponse? = null
@@ -109,8 +112,6 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
-
-        // Initialize views
         initViews()
         // Load theme and config
         themeData = ThemeUtils.getThemeData()
@@ -147,6 +148,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         }
 
         closeIcon.setOnClickListener { finish() }
+
 
     }
 
@@ -300,6 +302,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         logoIcon = findViewById(R.id.ivLogo)
         ivMenuOption=findViewById(R.id.ivMenuOption)
         ivMenu=findViewById(R.id.ivMenu)
+        connectionHeader=findViewById(R.id.connection_status_header)
 
         messageInputField.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -409,6 +412,48 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 Log.e("ParsingError", "Failed to parse JSON: ${e.localizedMessage}")
             }
         })
+
+
+        ncwAwsCredentialsViewModel.connectionStatus.observe(this) { status ->
+            when (status) {
+                ConnectionStatus.CONNECTING.toString() -> {
+                    connectionHeader.text = getString(R.string.connecting)
+                    connectionHeader.setBackgroundColor(Color.YELLOW)
+                    connectionHeader.setTextColor(Color.BLACK)
+                    connectionHeader.visibility = View.VISIBLE
+                }
+                ConnectionStatus.CONNECTED.toString() -> {
+                    connectionHeader.text = getString(R.string.connected)
+                    connectionHeader.setBackgroundColor(Color.GREEN)
+                    connectionHeader.setTextColor(Color.WHITE)
+                    connectionHeader.visibility = View.VISIBLE
+
+                    // Hide header after 2 seconds when connected
+                    connectionHeader.postDelayed({
+                        connectionHeader.visibility = View.GONE
+                    }, 2000)
+                }
+                ConnectionStatus.CONNECTION_LOST.toString() -> {
+                    connectionHeader.text = getString(R.string.connection_lost)
+                    connectionHeader.setBackgroundColor(Color.RED)
+                    connectionHeader.setTextColor(Color.WHITE)
+                    connectionHeader.visibility = View.VISIBLE
+                }
+                ConnectionStatus.RE_CONNECTED.toString() -> {
+                    connectionHeader.text =getString(R.string.reconnecting)
+                    connectionHeader.setBackgroundColor(Color.BLUE)
+                    connectionHeader.setTextColor(Color.WHITE)
+                    connectionHeader.visibility = View.VISIBLE
+                }
+                else -> {
+                    // Unknown or other status
+                    connectionHeader.text = getString(R.string.unknown)
+                    connectionHeader.setBackgroundColor(Color.GRAY)
+                    connectionHeader.setTextColor(Color.WHITE)
+                    connectionHeader.visibility = View.VISIBLE
+                }
+            }
+        }
     }
 
         // Helper function to map attachments to NCWMessage
