@@ -52,7 +52,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         }
 
         imgChat.setOnClickListener{
-            NCWChatSdk.launch(this,"60e915d0-3eda-4fda-8c50-2da9dc036edf")
+            NCWChatSdk.launch(this)
         }
 
     }
