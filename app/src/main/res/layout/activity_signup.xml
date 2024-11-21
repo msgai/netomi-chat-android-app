@@ -87,7 +87,7 @@
             android:id="@+id/emailTextInputLayout"
             android:layout_width="0dp"
             android:layout_height="54dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/rounded_edittext_background"
             app:layout_constraintEnd_toEndOf="@id/guideline_end"
             app:layout_constraintStart_toStartOf="@id/guideline_start"
@@ -116,6 +116,7 @@
                 android:gravity="center|start"
                 android:hint="@string/enter_your_email"
                 android:inputType="textEmailAddress"
+                android:maxLength="50"
                 android:textColorHint="@color/charcoal_blue_50"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -252,6 +253,7 @@
                 android:gravity="center|start"
                 android:hint="@string/enter_your_number"
                 android:inputType="phone"
+                android:maxLength="10"
                 android:textColorHint="@color/charcoal_blue_50"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -290,7 +292,7 @@
             android:id="@+id/passwordTextInputLayout"
             android:layout_width="0dp"
             android:layout_height="54dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/rounded_edittext_background"
             app:layout_constraintEnd_toEndOf="@id/guideline_end"
             app:layout_constraintStart_toStartOf="@id/guideline_start"
@@ -400,5 +402,4 @@
             app:layout_constraintTop_toTopOf="@id/signupTextView" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
-
 

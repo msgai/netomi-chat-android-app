@@ -21,7 +21,7 @@
     <string name="existing_user">Existing user ?</string>
     <string name="name">Name</string>
     <string name="enter_your_number">Enter your number</string>
-    <string name="phone_number">Phone number</string>
-    <string name="sign_up">Sign Up</string>
+    <string name="phone_number">Mobile Number</string>
+    <string name="sign_up">Create Account</string>
     <string name="under_development">Under Development</string>
 </resources>

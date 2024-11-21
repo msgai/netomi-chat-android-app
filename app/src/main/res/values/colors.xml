@@ -11,4 +11,6 @@
     <color name="orange_error">#FF7661</color>
     <color name="gray_black">#0D152B</color>
     <color name="red">#DF1E00</color>
+    <color name="status_bar">#FCFBF2</color>
+
 </resources>
