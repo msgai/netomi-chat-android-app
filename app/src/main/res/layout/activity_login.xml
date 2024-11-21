@@ -231,6 +231,7 @@
         android:layout_marginTop="24dp"
         android:background="@drawable/button_gradient"
         android:text="@string/login"
+        android:textAllCaps="false"
         android:fontFamily="@font/proxima_nova_alt_bold"
         android:textColor="@android:color/black"
         app:layout_constraintEnd_toEndOf="@id/guideline_end"

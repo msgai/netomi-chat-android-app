@@ -363,6 +363,7 @@
             android:background="@drawable/button_gradient"
             android:fontFamily="@font/proxima_nova_alt_bold"
             android:text="@string/create_account"
+            android:textAllCaps="false"
             android:textColor="@android:color/black"
             app:layout_constraintEnd_toEndOf="@id/guideline_end"
             app:layout_constraintStart_toStartOf="@id/guideline_start"
