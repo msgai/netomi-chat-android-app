@@ -8,6 +8,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@drawable/ic_bg"
         android:orientation="vertical">
         <!-- Your main content here -->
 
@@ -15,9 +16,9 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constHeader"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
             android:padding="10dp"
-            android:background="@color/white"
+
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
@@ -25,6 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_menu"
+                android:layout_marginStart="5dp"
                 android:layout_marginTop="2dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

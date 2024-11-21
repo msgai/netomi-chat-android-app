@@ -7,8 +7,8 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageButton
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
 import com.netomi.chat.ui.init.NCWChatSdk
@@ -86,7 +86,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         logout = findViewById(R.id.logout)  // Find the NavigationView for the drawer content
         imgChat=findViewById(R.id.img_chat)
         tvHeaderOne = findViewById(R.id.tvHeaderOne)
-
+        window.statusBarColor = ContextCompat.getColor(this, R.color.status_bar)
         // Bind navigation header views
         val headerView = navView.getHeaderView(0) // Access the first header view of the NavigationView
         userName = headerView.findViewById(R.id.userName)
