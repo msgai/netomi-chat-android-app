@@ -8,6 +8,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.netomi.chat.R
 import com.netomi.chat.model.messages.QuickReplyOption
+import com.netomi.chat.utils.ThemeUtils
 
 class ChipAdapter(private val items: List<QuickReplyOption>, private val onQuickReply: (QuickReplyOption?) -> Unit,) : RecyclerView.Adapter<ChipAdapter.ViewHolder>() {
 
@@ -24,6 +25,16 @@ class ChipAdapter(private val items: List<QuickReplyOption>, private val onQuick
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
         holder.tvOption.text = item.label
+        // will change from bot json
+        val cornerRadii = floatArrayOf(
+            0f, 0f,  // Top-left
+            15f, 15f,    // Top-right
+            15f, 15f,  // Bottom-right
+            15f, 15f   // Bottom-left
+        )
+        // Apply the background with theme color and custom corners
+        ThemeUtils.applyChipBackgroundWithCorners(holder.tvOption,  cornerRadii)
+
         holder.tvOption.setOnClickListener {
             onQuickReply(item)
         }

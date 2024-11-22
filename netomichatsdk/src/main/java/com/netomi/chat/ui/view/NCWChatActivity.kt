@@ -272,7 +272,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 }
                 ThemeUtils.applyTheme(headerContainer)
             }
-            ThemeUtils.applyTheme(headerTextView)
+          //  ThemeUtils.applyTheme(headerTextView)
             headerTextView.text = theme.title
 
          /*  // Example usage for attachmentIcon (without rounded background) and sendMessageIcon (with circular background)

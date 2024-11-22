@@ -145,6 +145,28 @@ object ThemeUtils
         textView.background = backgroundDrawable
     }
 
+    /**
+     * Applies a customizable GradientDrawable background to a Chip.
+     *
+     * @param textView The TextView to apply the background to.
+     * @param cornerRadii Array of corner radii in the order of top-left, top-right, bottom-right, and bottom-left.
+     */
+    fun applyChipBackgroundWithCorners(
+        textView: TextView,
+        cornerRadii: FloatArray = floatArrayOf(10f, 10f, 10f, 10f, 10f, 10f, 10f, 10f),
+        opacity: Int = 128
+    ) {
+        val baseColor = Color.parseColor(themeData?.theme?.color ?: "#374E57") // Default color if null
+
+        val colorWithOpacity = Color.argb(opacity, Color.red(baseColor), Color.green(baseColor), Color.blue(baseColor))
+
+        val backgroundDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            this.cornerRadii = cornerRadii
+            setColor(colorWithOpacity)
+        }
+        textView.background = backgroundDrawable
+    }
 
 
 
