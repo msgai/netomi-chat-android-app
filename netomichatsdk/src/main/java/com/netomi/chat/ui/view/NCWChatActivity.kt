@@ -22,14 +22,12 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.netomi.chat.R
 import com.netomi.chat.awsiot.ConnectionStatus
-import com.netomi.chat.awsiot.NCWAwsIotManager
 import com.netomi.chat.config.NCWSdkConfig
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.MessageType
@@ -37,6 +35,7 @@ import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.awsmqtt.NCWAwsCredentials
 import com.netomi.chat.model.messages.Attachment
+import com.netomi.chat.model.messages.CarouselButton
 import com.netomi.chat.model.messages.GenericChannelResponse
 import com.netomi.chat.model.messages.MessagePayload
 import com.netomi.chat.model.messages.QuickReply
@@ -54,8 +53,7 @@ import com.netomi.chat.utils.NCWAppConstant.ARG_IMAGE_URL
 import com.netomi.chat.utils.NCWAppConstant.BOT
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
-import com.netomi.chat.utils.NCWAppConstant.INITIAL
-import com.netomi.chat.utils.NCWAppConstant.USER
+import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
@@ -272,7 +270,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 }
                 ThemeUtils.applyTheme(headerContainer)
             }
-            ThemeUtils.applyTheme(headerTextView)
+            //ThemeUtils.applyTheme(headerTextView)
             headerTextView.text = theme.title
 
          /*  // Example usage for attachmentIcon (without rounded background) and sendMessageIcon (with circular background)
@@ -327,19 +325,26 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         onQuickReplyClicked(option)
 
     }
-
-    override fun onImageClick(imageUrl: String) {
-        onFullScreenView(imageUrl)
-    }
-
-    private fun onFullScreenView(imageUrl: String) {
-        val intent = Intent(this, FullScreenImageActivity::class.java).apply {
-            putExtra(ARG_IMAGE_URL, imageUrl)
+    override fun onMediaClick(message: NCWMessage) {
+        val mediaUrl = when (message.type) {
+            MessageType.VIDEO -> message.thumbnailUrl
+            MessageType.IMAGE -> message.largeImageUrl
+            else -> null
         }
-        startActivity(intent)
-
-
+        mediaUrl?.let {
+            val intent = Intent(this, FullScreenMediaActivity::class.java).apply {
+                putExtra(ARG_IMAGE_URL, mediaUrl)
+                putExtra(MEDIA_TYPE, message.type.name)
+            }
+            startActivity(intent)
+        }
     }
+
+    override fun carouselButtonAction(carouselButton: CarouselButton?) {
+
+        Log.e("CarouselButton","CarouselButton "+carouselButton)
+    }
+
 
     /**
      * Handles quick reply option click by sending a message based on the option selected.

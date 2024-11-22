@@ -16,6 +16,7 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.netomi.chat.R
@@ -160,7 +161,7 @@ class ChatAdapter(
     ) : RecyclerView.ViewHolder(itemView) {
         private val messageText: TextView = itemView.findViewById(R.id.tvReceiverMessage)
         private val imageView: ImageView = itemView.findViewById(R.id.receiverImage)
-        private val videoView: VideoView = itemView.findViewById(R.id.receiverVideo)
+        private val videoView: ImageView = itemView.findViewById(R.id.receiverVideo)
         private val imgBot: ImageView = itemView.findViewById(R.id.img_bot)
         private val carouselRecyclerView: RecyclerView = itemView.findViewById(R.id.carouselRecyclerView)
         private val chipRecyclerViewGroup: RecyclerView = itemView.findViewById(R.id.quickReplyRecyclerView)
@@ -212,14 +213,20 @@ class ChatAdapter(
                         carouselRecyclerView.layoutManager =
                             LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
                     }
-                    val carouselAdapter = CarouselAdapter(message.carouselItems ?: emptyList())
+
+                    val carouselAdapter = CarouselAdapter(message.carouselItems ?: emptyList()){
+                        chatActionCallback.carouselButtonAction(it)
+                    }
                     carouselRecyclerView.adapter = carouselAdapter
                     carouselRecyclerView.visibility = View.VISIBLE
                 }
 
                 MessageType.VIDEO -> {
-                    videoView.setVideoURI(Uri.parse(message.thumbnailUrl))
-                    videoView.start()
+                    Glide.with(itemView.context)
+                        .load(message.thumbnailUrl)
+                        .apply(RequestOptions().frame(1000)) // Fetch the frame at 1 second (1000 ms)
+                        .into(videoView)
+
                     videoView.visibility = View.VISIBLE
                     cardVideo.visibility =View.VISIBLE
                 }
@@ -276,7 +283,10 @@ class ChatAdapter(
             }*/
 
             receiverImageCard.setOnClickListener {
-                message.largeImageUrl?.let { it1 -> chatActionCallback.onImageClick(it1) }
+                chatActionCallback.onMediaClick(message)
+            }
+            cardVideo.setOnClickListener {
+                chatActionCallback.onMediaClick(message)
             }
         }
     }

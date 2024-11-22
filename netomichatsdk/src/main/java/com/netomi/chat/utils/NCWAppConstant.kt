@@ -20,7 +20,7 @@ object NCWAppConstant {
 
     const val TIME_AM_PM="hh:mm a"
     const val ARG_IMAGE_URL = "image_url"
-
+    const val MEDIA_TYPE = "media_type"
 
 
     const val TYPE_TEXT="ai.msg.domain.responses.core.Text"

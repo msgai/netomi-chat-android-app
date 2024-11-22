@@ -25,6 +25,7 @@
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:textSize="14sp"
+        android:textColor="#374E57"
         android:layout_marginTop="2dp"
         android:text="User"
         android:background="@drawable/bg_sender_message"

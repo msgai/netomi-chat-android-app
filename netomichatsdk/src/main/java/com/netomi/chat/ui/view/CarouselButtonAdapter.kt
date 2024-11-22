@@ -8,8 +8,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.netomi.chat.R
 import com.netomi.chat.model.messages.CarouselButton
+import com.netomi.chat.model.messages.QuickReplyOption
 
-class CarouselButtonAdapter(private val items: List<CarouselButton>) : RecyclerView.Adapter<CarouselButtonAdapter.ViewHolder>() {
+class CarouselButtonAdapter(private val items: List<CarouselButton>,private val carouselButton: (CarouselButton?) -> Unit) : RecyclerView.Adapter<CarouselButtonAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -26,7 +27,9 @@ class CarouselButtonAdapter(private val items: List<CarouselButton>) : RecyclerV
         val item = items[position]
         holder.carouselButton.text = item.title
 
-
+        holder.carouselButton.setOnClickListener {
+            carouselButton(item)
+        }
 
 
     }
