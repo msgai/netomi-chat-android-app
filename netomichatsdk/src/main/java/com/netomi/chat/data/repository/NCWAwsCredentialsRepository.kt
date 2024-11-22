@@ -8,6 +8,7 @@ import com.netomi.chat.utils.NCWAppConstant.AWS_ACCESS_KEY
 import com.netomi.chat.utils.NCWAppConstant.AWS_IOT_ENDPOINT
 import com.netomi.chat.utils.NCWAppConstant.AWS_SECRET_KEY
 import com.netomi.chat.utils.NCWAppConstant.AWS_SESSION_TOKEN
+import com.netomi.chat.utils.NCWAppConstant.EXPIRE_TIME
 import com.netomi.chat.utils.NCWAppConstant.SECURE_CREDENTIAL
 
 class NCWAwsCredentialsRepository private constructor(context: Context) {
@@ -27,17 +28,29 @@ class NCWAwsCredentialsRepository private constructor(context: Context) {
             .putString(AWS_SECRET_KEY, credentials.secretKey)
             .putString(AWS_SESSION_TOKEN, credentials.sessionToken)
             .putString(AWS_IOT_ENDPOINT, credentials.iotEndpoint)
+            .putLong(EXPIRE_TIME,System.currentTimeMillis() + credentials.expiresIn * 1000L)
             .apply()
     }
 
     // Fetch credentials (assuming they are already stored)
-    fun getAWSCredentials(): NCWAwsCredentials {
+    fun getAWSCredentials(): NCWAwsCredentials? {
         val accessKey = sharedPreferences.getString(AWS_ACCESS_KEY, null) ?: ""
         val secretKey = sharedPreferences.getString(AWS_SECRET_KEY, null) ?: ""
         val sessionToken = sharedPreferences.getString(AWS_SESSION_TOKEN, null) ?: ""
         val iotEndpoint = sharedPreferences.getString(AWS_IOT_ENDPOINT, null) ?: ""
+        val expiresIn = sharedPreferences.getLong(EXPIRE_TIME, 0)
 
-        return NCWAwsCredentials(accessKey, secretKey, sessionToken, iotEndpoint)
+        //return NCWAwsCredentials(accessKey, secretKey, sessionToken, iotEndpoint)
+
+        return if (accessKey.isNotEmpty() && secretKey.isNotEmpty() && sessionToken.isNotEmpty() && iotEndpoint.isNotEmpty()) {
+            if (System.currentTimeMillis() < expiresIn) {
+                NCWAwsCredentials(accessKey, secretKey, sessionToken, iotEndpoint, ((expiresIn - System.currentTimeMillis()) / 1000).toInt())
+            } else {
+                null // Expired credentials
+            }
+        } else {
+            null // Missing credentials
+        }
     }
 
     fun clearCredentials() {
