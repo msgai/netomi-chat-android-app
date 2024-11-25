@@ -15,6 +15,7 @@ object NCWAppConstant {
     const val USER="User"
     const val INITIAL="Initial"
     const val CHAT_WIDGET="chat_widget"
+    const val EXPIRE_TIME="EXPIRE_TIME"
 
     const val BOT="BOT"
 

@@ -168,7 +168,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         }
     }
 
-     /**
+    /**
      * Checks the last message in the list to determine if it has visible quick replies.
      * If quick replies are visible, it updates the visibility flag to `false`.
      */
@@ -275,14 +275,14 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
           //  ThemeUtils.applyTheme(headerTextView)
             headerTextView.text = theme.title
 
-         /*  // Example usage for attachmentIcon (without rounded background) and sendMessageIcon (with circular background)
-            theme.theme?.color?.takeIf { it.isNotEmpty() }?.let { color ->
-                Log.e("Enterrr","Enter herer")
-                ThemeUtils.applyBackgroundAndTint(sendMessageIcon, color, isCircularBackground = true)
-                ThemeUtils.applyBackgroundAndTint(attachmentIcon,
-                    color, isCircularBackground = false)
-            }
-*/
+            /*  // Example usage for attachmentIcon (without rounded background) and sendMessageIcon (with circular background)
+               theme.theme?.color?.takeIf { it.isNotEmpty() }?.let { color ->
+                   Log.e("Enterrr","Enter herer")
+                   ThemeUtils.applyBackgroundAndTint(sendMessageIcon, color, isCircularBackground = true)
+                   ThemeUtils.applyBackgroundAndTint(attachmentIcon,
+                       color, isCircularBackground = false)
+               }
+   */
 
 
         }
@@ -323,7 +323,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     }
     override fun onQuickReply(option: QuickReplyOption?, position: Int) {
         messageList[position].isQuickReplyVisible = false
-     //   messageList.removeAt(position)
+        //   messageList.removeAt(position)
         onQuickReplyClicked(option)
 
     }
@@ -456,24 +456,24 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         }
     }
 
-        // Helper function to map attachments to NCWMessage
-        private fun mapAttachmentToMessage(attachment: Attachment): NCWMessage? {
-            val attach = attachment.attachment ?: return null
-            val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
+    // Helper function to map attachments to NCWMessage
+    private fun mapAttachmentToMessage(attachment: Attachment): NCWMessage? {
+        val attach = attachment.attachment ?: return null
+        val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
 
-            return NCWMessage(
-                sender = "BOT",
-                type = messageType,
-                timestamp = attach.timestamp ?: System.currentTimeMillis(),
-                message = attach.text,
-                carouselItems = if (messageType == MessageType.CAROUSEL) attach.elements else null,
-                thumbnailUrl = if (messageType == MessageType.VIDEO) attach.thumbnailUrl else null,
-                title = if (messageType == MessageType.CARD) attach.title else null,
-                buttons = if (messageType == MessageType.CARD) attach.buttons else arrayListOf(),
-                largeImageUrl = if (messageType == MessageType.IMAGE) attach.largeImageUrl else null,
-                quickReply = attach.quickReply
-            )
-        }
+        return NCWMessage(
+            sender = "BOT",
+            type = messageType,
+            timestamp = attach.timestamp ?: System.currentTimeMillis(),
+            message = attach.text,
+            carouselItems = if (messageType == MessageType.CAROUSEL) attach.elements else null,
+            thumbnailUrl = if (messageType == MessageType.VIDEO) attach.thumbnailUrl else null,
+            title = if (messageType == MessageType.CARD) attach.title else null,
+            buttons = if (messageType == MessageType.CARD) attach.buttons else arrayListOf(),
+            largeImageUrl = if (messageType == MessageType.IMAGE) attach.largeImageUrl else null,
+            quickReply = attach.quickReply
+        )
+    }
 
 
 
@@ -601,7 +601,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 if (type!!.startsWith("image/")) {
                     addMediaMessage(selectedMediaUri, MessageType.IMAGE)
                 } else if (type.startsWith("video/")) {
-                   // addMediaMessage(selectedMediaUri, MessageType.VIDEO)
+                    // addMediaMessage(selectedMediaUri, MessageType.VIDEO)
                 }
             }
         }
@@ -641,19 +641,11 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
             Routes.ROUTE_GET_MQTT_CREDENTIALS -> {
                 val mqttsCredentials = apiResponse as MQTTCredentialsResponse
-                Log.d(
-                    "MQTTCredentialsResponse",
-                    "Fetched MQTTCredentialsResponse: ${mqttsCredentials.credentials.accessKeyId}"
-                )
                 saveAwsCredentials(mqttsCredentials.credentials)
             }
 
             Routes.ROUTE_SEND_CHAT -> {
                 val sendMessageResponse = apiResponse as SendMessageResponse
-                Log.d(
-                    "MQTTCredentialsResponse",
-                    "Fetched MQTTCredentialsResponse: ${sendMessageResponse}"
-                )
             }
 
 
@@ -664,13 +656,15 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     /**
      * Save Aws Credentials in data store
      */
-    private fun saveAwsCredentials(mqttsCredentials: Credentials) {
+    private fun saveAwsCredentials(credentials: Credentials) {
         // Save new credentials (example usage)
         val newCredentials = NCWAwsCredentials(
-            accessKey = mqttsCredentials.accessKeyId,
-            secretKey = mqttsCredentials.secretAccessKey,
-            sessionToken = mqttsCredentials.SessionToken,
-            iotEndpoint = mqttsCredentials.IoTHostEndPoint
+            accessKey = credentials.accessKeyId,
+            secretKey = credentials.secretAccessKey,
+            sessionToken = credentials.SessionToken,
+            iotEndpoint = credentials.IoTHostEndPoint,
+            expiresIn = credentials.expiresIn
+
         )
         ncwAwsCredentialsViewModel.saveAwsCredentials(newCredentials)
 
