@@ -503,7 +503,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             }
 
             is State.Error -> {
-                Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
+              //  Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
             }
 
             else -> {
