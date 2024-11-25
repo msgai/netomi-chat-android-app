@@ -1,8 +1,10 @@
 package com.netomi.chat.utils
 
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.media.MediaMetadataRetriever
 import android.util.Log
 import android.view.View
 import android.widget.Button

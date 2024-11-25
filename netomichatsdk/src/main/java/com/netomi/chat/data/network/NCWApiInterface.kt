@@ -1,8 +1,10 @@
 package com.netomi.chat.data.network
 
+import com.netomi.chat.model.GetChatHistoryResponse
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.SendMessageResponse
+import com.netomi.chat.model.chat_history.GetChatHistoryPayload
 import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.theme.ThemeResponse
@@ -44,8 +46,8 @@ interface NCWApiInterface {
      *
      * @return A `Response` object wrapping a ArrayList of `NCWMessage` objects.
      */
-    @GET("chat/history")
-    fun fetchChatHistory(): Response<NCWBaseResponse<ArrayList<NCWMessage>>>
+    @POST("api/webhook-history-v2")
+    suspend fun fetchChatHistory(@Body payload: GetChatHistoryPayload?): Response<GetChatHistoryResponse>
 
     /**
      * Sends a new chat message to the NCW server.

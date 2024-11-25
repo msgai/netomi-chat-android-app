@@ -13,6 +13,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.VideoView
 import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -24,6 +25,7 @@ import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.utils.ChatActionCallback
+import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppConstant.INITIAL
 import com.netomi.chat.utils.NCWAppConstant.USER
 import com.netomi.chat.utils.NCWAppUtils
@@ -36,55 +38,58 @@ class ChatAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
-        private const val VIEW_TYPE_SENDER = 1
-        private const val VIEW_TYPE_RECEIVER = 2
-        private const val VIEW_INITIAL = 3
+        private const val VIEW_TYPE_REQUEST = 1
+        private const val VIEW_TYPE_RESPONSE = 2
+        private const val VIEW_INDICATOR = 3
     }
 
     override fun getItemViewType(position: Int): Int {
         return when (messages[position].sender) {
-            USER -> VIEW_TYPE_SENDER
-            INITIAL -> VIEW_INITIAL
-            else -> VIEW_TYPE_RECEIVER
+            NCWAppConstant.TYPE_REQUEST -> VIEW_TYPE_REQUEST
+            INITIAL -> VIEW_INDICATOR
+            else -> VIEW_TYPE_RESPONSE
         }
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val view = when (viewType) {
-            VIEW_TYPE_SENDER -> inflater.inflate(R.layout.item_sender, parent, false)
-            VIEW_INITIAL -> inflater.inflate(R.layout.layout_initial, parent, false)
+            VIEW_TYPE_REQUEST -> inflater.inflate(R.layout.item_sender, parent, false)
+            VIEW_INDICATOR -> inflater.inflate(R.layout.layout_add_loader, parent, false)
             else -> inflater.inflate(R.layout.item_receiver, parent, false)
         }
         return when (viewType) {
-            VIEW_TYPE_SENDER -> SenderViewHolder(view, themeData)
-            VIEW_INITIAL -> InitialViewHolder(view, themeData,actionCallback)
-            else -> ReceiverViewHolder(view,themeData,actionCallback)
+            VIEW_TYPE_REQUEST -> RequestViewHolder(view, themeData)
+            VIEW_INDICATOR -> InitialViewHolder(view)
+            else -> ResponseViewHolder(view,themeData,actionCallback)
         }
     }
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = messages[position]
 
         when (holder) {
-            is SenderViewHolder -> holder.bind(message)
-            is ReceiverViewHolder -> holder.bind(message,position)
-            is InitialViewHolder -> holder.bind(message,position)
+            is RequestViewHolder -> holder.bind(message)
+            is ResponseViewHolder -> holder.bind(message,position)
+           // is InitialViewHolder -> holder.bind(message,position)
         }
     }
 
     override fun getItemCount(): Int = messages.size
 
-    class SenderViewHolder(itemView: View, private val themeData: ThemeResponse?) : RecyclerView.ViewHolder(itemView) {
+    class RequestViewHolder(itemView: View, private val themeData: ThemeResponse?) : RecyclerView.ViewHolder(itemView) {
         private val messageText: TextView = itemView.findViewById(R.id.tvSenderMessage)
         private val imageView: ImageView = itemView.findViewById(R.id.senderImage)
-        private val videoView: VideoView = itemView.findViewById(R.id.senderVideo)
+        private val videoView: ImageView = itemView.findViewById(R.id.senderVideo)
         private val senderImageCard: CardView = itemView.findViewById(R.id.senderImageCard)
         private val tvTime: TextView = itemView.findViewById(R.id.tvTime)
+        private val senderVideoCard: CardView = itemView.findViewById(R.id.senderVideoCard)
+
 
 
         fun bind(message: NCWMessage) {
             // Show or hide views based on the message type
             tvTime.text=NCWAppUtils.formatTimestampToTime(message.timestamp)
             if (message.type == MessageType.TEXT) {
+                senderVideoCard.visibility = View.GONE
                 messageText.visibility = View.VISIBLE
                 messageText.text = message.message
                 imageView.visibility = View.GONE
@@ -102,59 +107,36 @@ class ChatAdapter(
                 ThemeUtils.applyTheme(messageText)
 
             } else if (message.type == MessageType.IMAGE) {
+                senderVideoCard.visibility = View.GONE
                 imageView.visibility = View.VISIBLE
                 imageView.setImageURI(Uri.parse(message.message))
                 // Glide.with(itemView.context).load(message.content).into(imageView)
                 messageText.visibility = View.GONE
                 videoView.visibility = View.GONE
                 senderImageCard.visibility = View.VISIBLE
-            } /*else if (message.type == MessageType.VIDEO) {
+            } else if (message.type == MessageType.VIDEO) {
+                senderVideoCard.visibility = View.VISIBLE
+                Log.e("Dataqtat",""+message.message)
                 videoView.visibility = View.VISIBLE
-                videoView.setVideoPath(message.message)
-                videoView.start()
+                Glide.with(itemView.context)
+                    .load(message.message)
+                    .apply(RequestOptions().frame(1000)) 
+                    .into(videoView)
                 messageText.visibility = View.GONE
                 imageView.visibility = View.GONE
                 senderImageCard.visibility = View.GONE
-            }*/
+            }
         }
     }
 
     class InitialViewHolder(
         itemView: View,
-        themeData: ThemeResponse?,
-        private val actionCallback: ChatActionCallback
     ) : RecyclerView.ViewHolder(itemView) {
-        private val chipContainer: LinearLayout = itemView.findViewById(R.id.initialReplyChipContainer)
-        private val strokeColor = Color.parseColor(themeData?.botResponseBubbleColor ?: "000000")
-        private val whiteColor = Color.parseColor("#FFFFFF")
+        private val LoaderContainer: ConstraintLayout = itemView.findViewById(R.id.constRow)
 
-        fun bind(message: NCWMessage, position: Int) {
-            chipContainer.removeAllViews() // Clear any existing chips
-            chipContainer.visibility = View.VISIBLE
-
-            message.quickReply?.options?.let { options ->
-                options.forEach { option ->
-                    val chip = Chip(itemView.context).apply {
-                        text = option.label
-                        isClickable = true
-                        isCheckable = false
-                        setOnClickListener {
-                            Log.e("option.metadata", "" + option.metadata)
-                            actionCallback.onQuickReply(option,position)
-                        }
-                        chipBackgroundColor = ColorStateList.valueOf(whiteColor)
-                        setTextColor(strokeColor)
-                        chipStrokeWidth = 1f
-                        chipCornerRadius = 10f
-                        chipStrokeColor = ColorStateList.valueOf(strokeColor)
-                    }
-                    chipContainer.addView(chip) // Add chips directly to the LinearLayout
-                }
-            }
-        }
     }
 
-    class ReceiverViewHolder(
+    class ResponseViewHolder(
         itemView: View,
         val themeData: ThemeResponse?,
         private val chatActionCallback:ChatActionCallback
@@ -224,7 +206,7 @@ class ChatAdapter(
                 MessageType.VIDEO -> {
                     Glide.with(itemView.context)
                         .load(message.thumbnailUrl)
-                        .apply(RequestOptions().frame(1000)) // Fetch the frame at 1 second (1000 ms)
+                        .apply(RequestOptions().frame(1000)) 
                         .into(videoView)
 
                     videoView.visibility = View.VISIBLE

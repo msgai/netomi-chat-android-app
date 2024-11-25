@@ -16,6 +16,9 @@ object NCWAppConstant {
     const val INITIAL="Initial"
     const val CHAT_WIDGET="chat_widget"
 
+    const val TYPE_RESPONSE="RESPONSE"
+    const val TYPE_REQUEST="REQUEST"
+
     const val BOT="BOT"
 
     const val TIME_AM_PM="hh:mm a"

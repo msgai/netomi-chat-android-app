@@ -116,7 +116,7 @@
         android:layout_height="0dp"
 
         android:background="@android:color/white"
-        android:padding="0dp"
+     android:paddingBottom="10dp"
         app:layout_constraintBottom_toTopOf="@id/layBottom"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

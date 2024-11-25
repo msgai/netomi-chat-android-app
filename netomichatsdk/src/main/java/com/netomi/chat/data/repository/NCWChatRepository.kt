@@ -4,9 +4,11 @@ import android.content.Context
 import com.netomi.chat.data.network.NCWApiInterface
 import com.netomi.chat.data.network.NCWBaseService
 import com.netomi.chat.data.network.NCWRetrofitClient
+import com.netomi.chat.model.GetChatHistoryResponse
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.SendMessageResponse
+import com.netomi.chat.model.chat_history.GetChatHistoryPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.utils.NCWBaseResponse
@@ -37,8 +39,8 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
         NCWRetrofitClient.getInstance(context).create(NCWApiInterface::class.java)
 
     // Fetch chat history
-    fun getChatHistory(): State<NCWBaseResponse<ArrayList<NCWMessage>>> {
-        val response = apiInterface.fetchChatHistory()
+    suspend fun getChatHistory(payload: GetChatHistoryPayload?): State<GetChatHistoryResponse> {
+        val response = apiInterface.fetchChatHistory(payload)
         return if (response.isSuccessful && response.body() != null) {
             State.success(data = response.body()!!, Routes.ROUTE_GET_CHAT)
         } else {

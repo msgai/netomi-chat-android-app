@@ -29,11 +29,14 @@ import com.google.gson.Gson
 import com.netomi.chat.R
 import com.netomi.chat.awsiot.ConnectionStatus
 import com.netomi.chat.config.NCWSdkConfig
+import com.netomi.chat.model.GetChatHistoryResponse
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.awsmqtt.NCWAwsCredentials
+import com.netomi.chat.model.chat_history.GetChatHistoryPayload
+import com.netomi.chat.model.chat_history.HistoryRequestBody
 import com.netomi.chat.model.messages.Attachment
 import com.netomi.chat.model.messages.CarouselButton
 import com.netomi.chat.model.messages.GenericChannelResponse
@@ -53,7 +56,10 @@ import com.netomi.chat.utils.NCWAppConstant.ARG_IMAGE_URL
 import com.netomi.chat.utils.NCWAppConstant.BOT
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
+import com.netomi.chat.utils.NCWAppConstant.INITIAL
 import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
+import com.netomi.chat.utils.NCWAppConstant.TYPE_REQUEST
+import com.netomi.chat.utils.NCWAppConstant.TYPE_RESPONSE
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
@@ -122,9 +128,10 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         observeChatMessages()
         loadInitialMessages()
 
+
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         chatViewModel.getConversationId(botRefId)
-
+        //getChatHistory()
         sendMessageIcon.setOnClickListener {
             if (!NCWAppUtils.isNetworkAvailable(this)) {
                 NCWAppUtils.showToast(this, "Please check your network and try again.")
@@ -134,8 +141,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         }
 
         attachmentIcon.setOnClickListener {
-            //requestPermissionsAndShowMediaOptions()
-            Toast.makeText(this,R.string.under_development,Toast.LENGTH_SHORT).show()
+            requestPermissionsAndShowMediaOptions()
+         //   Toast.makeText(this,R.string.under_development,Toast.LENGTH_SHORT).show()
 
         }
         ivMenuOption.setOnClickListener{
@@ -214,7 +221,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         themeData?.initialFlows?.header?.let { header ->
             messageList.add(
                 NCWMessage(
-                    sender = "BOT",
+                    sender = TYPE_RESPONSE,
                     type = MessageType.TEXT,
                     message = header,
                     timestamp = System.currentTimeMillis()
@@ -234,7 +241,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
             messageList.add(
                 NCWMessage(
-                    sender = BOT,
+                    sender = TYPE_RESPONSE,
                     timestamp = System.currentTimeMillis(),
                     quickReply = QuickReply(options = ArrayList(options))
                 )
@@ -400,6 +407,13 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             updateMessageList(message)
         })
 
+        chatViewModel.getChatHistory.observe(this, Observer { messages ->
+           // updateMessageList(message)
+
+            handleApiCallback(messages as State<Any>)
+
+        })
+
         chatViewModel.awsMessage.observe(this, Observer { jsonMessage ->
             try {
                 val response = Gson().fromJson(jsonMessage, GenericChannelResponse::class.java)
@@ -467,7 +481,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
 
             return NCWMessage(
-                sender = "BOT",
+                sender = TYPE_RESPONSE,
                 type = messageType,
                 timestamp = attach.timestamp ?: System.currentTimeMillis(),
                 message = attach.text,
@@ -484,16 +498,40 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
     // Helper function to update the adapter and scroll to the latest message
     private fun updateMessageList(newMessages: List<NCWMessage>) {
+        removeLoader()
         messageList.addAll(newMessages)
         messageAdapter.notifyDataSetChanged()
-        chatRecyclerView.scrollToPosition(messageList.size - 1)
+        chatRecyclerView.post {
+            chatRecyclerView.scrollToPosition(messageList.size - 1)
+        }
+
+        getChatHistory()
     }
 
     // Overloaded helper function for a single message
     private fun updateMessageList(newMessage: NCWMessage) {
         messageList.add(newMessage)
         messageAdapter.notifyDataSetChanged()
-        chatRecyclerView.scrollToPosition(messageList.size - 1)
+        chatRecyclerView.scrollToPosition(messageList.size)
+        addLoader()
+    }
+    private fun removeLoader() {
+        val lastIndex = messageList.lastIndex
+        if (lastIndex >= 0) {
+            messageList.removeAt(lastIndex)
+        }
+    }
+
+
+
+    private fun addLoader() {
+        messageList.add(
+            NCWMessage(
+                sender = INITIAL,
+                type = MessageType.TEXT,
+                timestamp = System.currentTimeMillis()
+            )
+        )
     }
 
 
@@ -558,16 +596,16 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     }
 
 
-    private fun openCamera() {
-        val imageFile = createImageFile()
-        photoUri = imageFile?.let {
-            FileProvider.getUriForFile(
-                this, "${applicationContext.packageName}.fileprovider",
-                it
-            )
+        private fun openCamera() {
+            val imageFile = createImageFile()
+            photoUri = imageFile?.let {
+                FileProvider.getUriForFile(
+                    this, "${applicationContext.packageName}.fileprovider",
+                    it
+                )
+            }
+            cameraLauncherMain.launch(photoUri)
         }
-        cameraLauncherMain.launch(photoUri)
-    }
 
 
     private val cameraLauncherMain =
@@ -606,7 +644,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 if (type!!.startsWith("image/")) {
                     addMediaMessage(selectedMediaUri, MessageType.IMAGE)
                 } else if (type.startsWith("video/")) {
-                   // addMediaMessage(selectedMediaUri, MessageType.VIDEO)
+                   addMediaMessage(selectedMediaUri, MessageType.VIDEO)
                 }
             }
         }
@@ -614,7 +652,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     // Add media message (image or video) to the chat
     private fun addMediaMessage(uri: Uri, type: MessageType) {
         val newMessage = NCWMessage(
-            sender = "User",
+            sender = TYPE_REQUEST,
             type = type,
             message = uri.toString(),
             timestamp = System.currentTimeMillis()
@@ -638,6 +676,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                         "ConversationID",
                         "Fetched conversation ID: $conversationID"
                     )
+                   getChatHistory()
                 } else {
                     // Handle the case where conversationID is null
                     Log.d("ConversationID", "Conversation ID is null")
@@ -661,9 +700,43 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 )
             }
 
+            Routes.ROUTE_GET_CHAT -> {
+                val response = apiResponse as GetChatHistoryResponse
+                Log.d(
+                    "MQTTCredentialsResponse",
+                    "Fetched MQTTCredentialsResponse: ${response}"
+                )
+
+                if (response!=null && response.responses.size>0){
+                    parseHistoryItems(response.responses)
+                }
+            }
+
 
         }
 
+    }
+
+    private fun parseHistoryItems(responses: ArrayList<GenericChannelResponse>) {
+
+
+    }
+
+    private fun getChatHistory() {
+
+        val payload = conversationID?.let {
+            botRefId?.let { it1 ->
+                GetChatHistoryPayload(
+                    conversationId = it,
+                    requestBody = HistoryRequestBody(
+                        numberOfMessages = 100,
+                        numberOfDays = 10
+                    ),
+                    botRefId = it1
+                )
+            }
+        }
+        chatViewModel.getChatHistory(payload)
     }
 
     /**
