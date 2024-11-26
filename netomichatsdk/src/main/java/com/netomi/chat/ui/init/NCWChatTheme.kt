@@ -1,6 +1,7 @@
 package com.netomi.chat.ui.init
 
 import android.content.Context
+import android.util.Log
 import com.netomi.chat.data.network.NCWApiInterface
 import com.netomi.chat.data.network.NCWRetrofitClient
 import com.netomi.chat.model.theme.ThemeResponse
@@ -37,6 +38,7 @@ class NCWChatTheme(
                     }
                 }
             } catch (e: Exception) {
+                Log.e("Exceptoo","aassaas"+e.printStackTrace())
                 withContext(Dispatchers.Main) {
                     onError(e.message ?: "Unknown error")
                 }

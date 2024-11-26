@@ -1,17 +1,19 @@
 package com.netomi.chat.data.repository
 
 import android.content.Context
+import androidx.lifecycle.MutableLiveData
 import com.netomi.chat.data.network.NCWApiInterface
 import com.netomi.chat.data.network.NCWBaseService
 import com.netomi.chat.data.network.NCWRetrofitClient
 import com.netomi.chat.model.GetChatHistoryResponse
 import com.netomi.chat.model.GetConversationIdResponse
-import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.chat_history.GetChatHistoryPayload
+import com.netomi.chat.model.media_payload.SignedUrlPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.messages.WebhookPayload
-import com.netomi.chat.utils.NCWBaseResponse
+import com.netomi.chat.model.presigned_url.GetPreSignedUrl
+import com.netomi.chat.ui.viewmodel.SingleLiveEvent
 import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
 
@@ -39,7 +41,9 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
         NCWRetrofitClient.getInstance(context).create(NCWApiInterface::class.java)
 
     // Fetch chat history
-    suspend fun getChatHistory(payload: GetChatHistoryPayload?): State<GetChatHistoryResponse> {
+    suspend fun <T> getChatHistory(payload: GetChatHistoryPayload?, liveData: MutableLiveData<State<T>>,
+                               loadingType: State.LoadingType? = State.LoadingType.LOADER): State<GetChatHistoryResponse> {
+        liveData.postValue(State.loading(Routes.ROUTE_GET_CHAT, loadingType))
         val response = apiInterface.fetchChatHistory(payload)
         return if (response.isSuccessful && response.body() != null) {
             State.success(data = response.body()!!, Routes.ROUTE_GET_CHAT)
@@ -74,8 +78,11 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
 
 
     // API to get ConversationId
-    suspend fun getConversationId(botRef: String?): State<GetConversationIdResponse> {
+    suspend fun getConversationId(
+        botRef: String?,
+    ): State<GetConversationIdResponse> {
         return try {
+        //    liveData.value = State.loading(Routes.ROUTE_GET_CONVERSATION_ID, loadingType)
             val response = apiInterface.getConversationId(botRef)
             if (response.isSuccessful && response.body() != null) {
                 State.success(data = response.body()!!, Routes.ROUTE_GET_CONVERSATION_ID)
@@ -109,6 +116,20 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
         } catch (e: Exception) {
             State.error(e.message.toString(), code = 500)
         }
+    }
+
+    suspend fun getPreSignedUrl(payload: SignedUrlPayload): State<GetPreSignedUrl> {
+            val response = apiInterface.getPreSignedUrl(payload)
+            return if (response.isSuccessful && response.body() != null) {
+                State.success(data = response.body()!!, Routes.ROUTE_GET_PRESIGNED_URL)
+            } else {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    State.error(parseError(errorBody), code = response.code())
+                } else {
+                    State.error(mapApiException(response.code()), code = response.code())
+                }
+            }
     }
 
 }

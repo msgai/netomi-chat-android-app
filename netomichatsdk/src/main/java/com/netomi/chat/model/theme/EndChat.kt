@@ -7,7 +7,7 @@ data class EndChat(
     val endChatGreetingDelay: String,
     val endChatGreeting_: String,
     val endChatQuery_: String,
-    val idleTimeout: Int,
+    val idleTimeout: Long,
     val isSendTranscriptEnabled: Boolean,
     val sendTranscriptCTA: String
 )

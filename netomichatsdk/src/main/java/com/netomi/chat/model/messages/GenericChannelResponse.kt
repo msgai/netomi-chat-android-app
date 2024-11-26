@@ -21,7 +21,8 @@ data class RequestPayload(
     val channelId: String? = null,
     val ownerType: String? = null,
     val eventType: String? = null,
-    val triggerType: String? = null
+    val triggerType: String? = null,
+    var messagePayload : MessagePayload? = null,
 )
 data class Attachment(
     val type: String? = null,

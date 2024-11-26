@@ -1,7 +1,9 @@
 package com.netomi.chat.ui.view
 
+import IdleTimeoutManager
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -13,6 +15,7 @@ import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,6 +40,7 @@ import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.awsmqtt.NCWAwsCredentials
 import com.netomi.chat.model.chat_history.GetChatHistoryPayload
 import com.netomi.chat.model.chat_history.HistoryRequestBody
+import com.netomi.chat.model.media_payload.SignedUrlPayload
 import com.netomi.chat.model.messages.Attachment
 import com.netomi.chat.model.messages.CarouselButton
 import com.netomi.chat.model.messages.GenericChannelResponse
@@ -47,17 +51,18 @@ import com.netomi.chat.model.messages.RequestBody
 import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.model.mqtt.Credentials
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
+import com.netomi.chat.model.presigned_url.GetPreSignedUrl
 import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.ChatActionCallback
+
 import com.netomi.chat.utils.NCWAppConstant.ARG_IMAGE_URL
-import com.netomi.chat.utils.NCWAppConstant.BOT
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
-import com.netomi.chat.utils.NCWAppConstant.INITIAL
 import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
+import com.netomi.chat.utils.NCWAppConstant.TYPE_INDICATOR
 import com.netomi.chat.utils.NCWAppConstant.TYPE_REQUEST
 import com.netomi.chat.utils.NCWAppConstant.TYPE_RESPONSE
 import com.netomi.chat.utils.NCWAppUtils
@@ -105,17 +110,20 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private lateinit var ivMenuOption: AppCompatImageView
     private lateinit var ivMenu:ImageView
     private lateinit var  connectionHeader:TextView
+    private lateinit var progressBar:ProgressBar
     private var photoUri: Uri? = null
     private var ncwSdkConfig: NCWSdkConfig? = null
     private var themeData: ThemeResponse? = null
 
     private var conversationID : String? = null
     private var botRefId : String? = null
+    private lateinit var idleTimeoutManager: IdleTimeoutManager
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
+        Log.e("Testingggg","onCreate")
         initViews()
         // Load theme and config
         themeData = ThemeUtils.getThemeData()
@@ -126,12 +134,20 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
         applyTheme(themeData)
         observeChatMessages()
-        loadInitialMessages()
+      //  loadInitialMessages()
 
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
-        chatViewModel.getConversationId(botRefId)
-        //getChatHistory()
+
+       if(ThemeUtils.getConversationID()==null) {
+           loadInitialMessages()
+            chatViewModel.getConversationId(botRefId)
+        }else
+        {
+            conversationID=ThemeUtils.getConversationID()
+            chatViewModel.getAWSMQTTCredentials(botRefId)
+            getChatHistory()
+        }
         sendMessageIcon.setOnClickListener {
             if (!NCWAppUtils.isNetworkAvailable(this)) {
                 NCWAppUtils.showToast(this, "Please check your network and try again.")
@@ -154,6 +170,57 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
         closeIcon.setOnClickListener { finish() }
 
+    //    getPreSignedUrl()
+
+        // Initialize IdleTimeoutManager with a timeout and a callback for session timeout
+        themeData?.endChat?.idleTimeout?.let {
+            idleTimeoutManager = IdleTimeoutManager(
+                idleTimeoutMillis = it,
+                onTimeout = { handleSessionTimeout() }
+            )
+
+        }
+
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Check for timeout whenever the activity is resumed
+        idleTimeoutManager.checkForTimeout()
+    }
+
+
+    override fun onUserInteraction() {
+        super.onUserInteraction()
+        Log.e("Clickkk", "onUserInteraction, updating last active time")
+
+        // Update last active time on any interaction
+        idleTimeoutManager.updateLastActiveTime()
+
+        // Check if session has timed out
+        idleTimeoutManager.checkForTimeout()
+    }
+
+    /**
+     * Handles the session timeout logic.
+     */
+    private fun handleSessionTimeout() {
+        // Show a timeout dialog or perform other actions
+        AlertDialog.Builder(this)
+            .setTitle("Session Timeout")
+            .setMessage("Your session has expired due to inactivity.")
+            .setPositiveButton("OK") { _, _ -> finish() }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun getPreSignedUrl() {
+        val mediaUpload = SignedUrlPayload(
+            fileType = "",
+            uploadKeyPrefix = "media/image/NzgyNDY4.jpg"
+        )
+        chatViewModel.getPreSignedUrl(mediaUpload)
 
     }
 
@@ -171,6 +238,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             chatViewModel.sendMessageAPI(payload)
             messageInputField.text.clear()
         }
+      //  idleTimeoutManager.updateLastActiveTime()
+        idleTimeoutManager.checkForTimeout()
     }
 
      /**
@@ -297,6 +366,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
      * Initializes and binds UI components in the chat activity layout.
      */
     private fun initViews() {
+         progressBar = findViewById(R.id.progressBar)
         headerContainer = findViewById(R.id.constHeader)
         messageInputField = findViewById(R.id.edtMessage)
         sendMessageIcon = findViewById(R.id.ivSend)
@@ -408,11 +478,14 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         })
 
         chatViewModel.getChatHistory.observe(this, Observer { messages ->
-           // updateMessageList(message)
-
             handleApiCallback(messages as State<Any>)
 
         })
+        chatViewModel.getSignedUrl.observe(this, Observer { signedUrl ->
+            handleApiCallback(signedUrl as State<Any>)
+
+        })
+
 
         chatViewModel.awsMessage.observe(this, Observer { jsonMessage ->
             try {
@@ -434,6 +507,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
 
         ncwAwsCredentialsViewModel.connectionStatus.observe(this) { status ->
+
+           Log.e("Status","stauuyys "+status)
             when (status) {
                 ConnectionStatus.CONNECTING.toString() -> {
                     connectionHeader.text = getString(R.string.connecting)
@@ -505,7 +580,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             chatRecyclerView.scrollToPosition(messageList.size - 1)
         }
 
-        getChatHistory()
+       // getChatHistory()
     }
 
     // Overloaded helper function for a single message
@@ -527,7 +602,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private fun addLoader() {
         messageList.add(
             NCWMessage(
-                sender = INITIAL,
+                sender = TYPE_INDICATOR,
                 type = MessageType.TEXT,
                 timestamp = System.currentTimeMillis()
             )
@@ -538,7 +613,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private fun handleApiCallback(response: State<Any>) {
         when (response) {
             is State.Loading -> {
-                Toast.makeText(this, "Loading..", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this, "Loading..", Toast.LENGTH_SHORT).show()
+                progressBar.visibility = View.VISIBLE
             }
 
             is State.Success -> {
@@ -547,6 +623,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
             is State.Error -> {
                 Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
+                progressBar.visibility = View.GONE
             }
 
             else -> {
@@ -672,11 +749,12 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                     // Use conversationID as needed
                     conversationID=response.conversationID
                     chatViewModel.getAWSMQTTCredentials(botRefId)
+                    conversationID?.let { ThemeUtils.setConversationID(it) }
                     Log.d(
                         "ConversationID",
                         "Fetched conversation ID: $conversationID"
                     )
-                   getChatHistory()
+
                 } else {
                     // Handle the case where conversationID is null
                     Log.d("ConversationID", "Conversation ID is null")
@@ -702,14 +780,18 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
             Routes.ROUTE_GET_CHAT -> {
                 val response = apiResponse as GetChatHistoryResponse
-                Log.d(
-                    "MQTTCredentialsResponse",
-                    "Fetched MQTTCredentialsResponse: ${response}"
-                )
-
                 if (response!=null && response.responses.size>0){
                     parseHistoryItems(response.responses)
                 }
+                progressBar.visibility = View.GONE
+            }
+
+            Routes.ROUTE_GET_PRESIGNED_URL -> {
+                val response = apiResponse as GetPreSignedUrl
+                Log.d(
+                    "ROUTE_GET_PRESIGNED_URL",
+                    "Fetched ROUTE_GET_PRESIGNED_URL: ${response}"
+                )
             }
 
 
@@ -719,11 +801,59 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
     private fun parseHistoryItems(responses: ArrayList<GenericChannelResponse>) {
 
+        responses.forEach {response->
+
+            if (response.triggerType== TYPE_RESPONSE){
+                val newMessages =
+                    response.attachments?.mapNotNull { mapAttachmentToMessage(it) } ?: emptyList()
+                if (newMessages.isNotEmpty())
+                {
+                    newMessages.forEachIndexed { index, message ->
+                        message.isSameTimeMessage = index == 0
+                    }
+                }
+                    messageList.addAll(newMessages)
+            }
+            else{
+                val newMessage = NCWMessage(
+                    id = System.currentTimeMillis().toString(),
+                    message = response.requestPayload?.messagePayload?.text,
+                    timestamp = response.timestamp?:System.currentTimeMillis(),
+                    type = MessageType.TEXT,
+                    sender = TYPE_REQUEST,
+                )
+                messageList.add(newMessage)
+
+            }
+
+        }
+
+        messageAdapter.notifyDataSetChanged()
+        chatRecyclerView.scrollToPosition(messageList.size-1)
+
 
     }
 
-    private fun getChatHistory() {
+    private fun mapRequestToMessage(attachment: Attachment): NCWMessage? {
+        val attach = attachment.attachment ?: return null
+        val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
 
+        return NCWMessage(
+            sender = TYPE_RESPONSE,
+            type = messageType,
+            timestamp = attach.timestamp ?: System.currentTimeMillis(),
+            message = attach.text,
+            carouselItems = if (messageType == MessageType.CAROUSEL) attach.elements else null,
+            thumbnailUrl = if (messageType == MessageType.VIDEO) attach.thumbnailUrl else null,
+            title = if (messageType == MessageType.CARD) attach.title else null,
+            buttons = if (messageType == MessageType.CARD) attach.buttons else arrayListOf(),
+            largeImageUrl = if (messageType == MessageType.IMAGE) attach.largeImageUrl else null,
+            quickReply = attach.quickReply
+        )
+    }
+
+    private fun getChatHistory() {
+Log.e("ChatHistoryCalled","getChatHistoryCalled")
         val payload = conversationID?.let {
             botRefId?.let { it1 ->
                 GetChatHistoryPayload(
@@ -753,6 +883,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         ncwAwsCredentialsViewModel.saveAwsCredentials(newCredentials)
 
         val topic = "$CHAT_WIDGET/$botRefId/$conversationID"
+        Log.e("Topic","Dataa  kskks "+topic)
         ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)
 
     }

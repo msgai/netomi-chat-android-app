@@ -91,6 +91,7 @@ object NCWChatSdk {
      * @param context The context from which the activity is started.
      */
     private fun startChatActivity(context: Context) {
+        Log.e("Testingggg","startChatActivity")
         val intent = Intent(context, NCWChatActivity::class.java).apply {
             putExtra(NCWAppConstant.BOT_REFERENCE_ID, botRefId)
         }

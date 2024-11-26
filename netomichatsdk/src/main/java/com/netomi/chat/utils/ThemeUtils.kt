@@ -27,6 +27,14 @@ object ThemeUtils
         return themeData
     }
 
+    private var conversationID : String? = null
+
+    fun setConversationID(id: String) {
+        conversationID = id
+    }
+    fun getConversationID():String?{
+        return conversationID
+    }
 
 
     fun applyTheme(view: View) {
@@ -154,7 +162,7 @@ object ThemeUtils
      * @param cornerRadii Array of corner radii in the order of top-left, top-right, bottom-right, and bottom-left.
      */
     fun applyChipBackgroundWithCorners(
-        textView: TextView,
+        textView: View,
         cornerRadii: FloatArray = floatArrayOf(10f, 10f, 10f, 10f, 10f, 10f, 10f, 10f),
         opacity: Int = 128
     ) {

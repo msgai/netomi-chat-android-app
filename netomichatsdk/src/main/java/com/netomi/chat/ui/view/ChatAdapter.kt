@@ -1,6 +1,5 @@
 package com.netomi.chat.ui.view
 
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -9,16 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.VideoView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.netomi.chat.R
 import com.netomi.chat.model.MessageType
@@ -26,8 +22,7 @@ import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.utils.ChatActionCallback
 import com.netomi.chat.utils.NCWAppConstant
-import com.netomi.chat.utils.NCWAppConstant.INITIAL
-import com.netomi.chat.utils.NCWAppConstant.USER
+
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.ThemeUtils
 
@@ -40,26 +35,26 @@ class ChatAdapter(
     companion object {
         private const val VIEW_TYPE_REQUEST = 1
         private const val VIEW_TYPE_RESPONSE = 2
-        private const val VIEW_INDICATOR = 3
+        private const val VIEW_TYPE_INDICATOR = 3
     }
 
     override fun getItemViewType(position: Int): Int {
         return when (messages[position].sender) {
             NCWAppConstant.TYPE_REQUEST -> VIEW_TYPE_REQUEST
-            INITIAL -> VIEW_INDICATOR
+            NCWAppConstant.TYPE_INDICATOR -> VIEW_TYPE_INDICATOR
             else -> VIEW_TYPE_RESPONSE
         }
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val view = when (viewType) {
-            VIEW_TYPE_REQUEST -> inflater.inflate(R.layout.item_sender, parent, false)
-            VIEW_INDICATOR -> inflater.inflate(R.layout.layout_add_loader, parent, false)
-            else -> inflater.inflate(R.layout.item_receiver, parent, false)
+            VIEW_TYPE_REQUEST -> inflater.inflate(R.layout.layout_request, parent, false)
+            VIEW_TYPE_INDICATOR -> inflater.inflate(R.layout.layout_add_loader, parent, false)
+            else -> inflater.inflate(R.layout.layout_response, parent, false)
         }
         return when (viewType) {
             VIEW_TYPE_REQUEST -> RequestViewHolder(view, themeData)
-            VIEW_INDICATOR -> InitialViewHolder(view)
+            VIEW_TYPE_INDICATOR -> InitialViewHolder(view)
             else -> ResponseViewHolder(view,themeData,actionCallback)
         }
     }

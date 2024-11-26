@@ -5,12 +5,17 @@ import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.chat_history.GetChatHistoryPayload
+import com.netomi.chat.model.media_payload.SignedUrlPayload
 import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
+import com.netomi.chat.model.presigned_url.GetPreSignedUrl
 import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.utils.NCWBaseResponse
+import com.netomi.chat.utils.Routes.ROUTE_GET_CHAT
 import com.netomi.chat.utils.Routes.ROUTE_GET_CONVERSATION_ID
 import com.netomi.chat.utils.Routes.ROUTE_GET_MQTT_CREDENTIALS
+import com.netomi.chat.utils.Routes.ROUTE_GET_PRESIGNED_URL
+import com.netomi.chat.utils.Routes.ROUTE_SEND_CHAT
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -46,7 +51,8 @@ interface NCWApiInterface {
      *
      * @return A `Response` object wrapping a ArrayList of `NCWMessage` objects.
      */
-    @POST("api/webhook-history-v2")
+
+    @POST(ROUTE_GET_CHAT)
     suspend fun fetchChatHistory(@Body payload: GetChatHistoryPayload?): Response<GetChatHistoryResponse>
 
     /**
@@ -58,7 +64,7 @@ interface NCWApiInterface {
      * @return A `Response` object wrapping a `Boolean` response (indicating the operation's success or failure).
      *
      */
-    @POST("api/webhook-message")
+    @POST(ROUTE_SEND_CHAT)
     suspend fun sendMessage(@Body message: WebhookPayload?): Response<SendMessageResponse>
 
     /**
@@ -98,5 +104,6 @@ interface NCWApiInterface {
     @GET(ROUTE_GET_MQTT_CREDENTIALS)
     suspend fun getAWSMQTTCredentials(@Query("botRef") botRef: String?): Response<MQTTCredentialsResponse>
 
-
+    @POST(ROUTE_GET_PRESIGNED_URL)
+    suspend fun getPreSignedUrl(@Body payload: SignedUrlPayload?): Response<GetPreSignedUrl>
 }
