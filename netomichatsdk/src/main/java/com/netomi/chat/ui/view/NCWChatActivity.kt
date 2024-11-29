@@ -1,18 +1,22 @@
 package com.netomi.chat.ui.view
 
+import IdleTimeoutManager
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,21 +26,25 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.netomi.chat.R
 import com.netomi.chat.awsiot.ConnectionStatus
-import com.netomi.chat.awsiot.NCWAwsIotManager
 import com.netomi.chat.config.NCWSdkConfig
+import com.netomi.chat.model.GetChatHistoryResponse
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.awsmqtt.NCWAwsCredentials
+import com.netomi.chat.model.chat_history.GetChatHistoryPayload
+import com.netomi.chat.model.chat_history.HistoryRequestBody
+import com.netomi.chat.model.media_payload.SignedUrlPayload
 import com.netomi.chat.model.messages.Attachment
+import com.netomi.chat.model.messages.AttachmentList
+import com.netomi.chat.model.messages.CarouselButton
 import com.netomi.chat.model.messages.GenericChannelResponse
 import com.netomi.chat.model.messages.MessagePayload
 import com.netomi.chat.model.messages.QuickReply
@@ -45,17 +53,24 @@ import com.netomi.chat.model.messages.RequestBody
 import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.model.mqtt.Credentials
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
+import com.netomi.chat.model.presigned_url.GetMediaUploadUrl
+import com.netomi.chat.model.presigned_url.GetPreSignedUrl
 import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.ChatActionCallback
+import com.netomi.chat.utils.DeviceInfoUtil
+import com.netomi.chat.utils.DialogUtils
+import com.netomi.chat.utils.FilePath
+
 import com.netomi.chat.utils.NCWAppConstant.ARG_IMAGE_URL
-import com.netomi.chat.utils.NCWAppConstant.BOT
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
-import com.netomi.chat.utils.NCWAppConstant.INITIAL
-import com.netomi.chat.utils.NCWAppConstant.USER
+import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
+import com.netomi.chat.utils.NCWAppConstant.TYPE_INDICATOR
+import com.netomi.chat.utils.NCWAppConstant.TYPE_REQUEST
+import com.netomi.chat.utils.NCWAppConstant.TYPE_RESPONSE
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
@@ -101,12 +116,15 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private lateinit var ivMenuOption: AppCompatImageView
     private lateinit var ivMenu:ImageView
     private lateinit var  connectionHeader:TextView
+    private lateinit var progressBar:ProgressBar
     private var photoUri: Uri? = null
     private var ncwSdkConfig: NCWSdkConfig? = null
     private var themeData: ThemeResponse? = null
 
     private var conversationID : String? = null
     private var botRefId : String? = null
+    private lateinit var idleTimeoutManager: IdleTimeoutManager
+    private var fileSend:File?=null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -122,11 +140,22 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
         applyTheme(themeData)
         observeChatMessages()
-        loadInitialMessages()
+      //  loadInitialMessages()
+
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
-        chatViewModel.getConversationId(botRefId)
+        val deviceInfo = DeviceInfoUtil.getDeviceInfo(this)
+        Log.d("DeviceInfo", "Device Info: $deviceInfo")
 
+       if(ThemeUtils.getConversationID()==null) {
+           loadInitialMessages()
+            chatViewModel.getConversationId(botRefId)
+        }else
+        {
+            conversationID=ThemeUtils.getConversationID()
+            chatViewModel.getAWSMQTTCredentials(botRefId)
+            getChatHistory()
+        }
         sendMessageIcon.setOnClickListener {
             if (!NCWAppUtils.isNetworkAvailable(this)) {
                 NCWAppUtils.showToast(this, "Please check your network and try again.")
@@ -136,10 +165,14 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         }
 
         attachmentIcon.setOnClickListener {
-            //requestPermissionsAndShowMediaOptions()
-            Toast.makeText(this,R.string.under_development,Toast.LENGTH_SHORT).show()
+            if (arePermissionsGranted())
+                showMediaOptions()
+                else
+            requestPermissionsAndShowMediaOptions()
+
 
         }
+
         ivMenuOption.setOnClickListener{
             Toast.makeText(this,R.string.under_development,Toast.LENGTH_SHORT).show()
         }
@@ -147,9 +180,81 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             Toast.makeText(this,R.string.under_development,Toast.LENGTH_SHORT).show()
         }
 
-        closeIcon.setOnClickListener { finish() }
+        closeIcon.setOnClickListener {
+            backClicked()
+           // finish()
+        }
+
+    //
+
+        // Initialize IdleTimeoutManager with a timeout and a callback for session timeout
+        themeData?.endChat?.idleTimeout?.let {
+            idleTimeoutManager = IdleTimeoutManager(
+                idleTimeoutMillis = it,
+                onTimeout = { handleSessionTimeout() }
+            )
+
+        }
+    }
+
+    private fun backClicked() {
+        DialogUtils.showCustomDialog(
+            context = this,
+            title = "Exit Chat",
+            subtitle = "Are you sure you want to exit from this chat?",
+            yesText = "Yes,Exit",
+            noText = "No",
+            titleColor = Color.RED,
+            subtitleColor = Color.DKGRAY,
+            backgroundColor = Color.LTGRAY,
+            onYesClick = {
+              //  Toast.makeText(this, "Item Deleted", Toast.LENGTH_SHORT).show()
+                         finish()
+            },
+            onNoClick = {
+              //  Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show()
+            }
+        )
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Check for timeout whenever the activity is resumed
+        idleTimeoutManager.checkForTimeout()
+    }
 
 
+    override fun onUserInteraction() {
+        super.onUserInteraction()
+        Log.e("Clickkk", "onUserInteraction, updating last active time")
+
+        // Update last active time on any interaction
+        idleTimeoutManager.updateLastActiveTime()
+
+        // Check if session has timed out
+        idleTimeoutManager.checkForTimeout()
+    }
+
+    /**
+     * Handles the session timeout logic.
+     */
+    private fun handleSessionTimeout() {
+        // Show a timeout dialog or perform other actions
+        AlertDialog.Builder(this)
+            .setTitle("Session Timeout")
+            .setMessage("Your session has expired due to inactivity.")
+            .setPositiveButton("OK") { _, _ -> finish() }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun getPreSignedUrl(type: String, uploadKeyPrefix: String) {
+        val mediaUpload = SignedUrlPayload(
+            fileType = type,
+            uploadKeyPrefix = uploadKeyPrefix
+        )
+        chatViewModel.getPreSignedUrl(mediaUpload)
     }
 
     /**
@@ -166,9 +271,10 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             chatViewModel.sendMessageAPI(payload)
             messageInputField.text.clear()
         }
+        idleTimeoutManager.checkForTimeout()
     }
 
-    /**
+     /**
      * Checks the last message in the list to determine if it has visible quick replies.
      * If quick replies are visible, it updates the visibility flag to `false`.
      */
@@ -189,7 +295,11 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
      * @param label Optional label for the message, default is null.
      * @return The constructed WebhookPayload.
      */
-    private fun createPayload(messageContent: String, label: String? = null): WebhookPayload {
+    private fun createPayload(
+        messageContent: String,
+        label: String? = null,
+        attachmentList: ArrayList<AttachmentList>? = null
+    ): WebhookPayload {
         val messageId = UUID.randomUUID().toString()
         return WebhookPayload(
             botRefId = botRefId,
@@ -198,8 +308,10 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 messagePayload = MessagePayload(
                     text = messageContent,
                     label = label,
-                    messageId = messageId
-                )
+                    messageId = messageId,
+
+                ),
+                attachmentList=attachmentList
             )
         )
     }
@@ -216,7 +328,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         themeData?.initialFlows?.header?.let { header ->
             messageList.add(
                 NCWMessage(
-                    sender = "BOT",
+                    sender = TYPE_RESPONSE,
                     type = MessageType.TEXT,
                     message = header,
                     timestamp = System.currentTimeMillis()
@@ -236,7 +348,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
             messageList.add(
                 NCWMessage(
-                    sender = BOT,
+                    sender = TYPE_RESPONSE,
                     timestamp = System.currentTimeMillis(),
                     quickReply = QuickReply(options = ArrayList(options))
                 )
@@ -272,17 +384,17 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 }
                 ThemeUtils.applyTheme(headerContainer)
             }
-          //  ThemeUtils.applyTheme(headerTextView)
+            //ThemeUtils.applyTheme(headerTextView)
             headerTextView.text = theme.title
 
-            /*  // Example usage for attachmentIcon (without rounded background) and sendMessageIcon (with circular background)
-               theme.theme?.color?.takeIf { it.isNotEmpty() }?.let { color ->
-                   Log.e("Enterrr","Enter herer")
-                   ThemeUtils.applyBackgroundAndTint(sendMessageIcon, color, isCircularBackground = true)
-                   ThemeUtils.applyBackgroundAndTint(attachmentIcon,
-                       color, isCircularBackground = false)
-               }
-   */
+         /*  // Example usage for attachmentIcon (without rounded background) and sendMessageIcon (with circular background)
+            theme.theme?.color?.takeIf { it.isNotEmpty() }?.let { color ->
+                Log.e("Enterrr","Enter herer")
+                ThemeUtils.applyBackgroundAndTint(sendMessageIcon, color, isCircularBackground = true)
+                ThemeUtils.applyBackgroundAndTint(attachmentIcon,
+                    color, isCircularBackground = false)
+            }
+*/
 
 
         }
@@ -292,6 +404,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
      * Initializes and binds UI components in the chat activity layout.
      */
     private fun initViews() {
+         progressBar = findViewById(R.id.progressBar)
         headerContainer = findViewById(R.id.constHeader)
         messageInputField = findViewById(R.id.edtMessage)
         sendMessageIcon = findViewById(R.id.ivSend)
@@ -323,23 +436,30 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     }
     override fun onQuickReply(option: QuickReplyOption?, position: Int) {
         messageList[position].isQuickReplyVisible = false
-        //   messageList.removeAt(position)
+     //   messageList.removeAt(position)
         onQuickReplyClicked(option)
 
     }
-
-    override fun onImageClick(imageUrl: String) {
-        onFullScreenView(imageUrl)
-    }
-
-    private fun onFullScreenView(imageUrl: String) {
-        val intent = Intent(this, FullScreenImageActivity::class.java).apply {
-            putExtra(ARG_IMAGE_URL, imageUrl)
+    override fun onMediaClick(message: NCWMessage) {
+        val mediaUrl = when (message.type) {
+            MessageType.VIDEO -> message.thumbnailUrl
+            MessageType.IMAGE -> message.largeImageUrl
+            else -> null
         }
-        startActivity(intent)
-
-
+        mediaUrl?.let {
+            val intent = Intent(this, FullScreenMediaActivity::class.java).apply {
+                putExtra(ARG_IMAGE_URL, mediaUrl)
+                putExtra(MEDIA_TYPE, message.type.name)
+            }
+            startActivity(intent)
+        }
     }
+
+    override fun carouselButtonAction(carouselButton: CarouselButton?) {
+
+        Log.e("CarouselButton","CarouselButton "+carouselButton)
+    }
+
 
     /**
      * Handles quick reply option click by sending a message based on the option selected.
@@ -395,6 +515,22 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             updateMessageList(message)
         })
 
+        chatViewModel.getChatHistory.observe(this, Observer { messages ->
+            handleApiCallback(messages as State<Any>)
+
+        })
+        chatViewModel.getSignedUrl.observe(this, Observer { signedUrl ->
+            handleApiCallback(signedUrl as State<Any>)
+
+        })
+        chatViewModel.getUploadedMediaUrl.observe(this, Observer { media ->
+            handleApiCallback(media as State<Any>)
+
+        })
+
+
+
+
         chatViewModel.awsMessage.observe(this, Observer { jsonMessage ->
             try {
                 val response = Gson().fromJson(jsonMessage, GenericChannelResponse::class.java)
@@ -415,6 +551,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
 
         ncwAwsCredentialsViewModel.connectionStatus.observe(this) { status ->
+
+           Log.e("Status","stauuyys "+status)
             when (status) {
                 ConnectionStatus.CONNECTING.toString() -> {
                     connectionHeader.text = getString(R.string.connecting)
@@ -456,46 +594,71 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         }
     }
 
-    // Helper function to map attachments to NCWMessage
-    private fun mapAttachmentToMessage(attachment: Attachment): NCWMessage? {
-        val attach = attachment.attachment ?: return null
-        val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
+        // Helper function to map attachments to NCWMessage
+        private fun mapAttachmentToMessage(attachment: Attachment): NCWMessage? {
+            val attach = attachment.attachment ?: return null
+            val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
 
-        return NCWMessage(
-            sender = "BOT",
-            type = messageType,
-            timestamp = attach.timestamp ?: System.currentTimeMillis(),
-            message = attach.text,
-            carouselItems = if (messageType == MessageType.CAROUSEL) attach.elements else null,
-            thumbnailUrl = if (messageType == MessageType.VIDEO) attach.thumbnailUrl else null,
-            title = if (messageType == MessageType.CARD) attach.title else null,
-            buttons = if (messageType == MessageType.CARD) attach.buttons else arrayListOf(),
-            largeImageUrl = if (messageType == MessageType.IMAGE) attach.largeImageUrl else null,
-            quickReply = attach.quickReply
-        )
-    }
+            return NCWMessage(
+                sender = TYPE_RESPONSE,
+                type = messageType,
+                timestamp = attach.timestamp ?: System.currentTimeMillis(),
+                message = attach.text,
+                carouselItems = if (messageType == MessageType.CAROUSEL) attach.elements else null,
+                thumbnailUrl = if (messageType == MessageType.VIDEO) attach.thumbnailUrl else null,
+                title = if (messageType == MessageType.CARD) attach.title else null,
+                buttons = if (messageType == MessageType.CARD) attach.buttons else arrayListOf(),
+                largeImageUrl = if (messageType == MessageType.IMAGE) attach.largeImageUrl else null,
+                quickReply = attach.quickReply
+            )
+        }
+
 
 
 
     // Helper function to update the adapter and scroll to the latest message
     private fun updateMessageList(newMessages: List<NCWMessage>) {
+        removeLoader()
         messageList.addAll(newMessages)
         messageAdapter.notifyDataSetChanged()
-        chatRecyclerView.scrollToPosition(messageList.size - 1)
+        chatRecyclerView.post {
+            chatRecyclerView.scrollToPosition(messageList.size - 1)
+        }
+
     }
 
     // Overloaded helper function for a single message
     private fun updateMessageList(newMessage: NCWMessage) {
         messageList.add(newMessage)
         messageAdapter.notifyDataSetChanged()
-        chatRecyclerView.scrollToPosition(messageList.size - 1)
+        chatRecyclerView.scrollToPosition(messageList.size)
+        addLoader()
+    }
+    private fun removeLoader() {
+        val lastIndex = messageList.lastIndex
+        if (lastIndex >= 0) {
+            messageList.removeAt(lastIndex)
+        }
+    }
+
+
+
+    private fun addLoader() {
+        messageList.add(
+            NCWMessage(
+                sender = TYPE_INDICATOR,
+                type = MessageType.TEXT,
+                timestamp = System.currentTimeMillis()
+            )
+        )
     }
 
 
     private fun handleApiCallback(response: State<Any>) {
         when (response) {
             is State.Loading -> {
-                Toast.makeText(this, "Loading..", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this, "Loading..", Toast.LENGTH_SHORT).show()
+                progressBar.visibility = View.VISIBLE
             }
 
             is State.Success -> {
@@ -503,7 +666,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             }
 
             is State.Error -> {
-              //  Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
+                progressBar.visibility = View.GONE
             }
 
             else -> {
@@ -514,20 +678,31 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
 
     private fun requestPermissionsAndShowMediaOptions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val permissions = arrayOf(
+        val permissions: Array<String> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(
                 Manifest.permission.CAMERA,
-                Manifest.permission.READ_MEDIA_IMAGES
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.READ_MEDIA_VIDEO
             )
-            requestPermissionLauncher.launch(permissions)
         } else {
-            val permissions = arrayOf(
+            arrayOf(
                 Manifest.permission.CAMERA,
                 Manifest.permission.READ_EXTERNAL_STORAGE
             )
-            requestPermissionLauncher.launch(permissions)
+        }
+        requestPermissionLauncher.launch(permissions)
+    }
+
+    private fun arePermissionsGranted(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        } else {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
         }
     }
+
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -553,23 +728,52 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     }
 
 
-    private fun openCamera() {
-        val imageFile = createImageFile()
-        photoUri = imageFile?.let {
-            FileProvider.getUriForFile(
-                this, "${applicationContext.packageName}.fileprovider",
-                it
-            )
+        private fun openCamera() {
+            val imageFile = createImageFile()
+            photoUri = imageFile?.let {
+                FileProvider.getUriForFile(
+                    this, "${applicationContext.packageName}.fileprovider",
+                    it
+                )
+            }
+            cameraLauncherMain.launch(photoUri)
         }
-        cameraLauncherMain.launch(photoUri)
-    }
 
+    private fun getFileFromUri(context: Context, uri: Uri): File? {
+        // Since `photoUri` is created from `createImageFile`, it already points to the file
+        return if ("file" == uri.scheme) {
+            File(uri.path!!)
+        } else {
+            // For safety, copy content to a cache file if the URI scheme isn't "file"
+            val tempFile = File(context.cacheDir, "temp_${System.currentTimeMillis()}.jpg")
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                tempFile.outputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+            }
+            tempFile
+        }
+    }
 
     private val cameraLauncherMain =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             if (success) {
                 photoUri?.let { uri ->
                     addMediaMessage(uri, MessageType.IMAGE)
+                }
+               // val type = photoUri?.let { contentResolver.getType(it) }
+             //   val type= photoUri?.let { NCWAppUtils.getMimeType(this, it) }
+
+                /*val path = photoUri?.let { FilePath().getPath(this, it) }
+                fileSend = path?.let { File(it)}*/
+
+                fileSend= photoUri?.let { getFileFromUri(this, it) }
+                val type= photoUri?.let { fileSend?.let { it1 -> NCWAppUtils.getFileContentType(it1) } }
+                Log.e("MimeType","sss "+type)
+                fileSend?.let {
+                    if (type != null) {
+                        getPreSignedUrl(type, it.path)
+                    }
                 }
             } else {
                 Toast.makeText(this, "Failed to capture image", Toast.LENGTH_SHORT).show()
@@ -586,8 +790,14 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
     // Open the gallery to select an image or video
     private fun openGallery() {
-        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        galleryIntent.type = "image/* video/*"
+//        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+//        galleryIntent.type = "image/* video/*"
+//        galleryLauncher.launch(galleryIntent)
+
+        val galleryIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+        }
         galleryLauncher.launch(galleryIntent)
     }
 
@@ -598,25 +808,46 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             if (result.resultCode == Activity.RESULT_OK && result.data != null) {
                 val selectedMediaUri: Uri? = result.data?.data
                 val type = contentResolver.getType(selectedMediaUri!!)
+                Log.e("Type","ddmm "+type)
                 if (type!!.startsWith("image/")) {
                     addMediaMessage(selectedMediaUri, MessageType.IMAGE)
                 } else if (type.startsWith("video/")) {
-                    // addMediaMessage(selectedMediaUri, MessageType.VIDEO)
+                   addMediaMessage(selectedMediaUri, MessageType.VIDEO)
                 }
+                else{
+                    Log.e("Typeee","ddd"+type)
+                }
+                val path = selectedMediaUri?.let { FilePath().getPath(this, it) }
+               fileSend = path?.let { File(it)}
+                if (fileSend != null) {
+                    Log.d(
+                        "File",
+                        "Fetched File: ${fileSend!!.path}"
+                    )
+                }
+                fileSend?.let { getPreSignedUrl(type, it.path)
+                }
+
+
+
             }
         }
 
     // Add media message (image or video) to the chat
     private fun addMediaMessage(uri: Uri, type: MessageType) {
         val newMessage = NCWMessage(
-            sender = "User",
+            sender = TYPE_REQUEST,
             type = type,
             message = uri.toString(),
             timestamp = System.currentTimeMillis()
         )
         messageList.add(newMessage)
-        messageAdapter.notifyItemInserted(messageList.size - 1)
-        chatRecyclerView.scrollToPosition(messageList.size - 1) // Scroll to the latest message
+//        messageAdapter.notifyItemInserted(messageList.size - 1)
+//        chatRecyclerView.scrollToPosition(messageList.size - 1) // Scroll to the latest message
+
+        messageAdapter.notifyDataSetChanged()
+        chatRecyclerView.scrollToPosition(messageList.size)
+        addLoader()
     }
 
 
@@ -629,10 +860,12 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                     // Use conversationID as needed
                     conversationID=response.conversationID
                     chatViewModel.getAWSMQTTCredentials(botRefId)
+                    conversationID?.let { ThemeUtils.setConversationID(it) }
                     Log.d(
                         "ConversationID",
                         "Fetched conversation ID: $conversationID"
                     )
+
                 } else {
                     // Handle the case where conversationID is null
                     Log.d("ConversationID", "Conversation ID is null")
@@ -648,9 +881,126 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 val sendMessageResponse = apiResponse as SendMessageResponse
             }
 
+            Routes.ROUTE_GET_CHAT -> {
+                val response = apiResponse as GetChatHistoryResponse
+                if (response!=null && response.responses.size>0){
+                    parseHistoryItems(response.responses)
+                }
+                progressBar.visibility = View.GONE
+            }
+
+            Routes.ROUTE_GET_PRESIGNED_URL -> {
+                val response = apiResponse as GetPreSignedUrl
+                Log.d(
+                    "ROUTE_GET_PRESIGNED_URL",
+                    "Fetched ROUTE_GET_PRESIGNED_URL: ${response}"
+                )
+
+                    chatViewModel.uploadFile(fileSend,response)
+            }
+
+            Routes.ROUTE_UPLOAD_MEDIA -> {
+                val response = apiResponse as GetMediaUploadUrl
+                Log.d("ROUTE_UPLOAD_MEDIA", "Fetched ROUTE_UPLOAD_MEDIA: $response")
+
+                val mediaType = response.type?.let { NCWAppUtils.getTypeFromContent(it) }
+                Log.e("MediaType", "Determined media type: $mediaType")
+
+                val attachmentList = arrayListOf(
+                    AttachmentList().apply {
+                        type = mediaType
+                        actualType = mediaType
+                        percentage = 10
+                        fileType = response.type
+                        title = response.title
+                        fileSize = response.fileSize
+                        largeImageUrl = response.url
+                    }
+                )
+
+                val payload = createPayload(
+                    "event://;LEARN_ATTRIBUTE_EVENT;ATTACHMENT::value=Media has been uploaded",
+                    "Attachment has been uploaded",
+                    attachmentList
+                )
+                chatViewModel.sendMessageAPI(payload)
+
+
+            }
+
 
         }
 
+    }
+
+    private fun parseHistoryItems(responses: ArrayList<GenericChannelResponse>) {
+
+        responses.forEach { response ->
+
+            if (response.triggerType == TYPE_RESPONSE) {
+                val newMessages =
+                    response.attachments?.mapNotNull { mapAttachmentToMessage(it) } ?: emptyList()
+                if (newMessages.isNotEmpty()) {
+                    newMessages.forEachIndexed { index, message ->
+                        message.isSameTimeMessage = index == 0
+                    }
+                }
+                messageList.addAll(newMessages)
+            }
+            else {
+                response.requestPayload?.attachmentList?.takeIf { it.isNotEmpty() }?.forEach { attachmentListRequest ->
+                    val messageType = attachmentListRequest.type?.let { MessageType.fromTypeName(it) }
+
+                    messageType?.let {
+                        val newMessage = NCWMessage(
+                            sender = TYPE_REQUEST,
+                            type = it,
+                            timestamp = response.timestamp ?: System.currentTimeMillis(),
+                            largeImageUrl = if (it == MessageType.IMAGE) attachmentListRequest.largeImageUrl else null
+                        )
+                        messageList.add(newMessage)
+                    }
+                } ?: run {
+                    val newMessage = NCWMessage(
+                        id = System.currentTimeMillis().toString(),
+                        message = response.requestPayload?.messagePayload?.text,
+                        timestamp = response.timestamp ?: System.currentTimeMillis(),
+                        type = MessageType.TEXT,
+                        sender = TYPE_REQUEST,
+                    )
+                    messageList.add(newMessage)
+                }
+
+            }
+        }
+
+
+        messageList.forEach { it.isQuickReplyVisible = false }
+        val lastMessage = messageList.lastOrNull()
+        if (lastMessage?.sender == TYPE_RESPONSE && !lastMessage.quickReply?.options.isNullOrEmpty()) {
+            lastMessage.isQuickReplyVisible = true
+        }
+
+        messageAdapter.notifyDataSetChanged()
+        chatRecyclerView.scrollToPosition(messageList.size-1)
+
+
+    }
+
+    private fun getChatHistory() {
+        val payload = conversationID?.let {
+            botRefId?.let { it1 ->
+                GetChatHistoryPayload(
+                    conversationId = it,
+                    requestBody = HistoryRequestBody(
+                        numberOfMessages = 100,
+                        numberOfDays = 10
+                    ),
+                    botRefId = it1
+                )
+            }
+        }
+        chatViewModel.getChatHistory(payload)
     }
 
     /**

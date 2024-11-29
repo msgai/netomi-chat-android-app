@@ -152,7 +152,7 @@
         android:layout_marginTop="10dp"
         app:cardCornerRadius="5dp"
         android:visibility="gone"
-        app:cardElevation="4dp"
+        app:cardElevation="2dp"
         app:layout_constraintStart_toEndOf="@id/img_bot"
         app:layout_constraintTop_toBottomOf="@id/cardViewCard">
 
@@ -160,7 +160,7 @@
             android:layout_width="300dp"
             android:layout_height="200dp">
 
-            <VideoView
+            <ImageView
                 android:id="@+id/receiverVideo"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -168,9 +168,9 @@
 
             <ImageView
                 android:id="@+id/playPauseIcon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="8dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:padding="5dp"
                 android:src="@drawable/ic_play"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -181,17 +181,16 @@
                 android:id="@+id/bottomLeftContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginBottom="5dp"
-                android:background="@drawable/bg_rounded_corner"
+                android:layout_marginStart="5dp"
+                android:layout_marginBottom="8dp"
                 android:orientation="horizontal"
-                android:padding="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
 
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
+                    android:layout_marginStart="5dp"
                     android:src="@drawable/ic_video_rec" />
 
                 <TextView
@@ -206,13 +205,11 @@
 
             <ImageView
                 android:id="@+id/downloadIcon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginEnd="5dp"
-                android:layout_marginBottom="5dp"
-                android:padding="8dp"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
                 android:src="@drawable/ic_download"
-                android:background="@drawable/bg_circle"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,8 +1,10 @@
 package com.netomi.chat.utils
 
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.media.MediaMetadataRetriever
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -25,6 +27,14 @@ object ThemeUtils
         return themeData
     }
 
+    private var conversationID : String? = null
+
+    fun setConversationID(id: String) {
+        conversationID = id
+    }
+    fun getConversationID():String?{
+        return conversationID
+    }
 
 
     fun applyTheme(view: View) {
@@ -152,7 +162,7 @@ object ThemeUtils
      * @param cornerRadii Array of corner radii in the order of top-left, top-right, bottom-right, and bottom-left.
      */
     fun applyChipBackgroundWithCorners(
-        textView: TextView,
+        textView: View,
         cornerRadii: FloatArray = floatArrayOf(10f, 10f, 10f, 10f, 10f, 10f, 10f, 10f),
         opacity: Int = 128
     ) {
@@ -168,6 +178,28 @@ object ThemeUtils
         textView.background = backgroundDrawable
     }
 
+    /**
+     * Applies a customizable GradientDrawable background to a Chip.
+     *
+     * @param textView The TextView to apply the background to.
+     * @param cornerRadii Array of corner radii in the order of top-left, top-right, bottom-right, and bottom-left.
+     */
+    fun applyChipBackgroundWithCorners(
+        textView: TextView,
+        cornerRadii: FloatArray = floatArrayOf(10f, 10f, 10f, 10f, 10f, 10f, 10f, 10f),
+        opacity: Int = 128
+    ) {
+        val baseColor = Color.parseColor(themeData?.theme?.color ?: "#374E57") // Default color if null
+
+        val colorWithOpacity = Color.argb(opacity, Color.red(baseColor), Color.green(baseColor), Color.blue(baseColor))
+
+        val backgroundDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            this.cornerRadii = cornerRadii
+            setColor(colorWithOpacity)
+        }
+        textView.background = backgroundDrawable
+    }
 
 
     // Function to load an image into ImageView (e.g., using Glide or Coil)

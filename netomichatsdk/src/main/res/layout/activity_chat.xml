@@ -45,6 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
+            android:text="AI Agent"
             android:textStyle="bold"
             android:textColor="@android:color/black"
             android:textSize="16sp"
@@ -94,7 +95,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/connection_status_header">
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <TextView
             android:id="@+id/tvToday"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -115,7 +116,7 @@
         android:layout_height="0dp"
 
         android:background="@android:color/white"
-        android:padding="0dp"
+     android:paddingBottom="10dp"
         app:layout_constraintBottom_toTopOf="@id/layBottom"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -206,6 +207,18 @@
             app:layout_constraintTop_toTopOf="@+id/cardView" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:indeterminate="true"
+        android:visibility="gone" />
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

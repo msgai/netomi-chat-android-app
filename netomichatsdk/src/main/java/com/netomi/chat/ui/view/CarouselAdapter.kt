@@ -13,9 +13,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.netomi.chat.R
+import com.netomi.chat.model.messages.CarouselButton
 import com.netomi.chat.model.messages.CarouselElement
 
-class CarouselAdapter(private val items: List<CarouselElement>) : RecyclerView.Adapter<CarouselAdapter.CarouselViewHolder>() {
+class CarouselAdapter(private val items: List<CarouselElement>,private val carouselButton: (CarouselButton?) -> Unit) : RecyclerView.Adapter<CarouselAdapter.CarouselViewHolder>() {
 
     inner class CarouselViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -40,7 +41,9 @@ class CarouselAdapter(private val items: List<CarouselElement>) : RecyclerView.A
             stackFromEnd = true
            // reverseLayout = true
         }*/
-        val carouselAdapter = CarouselButtonAdapter(item.buttons ?: emptyList())
+        val carouselAdapter = CarouselButtonAdapter(item.buttons ?: emptyList()){
+            carouselButton(it)
+        }
         holder.recyclerViewCarouselButton.adapter = carouselAdapter
         holder.recyclerViewCarouselButton.setHasFixedSize(true)
        /* val colorHex = "#E6E6E6"  // replace with your dynamic color as needed

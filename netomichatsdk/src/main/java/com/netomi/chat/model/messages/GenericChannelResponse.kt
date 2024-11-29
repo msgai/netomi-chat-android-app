@@ -21,8 +21,23 @@ data class RequestPayload(
     val channelId: String? = null,
     val ownerType: String? = null,
     val eventType: String? = null,
-    val triggerType: String? = null
+    val triggerType: String? = null,
+    var messagePayload: MessagePayload? = null,
+    var attachmentList: ArrayList<AttachmentListRequest>? = null,
+
+    )
+
+data class AttachmentListRequest(
+
+    var type: String? = null,
+    var title: String? = null,
+    var timestamp: Int? = null,
+    var largeImageUrl: String? = null,
+    var isReviewEnabled: Boolean? = null
+
 )
+
+
 data class Attachment(
     val type: String? = null,
     val attachment: AttachmentContent? = null
@@ -45,7 +60,7 @@ data class AttachmentContent(
     val carouselImageAspectRatio: String? = null,
     val thumbnailUrl: String? = null,
     val title: String? = null,
-    var buttons : ArrayList<Buttons> = arrayListOf()
+    var buttons: ArrayList<Buttons> = arrayListOf()
 
 )
 
@@ -83,12 +98,12 @@ data class CustomPayload(
 )
 
 
-data class Buttons (
+data class Buttons(
 
- var type                : String?  = null,
-    var url                 : String?  = null,
- var title               : String?  = null,
-   var messengerExtensions : Boolean? = null
+    var type: String? = null,
+    var url: String? = null,
+    var title: String? = null,
+    var messengerExtensions: Boolean? = null
 
 )
 
