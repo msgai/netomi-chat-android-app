@@ -20,18 +20,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-
-    <TextView
-        android:id="@+id/tvIndication"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/dots"
+        android:layout_width="40dp"
+        android:layout_height="23dp"
+        app:lottie_rawRes="@raw/dots"
+        app:lottie_autoPlay="true"
         android:layout_marginStart="5dp"
-        android:layout_marginTop="5dp"
-        android:text="......"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:textSize="11sp"
+        app:lottie_loop="false"
         app:layout_constraintStart_toEndOf="@id/img_bot"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/img_bot"
+        app:layout_constraintBottom_toBottomOf="@+id/img_bot"/>
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -21,6 +21,11 @@ android {
         }
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -43,6 +48,8 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+
 }
 
 dependencies {
@@ -80,6 +87,8 @@ dependencies {
     //Data Store
     implementation ("androidx.datastore:datastore-preferences:1.1.1")
     implementation ("androidx.security:security-crypto:1.1.0-alpha06")
+
+    implementation ("com.airbnb.android:lottie:6.6.0")
 
 
 

@@ -104,8 +104,11 @@ class ChatAdapter(
             } else if (message.type == MessageType.IMAGE) {
                 senderVideoCard.visibility = View.GONE
                 imageView.visibility = View.VISIBLE
+                if (message.largeImageUrl!=null)
+                    Glide.with(itemView.context).load(message.largeImageUrl).into(imageView)
+                else
                 imageView.setImageURI(Uri.parse(message.message))
-                // Glide.with(itemView.context).load(message.content).into(imageView)
+
                 messageText.visibility = View.GONE
                 videoView.visibility = View.GONE
                 senderImageCard.visibility = View.VISIBLE

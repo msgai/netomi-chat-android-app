@@ -14,4 +14,6 @@ object Routes {
 
     const val ROUTE_GET_PRESIGNED_URL = API + "upload"
 
+    const val ROUTE_UPLOAD_MEDIA = "upload_media"
+
 }

@@ -3,7 +3,6 @@ package com.netomi.chat.ui.viewmodel
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.netomi.chat.data.repository.NCWChatRepository
 import com.netomi.chat.model.GetChatHistoryResponse
@@ -13,8 +12,9 @@ import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.chat_history.GetChatHistoryPayload
 import com.netomi.chat.model.media_payload.SignedUrlPayload
-import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.messages.WebhookPayload
+import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
+import com.netomi.chat.model.presigned_url.GetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.GetPreSignedUrl
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWBaseResponse
@@ -22,6 +22,7 @@ import com.netomi.chat.utils.State
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 /**
  * ViewModel for managing chat messages in the NCWChat application
@@ -76,6 +77,9 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
 
     private var _getSignedUrl= SingleLiveEvent<State<GetPreSignedUrl>>()
     val getSignedUrl get()= _getSignedUrl
+
+    private var _getUploadedMediaUrl= SingleLiveEvent<State<GetMediaUploadUrl>>()
+    val getUploadedMediaUrl get()= _getUploadedMediaUrl
     init {
         loadChatHistory()
     }
@@ -162,6 +166,16 @@ Log.e("DataaResposne","response"+response)
             Log.e("DataaResposne","response"+response)
             withContext(Dispatchers.Main) {
                 _getSignedUrl.value = response // Use setValue on the Main thread
+            }
+        }
+    }
+
+    fun uploadFile(mediaUri: File?, response: GetPreSignedUrl) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.uploadFile(mediaUri,response)
+            Log.e("uploadFile","response"+response)
+            withContext(Dispatchers.Main) {
+                _getUploadedMediaUrl.value = response // Use setValue on the Main thread
             }
         }
     }

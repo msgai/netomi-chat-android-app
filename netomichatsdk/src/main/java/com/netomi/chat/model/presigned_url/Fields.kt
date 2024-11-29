@@ -8,6 +8,6 @@ data class Fields(
     @SerializedName("X-Amz-Algorithm"  ) var XAmzAlgorithm  : String? = null,
     @SerializedName("X-Amz-Credential" ) var XAmzCredential : String? = null,
     @SerializedName("X-Amz-Date"       ) var XAmzDate       : String? = null,
-    @SerializedName("Policy"           ) var Policy           : String? = null,
+    @SerializedName("Policy"           ) var policy           : String? = null,
     @SerializedName("X-Amz-Signature"  ) var XAmzSignature  : String? = null
 )

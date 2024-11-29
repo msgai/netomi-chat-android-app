@@ -16,12 +16,18 @@ import com.netomi.chat.utils.Routes.ROUTE_GET_CONVERSATION_ID
 import com.netomi.chat.utils.Routes.ROUTE_GET_MQTT_CREDENTIALS
 import com.netomi.chat.utils.Routes.ROUTE_GET_PRESIGNED_URL
 import com.netomi.chat.utils.Routes.ROUTE_SEND_CHAT
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Url
+import okhttp3.MultipartBody
+import okhttp3.ResponseBody
 
 /**
  * Retrofit API interface for defining network endpoints in the NCW SDK.
@@ -106,4 +112,37 @@ interface NCWApiInterface {
 
     @POST(ROUTE_GET_PRESIGNED_URL)
     suspend fun getPreSignedUrl(@Body payload: SignedUrlPayload?): Response<GetPreSignedUrl>
+
+
+    @Multipart
+    @POST
+    suspend fun uploadFile(
+        @Url url: String,
+        @Part("key") key: RequestBody?,
+        @Part("bucket") bucket: RequestBody?,
+        @Part("X-Amz-Algorithm") amzAlgorithm: RequestBody?,
+        @Part("X-Amz-Credential") amzCredential: RequestBody?,
+        @Part("X-Amz-Date") amzDate: RequestBody?,
+        @Part("Policy") policy: RequestBody?,
+        @Part("X-Amz-Signature") amzSignature: RequestBody?,
+        @Part("acl") acl: RequestBody?,
+        @Part("Content-Type") contentType: RequestBody?,
+        @Part file: MultipartBody.Part
+    ): Response<ResponseBody>
+    /*@Multipart
+    @POST
+    suspend fun uploadFile(
+        @Url url: String,
+        @Part("key") key: RequestBody?,
+        @Part("bucket") bucket: RequestBody?,
+        @Part("X-Amz-Algorithm") amzAlgorithm: RequestBody?,
+        @Part("X-Amz-Credential") amzCredential: RequestBody?,
+        @Part("X-Amz-Date") amzDate: RequestBody?,
+        @Part("Policy") policy: RequestBody?,
+        @Part("X-Amz-Signature") amzSignature: RequestBody?,
+        @Part("acl") acl: RequestBody?,
+        @Part("Content-Type") contentType: RequestBody?,
+        @Part file: MultipartBody.Part
+    ): Response<ResponseBody>*/
+
 }
