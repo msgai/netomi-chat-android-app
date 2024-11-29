@@ -903,20 +903,18 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 val response = apiResponse as GetMediaUploadUrl
                 Log.d("ROUTE_UPLOAD_MEDIA", "Fetched ROUTE_UPLOAD_MEDIA: $response")
 
-             //   val mediaType = response.type?.let { NCWAppUtils.getTypeFromContent(it) }
-               // Log.e("MediaType", "Determined media type: $mediaType")
-                val mediaType = response.type?.let { MessageType.fromTypeName(it) }
+                val mediaType = response.type?.let { NCWAppUtils.getTypeFromContent(it) }
+                Log.e("MediaType", "Determined media type: $mediaType")
 
                 val attachmentList = arrayListOf(
                     AttachmentList().apply {
-                        type = mediaType.toString()
-                        actualType = mediaType.toString()
+                        type = mediaType
+                        actualType = mediaType
+                        percentage = 10
                         fileType = response.type
                         title = response.title
                         fileSize = response.fileSize
                         largeImageUrl = response.url
-                        thumbnailUrl = response.url
-                        largeImageUrl = if (mediaType == MessageType.IMAGE) response.url else null
                     }
                 )
 

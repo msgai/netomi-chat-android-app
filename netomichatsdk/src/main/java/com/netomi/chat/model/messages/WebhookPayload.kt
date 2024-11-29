@@ -39,8 +39,7 @@ data class AttachmentList(
     var title: String? = null,
     var fileSize: Long? = null,
     var largeImageUrl: String? = null,
-    var errorMessage: String? = null,
-    var thumbnailUrl: String? = null,
+    var errorMessage: String? = null
 
     )
 
