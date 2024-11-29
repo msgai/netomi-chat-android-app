@@ -6,7 +6,6 @@ import com.amazonaws.auth.BasicSessionCredentials
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttClientStatusCallback
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttManager
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos
-import com.netomi.chat.R
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.ui.viewmodel.SingleLiveEvent
 import java.util.UUID
@@ -95,7 +94,7 @@ object NCWAwsIotManager {
      * Subscribes to a topic to receive messages.
      * @param topic Topic to subscribe to.
      */
-    fun subscribeToTopic(topic: String, chatViewModel: NCWChatViewModel) {
+    private fun subscribeToTopic(topic: String, chatViewModel: NCWChatViewModel) {
         mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS0) { topic, data ->
             val message = String(data, Charsets.UTF_8)
             Log.d("IoT", "Message received on topic [$topic]: $message")

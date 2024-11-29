@@ -13,12 +13,15 @@
         android:id="@+id/tvOption"
         android:layout_width="wrap_content"
         android:gravity="center"
+
         android:textColor="#374E57"
         android:background="@drawable/bg_chip_view"
+
         android:layout_height="wrap_content"
         android:padding="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         android:text="Action"
+
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
        />

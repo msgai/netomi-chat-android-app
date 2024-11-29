@@ -102,7 +102,7 @@
             android:paddingHorizontal="15dp"
             android:paddingVertical="5dp"
             android:text="Today"
-            android:textColor="#374E57"
+            android:textColor="#859397"
             android:textSize="14sp" />
 
 

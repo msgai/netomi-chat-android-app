@@ -130,7 +130,6 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
-        Log.e("Testingggg","onCreate")
         initViews()
         // Load theme and config
         themeData = ThemeUtils.getThemeData()
@@ -875,19 +874,11 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
             Routes.ROUTE_GET_MQTT_CREDENTIALS -> {
                 val mqttsCredentials = apiResponse as MQTTCredentialsResponse
-                Log.d(
-                    "MQTTCredentialsResponse",
-                    "Fetched MQTTCredentialsResponse: ${mqttsCredentials.credentials.accessKeyId}"
-                )
                 saveAwsCredentials(mqttsCredentials.credentials)
             }
 
             Routes.ROUTE_SEND_CHAT -> {
                 val sendMessageResponse = apiResponse as SendMessageResponse
-                Log.d(
-                    "MQTTCredentialsResponse",
-                    "Fetched MQTTCredentialsResponse: ${sendMessageResponse}"
-                )
             }
 
             Routes.ROUTE_GET_CHAT -> {
@@ -1017,18 +1008,19 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     /**
      * Save Aws Credentials in data store
      */
-    private fun saveAwsCredentials(mqttsCredentials: Credentials) {
+    private fun saveAwsCredentials(credentials: Credentials) {
         // Save new credentials (example usage)
         val newCredentials = NCWAwsCredentials(
-            accessKey = mqttsCredentials.accessKeyId,
-            secretKey = mqttsCredentials.secretAccessKey,
-            sessionToken = mqttsCredentials.SessionToken,
-            iotEndpoint = mqttsCredentials.IoTHostEndPoint
+            accessKey = credentials.accessKeyId,
+            secretKey = credentials.secretAccessKey,
+            sessionToken = credentials.SessionToken,
+            iotEndpoint = credentials.IoTHostEndPoint,
+            expiresIn = credentials.expiresIn
+
         )
         ncwAwsCredentialsViewModel.saveAwsCredentials(newCredentials)
 
         val topic = "$CHAT_WIDGET/$botRefId/$conversationID"
-        Log.e("Topic","Dataa  kskks "+topic)
         ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)
 
     }

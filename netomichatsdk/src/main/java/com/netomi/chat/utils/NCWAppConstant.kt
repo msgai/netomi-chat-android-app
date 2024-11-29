@@ -15,6 +15,7 @@ object NCWAppConstant {
 
     const val TYPE_INDICATOR="INDICATOR"
     const val CHAT_WIDGET="chat_widget"
+    const val EXPIRE_TIME="EXPIRE_TIME"
 
     const val TYPE_RESPONSE="RESPONSE"
     const val TYPE_REQUEST="REQUEST"

@@ -48,7 +48,12 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         // Handle logout action
         logout.setOnClickListener {
             drawerLayout.closeDrawers() // Close all open drawers
-            logoutFun()
+          //  logoutFun()
+            preferences.clearSharedPreference()
+            // Navigate to LoginActivity and clear activity stack
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finishAffinity()
         }
 
         imgChat.setOnClickListener{
