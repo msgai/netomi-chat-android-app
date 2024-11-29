@@ -4,8 +4,11 @@ import android.content.Context
 import com.netomi.chat.data.network.NCWApiInterface
 import com.netomi.chat.data.network.NCWBaseService
 import com.netomi.chat.data.network.NCWRetrofitClient
-import com.netomi.chat.model.AppConfigurationResponseModel
+import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.NCWMessage
+import com.netomi.chat.model.SendMessageResponse
+import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
+import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
@@ -28,9 +31,10 @@ import com.netomi.chat.utils.State
  */
 
 
-class NCWChatRepository(private val context: Context) :NCWBaseService() {
+class NCWChatRepository(private val context: Context) : NCWBaseService() {
 
-    private val apiInterface = NCWRetrofitClient.getInstance(context).create(NCWApiInterface::class.java)
+    private val apiInterface =
+        NCWRetrofitClient.getInstance(context).create(NCWApiInterface::class.java)
 
     // Fetch chat history
     fun getChatHistory(): State<NCWBaseResponse<ArrayList<NCWMessage>>> {
@@ -48,36 +52,63 @@ class NCWChatRepository(private val context: Context) :NCWBaseService() {
     }
 
     // Send a new message
-    fun sendMessage(message: NCWMessage): State<NCWBaseResponse<Boolean>> {
-        val response = apiInterface.sendMessage(message)
-        return if (response.isSuccessful && response.body() != null) {
-            State.success(data = response.body()!!, Routes.ROUTE_SEND_CHAT)
-        } else {
-            val errorBody = response.errorBody()
-            if (errorBody != null) {
-                State.error(parseError(errorBody), code = response.code())
+    suspend fun sendMessage(message: WebhookPayload): State<SendMessageResponse> {
+        return try {
+            val response = apiInterface.sendMessage(message)
+            if (response.isSuccessful && response.body() != null) {
+                State.success(data = response.body()!!, Routes.ROUTE_SEND_CHAT)
             } else {
-                State.error(mapApiException(response.code()), code = response.code())
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    State.error(parseError(errorBody), code = response.code())
+                } else {
+                    State.error(mapApiException(response.code()), code = response.code())
+                }
             }
+        } catch (e: Exception) {
+            State.error(e.message.toString(), code = 500)
         }
     }
 
 
-    // Test App config API
-    suspend fun getAppConfiguration(): State<NCWBaseResponse<AppConfigurationResponseModel>> {
-        val response = apiInterface.getAppConfiguration()
-        return if (response.isSuccessful && response.body() != null) {
-            State.success(data = response.body()!!, Routes.ROUTE_APP_CONFIG)
-        } else {
-            val errorBody = response.errorBody()
-            if (errorBody != null) {
-                State.error(parseError(errorBody), code = response.code())
+    // API to get ConversationId
+    suspend fun getConversationId(botRef: String?): State<GetConversationIdResponse> {
+        return try {
+            val response = apiInterface.getConversationId(botRef)
+            if (response.isSuccessful && response.body() != null) {
+                State.success(data = response.body()!!, Routes.ROUTE_GET_CONVERSATION_ID)
             } else {
-                State.error(mapApiException(response.code()), code = response.code())
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    State.error(parseError(errorBody), code = response.code())
+                } else {
+                    State.error(mapApiException(response.code()), code = response.code())
+                }
             }
+        } catch (e: Exception) {
+            State.error(e.message.toString(), code = 500)
         }
-
     }
+
+    // Hit API to get AWS MQTT Credentials
+    suspend fun getAWSMQTTCredentials(botRef: String?): State<MQTTCredentialsResponse> {
+        return try {
+            val response = apiInterface.getAWSMQTTCredentials(botRef)
+            if (response.isSuccessful && response.body() != null) {
+                State.success(data = response.body()!!, Routes.ROUTE_GET_MQTT_CREDENTIALS)
+            } else {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    State.error(parseError(errorBody), code = response.code())
+                } else {
+                    State.error(mapApiException(response.code()), code = response.code())
+                }
+            }
+        } catch (e: Exception) {
+            State.error(e.message.toString(), code = 500)
+        }
+    }
+
 }
 
 

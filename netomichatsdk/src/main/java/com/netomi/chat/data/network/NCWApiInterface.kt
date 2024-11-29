@@ -1,17 +1,20 @@
 package com.netomi.chat.data.network
 
-import com.netomi.chat.data.apiconstant.NCWApiConstant.HEADER_TUTORIAL_STATUS
-import com.netomi.chat.data.apiconstant.NCWApiConstant.HEADER_USER_TYPE
-import com.netomi.chat.data.apiconstant.NCWApiConstant.USER_TYPE
-import com.netomi.chat.model.AppConfigurationResponseModel
+import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.NCWMessage
+import com.netomi.chat.model.SendMessageResponse
+import com.netomi.chat.model.messages.WebhookPayload
+import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
+import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.utils.NCWBaseResponse
-import com.netomi.chat.utils.Routes.ROUTE_APP_CONFIG
+import com.netomi.chat.utils.Routes.ROUTE_GET_CONVERSATION_ID
+import com.netomi.chat.utils.Routes.ROUTE_GET_MQTT_CREDENTIALS
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 /**
  * Retrofit API interface for defining network endpoints in the NCW SDK.
@@ -53,14 +56,45 @@ interface NCWApiInterface {
      * @return A `Response` object wrapping a `Boolean` response (indicating the operation's success or failure).
      *
      */
-    @POST("chat/send")
-    fun sendMessage(@Body message: NCWMessage): Response<NCWBaseResponse<Boolean>>
+    @POST("api/webhook-message")
+    suspend fun sendMessage(@Body message: WebhookPayload?): Response<SendMessageResponse>
 
-    @GET(ROUTE_APP_CONFIG)
-    suspend fun getAppConfiguration(
-        @Header(HEADER_USER_TYPE) userType: String = USER_TYPE,
-        @Header(HEADER_TUTORIAL_STATUS) tutorialStatus: String = "true"
-    ): Response<NCWBaseResponse<AppConfigurationResponseModel>>
+    /**
+     * Fetches the SDK theme configuration from the server based on the provided bot reference ID.
+     *
+     * @param botRefId The unique identifier for the bot whose theme configuration is to be retrieved.
+     * @return A [Response] object containing the [ThemeResponse] with the theme details.
+     *         The response status and data can be checked to determine if the request was successful.
+     */
+    @GET("json-config/{botRefId}.json")
+    suspend fun getSdkTheme(
+        @Path("botRefId") botRefId: String
+    ): Response<ThemeResponse>
+
+    /**
+     * Fetches the Conversation ID from the NCW server.
+     *
+     * This method sends a **GET** request to retrieve the Conversation ID.
+     * It returns a **Retrofit Call** that wraps a list of `GetConversationIdResponse` objects.
+     * The caller needs to execute the call synchronously or asynchronously.
+     * @param botRef A string representing the bot Reference ID we will get this from AI Studio
+     * @return A `Response` object wrapping a Object of `GetConversationIdResponse` objects.
+     */
+    @GET(ROUTE_GET_CONVERSATION_ID)
+    suspend fun getConversationId(@Query("botRef") botRef: String?): Response<GetConversationIdResponse>
+
+
+    /**
+     * Fetches the AWS MQTT Credentials from the NCW server.
+     *
+     * This method sends a **GET** request to retrieve the AWS MQTT Credentials.
+     * It returns a **Retrofit Call** that wraps a list of `MQTTCredentialsResponse` objects.
+     * The caller needs to execute the call synchronously or asynchronously.
+     * @param botRef A string representing the bot Reference ID we will get this from AI Studio
+     * @return A `Response` object wrapping a Object of `MQTTCredentialsResponse` objects.
+     */
+    @GET(ROUTE_GET_MQTT_CREDENTIALS)
+    suspend fun getAWSMQTTCredentials(@Query("botRef") botRef: String?): Response<MQTTCredentialsResponse>
 
 
 }

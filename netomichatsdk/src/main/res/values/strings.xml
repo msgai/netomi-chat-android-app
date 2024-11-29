@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="under_development">Under Development</string>
+    <string name="connecting">Connecting…</string>
+    <string name="connected">Connected</string>
+    <string name="connection_lost">Connection lost</string>
+    <string name="reconnecting">Reconnecting</string>
+    <string name="unknown">Unknown</string>
+</resources>

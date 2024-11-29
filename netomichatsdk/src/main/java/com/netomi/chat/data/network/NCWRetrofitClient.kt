@@ -38,9 +38,9 @@ import java.util.concurrent.TimeUnit
  */
 object NCWRetrofitClient {
 
-   // private val BASE_URL = "https://api.example.com/"  // Replace with your base URL
+    private val BASE_URL = "https://chatapps-qa.netomi.com"
 
-    private val BASE_URL = "https://pickmedevapi.appskeeper.in"  // Replace with your base URL
+
 
     /**
      * Configured OkHttpClient with connection and read timeouts,
