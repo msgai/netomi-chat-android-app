@@ -1,10 +1,10 @@
 package com.netomi.chat.ui.view
 
+
 import IdleTimeoutManager
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -68,10 +68,13 @@ import com.netomi.chat.utils.NCWAppConstant.ARG_IMAGE_URL
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
 import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
+import com.netomi.chat.utils.NCWAppConstant.TYPE_IMAGE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_INDICATOR
 import com.netomi.chat.utils.NCWAppConstant.TYPE_REQUEST
 import com.netomi.chat.utils.NCWAppConstant.TYPE_RESPONSE
+import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
 import com.netomi.chat.utils.NCWAppUtils
+import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
 import com.netomi.chat.utils.Routes
 import com.netomi.chat.utils.State
 import com.netomi.chat.utils.ThemeUtils
@@ -208,11 +211,9 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             subtitleColor = Color.DKGRAY,
             backgroundColor = Color.LTGRAY,
             onYesClick = {
-              //  Toast.makeText(this, "Item Deleted", Toast.LENGTH_SHORT).show()
                          finish()
             },
             onNoClick = {
-              //  Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show()
             }
         )
 
@@ -354,7 +355,6 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 )
             )
         }
-
         messageAdapter.notifyDataSetChanged()
     }
 
@@ -387,14 +387,21 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             //ThemeUtils.applyTheme(headerTextView)
             headerTextView.text = theme.title
 
-         /*  // Example usage for attachmentIcon (without rounded background) and sendMessageIcon (with circular background)
-            theme.theme?.color?.takeIf { it.isNotEmpty() }?.let { color ->
-                Log.e("Enterrr","Enter herer")
-                ThemeUtils.applyBackgroundAndTint(sendMessageIcon, color, isCircularBackground = true)
-                ThemeUtils.applyBackgroundAndTint(attachmentIcon,
-                    color, isCircularBackground = false)
+            attachmentIcon.visibility = if (themeData.fileSharing?.isEnabled == true) {
+                View.VISIBLE
+            } else {
+                View.GONE
             }
-*/
+
+
+            /*  // Example usage for attachmentIcon (without rounded background) and sendMessageIcon (with circular background)
+               theme.theme?.color?.takeIf { it.isNotEmpty() }?.let { color ->
+                   Log.e("Enterrr","Enter herer")
+                   ThemeUtils.applyBackgroundAndTint(sendMessageIcon, color, isCircularBackground = true)
+                   ThemeUtils.applyBackgroundAndTint(attachmentIcon,
+                       color, isCircularBackground = false)
+               }
+   */
 
 
         }
@@ -499,7 +506,6 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private fun observeChatMessages() {
         // Observe the chat messages LiveData from the ViewModel
         chatViewModel.sendMessage.observe(this, Observer { messages ->
-            // handleApiCallback(messages as State<NCWBaseResponse<Any>>)
             handleApiCallback(messages as State<Any>)
         })
 
@@ -612,7 +618,6 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 quickReply = attach.quickReply
             )
         }
-
 
 
 
@@ -739,35 +744,20 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             cameraLauncherMain.launch(photoUri)
         }
 
-    private fun getFileFromUri(context: Context, uri: Uri): File? {
-        // Since `photoUri` is created from `createImageFile`, it already points to the file
-        return if ("file" == uri.scheme) {
-            File(uri.path!!)
-        } else {
-            // For safety, copy content to a cache file if the URI scheme isn't "file"
-            val tempFile = File(context.cacheDir, "temp_${System.currentTimeMillis()}.jpg")
-            context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                tempFile.outputStream().use { outputStream ->
-                    inputStream.copyTo(outputStream)
-                }
-            }
-            tempFile
-        }
-    }
 
     private val cameraLauncherMain =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             if (success) {
+
+                fileSend= photoUri?.let { NCWAppUtils.getFileFromUri(this, it) }
+
+                if (!isFileSizeValid(this,fileSend?.length(), themeData?.fileSharing?.fileSize)) {
+                    return@registerForActivityResult
+                }
                 photoUri?.let { uri ->
                     addMediaMessage(uri, MessageType.IMAGE)
                 }
-               // val type = photoUri?.let { contentResolver.getType(it) }
-             //   val type= photoUri?.let { NCWAppUtils.getMimeType(this, it) }
 
-                /*val path = photoUri?.let { FilePath().getPath(this, it) }
-                fileSend = path?.let { File(it)}*/
-
-                fileSend= photoUri?.let { getFileFromUri(this, it) }
                 val type= photoUri?.let { fileSend?.let { it1 -> NCWAppUtils.getFileContentType(it1) } }
                 Log.e("MimeType","sss "+type)
                 fileSend?.let {
@@ -788,12 +778,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     }
 
 
-    // Open the gallery to select an image or video
+    // Open the gallery to select an attachment
     private fun openGallery() {
-//        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-//        galleryIntent.type = "image/* video/*"
-//        galleryLauncher.launch(galleryIntent)
-
         val galleryIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "*/*"
@@ -808,28 +794,42 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             if (result.resultCode == Activity.RESULT_OK && result.data != null) {
                 val selectedMediaUri: Uri? = result.data?.data
                 val type = contentResolver.getType(selectedMediaUri!!)
-                Log.e("Type","ddmm "+type)
-                if (type!!.startsWith("image/")) {
-                    addMediaMessage(selectedMediaUri, MessageType.IMAGE)
-                } else if (type.startsWith("video/")) {
-                   addMediaMessage(selectedMediaUri, MessageType.VIDEO)
-                }
-                else{
-                    Log.e("Typeee","ddd"+type)
-                }
                 val path = selectedMediaUri?.let { FilePath().getPath(this, it) }
-               fileSend = path?.let { File(it)}
-                if (fileSend != null) {
-                    Log.d(
-                        "File",
-                        "Fetched File: ${fileSend!!.path}"
+                fileSend = path?.let { File(it)}
+
+                if (!isFileSizeValid(this,fileSend?.length(), themeData?.fileSharing?.fileSize)) {
+                    return@registerForActivityResult
+                }
+
+                // Validate file type
+                val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
+                var fileExtension = path?.substringAfterLast('.', "")?.lowercase()
+              // Ensure the file extension includes the dot prefix
+                if (fileExtension != null && !fileExtension.startsWith(".")) {
+                    fileExtension = ".$fileExtension"
+                }
+
+                if (fileExtension == null || fileExtension !in supportedExtensions) {
+                    NCWAppUtils.showToast(
+                        this,
+                        "Unsupported file type selected. Supported types: ${supportedExtensions.joinToString(", ")}"
                     )
+                    return@registerForActivityResult
                 }
-                fileSend?.let { getPreSignedUrl(type, it.path)
+                checkForPreviousQuickReply()
+
+                // Handle based on MIME type
+                if (type != null) {
+                    when {
+                        type.startsWith("image/") -> addMediaMessage(selectedMediaUri, MessageType.IMAGE)
+                        type.startsWith("video/") -> addMediaMessage(selectedMediaUri, MessageType.VIDEO)
+                        else -> {
+                            Log.e("Unsupported Type", "Unsupported MIME type: $type")
+                        }
+                    }
+                    fileSend?.let { getPreSignedUrl(type, it.path)
                 }
-
-
-
+                }
             }
         }
 
@@ -910,13 +910,18 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                     AttachmentList().apply {
                         type = mediaType
                         actualType = mediaType
+                        attachmentId= UUID.randomUUID().toString()
                         percentage = 10
                         fileType = response.type
                         title = response.title
                         fileSize = response.fileSize
-                        largeImageUrl = response.url
+                        largeImageUrl =  if (mediaType == TYPE_IMAGE) response.url else null
+                        thumbnailUrl =  if (mediaType == TYPE_VIDEO) response.url else null
                     }
                 )
+
+                Log.e("attachmentList","attachmentList"+attachmentList)
+
 
                 val payload = createPayload(
                     "event://;LEARN_ATTRIBUTE_EVENT;ATTACHMENT::value=Media has been uploaded",
@@ -956,7 +961,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                             sender = TYPE_REQUEST,
                             type = it,
                             timestamp = response.timestamp ?: System.currentTimeMillis(),
-                            largeImageUrl = if (it == MessageType.IMAGE) attachmentListRequest.largeImageUrl else null
+                            largeImageUrl = if (it == MessageType.IMAGE) attachmentListRequest.largeImageUrl else null,
+                            thumbnailUrl = if (it == MessageType.VIDEO) attachmentListRequest.thumbnailUrl else null
                         )
                         messageList.add(newMessage)
                     }

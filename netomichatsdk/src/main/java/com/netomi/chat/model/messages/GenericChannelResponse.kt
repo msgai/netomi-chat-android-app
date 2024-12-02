@@ -33,7 +33,8 @@ data class AttachmentListRequest(
     var title: String? = null,
     var timestamp: Int? = null,
     var largeImageUrl: String? = null,
-    var isReviewEnabled: Boolean? = null
+    var isReviewEnabled: Boolean? = null,
+    var thumbnailUrl: String? = null,
 
 )
 

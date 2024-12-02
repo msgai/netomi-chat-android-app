@@ -27,7 +27,7 @@ object NCWAppConstant {
     const val MEDIA_TYPE = "media_type"
 
     const val TYPE_IMAGE="ai.msg.domain.responses.core.Image"
-    const val TYPE_VIDEO="ai.msg.domain.responses.core.VIDEO"
+    const val TYPE_VIDEO="ai.msg.domain.responses.core.Video"
     const val TYPE_TEXT="ai.msg.domain.responses.core.Text"
     const val TYPE_CAROUSEL="ai.msg.domain.responses.core.Carousel"
 

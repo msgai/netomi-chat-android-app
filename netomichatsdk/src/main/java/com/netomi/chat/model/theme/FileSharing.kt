@@ -2,7 +2,7 @@ package com.netomi.chat.model.theme
 
 data class FileSharing(
     val attachmentQuery: String,
-    val fileSize: Int,
+    val fileSize: Long,
     val isEnabled: Boolean,
     val list: List<String>,
     val multiAttachment: Boolean,

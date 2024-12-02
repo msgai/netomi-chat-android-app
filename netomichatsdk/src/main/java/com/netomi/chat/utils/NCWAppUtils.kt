@@ -10,10 +10,8 @@ import android.os.Build
 import android.text.Html
 import android.view.inputmethod.InputMethodManager
 import android.webkit.MimeTypeMap
-import android.widget.TextView
 import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.netomi.chat.utils.NCWAppConstant.ARG_IMAGE_URL
 import com.netomi.chat.utils.NCWAppConstant.TIME_AM_PM
 import com.netomi.chat.utils.NCWAppConstant.TYPE_IMAGE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_TEXT
@@ -161,5 +159,36 @@ object NCWAppUtils {
         }
         return extension
     }
+
+    fun getFileFromUri(context: Context, uri: Uri): File? {
+        // Since `photoUri` is created from `createImageFile`, it already points to the file
+        return if ("file" == uri.scheme) {
+            File(uri.path!!)
+        } else {
+            // For safety, copy content to a cache file if the URI scheme isn't "file"
+            val tempFile = File(context.cacheDir, "temp_${System.currentTimeMillis()}.jpg")
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                tempFile.outputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+            }
+            tempFile
+        }
+    }
+
+    fun isFileSizeValid(context: Context, fileSizeInBytes: Long?, maxFileSizeInBytes: Long?): Boolean {
+        //val fileSizeInMB = fileSizeInBytes?.toDouble()?.div(1024 * 1024) ?: 0.0
+        val maxFileSizeInMB = maxFileSizeInBytes?.toDouble()?.div(1024 * 1024) ?: 0.0
+
+        if (fileSizeInBytes != null && maxFileSizeInBytes != null && fileSizeInBytes > maxFileSizeInBytes) {
+            showToast(
+                context = context,
+                message = "File size should not be greater than ${String.format("%.2f", maxFileSizeInMB)} MB"
+            )
+            return false
+        }
+        return true
+    }
+
 
 }
