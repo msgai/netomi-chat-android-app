@@ -28,7 +28,8 @@ enum class MessageType(val typeName: String) {
     IMAGE("ai.msg.domain.responses.core.Image"),
     VIDEO("ai.msg.domain.responses.core.Video"),
     CAROUSEL("ai.msg.domain.responses.core.Carousel"),
-    CARD("ai.msg.domain.responses.core.Card");
+    CARD("ai.msg.domain.responses.core.Card"),
+    FILE("ai.msg.domain.responses.core.GenericFileAttachment");
 
 
     companion object {

@@ -27,7 +27,7 @@
         app:lottie_rawRes="@raw/dots"
         app:lottie_autoPlay="true"
         android:layout_marginStart="5dp"
-        app:lottie_loop="false"
+        app:lottie_loop="true"
         app:layout_constraintStart_toEndOf="@id/img_bot"
         app:layout_constraintTop_toTopOf="@+id/img_bot"
         app:layout_constraintBottom_toBottomOf="@+id/img_bot"/>

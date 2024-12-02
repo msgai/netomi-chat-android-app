@@ -3,7 +3,6 @@ package com.netomi.chat.ui.view
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +21,6 @@ import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.utils.ChatActionCallback
 import com.netomi.chat.utils.NCWAppConstant
-
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.ThemeUtils
 
@@ -53,7 +51,7 @@ class ChatAdapter(
             else -> inflater.inflate(R.layout.layout_response, parent, false)
         }
         return when (viewType) {
-            VIEW_TYPE_REQUEST -> RequestViewHolder(view, themeData)
+            VIEW_TYPE_REQUEST -> RequestViewHolder(view, themeData,actionCallback)
             VIEW_TYPE_INDICATOR -> InitialViewHolder(view)
             else -> ResponseViewHolder(view,themeData,actionCallback)
         }
@@ -70,62 +68,78 @@ class ChatAdapter(
 
     override fun getItemCount(): Int = messages.size
 
-    class RequestViewHolder(itemView: View, private val themeData: ThemeResponse?) : RecyclerView.ViewHolder(itemView) {
-        private val messageText: TextView = itemView.findViewById(R.id.tvSenderMessage)
-        private val imageView: ImageView = itemView.findViewById(R.id.senderImage)
-        private val videoView: ImageView = itemView.findViewById(R.id.senderVideo)
-        private val senderImageCard: CardView = itemView.findViewById(R.id.senderImageCard)
-        private val tvTime: TextView = itemView.findViewById(R.id.tvTime)
-        private val senderVideoCard: CardView = itemView.findViewById(R.id.senderVideoCard)
+  class RequestViewHolder(
+      itemView: View,
+      private val themeData: ThemeResponse?,
+      private val chatActionCallback: ChatActionCallback
+  ) : RecyclerView.ViewHolder(itemView) {
 
+      private val messageText: TextView = itemView.findViewById(R.id.tvSenderMessage)
+      private val imageView: ImageView = itemView.findViewById(R.id.senderImage)
+      private val videoView: ImageView = itemView.findViewById(R.id.senderVideo)
+      private val senderImageCard: CardView = itemView.findViewById(R.id.senderImageCard)
+      private val tvTime: TextView = itemView.findViewById(R.id.tvTime)
+      private val senderVideoCard: CardView = itemView.findViewById(R.id.senderVideoCard)
 
+      fun bind(message: NCWMessage) {
+          tvTime.text = NCWAppUtils.formatTimestampToTime(message.timestamp)
 
-        fun bind(message: NCWMessage) {
-            // Show or hide views based on the message type
-            tvTime.text=NCWAppUtils.formatTimestampToTime(message.timestamp)
-            if (message.type == MessageType.TEXT) {
-                senderVideoCard.visibility = View.GONE
-                messageText.visibility = View.VISIBLE
-                messageText.text = message.message
-                imageView.visibility = View.GONE
-                videoView.visibility = View.GONE
-                senderImageCard.visibility = View.GONE
-                // Define corner radii for each corner: top-left, top-right, bottom-right, bottom-left
-                val cornerRadii = floatArrayOf(
-                    15f, 15f,  // Top-left
-                    0f, 0f,    // Top-right
-                    15f, 15f,  // Bottom-right
-                    15f, 15f   // Bottom-left
-                )
-                // Apply the background with theme color and custom corners
-                ThemeUtils.applyBackgroundWithCorners(messageText, themeData?.botResponseBubbleColor, cornerRadii)
-                ThemeUtils.applyTheme(messageText)
+          // Reset visibility to GONE for all views initially
+          resetVisibility()
 
-            } else if (message.type == MessageType.IMAGE) {
-                senderVideoCard.visibility = View.GONE
-                imageView.visibility = View.VISIBLE
-                if (message.largeImageUrl!=null)
-                    Glide.with(itemView.context).load(message.largeImageUrl).into(imageView)
-                else
-                imageView.setImageURI(Uri.parse(message.message))
+          when (message.type) {
+              MessageType.TEXT -> {
+                  setupTextMessage(message)
+              }
+              MessageType.IMAGE -> {
+                  setupImageMessage(message)
+              }
+              MessageType.VIDEO -> {
+                  setupVideoMessage(message)
+              }
 
-                messageText.visibility = View.GONE
-                videoView.visibility = View.GONE
-                senderImageCard.visibility = View.VISIBLE
-            } else if (message.type == MessageType.VIDEO) {
-                senderVideoCard.visibility = View.VISIBLE
-                Log.e("Dataqtat",""+message.message)
-                videoView.visibility = View.VISIBLE
-                Glide.with(itemView.context)
-                    .load(message.message)
-                    .apply(RequestOptions().frame(1000)) 
-                    .into(videoView)
-                messageText.visibility = View.GONE
-                imageView.visibility = View.GONE
-                senderImageCard.visibility = View.GONE
-            }
-        }
-    }
+              else -> {}
+          }
+
+          // Handle media click actions
+          imageView.setOnClickListener { chatActionCallback.onMediaClick(message) }
+          senderVideoCard.setOnClickListener { chatActionCallback.onMediaClick(message) }
+      }
+
+      private fun resetVisibility() {
+          messageText.visibility = View.GONE
+          imageView.visibility = View.GONE
+          videoView.visibility = View.GONE
+          senderImageCard.visibility = View.GONE
+          senderVideoCard.visibility = View.GONE
+      }
+
+      private fun setupTextMessage(message: NCWMessage) {
+          messageText.visibility = View.VISIBLE
+          messageText.text = message.message
+          // Apply background with corners
+          val cornerRadii = floatArrayOf(15f, 15f, 0f, 0f, 15f, 15f, 15f, 15f)
+          ThemeUtils.applyBackgroundWithCorners(messageText, themeData?.botResponseBubbleColor, cornerRadii)
+          ThemeUtils.applyTheme(messageText)
+      }
+
+      private fun setupImageMessage(message: NCWMessage) {
+          imageView.visibility = View.VISIBLE
+          senderImageCard.visibility = View.VISIBLE
+          Glide.with(itemView.context).load(message.largeImageUrl ?: Uri.parse(message.message)).into(imageView)
+      }
+
+      private fun setupVideoMessage(message: NCWMessage) {
+          senderVideoCard.visibility = View.VISIBLE
+          videoView.visibility = View.VISIBLE
+
+          Glide.with(itemView.context)
+              .load(message.thumbnailUrl ?: message.message)
+              .apply(RequestOptions().frame(1000))  // Show first frame for preview
+              .into(videoView)
+      }
+  }
+
 
     class InitialViewHolder(
         itemView: View,
