@@ -141,7 +141,7 @@ object ThemeUtils
      * @param cornerRadii Array of corner radii in the order of top-left, top-right, bottom-right, and bottom-left.
      */
     fun applyBackgroundWithCorners(
-        textView: TextView,
+        view: View,
         color: String?,
         cornerRadii: FloatArray = floatArrayOf(10f, 10f, 10f, 10f, 10f, 10f, 10f, 10f)
     ) {
@@ -152,7 +152,7 @@ object ThemeUtils
             setColor(parsedColor)
         }
 
-        textView.background = backgroundDrawable
+        view.background = backgroundDrawable
     }
 
     /**

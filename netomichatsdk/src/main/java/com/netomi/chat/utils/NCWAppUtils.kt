@@ -13,6 +13,7 @@ import android.webkit.MimeTypeMap
 import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.netomi.chat.utils.NCWAppConstant.TIME_AM_PM
+import com.netomi.chat.utils.NCWAppConstant.TYPE_FILE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_IMAGE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_TEXT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
@@ -130,7 +131,25 @@ object NCWAppUtils {
         return when (type) {
             "image/png", "image/jpeg" -> TYPE_IMAGE
             "video/quicktime",  "video/mp4" -> TYPE_VIDEO
-            else -> TYPE_TEXT
+            else -> TYPE_FILE
+        }
+    }
+    fun formatFileSize(fileSizeInBytes: Long): String {
+        return when {
+            fileSizeInBytes >= 1_048_576 -> {
+                // Convert to MB
+                val sizeInMb = fileSizeInBytes / 1_048_576.0
+                String.format("%.2f MB", sizeInMb)
+            }
+            fileSizeInBytes >= 1_024 -> {
+                // Convert to KB
+                val sizeInKb = fileSizeInBytes / 1_024.0
+                String.format("%.2f KB", sizeInKb)
+            }
+            else -> {
+                // Show bytes
+                "$fileSizeInBytes Bytes"
+            }
         }
     }
 

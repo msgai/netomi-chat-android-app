@@ -29,6 +29,7 @@ object NCWAppConstant {
     const val TYPE_IMAGE="ai.msg.domain.responses.core.Image"
     const val TYPE_VIDEO="ai.msg.domain.responses.core.Video"
     const val TYPE_TEXT="ai.msg.domain.responses.core.Text"
+    const val TYPE_FILE="ai.msg.domain.responses.core.GenericFileAttachment"
     const val TYPE_CAROUSEL="ai.msg.domain.responses.core.Carousel"
 
 }
