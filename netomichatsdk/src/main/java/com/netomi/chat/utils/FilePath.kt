@@ -29,6 +29,7 @@ class FilePath {
         if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
             // ExternalStorageProvider
             if (isExternalStorageDocument(uri)) {
+                Log.e("TestPath","Step !")
                 val docId = DocumentsContract.getDocumentId(uri)
                 val split = docId.split(":").toTypedArray()
                 val type = split[0]
@@ -37,6 +38,7 @@ class FilePath {
                 }
                 // TODO handle non-primary volumes
             } else if (isDownloadsDocument(uri)) {
+                Log.e("TestPath","Step 2")
                 var cursor: Cursor? = null
                 try {
                     cursor = context.contentResolver.query(uri, arrayOf(MediaStore.MediaColumns.DISPLAY_NAME), null, null, null)
@@ -98,6 +100,7 @@ class FilePath {
                     return getDataColumn(context, contentUri, null, null)
                 }*/
             } else if (isMediaDocument(uri)) {
+                Log.e("TestPath","Step 3")
                 val docId = DocumentsContract.getDocumentId(uri)
                 val split = docId.split(":").toTypedArray()
                 val type = split[0]
@@ -112,6 +115,12 @@ class FilePath {
                     "audio" -> {
                         contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                     }
+                    else ->{
+                        Log.e("TestPath","Step zz3")
+                        contentUri = MediaStore.Files.getContentUri("external")
+                        Log.e("TestPath","Step 3"+contentUri)
+                    }
+
                 }
                 val selection = "_id=?"
                 val selectionArgs = arrayOf(
@@ -120,8 +129,10 @@ class FilePath {
                 return getDataColumn(context, contentUri, selection, selectionArgs)
             }
         }else if ("content".equals(uri.scheme, ignoreCase = true)) {
+            Log.e("TestPath","Step 4")
             return getDataColumn(context, uri, null, null)
         }else if ("file".equals(uri.scheme, ignoreCase = true)) {
+            Log.e("TestPath","Step 5")
             return uri.path
         }else if (isGoogleDriveUri(uri)) {
             return getDriveFilePath(uri,context)
@@ -197,16 +208,18 @@ class FilePath {
      * @param selectionArgs (Optional) Selection arguments used in the query.
      * @return The value of the _data column, which is typically a file path.
      */
-  /*  private fun getDataColumn(
+   private fun getDataColumn(
         context: Context, uri: Uri?, selection: String?,
         selectionArgs: Array<String>?
     ): String? {
+        Log.e("TestPath","Step 3")
         var cursor: Cursor? = null
         val column = "_data"
         val projection = arrayOf(
             column
         )
         try {
+            Log.e("TestPath","Step getData")
             cursor = uri?.let {
                 context.contentResolver.query(
                     it, projection, selection, selectionArgs,
@@ -215,20 +228,22 @@ class FilePath {
             }
             if (cursor != null && cursor.moveToFirst()) {
                 val column_index: Int = cursor.getColumnIndexOrThrow(column)
+                Log.e("TestPath","Step column_index")
                 return cursor.getString(column_index)
             }
         } finally {
             cursor?.close()
         }
         return null
-    }*/
-    private fun getDataColumn(
+    }
+ /*   private fun getDataColumn(
         context: Context, uri: Uri?, selection: String?,
         selectionArgs: Array<String>?
     ): String? {
         if (uri == null) return null
-
+        Log.e("TestPath","Step gettt")
         return try {
+            Log.e("TestPath","Step last")
             // Try to query the _data column
             context.contentResolver.query(uri, arrayOf("_data"), selection, selectionArgs, null)?.use { cursor ->
                 if (cursor.moveToFirst()) {
@@ -251,7 +266,7 @@ class FilePath {
         } catch (e: Exception) {
             null
         }
-    }
+    }*/
 
 
     private fun getDataVideoColumn(context: Context, uri: Uri?, selection: String?, selectionArgs: Array<String>?): String? {

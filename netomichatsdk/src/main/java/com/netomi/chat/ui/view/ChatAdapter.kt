@@ -80,6 +80,11 @@ class ChatAdapter(
       private val senderImageCard: CardView = itemView.findViewById(R.id.senderImageCard)
       private val tvTime: TextView = itemView.findViewById(R.id.tvTime)
       private val senderVideoCard: CardView = itemView.findViewById(R.id.senderVideoCard)
+      private val requestDocCard: ConstraintLayout = itemView.findViewById(R.id.docCard)
+      private val tvDocName: TextView = itemView.findViewById(R.id.tvDocName)
+      private val tvDocType: TextView = itemView.findViewById(R.id.tvDocType)
+
+
 
       fun bind(message: NCWMessage) {
           tvTime.text = NCWAppUtils.formatTimestampToTime(message.timestamp)
@@ -97,6 +102,9 @@ class ChatAdapter(
               MessageType.VIDEO -> {
                   setupVideoMessage(message)
               }
+              MessageType.FILE -> {
+                  setupFileMessage(message)
+              }
 
               else -> {}
           }
@@ -104,6 +112,19 @@ class ChatAdapter(
           // Handle media click actions
           imageView.setOnClickListener { chatActionCallback.onMediaClick(message) }
           senderVideoCard.setOnClickListener { chatActionCallback.onMediaClick(message) }
+          requestDocCard.setOnClickListener { chatActionCallback.onMediaClick(message) }
+      }
+
+      private fun setupFileMessage(message: NCWMessage) {
+          requestDocCard.visibility=View.VISIBLE
+          val cornerRadii = floatArrayOf(15f, 15f, 0f, 0f, 15f, 15f, 15f, 15f)
+          ThemeUtils.applyBackgroundWithCorners(requestDocCard, themeData?.botResponseBubbleColor, cornerRadii)
+          tvDocName.text=message.title
+          if (message.fileSize!=null)
+          tvDocType.text= NCWAppUtils.formatFileSize(message.fileSize.toLong())
+
+          ThemeUtils.applyTheme(tvDocName)
+          ThemeUtils.applyTheme(tvDocType)
       }
 
       private fun resetVisibility() {
@@ -112,6 +133,7 @@ class ChatAdapter(
           videoView.visibility = View.GONE
           senderImageCard.visibility = View.GONE
           senderVideoCard.visibility = View.GONE
+          requestDocCard.visibility = View.GONE
       }
 
       private fun setupTextMessage(message: NCWMessage) {

@@ -19,7 +19,9 @@ data class NCWMessage(
     val title: String? = null,
     var buttons : ArrayList<Buttons> = arrayListOf(),
     var isSameTimeMessage :Boolean=true,
-    var isQuickReplyVisible: Boolean = true
+    var isQuickReplyVisible: Boolean = true,
+    val fileUrl: String? = null,
+    val fileSize: String? = null
 
 )
 

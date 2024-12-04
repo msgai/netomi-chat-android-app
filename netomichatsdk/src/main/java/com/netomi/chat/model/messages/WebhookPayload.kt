@@ -1,5 +1,7 @@
 package com.netomi.chat.model.messages
 
+import com.netomi.chat.utils.DeviceInfo
+
 data class WebhookPayload(
     val botRefId: String? = null,
     val requestBody: RequestBody? = null
@@ -41,12 +43,13 @@ data class AttachmentList(
     var largeImageUrl: String? = null,
     var errorMessage: String? = null,
     var thumbnailUrl: String? = null,
+    var fileURL: String? = null
 
 
     )
 
 data class AdditionalAttributes(
-    val CUSTOM_ATTRIBUTES: List<CustomAttribute>? = null
+    val CUSTOM_ATTRIBUTES: ArrayList<DeviceInfo> = arrayListOf()
 )
 
 data class CustomAttribute(

@@ -35,7 +35,8 @@ data class AttachmentListRequest(
     var largeImageUrl: String? = null,
     var isReviewEnabled: Boolean? = null,
     var thumbnailUrl: String? = null,
-
+    var fileURL: String? = null,
+    var fileSize: String? = null
 )
 
 
