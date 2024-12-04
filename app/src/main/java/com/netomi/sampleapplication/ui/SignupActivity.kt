@@ -202,10 +202,12 @@ class SignupActivity : AppCompatActivity() {
     private fun setupPasswordToggle() {
         passwordToggle.setOnClickListener {
             isPasswordVisible = !isPasswordVisible
-            passwordEditText.inputType = if (isPasswordVisible) {
-                InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-            } else {
-                InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            if (passwordEditText.text?.isNotEmpty() == true) {
+                passwordEditText.inputType = if (isPasswordVisible) {
+                    InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                } else {
+                    InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                }
             }
             passwordToggle.setImageResource(
                 if (isPasswordVisible) R.drawable.ic_eye_view else R.drawable.ic_eye_hide
