@@ -183,7 +183,7 @@ class ChatAdapter(
         private val chipRecyclerViewGroup: RecyclerView = itemView.findViewById(R.id.quickReplyRecyclerView)
         private val receiverImageCard: CardView = itemView.findViewById(R.id.receiverImageCard)
         private val chipGroup: ChipGroup = itemView.findViewById(R.id.quickReplyChipGroup)
-        private val cardViewCard: CardView = itemView.findViewById(R.id.cardViewCard)
+        private val cardViewCard: ConstraintLayout = itemView.findViewById(R.id.cardViewCard)
         private val cardTitle: TextView = itemView.findViewById(R.id.cardTitle)
         private val cardText: TextView = itemView.findViewById(R.id.cardText)
         private val buttonRecyclerView: RecyclerView = itemView.findViewById(R.id.buttonRecyclerView)
@@ -251,17 +251,14 @@ class ChatAdapter(
                     cardViewCard.visibility = View.VISIBLE
                     cardTitle.text=message.message
                     cardText.text=message.title
-                    val buttonAdapter = ButtonAdapter(message.buttons)
                     buttonRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
-                    buttonRecyclerView.adapter = buttonAdapter
-                    buttonRecyclerView.setHasFixedSize(true)
-                    val colorHex = "#E6E6E6"  // replace with your dynamic color as needed
-                    val colorDrawable = ColorDrawable(Color.parseColor(colorHex))
-                    if (buttonRecyclerView.itemDecorationCount == 0) {
-                        val customDivider = CustomDividerItemDecoration(colorDrawable)
-                        buttonRecyclerView.addItemDecoration(customDivider)
+                    val carouselAdapter = CarouselButtonAdapter(message.buttons){
+                        chatActionCallback.carouselButtonAction(it)
                     }
-
+                    buttonRecyclerView.adapter = carouselAdapter
+                 /*   val buttonAdapter = ButtonAdapter(message.buttons)
+                    buttonRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
+                    buttonRecyclerView.adapter = buttonAdapter*/
                 }
 
                 else -> {}
