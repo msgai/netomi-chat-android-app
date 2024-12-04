@@ -1,8 +1,11 @@
 package com.netomi.chat.ui.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.webkit.WebSettings
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.VideoView
@@ -36,61 +39,85 @@ class FullScreenMediaActivity : AppCompatActivity() {
         imageView.visibility = View.GONE
         videoView.visibility = View.GONE
 
-        // Handle media based on type
-        if (!mediaUrl.isNullOrEmpty() && !mediaType.isNullOrEmpty()) {
-            when (mediaType) {
-                MessageType.IMAGE.name -> {
-                    webView.visibility = View.VISIBLE
-                    webView.settings.javaScriptEnabled = true
-                    // webView.loadUrl(mediaUrl)
-                    val imageHtml = """
-    <html>
-        <body style="margin:0;padding:0;">
-            <img src="$mediaUrl" style="width:100%;height:auto;" />
-        </body>
-    </html>
-"""
-                    webView.loadData(imageHtml, "text/html", "UTF-8")
-                    //    Glide.with(this).load(mediaUrl).into(imageView)
-                }
-
-                MessageType.VIDEO.name -> {
-
-                    webView.visibility = View.VISIBLE
-                    //  setupVideoPlayer(mediaUrl)
-
-
-                    val videoHtml = """
-    <html>
-        <body style="margin:0;padding:0;">
-            <video controls style="width:100%;height:auto;">
-                <source src="$mediaUrl" type="video/mp4" />
-                Your browser does not support the video tag.
-            </video>
-        </body>
-    </html>
-"""
-                    webView.loadData(videoHtml, "text/html", "UTF-8")
-                }
-
-                MessageType.FILE.name -> {
-                    webView.visibility = View.VISIBLE
-                    webView.settings.javaScriptEnabled = true
-                    webView.loadUrl("https://docs.google.com/gview?embedded=true&url=$mediaUrl")
-
-                }
-
-                else -> {
-                    NCWAppUtils.showToast(this, "Unsupported media type!")
-                }
-            }
-        } else {
-            NCWAppUtils.showToast(this, "Media data is missing!")
-        }
+        handleMedia(mediaUrl,mediaType)
 
         // Back button action
         ivBack.setOnClickListener { finish() }
     }
+
+    private fun handleMedia(mediaUrl: String?, mediaType: String?) {
+        if (mediaUrl.isNullOrEmpty() || mediaType.isNullOrEmpty()) {
+            NCWAppUtils.showToast(this, "Media data is missing!")
+            return
+        }
+
+        // Show loader while the page initializes
+        progressBar.visibility = View.VISIBLE
+
+        webView.apply {
+            visibility = View.VISIBLE
+            settings.javaScriptEnabled = true
+            settings.cacheMode = WebSettings.LOAD_NO_CACHE // Ensure fresh content
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    // Hide loader once the content is fully loaded
+                    progressBar.visibility = View.GONE
+                }
+
+                override fun onReceivedError(
+                    view: WebView?,
+                    errorCode: Int,
+                    description: String?,
+                    failingUrl: String?
+                ) {
+                    super.onReceivedError(view, errorCode, description, failingUrl)
+                    Log.e("WebViewError", "Error $errorCode: $description at $failingUrl")
+                    // Retry loading in case of error
+                    if (mediaType == MessageType.FILE.name) {
+                        webView.loadUrl("https://docs.google.com/gview?embedded=true&url=$mediaUrl")
+                    }
+                }
+            }
+        }
+
+        when (mediaType) {
+            MessageType.IMAGE.name -> {
+                val imageHtml = """
+                <html>
+                    <body style="margin:0;padding:0;">
+                        <img src="$mediaUrl" style="width:100%;height:auto;" />
+                    </body>
+                </html>
+            """
+                webView.loadData(imageHtml, "text/html", "UTF-8")
+            }
+
+            MessageType.VIDEO.name -> {
+                val videoHtml = """
+                <html>
+                    <body style="margin:0;padding:0;">
+                        <video controls style="width:100%;height:auto;">
+                            <source src="$mediaUrl" type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    </body>
+                </html>
+            """
+                webView.loadData(videoHtml, "text/html", "UTF-8")
+            }
+
+            MessageType.FILE.name -> {
+               webView.loadUrl("https://docs.google.com/gview?embedded=true&url=$mediaUrl")
+            }
+
+            else -> {
+                NCWAppUtils.showToast(this, "Unsupported media type!")
+                progressBar.visibility = View.GONE // Hide loader if unsupported
+            }
+        }
+    }
+
 
     /**
      * Configures the VideoView to play the video.

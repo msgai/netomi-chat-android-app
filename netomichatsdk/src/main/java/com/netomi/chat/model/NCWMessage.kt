@@ -1,6 +1,7 @@
 package com.netomi.chat.model
 
 import com.netomi.chat.model.messages.Buttons
+import com.netomi.chat.model.messages.CarouselButton
 import com.netomi.chat.model.messages.CarouselElement
 import com.netomi.chat.model.messages.QuickReply
 
@@ -17,7 +18,7 @@ data class NCWMessage(
     val quickReply: QuickReply? = null,
     val thumbnailUrl: String? = null,
     val title: String? = null,
-    var buttons : ArrayList<Buttons> = arrayListOf(),
+    var buttons : ArrayList<CarouselButton> = arrayListOf(),
     var isSameTimeMessage :Boolean=true,
     var isQuickReplyVisible: Boolean = true,
     val fileUrl: String? = null,

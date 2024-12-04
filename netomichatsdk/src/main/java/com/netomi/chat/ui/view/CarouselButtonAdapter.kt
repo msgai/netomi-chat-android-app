@@ -36,7 +36,7 @@ class CarouselButtonAdapter(private val items: List<CarouselButton>,private val 
         )
         // Apply the background with theme color and custom corners
         ThemeUtils.applyChipBackgroundWithCorners(holder.constRow,  cornerRadii)
-        holder.carouselButton.setOnClickListener {
+        holder.constRow.setOnClickListener {
             carouselButton(item)
         }
 

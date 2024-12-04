@@ -15,6 +15,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.EditText
@@ -66,6 +67,7 @@ import com.netomi.chat.utils.ChatActionCallback
 import com.netomi.chat.utils.DeviceInfo
 import com.netomi.chat.utils.DeviceInfoUtil
 import com.netomi.chat.utils.DialogUtils
+import com.netomi.chat.utils.FilePath
 import com.netomi.chat.utils.ImageUtils
 import com.netomi.chat.utils.NCWAppConstant.ARG_IMAGE_URL
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
@@ -258,7 +260,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             .show()
     }
 
-    private fun getPreSignedUrl(type: String, uploadKeyPrefix: String) {
+    private fun getPreSignedUrl(type: String?, uploadKeyPrefix: String) {
         progressBar.visibility=View.VISIBLE
         val mediaUpload = SignedUrlPayload(
             fileType = type,
@@ -650,38 +652,48 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         messageAdapter.notifyDataSetChanged()
         chatRecyclerView.scrollToPosition(messageList.size)
         addLoader()
-        Log.e("CalllActive","first")
     }
 
     private fun updateMessageList(newMessages: List<NCWMessage>) {
-        val currentTime = System.currentTimeMillis()
-        val elapsedTime = currentTime - loaderAddedTime
+        val typingIndicatorEnabled = themeData?.typingIndicator?.enabled ?: false
 
-        // Ensure loader remains visible for at least minTime
-        val minTime = themeData?.typingIndicator?.minTime ?: 1000L
-        if (isLoaderActive && elapsedTime < minTime) {
-            Log.e("CallActive", "Waiting for minTime: $minTime")
-            Handler(Looper.getMainLooper()).postDelayed({
-                if (isLoaderActive) { // Double-check if loader is still active
-                    safelyRemoveLoader(newMessages)
-                    Log.e("CallActive", "Removed after minTime")
-                }
-            }, minTime - elapsedTime)
-        } else if (isLoaderActive) { // Ensure loader is active before removing
-            Log.e("CallActive", "Removed loader immediately")
-            safelyRemoveLoader(newMessages)
-        } else {
-            Log.e("CallActive", "Loader already removed, updating messages only")
-            messageList.addAll(newMessages)
-            messageAdapter.notifyDataSetChanged()
-            chatRecyclerView.scrollToPosition(messageList.size - 1)
+        if (!typingIndicatorEnabled) {
+            addMessages(newMessages)
+            return
         }
+
+            val currentTime = System.currentTimeMillis()
+            val elapsedTime = currentTime - loaderAddedTime
+
+            // Ensure loader remains visible for at least minTime
+            val minTime = themeData?.typingIndicator?.minTime ?: 1000L
+            if (isLoaderActive && elapsedTime < minTime) {
+                Log.e("CallActive", "Waiting for minTime: $minTime")
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (isLoaderActive) { // Double-check if loader is still active
+                        safelyRemoveLoader(newMessages)
+                        Log.e("CallActive", "Removed after minTime")
+                    }
+                }, minTime - elapsedTime)
+            } else if (isLoaderActive) { // Ensure loader is active before removing
+                Log.e("CallActive", "Removed loader immediately")
+                safelyRemoveLoader(newMessages)
+            } else {
+                Log.e("CallActive", "Loader already removed, updating messages only")
+                addMessages(newMessages)
+            }
+
+    }
+    // Helper function to add messages and scroll to the latest
+    private fun addMessages(newMessages: List<NCWMessage>) {
+        messageList.addAll(newMessages)
+        messageAdapter.notifyDataSetChanged()
+        chatRecyclerView.scrollToPosition(messageList.size - 1)
     }
 
     private fun safelyRemoveLoader(newMessages: List<NCWMessage>) {
         if (!isLoaderActive) return // Prevent redundant calls
         removeLoader()
-        Log.e("CalllActive", "safelyRemoveLoader executed")
         messageList.addAll(newMessages)
         messageAdapter.notifyDataSetChanged()
         chatRecyclerView.post {
@@ -787,13 +799,13 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
     // Function to show camera and gallery options
     private fun showMediaOptions() {
-        NCWAppUtils.showMediaOptionDialog(this, {
-            openCamera()
-        },
-            {
-                openGallery()
-            }
+
+        val bottomSheet = MediaOptionsBottomSheet(
+            onCameraClick = { openCamera() },
+            onGalleryClick = { openGallery() },
+            onFileClick = { openFile() }
         )
+        bottomSheet.show(supportFragmentManager, "MediaOptionsBottomSheet")
     }
 
 
@@ -824,9 +836,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
                 val type= photoUri?.let { fileSend?.let { it1 -> NCWAppUtils.getFileContentType(it1) } }
                 fileSend?.let {
-                    if (type != null) {
                         getPreSignedUrl(type, it.path)
-                    }
+
                 }
             } else {
                 Toast.makeText(this, "Failed to capture image", Toast.LENGTH_SHORT).show()
@@ -840,74 +851,104 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
 
+    // Common function to validate file size and type
+    private fun validateFile(file: File?, mimeType: String?): Boolean {
+        // Validate file size
+        if (!isFileSizeValid(this, file?.length(), themeData?.fileSharing?.fileSize)) {
+            return false
+        }
 
-    // Open the gallery to select an attachment
+        // Validate file type
+        val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
+        val fileExtension = file?.extension?.lowercase()?.let { if (!it.startsWith(".")) ".$it" else it }
+
+        if (fileExtension !in supportedExtensions) {
+            NCWAppUtils.showToast(
+                this,
+                "Unsupported file type selected. Supported types: ${supportedExtensions.joinToString(", ")}"
+            )
+            return false
+        }
+
+        return true
+    }
+
+    // Common function to handle file result
+    private fun handleFileSelection(resultData: Intent?, mimeType: String?, isGallery: Boolean = false) {
+        val selectedMediaUri: Uri? = resultData?.data
+        if (selectedMediaUri == null) {
+            Log.e("FileSelection", "No media selected")
+            return
+        }
+
+        // Get the file from the URI
+       fileSend = if (isGallery) {
+           FilePath().getPath(this, selectedMediaUri)?.let { File(it) }
+       } else {
+           ImageUtils.getFileFromUri(this, selectedMediaUri)
+        }
+
+        if (fileSend == null) {
+            Log.e("FileSelection", "Failed to get file from URI")
+            return
+        }
+
+        Log.e("FileSelection", "Type: $mimeType, File path: ${fileSend?.absolutePath}")
+
+        // Validate file size and type
+        if (!validateFile(fileSend, mimeType)) return
+
+        checkForPreviousQuickReply()
+
+        when {
+            mimeType == null -> Log.e("FileSelection", "Unknown MIME type")
+            mimeType.startsWith("image/") -> addMediaMessage(selectedMediaUri, MessageType.IMAGE)
+            mimeType.startsWith("video/") -> addMediaMessage(selectedMediaUri, MessageType.VIDEO)
+            else -> addDocMessage(fileSend, selectedMediaUri, MessageType.FILE)
+        }
+
+        fileSend?.let {
+            getPreSignedUrl(mimeType, it.path)
+
+        }
+    }
+
+    // Gallery selection
     private fun openGallery() {
-        val galleryIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
-            type = "*/*"
+        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
+            type = "image/* video/*"
         }
         galleryLauncher.launch(galleryIntent)
     }
+
+    // File selection (PDF, DOC, etc.)
+    private fun openFile() {
+        val fileIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "*/*"
+            addCategory(Intent.CATEGORY_OPENABLE)
+        }
+        fileLauncher.launch(fileIntent)
+    }
+
     // Handle the result of the gallery selection
     private val galleryLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-                val selectedMediaUri: Uri? = result.data?.data
-                if (selectedMediaUri == null) {
-                    Log.e("galleryLauncher", "No media selected")
-                    return@registerForActivityResult
-                }
-
-                val type = contentResolver.getType(selectedMediaUri)
-                fileSend = ImageUtils.getFileFromUri(this, selectedMediaUri) // Use helper function
-                if (fileSend == null) {
-                    Log.e("galleryLauncher", "Failed to get file from URI")
-                    return@registerForActivityResult
-                }
-
-
-                Log.e("galleryLauncher", "Type: $type, File path: ${fileSend?.absolutePath}")
-
-                // Validate file size
-                if (!isFileSizeValid(this,fileSend?.length(), themeData?.fileSharing?.fileSize)) {
-                    return@registerForActivityResult
-                }
-
-                // Validate file type
-                val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
-                var fileExtension = fileSend?.extension?.lowercase()
-                if (fileExtension != null && !fileExtension.startsWith(".")) {
-                    fileExtension = ".$fileExtension"
-                }
-                if (fileExtension !in supportedExtensions) {
-                    NCWAppUtils.showToast(
-                        this,
-                        "Unsupported file type selected. Supported types: ${supportedExtensions.joinToString(", ")}"
-                    )
-                    return@registerForActivityResult
-                }
-
-                checkForPreviousQuickReply()
-
-                // Handle based on MIME type
-                when {
-                    type == null -> {
-                        Log.e("galleryLauncher", "Unknown MIME type")
-                    }
-                    type.startsWith("image/") -> addMediaMessage(selectedMediaUri, MessageType.IMAGE)
-                    type.startsWith("video/") -> addMediaMessage(selectedMediaUri, MessageType.VIDEO)
-                    //type == "application/pdf" -> addDocMessage(fileSend, MessageType.PDF)
-                    else -> addDocMessage(fileSend, selectedMediaUri,MessageType.FILE)
-                }
-
-                fileSend?.let {
-                    if (type != null) {
-                        getPreSignedUrl(type, it.path)
-                    }
-                }
+                val type = contentResolver.getType(result.data?.data!!)
+                handleFileSelection(result.data, type, isGallery = true)
             }
         }
+
+    // Handle the result of file selection (PDF, DOC, etc.)
+    private val fileLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                val type = contentResolver.getType(result.data?.data!!)
+                handleFileSelection(result.data, type)
+            }
+        }
+
+    // Function to add document message
 
     private fun addDocMessage(file: File?, selectedMediaUri: Uri, type: MessageType) {
         val newMessage = NCWMessage(

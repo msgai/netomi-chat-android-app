@@ -62,7 +62,7 @@ data class AttachmentContent(
     val carouselImageAspectRatio: String? = null,
     val thumbnailUrl: String? = null,
     val title: String? = null,
-    var buttons: ArrayList<Buttons> = arrayListOf()
+    var buttons: ArrayList<CarouselButton> = arrayListOf()
 
 )
 
@@ -106,6 +106,7 @@ data class Buttons(
     var url: String? = null,
     var title: String? = null,
     var messengerExtensions: Boolean? = null
+
 
 )
 

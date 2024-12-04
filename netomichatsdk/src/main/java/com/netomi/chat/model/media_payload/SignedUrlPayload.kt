@@ -1,6 +1,6 @@
 package com.netomi.chat.model.media_payload
 
 data class SignedUrlPayload(
-    val fileType: String,
+    val fileType: String?=null,
     val uploadKeyPrefix: String
 )
