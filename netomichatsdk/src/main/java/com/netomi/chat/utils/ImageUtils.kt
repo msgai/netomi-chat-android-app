@@ -6,7 +6,7 @@ import android.provider.OpenableColumns
 import java.io.File
 import java.io.FileOutputStream
 
-object FetchFile {
+object ImageUtils {
 
 
     fun getFileFromUri(context: Context, uri: Uri): File? {

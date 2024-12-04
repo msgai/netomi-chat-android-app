@@ -112,13 +112,14 @@ class ChatAdapter(
           // Handle media click actions
           imageView.setOnClickListener { chatActionCallback.onMediaClick(message) }
           senderVideoCard.setOnClickListener { chatActionCallback.onMediaClick(message) }
+          requestDocCard.setOnClickListener { chatActionCallback.onMediaClick(message) }
       }
 
       private fun setupFileMessage(message: NCWMessage) {
           requestDocCard.visibility=View.VISIBLE
           val cornerRadii = floatArrayOf(15f, 15f, 0f, 0f, 15f, 15f, 15f, 15f)
           ThemeUtils.applyBackgroundWithCorners(requestDocCard, themeData?.botResponseBubbleColor, cornerRadii)
-          tvDocName.text=message.message
+          tvDocName.text=message.title
           if (message.fileSize!=null)
           tvDocType.text= NCWAppUtils.formatFileSize(message.fileSize.toLong())
 

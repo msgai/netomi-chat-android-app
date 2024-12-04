@@ -32,4 +32,6 @@ object NCWAppConstant {
     const val TYPE_FILE="ai.msg.domain.responses.core.GenericFileAttachment"
     const val TYPE_CAROUSEL="ai.msg.domain.responses.core.Carousel"
 
+    const val DATE_FORMAT="yyyyMMdd_HHmmss"
+
 }
