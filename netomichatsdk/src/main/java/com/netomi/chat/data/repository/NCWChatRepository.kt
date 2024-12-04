@@ -10,6 +10,8 @@ import com.netomi.chat.model.GetChatHistoryResponse
 import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.chat_history.GetChatHistoryPayload
+import com.netomi.chat.model.endchat.EndChatRequest
+import com.netomi.chat.model.endchat.EndChatResponse
 import com.netomi.chat.model.media_payload.SignedUrlPayload
 import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
@@ -285,6 +287,25 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
 
 
         }*/
+
+    // Hit API to get AWS MQTT Credentials
+    suspend fun hitEndChatAPI(payload: EndChatRequest): State<EndChatResponse> {
+        return try {
+            val response = apiInterface.hitEndChatAPI(payload)
+            if (response.isSuccessful && response.body() != null) {
+                State.success(data = response.body()!!, Routes.ROUTE_END_CHAT)
+            } else {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    State.error(parseError(errorBody), code = response.code())
+                } else {
+                    State.error(mapApiException(response.code()), code = response.code())
+                }
+            }
+        } catch (e: Exception) {
+            State.error(e.message.toString(), code = 500)
+        }
+    }
 }
 
 

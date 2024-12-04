@@ -5,12 +5,15 @@ import com.netomi.chat.model.GetConversationIdResponse
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.chat_history.GetChatHistoryPayload
+import com.netomi.chat.model.endchat.EndChatRequest
+import com.netomi.chat.model.endchat.EndChatResponse
 import com.netomi.chat.model.media_payload.SignedUrlPayload
 import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.GetPreSignedUrl
 import com.netomi.chat.model.theme.ThemeResponse
 import com.netomi.chat.utils.NCWBaseResponse
+import com.netomi.chat.utils.Routes.ROUTE_END_CHAT
 import com.netomi.chat.utils.Routes.ROUTE_GET_CHAT
 import com.netomi.chat.utils.Routes.ROUTE_GET_CONVERSATION_ID
 import com.netomi.chat.utils.Routes.ROUTE_GET_MQTT_CREDENTIALS
@@ -144,5 +147,8 @@ interface NCWApiInterface {
         @Part("Content-Type") contentType: RequestBody?,
         @Part file: MultipartBody.Part
     ): Response<ResponseBody>*/
+
+    @POST(ROUTE_END_CHAT)
+    suspend fun hitEndChatAPI(@Body payload: EndChatRequest?): Response<EndChatResponse>
 
 }

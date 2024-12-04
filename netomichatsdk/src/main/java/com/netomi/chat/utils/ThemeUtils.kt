@@ -29,7 +29,7 @@ object ThemeUtils
 
     private var conversationID : String? = null
 
-    fun setConversationID(id: String) {
+    fun setConversationID(id: String?) {
         conversationID = id
     }
     fun getConversationID():String?{
@@ -88,7 +88,7 @@ object ThemeUtils
     }
 
     // Utility function to parse color strings (e.g., "#FF5733")
-    private fun parseColor(colorString: String): Int {
+     fun parseColor(colorString: String): Int {
         return try {
             Color.parseColor(colorString)
         } catch (e: IllegalArgumentException) {
