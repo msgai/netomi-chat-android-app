@@ -16,4 +16,6 @@ object Routes {
 
     const val ROUTE_UPLOAD_MEDIA = "upload_media"
 
+    const val ROUTE_END_CHAT= API+"webhook-event"
+
 }

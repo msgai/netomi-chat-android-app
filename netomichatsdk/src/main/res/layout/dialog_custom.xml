@@ -33,16 +33,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center">
+        android:gravity="center"
+        android:layout_marginTop="16dp">
 
         <Button
             android:id="@+id/yesButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:backgroundTint="@android:color/black"
+            android:textAllCaps="false"
             android:text="Yes"
-            android:textColor="@android:color/white"/>
+            android:textColor="#000000"/>
 
         <Space
             android:layout_width="16dp"
@@ -53,8 +54,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:backgroundTint="@android:color/black"
-            android:text="No"
-            android:textColor="@android:color/white"/>
+            android:textAllCaps="false"
+            android:textColor="#000000"
+            android:text="No"/>
     </LinearLayout>
 </LinearLayout>
