@@ -23,6 +23,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -44,6 +45,9 @@ import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.awsmqtt.NCWAwsCredentials
 import com.netomi.chat.model.chat_history.GetChatHistoryPayload
 import com.netomi.chat.model.chat_history.HistoryRequestBody
+import com.netomi.chat.model.endchat.EndChatRequest
+import com.netomi.chat.model.endchat.EndChatResponse
+import com.netomi.chat.model.endchat.EventData
 import com.netomi.chat.model.media_payload.SignedUrlPayload
 import com.netomi.chat.model.messages.AdditionalAttributes
 import com.netomi.chat.model.messages.Attachment
@@ -124,17 +128,17 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private lateinit var attachmentIcon: ImageView
     private lateinit var headerContainer: ConstraintLayout
     private lateinit var ivMenuOption: AppCompatImageView
-    private lateinit var ivMenu:ImageView
-    private lateinit var  connectionHeader:TextView
-    private lateinit var progressBar:ProgressBar
+    private lateinit var ivMenu: ImageView
+    private lateinit var connectionHeader: TextView
+    private lateinit var progressBar: ProgressBar
     private var photoUri: Uri? = null
     private var ncwSdkConfig: NCWSdkConfig? = null
     private var themeData: ThemeResponse? = null
 
-    private var conversationID : String? = null
-    private var botRefId : String? = null
+    private var conversationID: String? = null
+    private var botRefId: String? = null
     private lateinit var idleTimeoutManager: IdleTimeoutManager
-    private var fileSend:File?=null
+    private var fileSend: File? = null
 
     private var loaderAddedTime: Long = 0
     private var isLoaderActive: Boolean = false
@@ -211,25 +215,57 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             )
 
         }
+
+        // Add a custom back press callback
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                backClicked()
+            }
+        })
     }
 
     private fun backClicked() {
         DialogUtils.showCustomDialog(
             context = this,
-            title = "Exit Chat",
-            subtitle = "Are you sure you want to exit from this chat?",
-            yesText = "Yes,Exit",
-            noText = "No",
-            titleColor = Color.RED,
+            title = getString(R.string.end_chat_ques),
+            subtitle = getString(R.string.Are_you_sure_you_want_to_exit_from_this_chat),
+            yesText = getString(R.string.return_later),
+            noText = getString(R.string.end_chat),
+            titleColor = Color.BLACK,
             subtitleColor = Color.DKGRAY,
             backgroundColor = Color.LTGRAY,
+            noButtonBackgroundColor = ThemeUtils.parseColor(themeData!!.theme!!.color),
+            yesButtonBackgroundColor = Color.GRAY,
             onYesClick = {
-                         finish()
+                finish()
             },
             onNoClick = {
+                hitEndChatAPI()
             }
         )
 
+    }
+
+    private fun hitEndChatAPI() {
+        chatViewModel.hitEndChatAPI(
+            EndChatRequest(
+                botRefId = botRefId!!, com.netomi.chat.model.endchat.RequestBody(
+                    botReferenceId = botRefId!!,
+                    channelId = "NETOMI_WEB_WIDGET",
+                    conversationId = conversationID!!,
+                    eventData = EventData(
+                        eventType = "WIDGET_EVENT",
+                        subType = "CHAT_END"
+                    ),
+                    eventName = "INFO_PILL",
+                    isPublishToMQTT = false,
+                    requestType = "NETOMI",
+                    timestamp = System.currentTimeMillis(),
+                    triggerType = "EVENT"
+
+                )
+            )
+        )
     }
 
     override fun onResume() {
@@ -387,7 +423,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 // Set status bar to transparent to allow gradient visibility
                 window.apply {
                     statusBarColor = Color.TRANSPARENT
-                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    decorView.systemUiVisibility =
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 }
                 val gradientDrawable = ThemeUtils.createGradientDrawable(theme)
                 headerContainer.background = gradientDrawable
@@ -397,7 +434,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 theme.theme?.color?.takeIf { it.isNotEmpty() }?.let { color ->
                     window.statusBarColor = Color.parseColor(color)
                 } ?: run {
-                    window.statusBarColor = ContextCompat.getColor(this, android.R.color.holo_blue_dark)
+                    window.statusBarColor =
+                        ContextCompat.getColor(this, android.R.color.holo_blue_dark)
                 }
                 ThemeUtils.applyTheme(headerContainer)
             }
@@ -458,12 +496,14 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         chatRecyclerView.layoutManager = LinearLayoutManager(this)
         chatRecyclerView.adapter = messageAdapter
     }
+
     override fun onQuickReply(option: QuickReplyOption?, position: Int) {
         messageList[position].isQuickReplyVisible = false
      //   messageList.removeAt(position)
         onQuickReplyClicked(option)
 
     }
+
     override fun onMediaClick(message: NCWMessage) {
         val mediaUrl = when (message.type) {
             MessageType.VIDEO -> message.thumbnailUrl
@@ -593,6 +633,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                     connectionHeader.setTextColor(Color.BLACK)
                     connectionHeader.visibility = View.VISIBLE
                 }
+
                 ConnectionStatus.CONNECTED.toString() -> {
                     connectionHeader.text = getString(R.string.connected)
                     connectionHeader.setBackgroundColor(Color.GREEN)
@@ -604,18 +645,21 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                         connectionHeader.visibility = View.GONE
                     }, 2000)
                 }
+
                 ConnectionStatus.CONNECTION_LOST.toString() -> {
                     connectionHeader.text = getString(R.string.connection_lost)
                     connectionHeader.setBackgroundColor(Color.RED)
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
                 }
+
                 ConnectionStatus.RE_CONNECTED.toString() -> {
-                    connectionHeader.text =getString(R.string.reconnecting)
+                    connectionHeader.text = getString(R.string.reconnecting)
                     connectionHeader.setBackgroundColor(Color.BLUE)
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
                 }
+
                 else -> {
                     // Unknown or other status
                     connectionHeader.text = getString(R.string.unknown)
@@ -624,6 +668,10 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                     connectionHeader.visibility = View.VISIBLE
                 }
             }
+        }
+
+        chatViewModel.endChatResponse.observe(this) { messages ->
+            handleApiCallback(messages as State<Any>)
         }
     }
 
@@ -706,6 +754,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         messageList.removeAll { it.sender == TYPE_INDICATOR }
 
     }
+
     private fun addLoader() {
         if (!themeData?.typingIndicator?.enabled!!) return
 
@@ -1060,7 +1109,10 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
             }
 
-
+            Routes.ROUTE_END_CHAT -> {
+                ThemeUtils.setConversationID(null)
+                finish()
+            }
         }
 
     }

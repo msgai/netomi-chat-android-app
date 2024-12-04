@@ -11,6 +11,8 @@ import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.SendMessageResponse
 import com.netomi.chat.model.chat_history.GetChatHistoryPayload
+import com.netomi.chat.model.endchat.EndChatRequest
+import com.netomi.chat.model.endchat.EndChatResponse
 import com.netomi.chat.model.media_payload.SignedUrlPayload
 import com.netomi.chat.model.messages.WebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
@@ -54,6 +56,9 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
 
     private val _sendMessage = SingleLiveEvent<State<SendMessageResponse>>()
     val sendMessage get() = _sendMessage
+
+    private val _endChatResponse=SingleLiveEvent<State<EndChatResponse>>()
+    val endChatResponse get()=_endChatResponse
 
 
    /* private var _getConversationId =
@@ -178,6 +183,20 @@ Log.e("DataaResposne","response"+response)
                 _getUploadedMediaUrl.value = response // Use setValue on the Main thread
             }
         }
+    }
+
+    fun hitEndChatAPI(message: EndChatRequest) {
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.hitEndChatAPI(message)
+
+            withContext(Dispatchers.Main) {
+                Log.e("sendMessageAPI", "response " + response)
+                _endChatResponse.value = response
+            }
+        }
+
+
     }
 
 }
