@@ -4,7 +4,6 @@ package com.netomi.chat.ui.view
 import IdleTimeoutManager
 import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -46,7 +45,6 @@ import com.netomi.chat.model.awsmqtt.NCWAwsCredentials
 import com.netomi.chat.model.chat_history.GetChatHistoryPayload
 import com.netomi.chat.model.chat_history.HistoryRequestBody
 import com.netomi.chat.model.endchat.EndChatRequest
-import com.netomi.chat.model.endchat.EndChatResponse
 import com.netomi.chat.model.endchat.EventData
 import com.netomi.chat.model.media_payload.SignedUrlPayload
 import com.netomi.chat.model.messages.AdditionalAttributes
@@ -87,6 +85,7 @@ import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
 import com.netomi.chat.utils.Routes
+import com.netomi.chat.utils.SingleAlertDialog
 import com.netomi.chat.utils.State
 import com.netomi.chat.utils.ThemeUtils
 import java.io.File
@@ -127,6 +126,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private lateinit var chatRecyclerView: RecyclerView
     private lateinit var attachmentIcon: ImageView
     private lateinit var headerContainer: ConstraintLayout
+    private lateinit var footerContainer: ConstraintLayout
+    private lateinit var constProgressBar: ConstraintLayout
     private lateinit var ivMenuOption: AppCompatImageView
     private lateinit var ivMenu: ImageView
     private lateinit var connectionHeader: TextView
@@ -142,6 +143,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
     private var loaderAddedTime: Long = 0
     private var isLoaderActive: Boolean = false
+    private lateinit var tvBrandName: TextView
+
 
     private var deviceInfo:ArrayList<DeviceInfo> = arrayListOf()
 
@@ -201,12 +204,9 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         }
 
         closeIcon.setOnClickListener {
-            backClicked()
-           // finish()
+            if (themeData?.mobileConfig?.lightTheme?.headerConfig?.isBackPressPopupEnabed == true)
+              backClicked() else finish()
         }
-
-    //
-
         // Initialize IdleTimeoutManager with a timeout and a callback for session timeout
         themeData?.endChat?.idleTimeout?.let {
             idleTimeoutManager = IdleTimeoutManager(
@@ -234,8 +234,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             titleColor = Color.BLACK,
             subtitleColor = Color.DKGRAY,
             backgroundColor = Color.LTGRAY,
-            noButtonBackgroundColor = ThemeUtils.parseColor(themeData!!.theme!!.color),
-            yesButtonBackgroundColor = Color.GRAY,
+            noButtonBackgroundColor = themeData?.mobileConfig?.lightTheme?.headerConfig?.backgroundColor?.let { ThemeUtils.parseColor(it) } ?: Color.WHITE,
+            yesButtonBackgroundColor =themeData?.mobileConfig?.lightTheme?.botConfig?.backgroundColor?.let { ThemeUtils.parseColor(it) } ?: Color.WHITE,
             onYesClick = {
                 finish()
             },
@@ -287,13 +287,14 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
      * Handles the session timeout logic.
      */
     private fun handleSessionTimeout() {
-        // Show a timeout dialog or perform other actions
-        AlertDialog.Builder(this)
-            .setTitle("Session Timeout")
-            .setMessage("Your session has expired due to inactivity.")
-            .setPositiveButton("OK") { _, _ -> finish() }
-            .setCancelable(false)
-            .show()
+
+        SingleAlertDialog.showSingleButtonDialog(  context = this,
+            title = "Session Timeout",
+            subtitle = "Your session has expired due to inactivity.",
+            yesText = "OK",
+            onYesClick = {
+                finish()
+            },)
     }
 
     private fun getPreSignedUrl(type: String?, uploadKeyPrefix: String) {
@@ -417,57 +418,37 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
      * configuration, colors, and title.
      */
     private fun applyTheme(themeData: ThemeResponse?) {
-        themeData?.let { theme ->
-            // Apply gradient or default color to headerContainer
-            if (theme.theme?.gradient == true) {
-                // Set status bar to transparent to allow gradient visibility
-                window.apply {
-                    statusBarColor = Color.TRANSPARENT
-                    decorView.systemUiVisibility =
-                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        // Configure header and footer
+        val rootLayout = findViewById<View>(R.id.rootLayout)
+        ThemeUtils.configureHeader(headerContainer, ivMenu, closeIcon, headerTextView, window, rootLayout, this,progressBar)
+        ThemeUtils.configureFooter(footerContainer, ivMenuOption, messageInputField, attachmentIcon, sendMessageIcon)
+
+        // Set attachment icon visibility
+        attachmentIcon.visibility = if (themeData?.fileSharing?.isEnabled == true) View.VISIBLE else View.GONE
+
+        // Configure footer branding
+        themeData?.mobileConfig?.lightTheme?.footerConfig?.let { footerConfig ->
+            if (footerConfig.isFooterHidden) {
+                tvBrandName.apply {
+                    visibility = View.VISIBLE
+                    text = footerConfig.netomiBrandingText.orEmpty()
+                    footerConfig.netomiBrandingTextColor?.let {  setTextColor(ThemeUtils.parseColor(it)) }
                 }
-                val gradientDrawable = ThemeUtils.createGradientDrawable(theme)
-                headerContainer.background = gradientDrawable
-                val rootLayout = findViewById<View>(R.id.rootLayout)
-                rootLayout.background = gradientDrawable
             } else {
-                theme.theme?.color?.takeIf { it.isNotEmpty() }?.let { color ->
-                    window.statusBarColor = Color.parseColor(color)
-                } ?: run {
-                    window.statusBarColor =
-                        ContextCompat.getColor(this, android.R.color.holo_blue_dark)
-                }
-                ThemeUtils.applyTheme(headerContainer)
+                tvBrandName.visibility = View.GONE
             }
-            //ThemeUtils.applyTheme(headerTextView)
-            headerTextView.text = theme.title
-
-            attachmentIcon.visibility = if (themeData.fileSharing?.isEnabled == true) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
-
-
-            /*  // Example usage for attachmentIcon (without rounded background) and sendMessageIcon (with circular background)
-               theme.theme?.color?.takeIf { it.isNotEmpty() }?.let { color ->
-
-                   ThemeUtils.applyBackgroundAndTint(sendMessageIcon, color, isCircularBackground = true)
-                   ThemeUtils.applyBackgroundAndTint(attachmentIcon,
-                       color, isCircularBackground = false)
-               }
-   */
-
-
         }
+
+
     }
 
     /**
      * Initializes and binds UI components in the chat activity layout.
      */
     private fun initViews() {
-         progressBar = findViewById(R.id.progressBar)
+
         headerContainer = findViewById(R.id.constHeader)
+        footerContainer= findViewById(R.id.constFooter)
         messageInputField = findViewById(R.id.edtMessage)
         sendMessageIcon = findViewById(R.id.ivSend)
         chatRecyclerView = findViewById(R.id.rvChat)
@@ -478,12 +459,19 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         ivMenuOption=findViewById(R.id.ivMenuOption)
         ivMenu=findViewById(R.id.ivMenu)
         connectionHeader=findViewById(R.id.connection_status_header)
+        tvBrandName=findViewById(R.id.tvBrand)
+        constProgressBar = findViewById(R.id.constLoader)
+        progressBar = findViewById(R.id.progress_loader)
+
+
 
         messageInputField.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 chatRecyclerView.scrollToPosition(messageAdapter.itemCount - 1)
             }
         }
+
+
     }
 
     /**
@@ -622,6 +610,12 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             } catch (e: Exception) {
                 Log.e("ParsingError", "Failed to parse JSON: ${e.localizedMessage}")
             }
+        }
+
+        ncwAwsCredentialsViewModel.credentials.observe(this){
+            val topic = "$CHAT_WIDGET/$botRefId/$conversationID"
+            Log.e("Topic","Topic Name "+topic)
+            ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)
         }
 
 
@@ -789,6 +783,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             is State.Loading -> {
                 //Toast.makeText(this, "Loading..", Toast.LENGTH_SHORT).show()
                 progressBar.visibility = View.VISIBLE
+                constProgressBar.visibility = View.VISIBLE
             }
 
             is State.Success -> {
@@ -798,6 +793,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             is State.Error -> {
                 Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
                 progressBar.visibility = View.GONE
+                constProgressBar.visibility = View.GONE
             }
 
             else -> {
@@ -1059,6 +1055,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             Routes.ROUTE_SEND_CHAT -> {
                 val sendMessageResponse = apiResponse as SendMessageResponse
                 progressBar.visibility=View.GONE
+                constProgressBar.visibility = View.GONE
             }
 
             Routes.ROUTE_GET_CHAT -> {
@@ -1067,6 +1064,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                     parseHistoryItems(response.responses)
                 }
                 progressBar.visibility = View.GONE
+                constProgressBar.visibility = View.GONE
             }
 
             Routes.ROUTE_GET_PRESIGNED_URL -> {
@@ -1207,8 +1205,9 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         )
         ncwAwsCredentialsViewModel.saveAwsCredentials(newCredentials)
 
-        val topic = "$CHAT_WIDGET/$botRefId/$conversationID"
-        ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)
+      /*  val topic = "$CHAT_WIDGET/$botRefId/$conversationID"
+        Log.e("Topic","Topic Name "+topic)
+        ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)*/
 
     }
 }

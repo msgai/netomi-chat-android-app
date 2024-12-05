@@ -83,7 +83,7 @@ interface NCWApiInterface {
      * @return A [Response] object containing the [ThemeResponse] with the theme details.
      *         The response status and data can be checked to determine if the request was successful.
      */
-    @GET("json-config/{botRefId}.json")
+    @GET("json-config-mobile/{botRefId}.json")
     suspend fun getSdkTheme(
         @Path("botRefId") botRefId: String
     ): Response<ThemeResponse>

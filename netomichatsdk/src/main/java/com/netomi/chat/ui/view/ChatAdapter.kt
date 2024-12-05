@@ -88,7 +88,7 @@ class ChatAdapter(
 
       fun bind(message: NCWMessage) {
           tvTime.text = NCWAppUtils.formatTimestampToTime(message.timestamp)
-
+          ThemeUtils.setTimeStampColor(tvTime)
           // Reset visibility to GONE for all views initially
           resetVisibility()
 
@@ -122,9 +122,9 @@ class ChatAdapter(
           tvDocName.text=message.title
           if (message.fileSize!=null)
           tvDocType.text= NCWAppUtils.formatFileSize(message.fileSize.toLong())
+          ThemeUtils.setUserConfig(tvDocName)
+          ThemeUtils.setUserConfig(tvDocType)
 
-          ThemeUtils.applyTheme(tvDocName)
-          ThemeUtils.applyTheme(tvDocType)
       }
 
       private fun resetVisibility() {
@@ -139,10 +139,9 @@ class ChatAdapter(
       private fun setupTextMessage(message: NCWMessage) {
           messageText.visibility = View.VISIBLE
           messageText.text = message.message
-          // Apply background with corners
-          val cornerRadii = floatArrayOf(15f, 15f, 0f, 0f, 15f, 15f, 15f, 15f)
-          ThemeUtils.applyBackgroundWithCorners(messageText, themeData?.botResponseBubbleColor, cornerRadii)
-          ThemeUtils.applyTheme(messageText)
+
+          ThemeUtils.setUserConfig(messageText)
+
       }
 
       private fun setupImageMessage(message: NCWMessage) {
@@ -202,6 +201,7 @@ class ChatAdapter(
             cardVideo.visibility = View.GONE
             chipRecyclerViewGroup.visibility = View.GONE
             tvTime.text=NCWAppUtils.formatTimestampToTime(message.timestamp)
+            ThemeUtils.setTimeStampColor(tvTime)
             imgBot.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.INVISIBLE
             tvTime.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.GONE
 
@@ -210,6 +210,7 @@ class ChatAdapter(
                     message.message?.let {
                       messageText.text=NCWAppUtils.setHtmText(it)
                         messageText.visibility = View.VISIBLE
+                        ThemeUtils.setBotConfig(messageText)
                     } ?: run {
                         messageText.visibility = View.GONE
                         tvTime.visibility = View.GONE
@@ -249,6 +250,7 @@ class ChatAdapter(
 
                 MessageType.CARD -> {
                     cardViewCard.visibility = View.VISIBLE
+                    ThemeUtils.setBotConfig(cardViewCard)
                     cardTitle.text=message.message
                     cardText.text=message.title
                     buttonRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
@@ -256,9 +258,7 @@ class ChatAdapter(
                         chatActionCallback.carouselButtonAction(it)
                     }
                     buttonRecyclerView.adapter = carouselAdapter
-                 /*   val buttonAdapter = ButtonAdapter(message.buttons)
-                    buttonRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
-                    buttonRecyclerView.adapter = buttonAdapter*/
+
                 }
 
                 else -> {}
