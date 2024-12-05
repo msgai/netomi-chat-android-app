@@ -26,15 +26,7 @@ class ChipAdapter(private val items: List<QuickReplyOption>, private val onQuick
         val item = items[position]
         holder.tvOption.text = item.label
 
-        // will change from bot json
-        val cornerRadii = floatArrayOf(
-            0f, 0f,  // Top-left
-            15f, 15f,    // Top-right
-            15f, 15f,  // Bottom-right
-            15f, 15f   // Bottom-left
-        )
-        // Apply the background with theme color and custom corners
-        ThemeUtils.applyChipBackgroundWithCorners(holder.tvOption,  cornerRadii)
+        ThemeUtils.setQuickReply(holder.tvOption,holder.tvOption)
         holder.tvOption.setOnClickListener {
             onQuickReply(item)
         }

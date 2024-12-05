@@ -1,13 +1,17 @@
 package com.netomi.chat.utils
 
 import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.Window
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -31,9 +35,19 @@ object DialogUtils {
         onYesClick: () -> Unit,
         onNoClick: () -> Unit
     ) {
-        val builder = AlertDialog.Builder(context)
-        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_custom, null)
+       /* val builder = AlertDialog.Builder(context)
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_custom, null)*/
 
+        val dialogView = Dialog(context)
+        dialogView.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialogView.setCancelable(true)
+        dialogView.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialogView.setContentView(R.layout.dialog_custom)
+        // Set the dialog window's width to match the screen width
+        val layoutParams = dialogView.window?.attributes
+        layoutParams?.width = WindowManager.LayoutParams.MATCH_PARENT
+        layoutParams?.height = WindowManager.LayoutParams.WRAP_CONTENT // Adjust height as needed
+        dialogView.window?.attributes = layoutParams
         // Set up custom view
         val titleTextView = dialogView.findViewById<TextView>(R.id.dialogTitle)
         val subtitleTextView = dialogView.findViewById<TextView>(R.id.dialogSubtitle)
@@ -46,7 +60,7 @@ object DialogUtils {
         titleTextView.setTextColor(titleColor)
         subtitleTextView.text = subtitle
         subtitleTextView.setTextColor(subtitleColor)
-        dialogLayout.setBackgroundColor(backgroundColor)
+       // dialogLayout.setBackgroundColor(backgroundColor)
         yesButton.text = yesText
         noButton.text = noText
 
@@ -58,18 +72,18 @@ object DialogUtils {
         noButton.setTextColor(resolveColor(context, noTextColor))
 
         // Set click listeners
-        val dialog = builder.setView(dialogView).create()
+       // val dialog = builder.setView(dialogView).create()
         yesButton.setOnClickListener {
             onYesClick()
-            dialog.dismiss()
+            dialogView.dismiss()
         }
         noButton.setOnClickListener {
             onNoClick()
-            dialog.dismiss()
+            dialogView.dismiss()
         }
 
         // Show the dialog
-        dialog.show()
+        dialogView.show()
     }
 
     /**
@@ -96,4 +110,9 @@ object DialogUtils {
             color
         }
     }
+
+
+
+
+
 }

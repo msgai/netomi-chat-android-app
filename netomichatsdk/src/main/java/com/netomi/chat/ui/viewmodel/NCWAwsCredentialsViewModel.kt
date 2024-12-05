@@ -1,7 +1,7 @@
 package com.netomi.chat.ui.viewmodel
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import com.netomi.chat.awsiot.ConnectionStatus
 import com.netomi.chat.awsiot.NCWAwsIotManager
 import com.netomi.chat.data.repository.NCWAwsCredentialsRepository
 import com.netomi.chat.model.awsmqtt.NCWAwsCredentials

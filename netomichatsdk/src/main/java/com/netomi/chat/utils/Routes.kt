@@ -1,9 +1,6 @@
 package com.netomi.chat.utils
 
 object Routes {
-    /* API END POINT*/
-    private const val VERSION_V1 = "v1/"
-    private const val CONTENTS = "contents/"
     private const val API = "api/"
 
     const val ROUTE_GET_CHAT =API + "webhook-history-v2"
@@ -17,5 +14,7 @@ object Routes {
     const val ROUTE_UPLOAD_MEDIA = "upload_media"
 
     const val ROUTE_END_CHAT= API+"webhook-event"
+
+    const val ROUTE_BOT_JSON_CONFIG =API + "webhook-history-v2"
 
 }

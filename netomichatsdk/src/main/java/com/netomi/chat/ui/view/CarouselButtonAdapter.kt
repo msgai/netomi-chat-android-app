@@ -28,14 +28,7 @@ class CarouselButtonAdapter(private val items: List<CarouselButton>,private val 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
         holder.carouselButton.text = item.title
-        val cornerRadii = floatArrayOf(
-            0f, 0f,  // Top-left
-            15f, 15f,    // Top-right
-            15f, 15f,  // Bottom-right
-            15f, 15f   // Bottom-left
-        )
-        // Apply the background with theme color and custom corners
-        ThemeUtils.applyChipBackgroundWithCorners(holder.constRow,  cornerRadii)
+        ThemeUtils.setQuickReply(holder.constRow,holder.carouselButton)
         holder.constRow.setOnClickListener {
             carouselButton(item)
         }

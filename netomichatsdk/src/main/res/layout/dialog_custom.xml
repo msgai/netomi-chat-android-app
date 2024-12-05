@@ -5,8 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@android:color/white">
+    android:layout_marginHorizontal="25dp"
+    android:padding="14dp"
+    android:background="@drawable/bg_rounded_white">
 
     <TextView
         android:id="@+id/dialogTitle"
@@ -33,10 +34,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center"
+
         android:layout_marginTop="16dp">
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/yesButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -49,7 +50,7 @@
             android:layout_width="16dp"
             android:layout_height="wrap_content"/>
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/noButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

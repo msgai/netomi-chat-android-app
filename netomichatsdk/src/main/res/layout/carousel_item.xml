@@ -2,7 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="210dp"
+    android:layout_width="220dp"
+    android:id="@+id/rootLayout"
     android:background="@drawable/bg_receiver_message"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
@@ -21,7 +22,7 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/cardCarousel"
             android:layout_width="0dp"
-            android:layout_height="150dp"
+            android:layout_height="130dp"
             android:layout_margin="8dp"
             app:cardCornerRadius="5dp"
             app:cardElevation="4dp"
@@ -44,7 +45,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             app:cardCornerRadius="5dp"
-            app:cardElevation="4dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@android:color/white"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cardCarousel"
 
