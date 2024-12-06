@@ -71,9 +71,6 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
     private var _getAWSMQTTCredentials= SingleLiveEvent<State<MQTTCredentialsResponse>>()
     val getAWSMQTTCredentials get()= _getAWSMQTTCredentials
 
-
-
-
     private var _awsMessage = SingleLiveEvent<String>()
     val awsMessage get() = _awsMessage
 
@@ -103,11 +100,11 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
     /**
      * @param content The content of the message to be sent.
      */
-    fun sendMessage(content: String) {
+    fun sendMessage(content: String, timestamp: Long) {
         val newMessage = NCWMessage(
             id = System.currentTimeMillis().toString(),
             message = content,
-            timestamp = System.currentTimeMillis(),
+            timestamp =timestamp,
             type = MessageType.TEXT,
             sender = NCWAppConstant.TYPE_REQUEST,
         )

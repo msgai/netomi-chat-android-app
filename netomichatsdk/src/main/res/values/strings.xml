@@ -11,4 +11,5 @@
     <string name="return_later">Return Later</string>
     <string name="end_chat">End Chat</string>
     <string name="end_chat_ques">End Chat?</string>
+    <string name="not_sent_tap_to_retry">Not sent, Tap to retry</string>
 </resources>

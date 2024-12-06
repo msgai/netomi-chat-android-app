@@ -22,7 +22,8 @@ data class NCWMessage(
     var isSameTimeMessage :Boolean=true,
     var isQuickReplyVisible: Boolean = true,
     val fileUrl: String? = null,
-    val fileSize: String? = null
+    val fileSize: String? = null,
+    var isRetry :Boolean=false,
 
 )
 

@@ -23,8 +23,9 @@ object NCWAppConstant {
     const val BOT="BOT"
 
     const val TIME_AM_PM="hh:mm a"
-    const val ARG_IMAGE_URL = "image_url"
+    const val ARG_MEDIA_URL = "media_url"
     const val MEDIA_TYPE = "media_type"
+    const val ARG_FILE_URI = "file_uri"
 
     const val TYPE_IMAGE="ai.msg.domain.responses.core.Image"
     const val TYPE_VIDEO="ai.msg.domain.responses.core.Video"

@@ -1,5 +1,7 @@
 package com.netomi.chat.utils
 
+import com.netomi.chat.model.messages.WebhookPayload
+
 /**
  * A sealed class representing the state of a UI or data operation.
  * It encapsulates different states that can occur during an operation,
@@ -29,6 +31,8 @@ sealed class State<T> {
      * @param code An optional error code associated with the error.
      */
     data class Error<T>(val message: String, val code: Int? = null) : State<T>()
+
+    data class SendMessageError<T>(val message: String, val code: Int? = null,val payload: WebhookPayload) : State<T>()
     /**
      * Represents an unauthorized access state.
      *
@@ -70,6 +74,9 @@ sealed class State<T> {
          */
         fun <T> error(message: String, code: Int? = null) =
             Error<T>(message, code)
+
+        fun <T> sendMessageError(message: String, code: Int? = null,payload: WebhookPayload) =
+            SendMessageError<T>(message, code,payload)
         /**
          * Creates and returns a [State.UnAuthorized] instance.
          *

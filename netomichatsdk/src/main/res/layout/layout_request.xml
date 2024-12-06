@@ -140,7 +140,7 @@
         android:visibility="gone"
         android:background="@drawable/bg_rounded_corner"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvSenderMessage">
+        app:layout_constraintTop_toBottomOf="@+id/senderVideoCard">
 
         <ImageView
             android:id="@+id/ic_doc_placeHolder"
@@ -186,6 +186,22 @@
             app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/tvRetry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:visibility="gone"
+        android:text="@string/not_sent_tap_to_retry"
+        android:drawableLeft="@drawable/ic_retry_alert"
+        android:drawablePadding="5dp"
+        android:textStyle="bold"
+        android:padding="5dp"
+        android:textColor="#FF7661"
+        app:layout_constraintTop_toBottomOf="@+id/docCard"
+      app:layout_constraintEnd_toEndOf="parent"
+        />
 
 
 
