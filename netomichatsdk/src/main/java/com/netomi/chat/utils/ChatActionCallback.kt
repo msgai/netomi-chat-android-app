@@ -9,4 +9,5 @@ interface ChatActionCallback {
     fun onQuickReply(option: QuickReplyOption?, position: Int)
     fun onMediaClick(message: NCWMessage)
      fun carouselButtonAction(it: CarouselButton?)
+    fun onRetryClicked(message: NCWMessage)
 }

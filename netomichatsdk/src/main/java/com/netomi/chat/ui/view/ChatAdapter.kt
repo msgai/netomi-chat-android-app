@@ -83,6 +83,7 @@ class ChatAdapter(
       private val requestDocCard: ConstraintLayout = itemView.findViewById(R.id.docCard)
       private val tvDocName: TextView = itemView.findViewById(R.id.tvDocName)
       private val tvDocType: TextView = itemView.findViewById(R.id.tvDocType)
+      private val tvRetry: TextView = itemView.findViewById(R.id.tvRetry)
 
 
 
@@ -113,6 +114,9 @@ class ChatAdapter(
           imageView.setOnClickListener { chatActionCallback.onMediaClick(message) }
           senderVideoCard.setOnClickListener { chatActionCallback.onMediaClick(message) }
           requestDocCard.setOnClickListener { chatActionCallback.onMediaClick(message) }
+          tvRetry.visibility=if(message.isRetry) View.VISIBLE else View.GONE
+          tvRetry.setOnClickListener { chatActionCallback.onRetryClicked(message) }
+
       }
 
       private fun setupFileMessage(message: NCWMessage) {

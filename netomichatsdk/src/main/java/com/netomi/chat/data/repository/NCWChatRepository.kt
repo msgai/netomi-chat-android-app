@@ -72,16 +72,21 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
             val response = apiInterface.sendMessage(message)
             if (response.isSuccessful && response.body() != null) {
                 State.success(data = response.body()!!, Routes.ROUTE_SEND_CHAT)
+              //  State.sendMessageError("Teststts", code = response.code(),message)
             } else {
                 val errorBody = response.errorBody()
                 if (errorBody != null) {
-                    State.error(parseError(errorBody), code = response.code())
+                   // State.error(parseError(errorBody), code = response.code())
+                    State.sendMessageError(parseError(errorBody), code = response.code(),message)
+
                 } else {
-                    State.error(mapApiException(response.code()), code = response.code())
+                    //State.error(mapApiException(response.code()), code = response.code())
+                    State.sendMessageError(mapApiException(response.code()), code = response.code(),message)
                 }
             }
         } catch (e: Exception) {
-            State.error(e.message.toString(), code = 500)
+           // State.error(e.message.toString(), code = 500)
+            State.sendMessageError(e.message.toString(), code =500,message)
         }
     }
 
@@ -207,7 +212,9 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
                 }
             } else {
                 Log.e("UploadFile", "Error occurred: ${response.code()} - ${response.message()}")
-                State.error("File upload failed", code = response.code())
+               State.error("File upload failed", code = response.code())
+
+
             }
         } catch (e: Exception) {
             Log.e("UploadFile", "Exception occurred during upload: ${e.message}")
