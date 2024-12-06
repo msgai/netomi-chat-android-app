@@ -62,6 +62,7 @@ import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.GetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.GetPreSignedUrl
 import com.netomi.chat.model.theme.ThemeResponse
+import com.netomi.chat.model.theme.light_theme.HeaderConfig
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
@@ -133,7 +134,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private lateinit var connectionHeader: TextView
     private lateinit var progressBar: ProgressBar
     private var photoUri: Uri? = null
-    private var ncwSdkConfig: NCWSdkConfig? = null
+    private var ncwSdkConfig: HeaderConfig? = null
     private var themeData: ThemeResponse? = null
 
     private var conversationID: String? = null
@@ -155,7 +156,13 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         initViews()
         // Load theme and config
         themeData = ThemeUtils.getThemeData()
-        ncwSdkConfig = NCWChatSdk.getConfig()
+
+        NCWChatSdk.getUpdateHeaderConfiguration()
+        NCWChatSdk.getUpdatedFooterConfiguration()
+        NCWChatSdk.getUpdatedBotConfiguration()
+        NCWChatSdk.getUpdatedUserConfiguration()
+        NCWChatSdk.getUpdatedChatWindowConfiguration()
+        NCWChatSdk.getUpdatedBubbleConfiguration()
 
         // Set up message adapter and recycler view
         setupMessageList()
