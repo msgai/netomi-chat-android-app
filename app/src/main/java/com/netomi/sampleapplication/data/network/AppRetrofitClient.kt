@@ -2,7 +2,7 @@ package com.netomi.sampleapplication.data.network
 
 import android.content.Context
 import com.netomi.sampleapplication.data.apiconstant.AppApiConstant.HEADER_BEARER
-import com.netomi.chat.utils.AppSharedPreferences
+import com.netomi.chat.utils.NCWAppSharedPreferences
 import com.netomi.chat.utils.NCWAppConstant
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -86,7 +86,7 @@ object AppRetrofitClient {
      */
     class AuthInterceptor(private val context: Context) : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {
-            val sessionToken = AppSharedPreferences(context).getString(NCWAppConstant.SESSION_TOKEN)
+            val sessionToken = NCWAppSharedPreferences(context).getString(NCWAppConstant.SESSION_TOKEN)
 
             // Start building the request
             val requestBuilder = chain.request().newBuilder()

@@ -3,17 +3,16 @@ package com.netomi.chat.ui.init
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.netomi.chat.config.NCWSdkConfig
-import com.netomi.chat.model.theme.light_theme.BotConfig
-import com.netomi.chat.model.theme.light_theme.BubbleConfig
-import com.netomi.chat.model.theme.light_theme.ChatWindowConfig
-import com.netomi.chat.model.theme.light_theme.FooterConfig
-import com.netomi.chat.model.theme.light_theme.HeaderConfig
-import com.netomi.chat.model.theme.light_theme.UserConfig
+import com.netomi.chat.model.theme.light_theme.NCWBotConfig
+import com.netomi.chat.model.theme.light_theme.NCWBubbleConfig
+import com.netomi.chat.model.theme.light_theme.NCWChatWindowConfig
+import com.netomi.chat.model.theme.light_theme.NCWFooterConfig
+import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
+import com.netomi.chat.model.theme.light_theme.NCWUserConfig
 import com.netomi.chat.ui.view.NCWChatActivity
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppUtils
-import com.netomi.chat.utils.ThemeUtils
+import com.netomi.chat.utils.NCWThemeUtils
 
 
 object NCWChatSdk {
@@ -53,7 +52,7 @@ object NCWChatSdk {
             )
             return
         }
-        if (ThemeUtils.getThemeData() != null) {
+        if (NCWThemeUtils.getThemeData() != null) {
             startChatActivity(context)
         } else {
             botRefId?.let {
@@ -80,7 +79,7 @@ object NCWChatSdk {
             botRefId,
             onThemeReceived = { themeResponse ->
                 themeResponse?.let {
-                    ThemeUtils.setThemeData(it)
+                    NCWThemeUtils.setThemeData(it)
                     Log.d("NCWChatSdk", "Theme data stored: $it")
                     onComplete?.invoke()
                 } ?: Log.e("NCWChatSdk", "Received null theme data.")
@@ -107,12 +106,12 @@ object NCWChatSdk {
     /**
      * Store the NCW SDK configuration provided by the host app
      */
-    private var headerConfig: HeaderConfig?=null
-    private var footerConfig: FooterConfig?=null
-    private var botConfig:BotConfig?=null
-    private var userConfig:UserConfig?=null
-    private var bubbleConfig:BubbleConfig?=null
-    private var chatWindowConfig:ChatWindowConfig?=null
+    private var headerConfig: NCWHeaderConfig?=null
+    private var footerConfig: NCWFooterConfig?=null
+    private var botConfig:NCWBotConfig?=null
+    private var userConfig:NCWUserConfig?=null
+    private var bubbleConfig:NCWBubbleConfig?=null
+    private var chatWindowConfig:NCWChatWindowConfig?=null
 
 
     /**
@@ -134,62 +133,62 @@ object NCWChatSdk {
     }*/
 
 
-    fun updateBotConfiguration(config: BotConfig){
-        val currentConfig = botConfig ?: BotConfig()
+    fun updateBotConfiguration(config: NCWBotConfig){
+        val currentConfig = botConfig ?: NCWBotConfig()
         botConfig = currentConfig.mergeWith(config)
     }
 
-    fun getUpdatedBotConfiguration():BotConfig{
-        return botConfig?:BotConfig()
+    fun getUpdatedBotConfiguration():NCWBotConfig{
+        return botConfig?:NCWBotConfig()
     }
 
-    fun updateHeaderConfiguration(config: HeaderConfig){
-        val currentConfig = headerConfig ?: HeaderConfig()
+    fun updateHeaderConfiguration(config: NCWHeaderConfig){
+        val currentConfig = headerConfig ?: NCWHeaderConfig()
         headerConfig = currentConfig.mergeWith(config)
     }
 
-    fun getUpdateHeaderConfiguration():HeaderConfig{
-        return headerConfig?: HeaderConfig()
+    fun getUpdateHeaderConfiguration():NCWHeaderConfig{
+        return headerConfig?: NCWHeaderConfig()
     }
 
-    fun updateFooterConfiguration(config: FooterConfig){
-      val currentConfig = footerConfig ?: FooterConfig()
+    fun updateFooterConfiguration(config: NCWFooterConfig){
+      val currentConfig = footerConfig ?: NCWFooterConfig()
         footerConfig = currentConfig.mergeWith(config)
     }
 
-    fun getUpdatedFooterConfiguration():FooterConfig{
-        return footerConfig?: FooterConfig()
+    fun getUpdatedFooterConfiguration():NCWFooterConfig{
+        return footerConfig?: NCWFooterConfig()
     }
 
-    fun updateUserConfiguration(config:UserConfig){
-        val currentConfig = userConfig ?: UserConfig()
+    fun updateUserConfiguration(config:NCWUserConfig){
+        val currentConfig = userConfig ?: NCWUserConfig()
         userConfig = currentConfig.mergeWith(config)
     }
 
-    fun getUpdatedUserConfiguration(): UserConfig{
-        return userConfig?: UserConfig()
+    fun getUpdatedUserConfiguration(): NCWUserConfig{
+        return userConfig?: NCWUserConfig()
     }
 
-    fun updateBubbleConfiguration(config: BubbleConfig){
-        val currentConfig = bubbleConfig ?: BubbleConfig()
+    fun updateBubbleConfiguration(config: NCWBubbleConfig){
+        val currentConfig = bubbleConfig ?: NCWBubbleConfig()
         bubbleConfig = currentConfig.mergeWith(config)
     }
 
-    fun getUpdatedBubbleConfiguration():BubbleConfig{
-        return bubbleConfig?: BubbleConfig()
+    fun getUpdatedBubbleConfiguration():NCWBubbleConfig{
+        return bubbleConfig?: NCWBubbleConfig()
     }
 
-    fun updateChatWindowConfiguration(config: ChatWindowConfig){
-        val currentConfig = chatWindowConfig ?: ChatWindowConfig()
+    fun updateChatWindowConfiguration(config: NCWChatWindowConfig){
+        val currentConfig = chatWindowConfig ?: NCWChatWindowConfig()
         chatWindowConfig = currentConfig.mergeWith(config)
     }
 
-    fun getUpdatedChatWindowConfiguration():ChatWindowConfig{
-        return chatWindowConfig?: ChatWindowConfig()
+    fun getUpdatedChatWindowConfiguration():NCWChatWindowConfig{
+        return chatWindowConfig?: NCWChatWindowConfig()
     }
 
-    private fun HeaderConfig.mergeWith(newConfig: HeaderConfig): HeaderConfig {
-        return HeaderConfig(
+    private fun NCWHeaderConfig.mergeWith(newConfig: NCWHeaderConfig): NCWHeaderConfig {
+        return NCWHeaderConfig(
             backgroundColor = newConfig.backgroundColor ?: this.backgroundColor,
             gradientColors = newConfig.gradientColors ?: this.gradientColors,
             gradientDirection = newConfig.gradientDirection ?: this.gradientDirection,
@@ -201,8 +200,8 @@ object NCWChatSdk {
         )
     }
 
-    private fun FooterConfig.mergeWith(newConfig: FooterConfig):FooterConfig{
-        return FooterConfig(
+    private fun NCWFooterConfig.mergeWith(newConfig: NCWFooterConfig):NCWFooterConfig{
+        return NCWFooterConfig(
             backgroundColor = newConfig.backgroundColor?: this.backgroundColor,
             inputBoxTextColor = newConfig.inputBoxTextColor?: this.inputBoxTextColor,
             isFooterHidden = newConfig.isFooterHidden?: this.isFooterHidden,
@@ -213,8 +212,8 @@ object NCWChatSdk {
         )
     }
 
-    private fun BotConfig.mergeWith(newConfig: BotConfig):BotConfig{
-        return BotConfig(
+    private fun NCWBotConfig.mergeWith(newConfig: NCWBotConfig):NCWBotConfig{
+        return NCWBotConfig(
             backgroundColor = newConfig.backgroundColor?:this.backgroundColor,
             botImage = newConfig.botImage?:this.botImage,
             quickReplyBackgroundColor = newConfig.quickReplyBackgroundColor?: this.quickReplyBackgroundColor,
@@ -224,22 +223,22 @@ object NCWChatSdk {
         )
     }
 
-    private fun UserConfig.mergeWith(newConfig: UserConfig):UserConfig{
-        return UserConfig(
+    private fun NCWUserConfig.mergeWith(newConfig: NCWUserConfig):NCWUserConfig{
+        return NCWUserConfig(
             backgroundColor = newConfig.backgroundColor?:this.backgroundColor,
             textColor = newConfig.textColor?: this.textColor,
         )
     }
 
-    private fun BubbleConfig.mergeWith(newConfig: BubbleConfig):BubbleConfig{
-        return BubbleConfig(
+    private fun NCWBubbleConfig.mergeWith(newConfig: NCWBubbleConfig):NCWBubbleConfig{
+        return NCWBubbleConfig(
             borderRadius = newConfig.borderRadius?:this.borderRadius,
             timeStampColor = newConfig.timeStampColor?: this.timeStampColor,
         )
     }
 
-    private fun ChatWindowConfig.mergeWith(newConfig: ChatWindowConfig):ChatWindowConfig{
-        return ChatWindowConfig(
+    private fun NCWChatWindowConfig.mergeWith(newConfig: NCWChatWindowConfig):NCWChatWindowConfig{
+        return NCWChatWindowConfig(
             chatWindowBackgroundColor = newConfig.chatWindowBackgroundColor?:this.chatWindowBackgroundColor,
         )
     }

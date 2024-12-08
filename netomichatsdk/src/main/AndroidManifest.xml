@@ -15,7 +15,7 @@
         android:allowBackup="true"
         android:supportsRtl="true">
         <activity
-            android:name=".ui.view.FullScreenMediaActivity"
+            android:name=".ui.view.NCWFullScreenMediaActivity"
             android:exported="false" />
         <activity
             android:name=".ui.view.NCWChatActivity"

@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.netomi.chat.data.network.NCWApiInterface
 import com.netomi.chat.data.network.NCWRetrofitClient
-import com.netomi.chat.model.theme.ThemeResponse
+import com.netomi.chat.model.theme.NCWThemeResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 class NCWChatTheme(
     val context: Context,
     private val botReference: String,
-    private val onThemeReceived: (ThemeResponse?) -> Unit,
+    private val onThemeReceived: (NCWThemeResponse?) -> Unit,
     private val onError: (String) -> Unit
 ) {
     private val apiInterface =

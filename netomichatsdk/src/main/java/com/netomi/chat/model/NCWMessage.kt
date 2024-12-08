@@ -1,9 +1,8 @@
 package com.netomi.chat.model
 
-import com.netomi.chat.model.messages.Buttons
-import com.netomi.chat.model.messages.CarouselButton
-import com.netomi.chat.model.messages.CarouselElement
-import com.netomi.chat.model.messages.QuickReply
+import com.netomi.chat.model.messages.NCWCarouselButton
+import com.netomi.chat.model.messages.NCWCarouselElement
+import com.netomi.chat.model.messages.NCWQuickReply
 
 data class NCWMessage(
     val message: String? = null,
@@ -14,18 +13,18 @@ data class NCWMessage(
     val timestamp: Long,
     val sender: String? = null,
     val largeImageUrl: String? = null,
-    val carouselItems: List<CarouselElement>? = null,
-    val quickReply: QuickReply? = null,
+    val carouselItems: List<NCWCarouselElement>? = null,
+    val quickReply: NCWQuickReply? = null,
     val thumbnailUrl: String? = null,
     val title: String? = null,
-    var buttons : ArrayList<CarouselButton> = arrayListOf(),
+    var buttons : ArrayList<NCWCarouselButton> = arrayListOf(),
     var isSameTimeMessage :Boolean=true,
     var isQuickReplyVisible: Boolean = true,
     val fileUrl: String? = null,
     val fileSize: String? = null,
     var isRetry :Boolean=false,
 
-)
+    )
 
 enum class MessageType(val typeName: String) {
     TEXT("ai.msg.domain.responses.core.Text"),

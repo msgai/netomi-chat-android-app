@@ -11,12 +11,12 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
-import com.netomi.chat.model.theme.light_theme.BotConfig
-import com.netomi.chat.model.theme.light_theme.BubbleConfig
-import com.netomi.chat.model.theme.light_theme.ChatWindowConfig
-import com.netomi.chat.model.theme.light_theme.FooterConfig
-import com.netomi.chat.model.theme.light_theme.HeaderConfig
-import com.netomi.chat.model.theme.light_theme.UserConfig
+import com.netomi.chat.model.theme.light_theme.NCWBotConfig
+import com.netomi.chat.model.theme.light_theme.NCWBubbleConfig
+import com.netomi.chat.model.theme.light_theme.NCWChatWindowConfig
+import com.netomi.chat.model.theme.light_theme.NCWFooterConfig
+import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
+import com.netomi.chat.model.theme.light_theme.NCWUserConfig
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.sampleapplication.R
 import com.netomi.sampleapplication.constant.SharePreferenceConstant
@@ -67,7 +67,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
             /**
              * Customize the header configuration
              */
-            val headerConfig = HeaderConfig(
+            val headerConfig = NCWHeaderConfig(
                 backgroundColor = "#FFFFFF",
                 gradientColors = listOf("#FF0000", "#00FF00"),
                 gradientDirection = 90,
@@ -83,7 +83,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
              * Customize the footer configuration
              */
 
-            val footerConfig = FooterConfig(
+            val footerConfig = NCWFooterConfig(
                 backgroundColor = "#FFFFFF",
                 tintColor = "#000000",
                 inputBoxTextColor = "#000000",
@@ -98,7 +98,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
              * Customize the BOT configuration
              */
 
-            val botConfig = BotConfig(
+            val botConfig = NCWBotConfig(
                 backgroundColor = "",
                 botImage = "",
                 quickReplyBorderColor = "",
@@ -112,7 +112,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
              * Customize the User configuration
              */
 
-            val userConfig = UserConfig(
+            val userConfig = NCWUserConfig(
                 backgroundColor = "",
                 textColor = "",
             )
@@ -123,7 +123,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
              * Customize the Chat Window configuration
              */
 
-            val chatWindowConfig = ChatWindowConfig(
+            val chatWindowConfig = NCWChatWindowConfig(
                 chatWindowBackgroundColor = ""
             )
 
@@ -133,7 +133,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
              * Customize the Bubble configuration
              */
 
-            val bubbleConfig = BubbleConfig(
+            val bubbleConfig = NCWBubbleConfig(
                 borderRadius = "",
                 timeStampColor = ""
             )
