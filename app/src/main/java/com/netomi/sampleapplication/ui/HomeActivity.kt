@@ -77,7 +77,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
                 logoImage = "https://example.com/logo.png",
                 tintColor = "#000000"
             )
-            NCWChatSdk.updateHeaderConfiguration(headerConfig)
+            //NCWChatSdk.updateHeaderConfiguration(headerConfig)
 
             /**
              * Customize the footer configuration

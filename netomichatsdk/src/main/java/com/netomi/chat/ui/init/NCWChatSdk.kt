@@ -139,7 +139,7 @@ object NCWChatSdk {
     }
 
     fun getUpdatedBotConfiguration():NCWBotConfig{
-        return botConfig?:NCWBotConfig()
+        return botConfig?:NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.botConfig
     }
 
     fun updateHeaderConfiguration(config: NCWHeaderConfig){
@@ -148,7 +148,7 @@ object NCWChatSdk {
     }
 
     fun getUpdateHeaderConfiguration():NCWHeaderConfig{
-        return headerConfig?: NCWHeaderConfig()
+        return headerConfig?: NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.headerConfig
     }
 
     fun updateFooterConfiguration(config: NCWFooterConfig){
@@ -157,7 +157,7 @@ object NCWChatSdk {
     }
 
     fun getUpdatedFooterConfiguration():NCWFooterConfig{
-        return footerConfig?: NCWFooterConfig()
+        return footerConfig?: NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.footerConfig
     }
 
     fun updateUserConfiguration(config:NCWUserConfig){
@@ -166,7 +166,7 @@ object NCWChatSdk {
     }
 
     fun getUpdatedUserConfiguration(): NCWUserConfig{
-        return userConfig?: NCWUserConfig()
+        return userConfig?: NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.userConfig
     }
 
     fun updateBubbleConfiguration(config: NCWBubbleConfig){
@@ -175,7 +175,7 @@ object NCWChatSdk {
     }
 
     fun getUpdatedBubbleConfiguration():NCWBubbleConfig{
-        return bubbleConfig?: NCWBubbleConfig()
+        return bubbleConfig?: NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.bubbleConfig
     }
 
     fun updateChatWindowConfiguration(config: NCWChatWindowConfig){
@@ -184,7 +184,7 @@ object NCWChatSdk {
     }
 
     fun getUpdatedChatWindowConfiguration():NCWChatWindowConfig{
-        return chatWindowConfig?: NCWChatWindowConfig()
+        return chatWindowConfig?: NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.chatWindowConfig
     }
 
     private fun NCWHeaderConfig.mergeWith(newConfig: NCWHeaderConfig): NCWHeaderConfig {
