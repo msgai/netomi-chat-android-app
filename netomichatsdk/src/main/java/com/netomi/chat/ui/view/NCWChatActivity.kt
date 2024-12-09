@@ -968,8 +968,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
     private fun showMediaOptions() {
 
         val bottomSheet = NCWMediaOptionsBottomSheet(
-            onCameraClick = { openCamera() },
-        val bottomSheet = MediaOptionsBottomSheet(
             onCameraClick = { showCameraVideoOption() },
             onGalleryClick = { openGallery() },
             onFileClick = { openFile() }
