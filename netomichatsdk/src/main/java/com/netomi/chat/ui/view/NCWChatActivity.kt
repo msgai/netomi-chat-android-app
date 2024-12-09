@@ -842,7 +842,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
     private fun addMessages(newMessages: List<NCWMessage>) {
         messageList.addAll(newMessages)
         messageAdapter.notifyDataSetChanged()
-        chatRecyclerView.scrollToPosition(messageList.size - 1)
+        chatRecyclerView.post {
+            chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
+        }
+
     }
 
     private fun safelyRemoveLoader(newMessages: List<NCWMessage>) {
@@ -851,8 +854,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
         messageList.addAll(newMessages)
         messageAdapter.notifyDataSetChanged()
         chatRecyclerView.post {
-            chatRecyclerView.scrollToPosition(messageList.size - 1)
+            chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
         }
+
     }
 
     private fun removeLoader() {
