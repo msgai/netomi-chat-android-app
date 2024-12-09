@@ -2,6 +2,7 @@ package com.netomi.chat.utils
 
 import android.content.Context
 import android.net.Uri
+import android.provider.MediaStore
 import android.provider.OpenableColumns
 import java.io.File
 import java.io.FileOutputStream
@@ -38,4 +39,20 @@ object NCWImageUtils {
         }
         return uri.path?.substringAfterLast('/')
     }
+
+    fun getVideoFileFromUri(context: Context,uri: Uri): File? {
+        val filePathColumn = arrayOf(MediaStore.Video.Media.DATA)
+        val cursor = context.contentResolver.query(uri, filePathColumn, null, null, null)
+        cursor?.use {
+            val columnIndex = it.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
+            it.moveToFirst()
+            val filePath = it.getString(columnIndex)
+            return File(filePath)
+        }
+        return null
+    }
+
+
+
+
 }

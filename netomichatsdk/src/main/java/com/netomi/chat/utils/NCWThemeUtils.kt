@@ -14,6 +14,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
 import com.bumptech.glide.Glide
 import com.netomi.chat.model.theme.NCWThemeResponse
 
@@ -63,7 +64,7 @@ object NCWThemeUtils
             headerConfig.tintColor?.let { setTextColor(headerTextView, it) }
             // Apply icon styles
             headerConfig.iconBackgroundColor?.let { bgColor ->
-                val tintColor = headerConfig.tintColor
+              val tintColor = headerConfig.tintColor
                 styleIcon(ivMenu, bgColor, tintColor)
                 styleIcon(closeIcon, bgColor, tintColor)
             }
@@ -254,14 +255,19 @@ object NCWThemeUtils
     }
 
     private fun styleIcon(imageView: ImageView, backgroundColor: String, tintColor: String?) {
-        val bgParsedColor = parseColor(backgroundColor) ?: return
+        val bgParsedColor = parseColor(backgroundColor)
         val drawable = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             setColor(bgParsedColor)
             cornerRadius = 15f
         }
         imageView.background = drawable
-        imageView.imageTintList = tintColor?.let { ColorStateList.valueOf(parseColor(it) ?: return) }
+     //   imageView.imageTintList = tintColor?.let { ColorStateList.valueOf(parseColor(it)) }
+
+        tintColor?.let {
+            val tintList = ColorStateList.valueOf(parseColor(it))
+            ImageViewCompat.setImageTintList(imageView, tintList)
+        } ?: ImageViewCompat.setImageTintList(imageView, null)
     }
 
     // Utility function to parse color strings (e.g., "#FF5733")

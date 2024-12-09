@@ -968,13 +968,48 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
     private fun showMediaOptions() {
 
         val bottomSheet = NCWMediaOptionsBottomSheet(
-            onCameraClick = { openCamera() },
+            onCameraClick = { showCameraVideoOption() },
             onGalleryClick = { openGallery() },
             onFileClick = { openFile() }
         )
         bottomSheet.show(supportFragmentManager, "MediaOptionsBottomSheet")
     }
 
+    private fun showCameraVideoOption() {
+        NCWAppUtils.showMediaOptionDialog(this,
+            imageClick = { openCamera() },
+            videoClick = { openVideoCamera() }
+        )
+    }
+
+    private fun openVideoCamera() {
+        val takeVideoIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+        if (takeVideoIntent.resolveActivity(packageManager) != null) {
+            videoLauncher.launch(takeVideoIntent)
+        }
+    }
+
+    private val videoLauncher = registerForActivityResult(
+    ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val videoUri: Uri? = result.data?.data
+            videoUri?.let { uri ->
+                fileSend = NCWImageUtils.getVideoFileFromUri(this,uri)
+                val type = fileSend?.let { it1 -> NCWAppUtils.getFileContentType(it1) }
+                if (!validateFile(fileSend, type))
+                    return@registerForActivityResult
+
+                uri?.let { uri ->
+                    addMediaMessage(fileSend,uri, MessageType.VIDEO)
+                }
+                fileSend?.let {
+                    getPreSignedUrl(type, it.path)
+
+                }
+            }
+        }
+    }
 
     private fun openCamera() {
         val imageFile = createImageFile()
@@ -1026,7 +1061,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
             return false
         }
 
-// Validate file type
+          // Validate file type
         val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
         val fileExtension =
             file?.extension?.lowercase()?.let { if (!it.startsWith(".")) ".$it" else it }
