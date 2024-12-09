@@ -3,11 +3,16 @@ package com.netomi.chat.ui.init
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.netomi.chat.config.NCWSdkConfig
+import com.netomi.chat.model.theme.light_theme.NCWBotConfig
+import com.netomi.chat.model.theme.light_theme.NCWBubbleConfig
+import com.netomi.chat.model.theme.light_theme.NCWChatWindowConfig
+import com.netomi.chat.model.theme.light_theme.NCWFooterConfig
+import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
+import com.netomi.chat.model.theme.light_theme.NCWUserConfig
 import com.netomi.chat.ui.view.NCWChatActivity
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppUtils
-import com.netomi.chat.utils.ThemeUtils
+import com.netomi.chat.utils.NCWThemeUtils
 
 
 object NCWChatSdk {
@@ -47,7 +52,7 @@ object NCWChatSdk {
             )
             return
         }
-        if (ThemeUtils.getThemeData() != null) {
+        if (NCWThemeUtils.getThemeData() != null) {
             startChatActivity(context)
         } else {
             botRefId?.let {
@@ -74,7 +79,7 @@ object NCWChatSdk {
             botRefId,
             onThemeReceived = { themeResponse ->
                 themeResponse?.let {
-                    ThemeUtils.setThemeData(it)
+                    NCWThemeUtils.setThemeData(it)
                     Log.d("NCWChatSdk", "Theme data stored: $it")
                     onComplete?.invoke()
                 } ?: Log.e("NCWChatSdk", "Received null theme data.")
@@ -98,8 +103,15 @@ object NCWChatSdk {
         context.startActivity(intent)
     }
 
-    // Store the NCW SDK configuration provided by the host app
-    private var ncwSdkConfig: NCWSdkConfig? = null
+    /**
+     * Store the NCW SDK configuration provided by the host app
+     */
+    private var headerConfig: NCWHeaderConfig?=null
+    private var footerConfig: NCWFooterConfig?=null
+    private var botConfig:NCWBotConfig?=null
+    private var userConfig:NCWUserConfig?=null
+    private var bubbleConfig:NCWBubbleConfig?=null
+    private var chatWindowConfig:NCWChatWindowConfig?=null
 
 
     /**
@@ -108,17 +120,130 @@ object NCWChatSdk {
      * @param config The configuration object containing customizable properties.
      * This should be called by the host application before using any Chat SDK components.
      */
-    fun initialize(config: NCWSdkConfig) {
+  /*  fun initialize(config: HeaderConfig) {
         ncwSdkConfig = config
-    }
+    }*/
     /**
      * Retrieves the current Chat SDK configuration.
      *
      * @return The configuration object provided by the host app or a default one if not set.
      */
-    fun getConfig(): NCWSdkConfig {
-        return ncwSdkConfig ?: NCWSdkConfig()  // Provide default config if not initialized
+  /*  fun getConfig(): HeaderConfig {
+        return ncwSdkConfig ?: HeaderConfig()  // Provide default config if not initialized
+    }*/
+
+
+    fun updateBotConfiguration(config: NCWBotConfig){
+        val currentConfig = botConfig ?: NCWBotConfig()
+        botConfig = currentConfig.mergeWith(config)
     }
+
+    fun getUpdatedBotConfiguration():NCWBotConfig{
+        return botConfig?:NCWBotConfig()
+    }
+
+    fun updateHeaderConfiguration(config: NCWHeaderConfig){
+        val currentConfig = headerConfig ?: NCWHeaderConfig()
+        headerConfig = currentConfig.mergeWith(config)
+    }
+
+    fun getUpdateHeaderConfiguration():NCWHeaderConfig{
+        return headerConfig?: NCWHeaderConfig()
+    }
+
+    fun updateFooterConfiguration(config: NCWFooterConfig){
+      val currentConfig = footerConfig ?: NCWFooterConfig()
+        footerConfig = currentConfig.mergeWith(config)
+    }
+
+    fun getUpdatedFooterConfiguration():NCWFooterConfig{
+        return footerConfig?: NCWFooterConfig()
+    }
+
+    fun updateUserConfiguration(config:NCWUserConfig){
+        val currentConfig = userConfig ?: NCWUserConfig()
+        userConfig = currentConfig.mergeWith(config)
+    }
+
+    fun getUpdatedUserConfiguration(): NCWUserConfig{
+        return userConfig?: NCWUserConfig()
+    }
+
+    fun updateBubbleConfiguration(config: NCWBubbleConfig){
+        val currentConfig = bubbleConfig ?: NCWBubbleConfig()
+        bubbleConfig = currentConfig.mergeWith(config)
+    }
+
+    fun getUpdatedBubbleConfiguration():NCWBubbleConfig{
+        return bubbleConfig?: NCWBubbleConfig()
+    }
+
+    fun updateChatWindowConfiguration(config: NCWChatWindowConfig){
+        val currentConfig = chatWindowConfig ?: NCWChatWindowConfig()
+        chatWindowConfig = currentConfig.mergeWith(config)
+    }
+
+    fun getUpdatedChatWindowConfiguration():NCWChatWindowConfig{
+        return chatWindowConfig?: NCWChatWindowConfig()
+    }
+
+    private fun NCWHeaderConfig.mergeWith(newConfig: NCWHeaderConfig): NCWHeaderConfig {
+        return NCWHeaderConfig(
+            backgroundColor = newConfig.backgroundColor ?: this.backgroundColor,
+            gradientColors = newConfig.gradientColors ?: this.gradientColors,
+            gradientDirection = newConfig.gradientDirection ?: this.gradientDirection,
+            iconBackgroundColor = newConfig.iconBackgroundColor ?: this.iconBackgroundColor,
+            isBackPressPopupEnabed = newConfig.isBackPressPopupEnabed ?: this.isBackPressPopupEnabed,
+            isGradientAppied = newConfig.isGradientAppied ?: this.isGradientAppied,
+            logoImage = newConfig.logoImage ?: this.logoImage,
+            tintColor = newConfig.tintColor ?: this.tintColor
+        )
+    }
+
+    private fun NCWFooterConfig.mergeWith(newConfig: NCWFooterConfig):NCWFooterConfig{
+        return NCWFooterConfig(
+            backgroundColor = newConfig.backgroundColor?: this.backgroundColor,
+            inputBoxTextColor = newConfig.inputBoxTextColor?: this.inputBoxTextColor,
+            isFooterHidden = newConfig.isFooterHidden?: this.isFooterHidden,
+            isNetomiBrandingEnabled = newConfig.isNetomiBrandingEnabled?: this.isNetomiBrandingEnabled,
+            netomiBrandingText = newConfig.netomiBrandingText?: this.netomiBrandingText,
+            netomiBrandingTextColor = newConfig.netomiBrandingTextColor?: this.netomiBrandingTextColor,
+            tintColor= newConfig.tintColor?: this.tintColor
+        )
+    }
+
+    private fun NCWBotConfig.mergeWith(newConfig: NCWBotConfig):NCWBotConfig{
+        return NCWBotConfig(
+            backgroundColor = newConfig.backgroundColor?:this.backgroundColor,
+            botImage = newConfig.botImage?:this.botImage,
+            quickReplyBackgroundColor = newConfig.quickReplyBackgroundColor?: this.quickReplyBackgroundColor,
+            quickReplyBorderColor = newConfig.quickReplyBorderColor?: this.quickReplyBorderColor,
+            quickReplyTextColor = newConfig.quickReplyTextColor?: this.quickReplyTextColor,
+            textColor = newConfig.textColor?: this.textColor,
+        )
+    }
+
+    private fun NCWUserConfig.mergeWith(newConfig: NCWUserConfig):NCWUserConfig{
+        return NCWUserConfig(
+            backgroundColor = newConfig.backgroundColor?:this.backgroundColor,
+            textColor = newConfig.textColor?: this.textColor,
+        )
+    }
+
+    private fun NCWBubbleConfig.mergeWith(newConfig: NCWBubbleConfig):NCWBubbleConfig{
+        return NCWBubbleConfig(
+            borderRadius = newConfig.borderRadius?:this.borderRadius,
+            timeStampColor = newConfig.timeStampColor?: this.timeStampColor,
+        )
+    }
+
+    private fun NCWChatWindowConfig.mergeWith(newConfig: NCWChatWindowConfig):NCWChatWindowConfig{
+        return NCWChatWindowConfig(
+            chatWindowBackgroundColor = newConfig.chatWindowBackgroundColor?:this.chatWindowBackgroundColor,
+        )
+    }
+
+
 
 
 

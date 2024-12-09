@@ -11,6 +11,12 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
+import com.netomi.chat.model.theme.light_theme.NCWBotConfig
+import com.netomi.chat.model.theme.light_theme.NCWBubbleConfig
+import com.netomi.chat.model.theme.light_theme.NCWChatWindowConfig
+import com.netomi.chat.model.theme.light_theme.NCWFooterConfig
+import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
+import com.netomi.chat.model.theme.light_theme.NCWUserConfig
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.sampleapplication.R
 import com.netomi.sampleapplication.constant.SharePreferenceConstant
@@ -58,6 +64,80 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
 
         imgChat.setOnClickListener{
             NCWChatSdk.launch(this)
+            /**
+             * Customize the header configuration
+             */
+            val headerConfig = NCWHeaderConfig(
+                backgroundColor = "#FFFFFF",
+                gradientColors = listOf("#FF0000", "#00FF00"),
+                gradientDirection = 90,
+                iconBackgroundColor = "#CCCCCC",
+                isBackPressPopupEnabed = true,
+                isGradientAppied = false,
+                logoImage = "https://example.com/logo.png",
+                tintColor = "#000000"
+            )
+            NCWChatSdk.updateHeaderConfiguration(headerConfig)
+
+            /**
+             * Customize the footer configuration
+             */
+
+            val footerConfig = NCWFooterConfig(
+                backgroundColor = "#FFFFFF",
+                tintColor = "#000000",
+                inputBoxTextColor = "#000000",
+                isFooterHidden = false,
+                isNetomiBrandingEnabled = false,
+                netomiBrandingText = "Powered by Netomi",
+                netomiBrandingTextColor = "#000000",
+            )
+            NCWChatSdk.updateFooterConfiguration(footerConfig)
+
+            /**
+             * Customize the BOT configuration
+             */
+
+            val botConfig = NCWBotConfig(
+                backgroundColor = "",
+                botImage = "",
+                quickReplyBorderColor = "",
+                quickReplyBackgroundColor = "",
+                quickReplyTextColor = "",
+                textColor = ""
+            )
+            NCWChatSdk.updateBotConfiguration(botConfig)
+
+            /**
+             * Customize the User configuration
+             */
+
+            val userConfig = NCWUserConfig(
+                backgroundColor = "",
+                textColor = "",
+            )
+
+            NCWChatSdk.updateUserConfiguration(userConfig)
+
+            /**
+             * Customize the Chat Window configuration
+             */
+
+            val chatWindowConfig = NCWChatWindowConfig(
+                chatWindowBackgroundColor = ""
+            )
+
+            NCWChatSdk.updateChatWindowConfiguration(chatWindowConfig)
+
+            /**
+             * Customize the Bubble configuration
+             */
+
+            val bubbleConfig = NCWBubbleConfig(
+                borderRadius = "",
+                timeStampColor = ""
+            )
+            NCWChatSdk.updateBubbleConfiguration(bubbleConfig)
         }
 
     }

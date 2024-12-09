@@ -1,6 +1,5 @@
 package com.netomi.chat.ui.viewmodel
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import com.netomi.chat.awsiot.NCWAwsIotManager
 import com.netomi.chat.data.repository.NCWAwsCredentialsRepository
@@ -10,10 +9,10 @@ class NCWAwsCredentialsViewModel(application: Application) : AndroidViewModel(ap
 
     private val repository = NCWAwsCredentialsRepository.getInstance(application)
 
-    private val _credentials = SingleLiveEvent<NCWAwsCredentials?>()
+    private val _credentials = NCWSingleLiveEvent<NCWAwsCredentials?>()
     val credentials get() = _credentials
 
-    val connectionStatus: SingleLiveEvent<String> = NCWAwsIotManager.getConnectionStatusLiveData()
+    val connectionStatus: NCWSingleLiveEvent<String> = NCWAwsIotManager.getConnectionStatusLiveData()
 
 
 

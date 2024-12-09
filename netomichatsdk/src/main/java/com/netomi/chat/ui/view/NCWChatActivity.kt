@@ -1,9 +1,10 @@
 package com.netomi.chat.ui.view
 
 
-import IdleTimeoutManager
+import NCWIdleTimeoutManager
 import android.Manifest
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -33,44 +34,43 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.netomi.chat.R
-import com.netomi.chat.awsiot.ConnectionStatus
-import com.netomi.chat.config.NCWSdkConfig
-import com.netomi.chat.model.GetChatHistoryResponse
-import com.netomi.chat.model.GetConversationIdResponse
+import com.netomi.chat.awsiot.NCWConnectionStatus
+import com.netomi.chat.model.NCWGetChatHistoryResponse
+import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
-import com.netomi.chat.model.SendMessageResponse
+import com.netomi.chat.model.NCWSendMessageResponse
 import com.netomi.chat.model.awsmqtt.NCWAwsCredentials
-import com.netomi.chat.model.chat_history.GetChatHistoryPayload
-import com.netomi.chat.model.chat_history.HistoryRequestBody
-import com.netomi.chat.model.endchat.EndChatRequest
-import com.netomi.chat.model.endchat.EventData
-import com.netomi.chat.model.media_payload.SignedUrlPayload
-import com.netomi.chat.model.messages.AdditionalAttributes
-import com.netomi.chat.model.messages.Attachment
-import com.netomi.chat.model.messages.AttachmentList
-import com.netomi.chat.model.messages.CarouselButton
-import com.netomi.chat.model.messages.GenericChannelResponse
-import com.netomi.chat.model.messages.MessagePayload
-import com.netomi.chat.model.messages.QuickReply
-import com.netomi.chat.model.messages.QuickReplyOption
-import com.netomi.chat.model.messages.RequestBody
-import com.netomi.chat.model.messages.WebhookPayload
-import com.netomi.chat.model.mqtt.Credentials
+import com.netomi.chat.model.chat_history.NCWGetChatHistoryPayload
+import com.netomi.chat.model.chat_history.NCWHistoryRequestBody
+import com.netomi.chat.model.endchat.NCWEndChatRequest
+import com.netomi.chat.model.endchat.NCWEventData
+import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
+import com.netomi.chat.model.messages.NCWAdditionalAttributes
+import com.netomi.chat.model.messages.NCWAttachment
+import com.netomi.chat.model.messages.NCWAttachmentList
+import com.netomi.chat.model.messages.NCWCarouselButton
+import com.netomi.chat.model.messages.NCWGenericChannelResponse
+import com.netomi.chat.model.messages.NCWMessagePayload
+import com.netomi.chat.model.messages.NCWQuickReply
+import com.netomi.chat.model.messages.NCWQuickReplyOption
+import com.netomi.chat.model.messages.NCWRequestBody
+import com.netomi.chat.model.messages.NCWWebhookPayload
+import com.netomi.chat.model.mqtt.NCWCredentials
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
-import com.netomi.chat.model.presigned_url.GetMediaUploadUrl
-import com.netomi.chat.model.presigned_url.GetPreSignedUrl
-import com.netomi.chat.model.theme.ThemeResponse
+import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
+import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
+import com.netomi.chat.model.theme.NCWThemeResponse
+import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
-import com.netomi.chat.utils.ChatActionCallback
+import com.netomi.chat.utils.NCWChatActionCallback
 import com.netomi.chat.utils.DeviceInfo
 import com.netomi.chat.utils.DeviceInfoUtil
-import com.netomi.chat.utils.DialogUtils
-import com.netomi.chat.utils.FilePath
+import com.netomi.chat.utils.NCWDialogUtils
+import com.netomi.chat.utils.NCWFilePath
 import com.netomi.chat.utils.NCWImageUtils
-import com.netomi.chat.utils.NCWAppConstant.ARG_FILE_URI
 import com.netomi.chat.utils.NCWAppConstant.ARG_MEDIA_URL
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
@@ -84,10 +84,10 @@ import com.netomi.chat.utils.NCWAppConstant.TYPE_RESPONSE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
-import com.netomi.chat.utils.Routes
-import com.netomi.chat.utils.SingleAlertDialog
-import com.netomi.chat.utils.State
-import com.netomi.chat.utils.ThemeUtils
+import com.netomi.chat.utils.NCWRoutes
+import com.netomi.chat.utils.NCWSingleAlertDialog
+import com.netomi.chat.utils.NCWState
+import com.netomi.chat.utils.NCWThemeUtils
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -111,7 +111,7 @@ import java.util.UUID
  * This activity is intended to be launched by the host application or as part of the Chat SDK.
  *
  */
-class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
+class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
     private val chatViewModel: NCWChatViewModel by viewModels()
     private val ncwAwsCredentialsViewModel: NCWAwsCredentialsViewModel by viewModels()
@@ -121,7 +121,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private lateinit var logoIcon: ImageView
     private lateinit var headerTextView: TextView
     private lateinit var closeIcon: ImageView
-    private lateinit var messageAdapter: ChatAdapter
+    private lateinit var messageAdapter: NCWChatAdapter
     private lateinit var messageList: MutableList<NCWMessage>
     private lateinit var chatRecyclerView: RecyclerView
     private lateinit var attachmentIcon: ImageView
@@ -133,12 +133,12 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private lateinit var connectionHeader: TextView
     private lateinit var progressBar: ProgressBar
     private var photoUri: Uri? = null
-    private var ncwSdkConfig: NCWSdkConfig? = null
-    private var themeData: ThemeResponse? = null
+    private var ncwSdkConfig: NCWHeaderConfig? = null
+    private var themeData: NCWThemeResponse? = null
 
     private var conversationID: String? = null
     private var botRefId: String? = null
-    private lateinit var idleTimeoutManager: IdleTimeoutManager
+    private lateinit var idleTimeoutManager: NCWIdleTimeoutManager
     private var fileSend: File? = null
 
     private var loaderAddedTime: Long = 0
@@ -154,8 +154,14 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         setContentView(R.layout.activity_chat)
         initViews()
         // Load theme and config
-        themeData = ThemeUtils.getThemeData()
-        ncwSdkConfig = NCWChatSdk.getConfig()
+        themeData = NCWThemeUtils.getThemeData()
+
+        NCWChatSdk.getUpdateHeaderConfiguration()
+        NCWChatSdk.getUpdatedFooterConfiguration()
+        NCWChatSdk.getUpdatedBotConfiguration()
+        NCWChatSdk.getUpdatedUserConfiguration()
+        NCWChatSdk.getUpdatedChatWindowConfiguration()
+        NCWChatSdk.getUpdatedBubbleConfiguration()
 
         // Set up message adapter and recycler view
         setupMessageList()
@@ -170,11 +176,11 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         deviceInfo.add(device)
         Log.d("DeviceInfo", "Device Info: $deviceInfo")
 
-        if (ThemeUtils.getConversationID() == null) {
+        if (NCWThemeUtils.getConversationID() == null) {
             loadInitialMessages()
             chatViewModel.getConversationId(botRefId)
         } else {
-            conversationID = ThemeUtils.getConversationID()
+            conversationID = NCWThemeUtils.getConversationID()
             chatViewModel.getAWSMQTTCredentials(botRefId)
             getChatHistory()
         }
@@ -206,7 +212,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         }
         // Initialize IdleTimeoutManager with a timeout and a callback for session timeout
         themeData?.endChat?.idleTimeout?.let {
-            idleTimeoutManager = IdleTimeoutManager(
+            idleTimeoutManager = NCWIdleTimeoutManager(
                 idleTimeoutMillis = it,
                 onTimeout = { handleSessionTimeout() }
             )
@@ -222,7 +228,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     }
 
     private fun backClicked() {
-        DialogUtils.showCustomDialog(
+        NCWDialogUtils.showCustomDialog(
             context = this,
             title = getString(R.string.end_chat_ques),
             subtitle = getString(R.string.Are_you_sure_you_want_to_exit_from_this_chat),
@@ -232,12 +238,12 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             subtitleColor = Color.DKGRAY,
             backgroundColor = Color.LTGRAY,
             noButtonBackgroundColor = themeData?.mobileConfig?.lightTheme?.headerConfig?.backgroundColor?.let {
-                ThemeUtils.parseColor(
+                NCWThemeUtils.parseColor(
                     it
                 )
             } ?: Color.WHITE,
             yesButtonBackgroundColor = themeData?.mobileConfig?.lightTheme?.botConfig?.backgroundColor?.let {
-                ThemeUtils.parseColor(
+                NCWThemeUtils.parseColor(
                     it
                 )
             } ?: Color.WHITE,
@@ -253,12 +259,12 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
     private fun hitEndChatAPI() {
         chatViewModel.hitEndChatAPI(
-            EndChatRequest(
-                botRefId = botRefId!!, com.netomi.chat.model.endchat.RequestBody(
+            NCWEndChatRequest(
+                botRefId = botRefId!!, com.netomi.chat.model.endchat.NCWRequestBody(
                     botReferenceId = botRefId!!,
                     channelId = "NETOMI_WEB_WIDGET",
                     conversationId = conversationID!!,
-                    eventData = EventData(
+                    NCWEventData = NCWEventData(
                         eventType = "WIDGET_EVENT",
                         subType = "CHAT_END"
                     ),
@@ -293,7 +299,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
      */
     private fun handleSessionTimeout() {
 
-        SingleAlertDialog.showSingleButtonDialog(
+        NCWSingleAlertDialog.showSingleButtonDialog(
             context = this,
             title = "Session Timeout",
             subtitle = "Your session has expired due to inactivity.",
@@ -307,7 +313,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private fun getPreSignedUrl(type: String?, uploadKeyPrefix: String) {
         constProgressBar.visibility = View.VISIBLE
         progressBar.visibility = View.VISIBLE
-        val mediaUpload = SignedUrlPayload(
+        val mediaUpload = NCWSignedUrlPayload(
             fileType = type,
             uploadKeyPrefix = uploadKeyPrefix
         )
@@ -360,18 +366,18 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         messageContent: String,
         label: String? = null,
         timeStamp: Long? = System.currentTimeMillis(),
-        attachmentList: ArrayList<AttachmentList>? = null
-    ): WebhookPayload {
+        attachmentList: ArrayList<NCWAttachmentList>? = null
+    ): NCWWebhookPayload {
         val messageId = UUID.randomUUID().toString()
 
-        val attributes = AdditionalAttributes().apply {
+        val attributes = NCWAdditionalAttributes().apply {
             CUSTOM_ATTRIBUTES.addAll(deviceInfo)
         }
-        return WebhookPayload(
+        return NCWWebhookPayload(
             botRefId = botRefId,
-            requestBody = RequestBody(
+            requestBody = NCWRequestBody(
                 conversationId = conversationID,
-                messagePayload = MessagePayload(
+                messagePayload = NCWMessagePayload(
                     text = messageContent,
                     label = label,
                     messageId = messageId,
@@ -408,7 +414,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         val flows = themeData?.initialFlows?.flows.orEmpty()
         if (flows.isNotEmpty()) {
             val options = flows.map { initialData ->
-                QuickReplyOption().apply {
+                NCWQuickReplyOption().apply {
                     label = initialData.label
                     metadata = initialData.name
                 }
@@ -418,7 +424,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 NCWMessage(
                     sender = TYPE_RESPONSE,
                     timestamp = System.currentTimeMillis(),
-                    quickReply = QuickReply(options = ArrayList(options))
+                    quickReply = NCWQuickReply(options = ArrayList(options))
                 )
             )
         }
@@ -430,10 +436,10 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
      * @param themeData The theme settings to be applied, containing gradient
      * configuration, colors, and title.
      */
-    private fun applyTheme(themeData: ThemeResponse?) {
+    private fun applyTheme(themeData: NCWThemeResponse?) {
         // Configure header and footer
         val rootLayout = findViewById<View>(R.id.rootLayout)
-        ThemeUtils.configureHeader(
+        NCWThemeUtils.configureHeader(
             headerContainer,
             ivMenu,
             closeIcon,
@@ -443,7 +449,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             this,
             progressBar
         )
-        ThemeUtils.configureFooter(
+        NCWThemeUtils.configureFooter(
             footerContainer,
             ivMenuOption,
             messageInputField,
@@ -463,7 +469,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                     text = footerConfig.netomiBrandingText.orEmpty()
                     footerConfig.netomiBrandingTextColor?.let {
                         setTextColor(
-                            ThemeUtils.parseColor(
+                            NCWThemeUtils.parseColor(
                                 it
                             )
                         )
@@ -514,13 +520,13 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
      */
     private fun setupMessageList() {
         messageList = mutableListOf()
-        messageAdapter = ChatAdapter(messageList, themeData, this)
+        messageAdapter = NCWChatAdapter(messageList, themeData, this)
 
         chatRecyclerView.layoutManager = LinearLayoutManager(this)
         chatRecyclerView.adapter = messageAdapter
     }
 
-    override fun onQuickReply(option: QuickReplyOption?, position: Int) {
+    override fun onQuickReply(option: NCWQuickReplyOption?, position: Int) {
         messageList[position].isQuickReplyVisible = false
         //   messageList.removeAt(position)
         onQuickReplyClicked(option)
@@ -528,7 +534,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     }
 
     override fun onMediaClick(message: NCWMessage) {
-        val intent = Intent(this, FullScreenMediaActivity::class.java).apply {
+        /*val intent = Intent(this, FullScreenMediaActivity::class.java).apply {
             val mediaUrl = when (message.type) {
                 MessageType.VIDEO -> message.thumbnailUrl
                 MessageType.IMAGE -> message.largeImageUrl
@@ -543,9 +549,9 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 putExtra(ARG_FILE_URI, message.message) // Pass file URI directly
             }
         }
-        startActivity(intent)
+        startActivity(intent)*/
 
-      /*  val mediaUrl = when (message.type) {
+        val mediaUrl = when (message.type) {
             MessageType.VIDEO -> message.thumbnailUrl
             MessageType.IMAGE -> message.largeImageUrl
             MessageType.FILE -> message.fileUrl
@@ -553,7 +559,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         }
 
         mediaUrl?.let {
-            val intent = Intent(this, FullScreenMediaActivity::class.java).apply {
+            val intent = Intent(this, NCWFullScreenMediaActivity::class.java).apply {
                 putExtra(ARG_MEDIA_URL, mediaUrl)
                 putExtra(MEDIA_TYPE, message.type.name)
 
@@ -571,7 +577,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             } catch (e: ActivityNotFoundException) {
                 NCWAppUtils.showToast(this, "No application found to open this file")
             }
-        }*/
+        }
     }
 
 
@@ -592,7 +598,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     }
 
 
-    override fun carouselButtonAction(it: CarouselButton?) {
+    override fun carouselButtonAction(it: NCWCarouselButton?) {
 
         Log.e("CarouselButton", "CarouselButton $it")
     }
@@ -603,7 +609,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
      *
      * @param option The selected quick reply option.
      */
-    private fun onQuickReplyClicked(option: QuickReplyOption?) {
+    private fun onQuickReplyClicked(option: NCWQuickReplyOption?) {
         option?.label?.takeIf { it.isNotEmpty() }?.let { label ->
             val timeStamp = System.currentTimeMillis()
             val payload = option.metadata?.let { createPayload(it, label, timeStamp) }
@@ -637,15 +643,15 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private fun observeChatMessages() {
 // Observe the chat messages LiveData from the ViewModel
         chatViewModel.sendMessage.observe(this) { messages ->
-            handleApiCallback(messages as State<Any>)
+            handleApiCallback(messages as NCWState<Any>)
         }
 
         chatViewModel.getConversationId.observe(this) { conversationId ->
-            handleApiCallback(conversationId as State<Any>)
+            handleApiCallback(conversationId as NCWState<Any>)
         }
 
         chatViewModel.getAWSMQTTCredentials.observe(this) { credentials ->
-            handleApiCallback(credentials as State<Any>)
+            handleApiCallback(credentials as NCWState<Any>)
         }
 
         chatViewModel.sendMessages.observe(this) { message ->
@@ -653,15 +659,15 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         }
 
         chatViewModel.getChatHistory.observe(this) { messages ->
-            handleApiCallback(messages as State<Any>)
+            handleApiCallback(messages as NCWState<Any>)
 
         }
         chatViewModel.getSignedUrl.observe(this) { signedUrl ->
-            handleApiCallback(signedUrl as State<Any>)
+            handleApiCallback(signedUrl as NCWState<Any>)
 
         }
         chatViewModel.getUploadedMediaUrl.observe(this) { media ->
-            handleApiCallback(media as State<Any>)
+            handleApiCallback(media as NCWState<Any>)
 
         }
 
@@ -670,7 +676,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
         chatViewModel.awsMessage.observe(this) { jsonMessage ->
             try {
-                val response = Gson().fromJson(jsonMessage, GenericChannelResponse::class.java)
+                val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
                 val newMessages =
                     response.attachments?.mapNotNull { mapAttachmentToMessage(it) } ?: emptyList()
 
@@ -695,14 +701,14 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
         ncwAwsCredentialsViewModel.connectionStatus.observe(this) { status ->
             when (status) {
-                ConnectionStatus.CONNECTING.toString() -> {
+                NCWConnectionStatus.CONNECTING.toString() -> {
                     connectionHeader.text = getString(R.string.connecting)
                     connectionHeader.setBackgroundColor(Color.YELLOW)
                     connectionHeader.setTextColor(Color.BLACK)
                     connectionHeader.visibility = View.VISIBLE
                 }
 
-                ConnectionStatus.CONNECTED.toString() -> {
+                NCWConnectionStatus.CONNECTED.toString() -> {
                     connectionHeader.text = getString(R.string.connected)
                     connectionHeader.setBackgroundColor(Color.GREEN)
                     connectionHeader.setTextColor(Color.WHITE)
@@ -714,14 +720,14 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                     }, 2000)
                 }
 
-                ConnectionStatus.CONNECTION_LOST.toString() -> {
+                NCWConnectionStatus.CONNECTION_LOST.toString() -> {
                     connectionHeader.text = getString(R.string.connection_lost)
                     connectionHeader.setBackgroundColor(Color.RED)
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
                 }
 
-                ConnectionStatus.RE_CONNECTED.toString() -> {
+                NCWConnectionStatus.RE_CONNECTED.toString() -> {
                     connectionHeader.text = getString(R.string.reconnecting)
                     connectionHeader.setBackgroundColor(Color.BLUE)
                     connectionHeader.setTextColor(Color.WHITE)
@@ -739,12 +745,12 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         }
 
         chatViewModel.endChatResponse.observe(this) { messages ->
-            handleApiCallback(messages as State<Any>)
+            handleApiCallback(messages as NCWState<Any>)
         }
     }
 
     // Helper function to map attachments to NCWMessage
-    private fun mapAttachmentToMessage(attachment: Attachment): NCWMessage? {
+    private fun mapAttachmentToMessage(attachment: NCWAttachment): NCWMessage? {
         val attach = attachment.attachment ?: return null
         val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
 
@@ -852,24 +858,24 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
     }
 
-    private fun handleApiCallback(response: State<Any>) {
+    private fun handleApiCallback(response: NCWState<Any>) {
         when (response) {
-            is State.Loading -> {
+            is NCWState.Loading -> {
                 progressBar.visibility = View.VISIBLE
                 constProgressBar.visibility = View.VISIBLE
             }
 
-            is State.Success -> {
+            is NCWState.Success -> {
                 onApiSuccess(response.data, response.apiConstant)
             }
 
-            is State.Error -> {
+            is NCWState.Error -> {
                 Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
                 progressBar.visibility = View.GONE
                 constProgressBar.visibility = View.GONE
             }
 
-            is State.SendMessageError -> {
+            is NCWState.SendMessageError -> {
                 val payload = response.payload
                 val targetTimestamp =
                     payload.requestBody?.messagePayload?.timestamp ?: System.currentTimeMillis()
@@ -961,6 +967,8 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     // Function to show camera and gallery options
     private fun showMediaOptions() {
 
+        val bottomSheet = NCWMediaOptionsBottomSheet(
+            onCameraClick = { openCamera() },
         val bottomSheet = MediaOptionsBottomSheet(
             onCameraClick = { showCameraVideoOption() },
             onGalleryClick = { openGallery() },
@@ -1089,7 +1097,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
 // Get the file from the URI
         fileSend = if (isGallery) {
-            FilePath().getPath(this, selectedMediaUri)?.let { File(it) }
+            NCWFilePath().getPath(this, selectedMediaUri)?.let { File(it) }
         } else {
             NCWImageUtils.getFileFromUri(this, selectedMediaUri)
         }
@@ -1200,12 +1208,12 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private fun onApiSuccess(apiResponse: Any, apiConstant: String) {
 
         when (apiConstant) {
-            Routes.ROUTE_GET_CONVERSATION_ID -> {
-                val response = apiResponse as GetConversationIdResponse
+            NCWRoutes.ROUTE_GET_CONVERSATION_ID -> {
+                val response = apiResponse as NCWGetConversationIdResponse
                 // Use conversationID as needed
                 conversationID = response.conversationID
                 chatViewModel.getAWSMQTTCredentials(botRefId)
-                conversationID?.let { ThemeUtils.setConversationID(it) }
+                conversationID?.let { NCWThemeUtils.setConversationID(it) }
                 Log.d(
                     "ConversationID",
                     "Fetched conversation ID: $conversationID"
@@ -1213,19 +1221,19 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
             }
 
-            Routes.ROUTE_GET_MQTT_CREDENTIALS -> {
+            NCWRoutes.ROUTE_GET_MQTT_CREDENTIALS -> {
                 val mqttsCredentials = apiResponse as MQTTCredentialsResponse
                 saveAwsCredentials(mqttsCredentials.credentials)
             }
 
-            Routes.ROUTE_SEND_CHAT -> {
-                val sendMessageResponse = apiResponse as SendMessageResponse
+            NCWRoutes.ROUTE_SEND_CHAT -> {
+                val sendMessageResponse = apiResponse as NCWSendMessageResponse
                 progressBar.visibility = View.GONE
                 constProgressBar.visibility = View.GONE
             }
 
-            Routes.ROUTE_GET_CHAT -> {
-                val response = apiResponse as GetChatHistoryResponse
+            NCWRoutes.ROUTE_GET_CHAT -> {
+                val response = apiResponse as NCWGetChatHistoryResponse
                 if (response != null && response.responses.size > 0) {
                     parseHistoryItems(response.responses)
                 }
@@ -1233,20 +1241,20 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 constProgressBar.visibility = View.GONE
             }
 
-            Routes.ROUTE_GET_PRESIGNED_URL -> {
-                val response = apiResponse as GetPreSignedUrl
+            NCWRoutes.ROUTE_GET_PRESIGNED_URL -> {
+                val response = apiResponse as NCWGetPreSignedUrl
                 chatViewModel.uploadFile(fileSend, response)
             }
 
-            Routes.ROUTE_UPLOAD_MEDIA -> {
-                val response = apiResponse as GetMediaUploadUrl
+            NCWRoutes.ROUTE_UPLOAD_MEDIA -> {
+                val response = apiResponse as NCWGetMediaUploadUrl
                 Log.d("ROUTE_UPLOAD_MEDIA", "Fetched ROUTE_UPLOAD_MEDIA: $response")
 
                 val mediaType = response.type?.let { NCWAppUtils.getTypeFromContent(it) }
                 Log.e("MediaType", "Determined media type: $mediaType")
 
                 val attachmentList = arrayListOf(
-                    AttachmentList().apply {
+                    NCWAttachmentList().apply {
                         type = mediaType
                         actualType = mediaType
                         attachmentId = UUID.randomUUID().toString()
@@ -1274,15 +1282,15 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
 
             }
 
-            Routes.ROUTE_END_CHAT -> {
-                ThemeUtils.setConversationID(null)
+            NCWRoutes.ROUTE_END_CHAT -> {
+                NCWThemeUtils.setConversationID(null)
                 finish()
             }
         }
 
     }
 
-    private fun parseHistoryItems(responses: ArrayList<GenericChannelResponse>) {
+    private fun parseHistoryItems(responses: ArrayList<NCWGenericChannelResponse>) {
 
         responses.forEach { response ->
 
@@ -1345,9 +1353,9 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private fun getChatHistory() {
         val payload = conversationID?.let {
             botRefId?.let { it1 ->
-                GetChatHistoryPayload(
+                NCWGetChatHistoryPayload(
                     conversationId = it,
-                    requestBody = HistoryRequestBody(
+                    requestBody = NCWHistoryRequestBody(
                         numberOfMessages = 100,
                         numberOfDays = 10
                     ),
@@ -1361,7 +1369,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     /**
      * Save Aws Credentials in data store
      */
-    private fun saveAwsCredentials(credentials: Credentials) {
+    private fun saveAwsCredentials(credentials: NCWCredentials) {
 // Save new credentials (example usage)
         val newCredentials = NCWAwsCredentials(
             accessKey = credentials.accessKeyId,
