@@ -6,17 +6,22 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
+import android.util.Log
 import android.view.View
 import android.view.Window
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.RadioButton
 import android.widget.TextView
+import androidx.appcompat.widget.ThemeUtils
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import com.bumptech.glide.Glide
 import com.netomi.chat.model.theme.NCWThemeResponse
+import com.netomi.chat.ui.init.NCWChatSdk
 
 object NCWThemeUtils
 {
@@ -118,6 +123,11 @@ object NCWThemeUtils
         }
     }
 
+
+    fun setRadioButtonUserConfig(messageText: RadioButton) {
+        messageText.setTextColor(Color.parseColor(themeData?.mobileConfig?.lightTheme?.userConfig?.backgroundColor))
+    }
+
     fun setBotConfig(messageText: View) {
         themeData?.mobileConfig?.lightTheme?.botConfig?.let { botConfig ->
             val bubbleConfig = themeData?.mobileConfig?.lightTheme?.bubbleConfig
@@ -164,7 +174,7 @@ object NCWThemeUtils
 
 
 
-    fun applyBorderWithCorners(
+    private fun applyBorderWithCorners(
         view: View,
         backgroundColor: String?,
         border: String?,
@@ -403,6 +413,26 @@ object NCWThemeUtils
             setColor(colorWithOpacity)
         }
         textView.background = backgroundDrawable
+    }
+
+    fun applyButtonBackgroundWithCorners(
+        button: Button,
+        opacity: Int = 128,
+        isSelected:Boolean=false
+    ) {
+        val baseColor = Color.parseColor(NCWChatSdk.getUpdateHeaderConfiguration().backgroundColor?: "#374E57") // Default color if null
+        val colorWithOpacity= if(isSelected){
+            Color.parseColor(NCWChatSdk.getUpdateHeaderConfiguration().backgroundColor)
+        }else{
+            Color.argb(opacity, Color.red(baseColor), Color.green(baseColor), Color.blue(baseColor))
+        }
+
+        val backgroundDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 100f
+            setColor(colorWithOpacity)
+        }
+        button.background = backgroundDrawable
     }
 
 

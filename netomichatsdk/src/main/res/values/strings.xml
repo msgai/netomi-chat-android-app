@@ -12,4 +12,5 @@
     <string name="end_chat">End Chat</string>
     <string name="end_chat_ques">End Chat?</string>
     <string name="not_sent_tap_to_retry">Not sent, Tap to retry</string>
+    <string name="close_chat">Close Chat?</string>
 </resources>
