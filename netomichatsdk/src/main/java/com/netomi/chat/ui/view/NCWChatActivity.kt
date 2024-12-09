@@ -4,7 +4,6 @@ package com.netomi.chat.ui.view
 import IdleTimeoutManager
 import android.Manifest
 import android.app.Activity
-import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -70,7 +69,8 @@ import com.netomi.chat.utils.DeviceInfo
 import com.netomi.chat.utils.DeviceInfoUtil
 import com.netomi.chat.utils.DialogUtils
 import com.netomi.chat.utils.FilePath
-import com.netomi.chat.utils.ImageUtils
+import com.netomi.chat.utils.NCWImageUtils
+import com.netomi.chat.utils.NCWAppConstant.ARG_FILE_URI
 import com.netomi.chat.utils.NCWAppConstant.ARG_MEDIA_URL
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
@@ -528,7 +528,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     }
 
     override fun onMediaClick(message: NCWMessage) {
-        /*val intent = Intent(this, FullScreenMediaActivity::class.java).apply {
+        val intent = Intent(this, FullScreenMediaActivity::class.java).apply {
             val mediaUrl = when (message.type) {
                 MessageType.VIDEO -> message.thumbnailUrl
                 MessageType.IMAGE -> message.largeImageUrl
@@ -543,9 +543,9 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
                 putExtra(ARG_FILE_URI, message.message) // Pass file URI directly
             }
         }
-        startActivity(intent)*/
+        startActivity(intent)
 
-        val mediaUrl = when (message.type) {
+      /*  val mediaUrl = when (message.type) {
             MessageType.VIDEO -> message.thumbnailUrl
             MessageType.IMAGE -> message.largeImageUrl
             MessageType.FILE -> message.fileUrl
@@ -571,7 +571,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             } catch (e: ActivityNotFoundException) {
                 NCWAppUtils.showToast(this, "No application found to open this file")
             }
-        }
+        }*/
     }
 
 
@@ -962,13 +962,48 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
     private fun showMediaOptions() {
 
         val bottomSheet = MediaOptionsBottomSheet(
-            onCameraClick = { openCamera() },
+            onCameraClick = { showCameraVideoOption() },
             onGalleryClick = { openGallery() },
             onFileClick = { openFile() }
         )
         bottomSheet.show(supportFragmentManager, "MediaOptionsBottomSheet")
     }
 
+    private fun showCameraVideoOption() {
+        NCWAppUtils.showMediaOptionDialog(this,
+            imageClick = { openCamera() },
+            videoClick = { openVideoCamera() }
+        )
+    }
+
+    private fun openVideoCamera() {
+        val takeVideoIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+        if (takeVideoIntent.resolveActivity(packageManager) != null) {
+            videoLauncher.launch(takeVideoIntent)
+        }
+    }
+
+    private val videoLauncher = registerForActivityResult(
+    ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val videoUri: Uri? = result.data?.data
+            videoUri?.let { uri ->
+                fileSend = NCWImageUtils.getVideoFileFromUri(this,uri)
+                val type = fileSend?.let { it1 -> NCWAppUtils.getFileContentType(it1) }
+                if (!validateFile(fileSend, type))
+                    return@registerForActivityResult
+
+                uri?.let { uri ->
+                    addMediaMessage(fileSend,uri, MessageType.VIDEO)
+                }
+                fileSend?.let {
+                    getPreSignedUrl(type, it.path)
+
+                }
+            }
+        }
+    }
 
     private fun openCamera() {
         val imageFile = createImageFile()
@@ -1020,7 +1055,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
             return false
         }
 
-// Validate file type
+          // Validate file type
         val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
         val fileExtension =
             file?.extension?.lowercase()?.let { if (!it.startsWith(".")) ".$it" else it }
@@ -1056,7 +1091,7 @@ class NCWChatActivity : AppCompatActivity(), ChatActionCallback {
         fileSend = if (isGallery) {
             FilePath().getPath(this, selectedMediaUri)?.let { File(it) }
         } else {
-            ImageUtils.getFileFromUri(this, selectedMediaUri)
+            NCWImageUtils.getFileFromUri(this, selectedMediaUri)
         }
 
         if (fileSend == null) {

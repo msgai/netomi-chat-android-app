@@ -15,7 +15,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.netomi.chat.utils.NCWAppConstant.TIME_AM_PM
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FILE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_IMAGE
-import com.netomi.chat.utils.NCWAppConstant.TYPE_TEXT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -80,19 +79,19 @@ object NCWAppUtils {
 
     fun showMediaOptionDialog(
         context: Context,
-        cameraClickCallback: () -> Unit,
-        galleryClickCallback: () -> Unit
+        imageClick: () -> Unit,
+        videoClick: () -> Unit
     ) {
-        val items = arrayOf("Camera", "Attach from Device")
+        val items = arrayOf("Capture Image",  "Capture Video")
         MaterialAlertDialogBuilder(context)
             .setItems(items) { dialog, which ->
                 when (which) {
                     0 -> {
-                        cameraClickCallback.invoke()
+                        imageClick.invoke()
                         dialog.dismiss()
                     }
                     1 -> {
-                        galleryClickCallback.invoke()
+                        videoClick.invoke()
                         dialog.dismiss()
                     }
                 }
