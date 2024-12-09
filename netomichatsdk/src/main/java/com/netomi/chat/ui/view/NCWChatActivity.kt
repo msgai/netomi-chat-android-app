@@ -599,8 +599,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
 
     override fun carouselButtonAction(it: NCWCarouselButton?) {
+        Log.e("NCWCarouselButton","NCWCarouselButton "+it)
+        it?.url?.let { url ->
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                startActivity(intent) // Directly start the activity
+            } catch (e: Exception) {
+                Log.e("OpenURL", "Failed to open URL: $url", e)
+                NCWAppUtils.showToast(this, "Unable to open the link")
+            }
+        }
 
-        Log.e("CarouselButton", "CarouselButton $it")
     }
 
 
@@ -1056,12 +1065,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
     // Common function to validate file size and type
     private fun validateFile(file: File?, mimeType: String?): Boolean {
-// Validate file size
-        if (!isFileSizeValid(this, file?.length(), themeData?.fileSharing?.fileSize)) {
-            return false
-        }
 
-          // Validate file type
+        // Validate file type
         val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
         val fileExtension =
             file?.extension?.lowercase()?.let { if (!it.startsWith(".")) ".$it" else it }
@@ -1075,6 +1080,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
                     )
                 }"
             )
+            return false
+        }
+        // Validate file size
+        if (!isFileSizeValid(this, file?.length(), themeData?.fileSharing?.fileSize)) {
             return false
         }
 
@@ -1093,7 +1102,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
             return
         }
 
-// Get the file from the URI
+       // Get the file from the URI
         fileSend = if (isGallery) {
             NCWFilePath().getPath(this, selectedMediaUri)?.let { File(it) }
         } else {
@@ -1107,7 +1116,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
         Log.e("FileSelection", "Type: $mimeType, File path: ${fileSend?.absolutePath}")
 
-// Validate file size and type
+        // Validate file size and type
         if (!validateFile(fileSend, mimeType)) return
 
         checkForPreviousQuickReply()
@@ -1185,6 +1194,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
     // Add media message (image or video) to the chat
     private fun addMediaMessage(file: File?,uri: Uri, type: MessageType) {
+
         val newMessage = NCWMessage(
             sender = TYPE_REQUEST,
             type = type,
@@ -1194,6 +1204,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
             fileSize = fileSend?.length().toString()
         )
         messageList.add(newMessage)
+
+
 //        messageAdapter.notifyItemInserted(messageList.size - 1)
 //        chatRecyclerView.scrollToPosition(messageList.size - 1) // Scroll to the latest message
 
@@ -1266,8 +1278,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
                     }
                 )
 
-                Log.e("attachmentList", "attachmentList" + attachmentList)
+                val position = messageList.indexOfLast { it.title == response.title }
+                if (position != -1) {
+                    val item = messageList[position]
+                    when (mediaType) {
+                        TYPE_IMAGE -> item.largeImageUrl = response.url
+                        TYPE_VIDEO -> item.thumbnailUrl = response.url
+                        TYPE_FILE -> item.fileUrl = response.url
+                    }
+                }
 
+                Log.e("attachmentList", "attachmentList" + attachmentList)
                 val timeStamp = System.currentTimeMillis()
                 val payload = createPayload(
                     "event://;LEARN_ATTRIBUTE_EVENT;ATTACHMENT::value=Media has been uploaded",
