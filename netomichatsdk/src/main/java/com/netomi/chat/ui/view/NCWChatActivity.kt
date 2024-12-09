@@ -148,6 +148,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
     private var deviceInfo: ArrayList<DeviceInfo> = arrayListOf()
 
+    private var connectionStatus:String? = ""
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -168,8 +170,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
         applyTheme(themeData)
         observeChatMessages()
-        //  loadInitialMessages()
-
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         val device = DeviceInfoUtil.getDeviceInfo(this)
@@ -255,6 +255,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
             }
         )
 
+
+       /* val bottomSheet = NCWEndChatBottomSheet(
+            onReturnLaterClick = {  },
+            onEndChatClick = {  },
+            onConfirmClick = {  }
+        )
+        bottomSheet.show(supportFragmentManager, "EndChatBottomSheet")*/
+
     }
 
     private fun hitEndChatAPI() {
@@ -330,6 +338,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
             NCWAppUtils.showToast(this, "Please check your network and try again.")
             return
         }
+
         if (messageContent.isNotEmpty()) {
             val timeStamp = System.currentTimeMillis()
             val payload = createPayload(messageContent, messageContent, timeStamp)
@@ -504,14 +513,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
         constProgressBar = findViewById(R.id.constLoader)
         progressBar = findViewById(R.id.progress_loader)
 
-
-
         messageInputField.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 chatRecyclerView.scrollToPosition(messageAdapter.itemCount - 1)
             }
         }
-
+        setUIState(false)
 
     }
 
@@ -527,9 +534,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
     }
 
     override fun onQuickReply(option: NCWQuickReplyOption?, position: Int) {
-        messageList[position].isQuickReplyVisible = false
-        //   messageList.removeAt(position)
-        onQuickReplyClicked(option)
+
+        if (connectionStatus==NCWConnectionStatus.CONNECTED.toString()) {
+            messageList[position].isQuickReplyVisible = false
+            onQuickReplyClicked(option)
+        }
 
     }
 
@@ -650,7 +659,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
      * in the chat data or configuration.
      */
     private fun observeChatMessages() {
-// Observe the chat messages LiveData from the ViewModel
+       // Observe the chat messages LiveData from the ViewModel
         chatViewModel.sendMessage.observe(this) { messages ->
             handleApiCallback(messages as NCWState<Any>)
         }
@@ -709,12 +718,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
 
         ncwAwsCredentialsViewModel.connectionStatus.observe(this) { status ->
+            connectionStatus=status
             when (status) {
+
                 NCWConnectionStatus.CONNECTING.toString() -> {
                     connectionHeader.text = getString(R.string.connecting)
                     connectionHeader.setBackgroundColor(Color.YELLOW)
                     connectionHeader.setTextColor(Color.BLACK)
                     connectionHeader.visibility = View.VISIBLE
+                    setUIState(false)
                 }
 
                 NCWConnectionStatus.CONNECTED.toString() -> {
@@ -722,7 +734,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
                     connectionHeader.setBackgroundColor(Color.GREEN)
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
-
+                    setUIState(true)
                     // Hide header after 2 seconds when connected
                     connectionHeader.postDelayed({
                         connectionHeader.visibility = View.GONE
@@ -734,6 +746,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
                     connectionHeader.setBackgroundColor(Color.RED)
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
+                    setUIState(false)
                 }
 
                 NCWConnectionStatus.RE_CONNECTED.toString() -> {
@@ -741,6 +754,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
                     connectionHeader.setBackgroundColor(Color.BLUE)
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
+                    setUIState(false)
                 }
 
                 else -> {
@@ -749,6 +763,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
                     connectionHeader.setBackgroundColor(Color.GRAY)
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
+                    setUIState(false)
                 }
             }
         }
@@ -757,6 +772,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
             handleApiCallback(messages as NCWState<Any>)
         }
     }
+    private fun setUIState(enabled: Boolean) {
+
+        sendMessageIcon.isEnabled=enabled
+        messageInputField.isEnabled = enabled
+        attachmentIcon.isEnabled = enabled
+    }
+
 
     // Helper function to map attachments to NCWMessage
     private fun mapAttachmentToMessage(attachment: NCWAttachment): NCWMessage? {
@@ -1246,6 +1268,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
                 val response = apiResponse as NCWGetChatHistoryResponse
                 if (response != null && response.responses.size > 0) {
                     parseHistoryItems(response.responses)
+                }
+                else{
+                    loadInitialMessages()
                 }
                 progressBar.visibility = View.GONE
                 constProgressBar.visibility = View.GONE
