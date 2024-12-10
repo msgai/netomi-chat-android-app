@@ -17,9 +17,9 @@ import com.netomi.chat.R
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.theme.NCWThemeResponse
-import com.netomi.chat.utils.NCWChatActionCallback
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppUtils
+import com.netomi.chat.utils.NCWChatActionCallback
 import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWChatAdapter(
@@ -149,7 +149,8 @@ class NCWChatAdapter(
       private fun setupImageMessage(message: NCWMessage) {
           imageView.visibility = View.VISIBLE
           senderImageCard.visibility = View.VISIBLE
-          Glide.with(itemView.context).load(message.largeImageUrl ?: Uri.parse(message.message)).into(imageView)
+          val image= if (message.message!=null) Uri.parse(message.message) else message.largeImageUrl
+          Glide.with(itemView.context).load(image).into(imageView)
       }
 
       private fun setupVideoMessage(message: NCWMessage) {
@@ -157,7 +158,7 @@ class NCWChatAdapter(
           videoView.visibility = View.VISIBLE
 
           Glide.with(itemView.context)
-              .load(message.thumbnailUrl ?: message.message)
+              .load(message.message ?: message.thumbnailUrl)
               .apply(RequestOptions().frame(1000))  // Show first frame for preview
               .into(videoView)
       }

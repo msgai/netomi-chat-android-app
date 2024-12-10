@@ -319,8 +319,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
     }
 
     private fun getPreSignedUrl(type: String?, uploadKeyPrefix: String) {
-        constProgressBar.visibility = View.VISIBLE
-        progressBar.visibility = View.VISIBLE
+        showProgressBar()
         val mediaUpload = NCWSignedUrlPayload(
             fileType = type,
             uploadKeyPrefix = uploadKeyPrefix
@@ -591,20 +590,46 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
 
     override fun onRetryClicked(message: NCWMessage) {
+        messageList.remove(message)
+
         when (message.type) {
-            MessageType.TEXT -> message.message?.let {
-                messageList.remove(message)
-                sendMessage(it)
+            MessageType.TEXT -> {
+                message.message?.let {
+                    sendMessage(it)
+                }
             }
 
             else -> {
-                messageList.remove(message)
-                val selectedMediaUri:Uri=Uri.parse(message.message)
-                val type = contentResolver.getType(selectedMediaUri)
-                handleFileSelection(selectedMediaUri, type)
+                if (!message.attachmentList.isNullOrEmpty()) {
+                    retryAttachmentMessage(message)
+                } else {
+                    handleMediaMessage(message)
+                }
             }
         }
     }
+
+    private fun retryAttachmentMessage(message: NCWMessage) {
+        message.isRetry = false
+        messageList.add(message)
+        messageAdapter.notifyDataSetChanged()
+
+        val timeStamp = System.currentTimeMillis()
+        val payload = createPayload(
+            "event://;LEARN_ATTRIBUTE_EVENT;ATTACHMENT::value=Media has been uploaded",
+            "Attachment has been uploaded",
+            timeStamp,
+            message.attachmentList
+        )
+        chatViewModel.sendMessageAPI(payload)
+    }
+
+    private fun handleMediaMessage(message: NCWMessage) {
+        val selectedMediaUri: Uri = Uri.parse(message.message)
+        val type = contentResolver.getType(selectedMediaUri)
+        handleFileSelection(selectedMediaUri, type)
+    }
+
 
 
     override fun carouselButtonAction(it: NCWCarouselButton?) {
@@ -896,8 +921,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
     private fun handleApiCallback(response: NCWState<Any>) {
         when (response) {
             is NCWState.Loading -> {
-                progressBar.visibility = View.VISIBLE
-                constProgressBar.visibility = View.VISIBLE
+               showProgressBar()
             }
 
             is NCWState.Success -> {
@@ -906,38 +930,55 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
             is NCWState.Error -> {
                 Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
-                progressBar.visibility = View.GONE
-                constProgressBar.visibility = View.GONE
+               hideProgressBar()
             }
 
-            is NCWState.SendMessageError -> {
-                val payload = response.payload
-                val targetTimestamp =
-                    payload.requestBody?.messagePayload?.timestamp ?: System.currentTimeMillis()
-                // Flag to track if any message was updated
-                val updated = messageList.any { message ->
-                    when {
-                        // Check for a text message and matching timestamp
-                        message.type == MessageType.TEXT && message.timestamp == targetTimestamp -> {
-                            message.isRetry = true
-                            true
-                        }
+            is NCWState.SendMessageError<*, *> -> {
 
-                        else -> {
-                            payload.requestBody?.attachmentList?.any { attachment ->
-                                if (attachment.title == message.title) {
-                                    message.isRetry = true  // Update retry flag for matching attachment
-                                    true
-                                } else {
-                                    false
-                                }
-                            } ?: false
+                val payload = response.payload
+                if (payload is NCWWebhookPayload) {
+                    val targetTimestamp =
+                        payload.requestBody?.messagePayload?.timestamp ?: System.currentTimeMillis()
+                    // Flag to track if any message was updated
+                    val updated = messageList.any { message ->
+                        when {
+                            // Check for a text message and matching timestamp
+                            message.type == MessageType.TEXT && message.timestamp == targetTimestamp -> {
+                                message.isRetry = true
+                                true
+                            }
+
+                            else -> {
+                                payload.requestBody?.attachmentList?.any { attachment ->
+                                    if (attachment.title == message.title) {
+                                        message.isRetry = true  // Update retry flag for matching attachment
+                                        true
+                                    } else {
+                                        false
+                                    }
+                                } ?: false
+                            }
+
+
                         }
                     }
+                    if (updated) {
+                        messageAdapter.notifyDataSetChanged()
+                    }
                 }
-                if (updated) {
-                    messageAdapter.notifyDataSetChanged()
+
+                else if (payload is NCWSignedUrlPayload) {
+
+                    Log.e("MedianName","saas"+payload.uploadKeyPrefix )
+                    Log.e("MedianName","messageList "+messageList )
+                    val position = messageList.indexOfLast { it.title == payload.uploadKeyPrefix }
+                    if (position != -1) {
+                        val item = messageList[position]
+                        item.isRetry = true
+                        messageAdapter.notifyItemChanged(position)
+                    }
                 }
+              hideProgressBar()
             }
 
             else -> {
@@ -1039,7 +1080,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
                     addMediaMessage(fileSend,uri, MessageType.VIDEO)
                 }
                 fileSend?.let {
-                    getPreSignedUrl(type, it.path)
+                    getPreSignedUrl(type, it.name)
 
                 }
             }
@@ -1074,7 +1115,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
                 val type =
                     photoUri?.let { fileSend?.let { it1 -> NCWAppUtils.getFileContentType(it1) } }
                 fileSend?.let {
-                    getPreSignedUrl(type, it.path)
+                    getPreSignedUrl(type, it.name)
 
                 }
             } else {
@@ -1093,7 +1134,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
     private fun validateFile(file: File?, mimeType: String?): Boolean {
 
         // Validate file type
-        val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
+       val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
         val fileExtension =
             file?.extension?.lowercase()?.let { if (!it.startsWith(".")) ".$it" else it }
 
@@ -1155,7 +1196,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
         }
 
         fileSend?.let {
-            getPreSignedUrl(mimeType, it.path)
+            getPreSignedUrl(mimeType, it.name)
 
         }
     }
@@ -1264,8 +1305,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
             NCWRoutes.ROUTE_SEND_CHAT -> {
                 val sendMessageResponse = apiResponse as NCWSendMessageResponse
-                progressBar.visibility = View.GONE
-                constProgressBar.visibility = View.GONE
+               hideProgressBar()
             }
 
             NCWRoutes.ROUTE_GET_CHAT -> {
@@ -1276,8 +1316,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
                 else{
                     loadInitialMessages()
                 }
-                progressBar.visibility = View.GONE
-                constProgressBar.visibility = View.GONE
+              hideProgressBar()
             }
 
             NCWRoutes.ROUTE_GET_PRESIGNED_URL -> {
@@ -1310,6 +1349,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
                 val position = messageList.indexOfLast { it.title == response.title }
                 if (position != -1) {
                     val item = messageList[position]
+                    item.attachmentList=attachmentList
                     when (mediaType) {
                         TYPE_IMAGE -> item.largeImageUrl = response.url
                         TYPE_VIDEO -> item.thumbnailUrl = response.url
@@ -1359,7 +1399,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
                         messageType?.let {
                             val newMessage = NCWMessage(
-                                message = attachmentListRequest.title,
                                 sender = TYPE_REQUEST,
                                 type = it,
                                 timestamp = response.timestamp ?: System.currentTimeMillis(),
@@ -1432,5 +1471,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
         Log.e("Topic","Topic Name "+topic)
         ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)*/
 
+    }
+
+    private fun showProgressBar()
+    {
+
+        progressBar.visibility = View.VISIBLE
+        constProgressBar.visibility = View.VISIBLE
+    }
+    private fun hideProgressBar()
+    {
+        progressBar.visibility = View.GONE
+        constProgressBar.visibility = View.GONE
     }
 }

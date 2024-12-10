@@ -32,7 +32,9 @@ sealed class NCWState<T> {
      */
     data class Error<T>(val message: String, val code: Int? = null) : NCWState<T>()
 
-    data class SendMessageError<T>(val message: String, val code: Int? = null,val payload: NCWWebhookPayload) : NCWState<T>()
+    //data class SendMessageError<T>(val message: String, val code: Int? = null,val payload: NCWWebhookPayload) : NCWState<T>()
+
+    data class SendMessageError<T, P>(val message: String, val code: Int? = null, val payload: P) : NCWState<T>()
     /**
      * Represents an unauthorized access state.
      *
@@ -75,8 +77,12 @@ sealed class NCWState<T> {
         fun <T> error(message: String, code: Int? = null) =
             Error<T>(message, code)
 
-        fun <T> sendMessageError(message: String, code: Int? = null,payload: NCWWebhookPayload) =
-            SendMessageError<T>(message, code,payload)
+      /*  fun <T> sendMessageError(message: String, code: Int? = null,payload: NCWWebhookPayload) =
+            SendMessageError<T>(message, code,payload)*/
+
+        fun <T, P> sendMessageError(message: String, code: Int? = null, payload: P) =
+            SendMessageError<T, P>(message, code, payload)
+
         /**
          * Creates and returns a [NCWState.UnAuthorized] instance.
          *
