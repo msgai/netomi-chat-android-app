@@ -77,16 +77,16 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
                 val errorBody = response.errorBody()
                 if (errorBody != null) {
                    // State.error(parseError(errorBody), code = response.code())
-                    NCWState.sendMessageError(parseError(errorBody), code = response.code(),message)
+                    NCWState.sendMessageError(parseError(errorBody), code = response.code(), payload = message)
 
                 } else {
                     //State.error(mapApiException(response.code()), code = response.code())
-                    NCWState.sendMessageError(mapApiException(response.code()), code = response.code(),message)
+                    NCWState.sendMessageError(mapApiException(response.code()), code = response.code(),payload = message)
                 }
             }
         } catch (e: Exception) {
            // State.error(e.message.toString(), code = 500)
-            NCWState.sendMessageError(e.message.toString(), code =500,message)
+            NCWState.sendMessageError(e.message.toString(), code =500,payload = message)
         }
     }
 
@@ -139,9 +139,11 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
         } else {
             val errorBody = response.errorBody()
             if (errorBody != null) {
-                NCWState.error(parseError(errorBody), code = response.code())
+               // NCWState.error(parseError(errorBody), code = response.code())
+                NCWState.sendMessageError(parseError(errorBody), code = response.code(), payload = payload)
             } else {
-                NCWState.error(mapApiException(response.code()), code = response.code())
+              //  NCWState.error(mapApiException(response.code()), code = response.code())
+                NCWState.sendMessageError(mapApiException(response.code()), code = response.code(),payload = payload)
             }
         }
     }
@@ -152,7 +154,7 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
         preSignedUrl: NCWGetPreSignedUrl
     ): NCWState<NCWGetMediaUploadUrl> {
         if (mediaFile == null) return NCWState.error("Media URI is null", code = 400)
-
+        Log.e("MedianName","Beforee q"+mediaFile.name )
         // Prepare file part
         val filePart = prepareFilePart(mediaFile)
 
@@ -212,88 +214,24 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
                 }
             } else {
                 Log.e("UploadFile", "Error occurred: ${response.code()} - ${response.message()}")
-               NCWState.error("File upload failed", code = response.code())
-
-
+            //   NCWState.error("File upload failed", code = response.code())
+                val payload=NCWSignedUrlPayload(mediaType,mediaFile.name)
+                Log.e("MedianName","payload q"+mediaFile.name )
+                Log.e("MedianName","payload"+payload )
+                NCWState.sendMessageError("File upload failed", code = response.code(), payload = payload)
             }
         } catch (e: Exception) {
             Log.e("UploadFile", "Exception occurred during upload: ${e.message}")
-            NCWState.error("File upload failed due to an exception", code = 500)
+            //NCWState.error("File upload failed due to an exception", code = 500)
+            val payload=NCWSignedUrlPayload(mediaType,mediaFile.name)
+            Log.e("MedianName","payload q else "+mediaFile.name )
+            Log.e("MedianName","payload"+payload )
+            NCWState.sendMessageError("File upload failed", code =500, payload = payload)
         }
     }
 
 
-    /*    suspend fun uploadFile(
-            mediaUri: File?,
-            preSignedUrl: GetPreSignedUrl
-        ): State<GetMediaUploadUrl>? {
-            val filePart = mediaUri?.let { prepareFilePart(it) }
 
-            // Extract fields from preSignedUrl
-            val fields = preSignedUrl.preSignedUrl?.fields
-            val key = fields?.key?.let { createRequestBody(it) }
-            val bucket = fields?.bucket?.let { createRequestBody(it) }
-            val amzAlgorithm = fields?.XAmzAlgorithm?.let { createRequestBody(it) }
-            val amzCredential = fields?.XAmzCredential?.let { createRequestBody(it) }
-            val amzDate = fields?.XAmzDate?.let { createRequestBody(it) }
-            val policy = fields?.policy?.let { createRequestBody(it) }
-            val amzSignature = fields?.XAmzSignature?.let { createRequestBody(it) }
-
-            // Static fields
-            val acl = createRequestBody("public-read")
-
-            val mediaType = mediaUri?.let { getFileContentType(it) }
-            Log.e("sajnaskmasmklsa ", "ss " + mediaType)
-            val contentType =
-                mediaUri?.let { getFileContentType(it) }
-                    ?.let { createRequestBody(it) } // Replace with actual file type
-
-            return mediaUri?.let {
-                val response = preSignedUrl.preSignedUrl?.url?.let { url ->
-                    filePart?.let { file ->
-                        apiInterface.uploadFile(
-                            url,
-                            key,
-                            bucket,
-                            amzAlgorithm,
-                            amzCredential,
-                            amzDate,
-                            policy,
-                            amzSignature,
-                            acl,
-                            contentType,
-                            file
-                        )
-                    }
-                }
-
-                response?.let {
-                    if (it.isSuccessful) {
-                        val locationHeader = it.headers()["Location"]
-                        if (locationHeader != null) {
-                            val mObj = GetMediaUploadUrl(locationHeader, mediaType)
-
-                            State.success(data = mObj, Routes.ROUTE_GET_PRESIGNED_URL)
-                            // contentType
-                            Log.d("UploadFile", "File uploaded successfully. Location: $locationHeader")
-                        } else {
-                            Log.e("UploadFile", "Location header is missing")
-                            State.error("File upload failed", code = 500)
-
-                        }
-                    } else {
-                        State.error("File upload failed", code = 500)
-                        Log.e("UploadFile", "Error occurred: ${it.code()} - ${it.message()}")
-                    }
-                } ?: run {
-                    Log.e("UploadFile", "Response is null")
-                    State.error("File upload failed", code = 500)
-                }
-
-            }
-
-
-        }*/
 
     // Hit API to get AWS MQTT Credentials
     suspend fun hitEndChatAPI(payload: NCWEndChatRequest): NCWState<NCWEndChatResponse> {
