@@ -151,6 +151,14 @@ class NCWFullScreenMediaActivity : AppCompatActivity() {
     private fun showFileInWebView(fileUrl: String) {
         webView.apply {
             visibility = View.VISIBLE
+            settings.javaScriptEnabled = true
+            settings.allowFileAccess = true
+            settings.domStorageEnabled = true
+            settings.loadWithOverviewMode = true
+            settings.useWideViewPort = true
+            settings.builtInZoomControls = true
+            settings.displayZoomControls = false
+            settings.setSupportZoom(true)
             loadUrl("https://docs.google.com/gview?embedded=true&url=$fileUrl")
         }
     }
