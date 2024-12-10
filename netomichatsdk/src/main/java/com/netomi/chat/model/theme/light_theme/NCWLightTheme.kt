@@ -6,5 +6,6 @@ data class NCWLightTheme(
     val chatWindowConfig: NCWChatWindowConfig,
     val footerConfig: NCWFooterConfig,
     val headerConfig: NCWHeaderConfig,
-    val userConfig: NCWUserConfig
+    val userConfig: NCWUserConfig,
+    val otherConfig: NCWOtherConfig,
 )

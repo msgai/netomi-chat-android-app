@@ -8,6 +8,7 @@ import com.netomi.chat.model.theme.light_theme.NCWBubbleConfig
 import com.netomi.chat.model.theme.light_theme.NCWChatWindowConfig
 import com.netomi.chat.model.theme.light_theme.NCWFooterConfig
 import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
+import com.netomi.chat.model.theme.light_theme.NCWOtherConfig
 import com.netomi.chat.model.theme.light_theme.NCWUserConfig
 import com.netomi.chat.ui.view.NCWChatActivity
 import com.netomi.chat.utils.NCWAppConstant
@@ -112,6 +113,7 @@ object NCWChatSdk {
     private var userConfig:NCWUserConfig?=null
     private var bubbleConfig:NCWBubbleConfig?=null
     private var chatWindowConfig:NCWChatWindowConfig?=null
+    private var otherConfig:NCWOtherConfig?=null
 
 
     /**
@@ -187,6 +189,15 @@ object NCWChatSdk {
         return chatWindowConfig?: NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.chatWindowConfig
     }
 
+    fun updateOtherConfiguration(config: NCWOtherConfig){
+        val currentConfig = otherConfig ?: NCWOtherConfig()
+        otherConfig = otherConfig?.mergeWith(config)
+    }
+
+    fun getUpdatedOtherConfiguration():NCWOtherConfig{
+        return otherConfig?: NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.otherConfig
+    }
+
     private fun NCWHeaderConfig.mergeWith(newConfig: NCWHeaderConfig): NCWHeaderConfig {
         return NCWHeaderConfig(
             backgroundColor = newConfig.backgroundColor ?: this.backgroundColor,
@@ -240,6 +251,14 @@ object NCWChatSdk {
     private fun NCWChatWindowConfig.mergeWith(newConfig: NCWChatWindowConfig):NCWChatWindowConfig{
         return NCWChatWindowConfig(
             chatWindowBackgroundColor = newConfig.chatWindowBackgroundColor?:this.chatWindowBackgroundColor,
+        )
+    }
+
+    private fun NCWOtherConfig.mergeWith(newConfig: NCWOtherConfig):NCWOtherConfig{
+        return NCWOtherConfig(
+            backgroundColor = newConfig.backgroundColor?:this.backgroundColor,
+            titleColor = newConfig.titleColor?: this.titleColor,
+            descriptionColor = newConfig.descriptionColor?: this.descriptionColor,
         )
     }
 
