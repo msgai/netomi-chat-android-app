@@ -125,7 +125,7 @@ object NCWThemeUtils
 
 
     fun setRadioButtonUserConfig(messageText: RadioButton) {
-        messageText.setTextColor(Color.parseColor(themeData?.mobileConfig?.lightTheme?.userConfig?.backgroundColor))
+        messageText.setTextColor(Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().titleColor))
     }
 
     fun setBotConfig(messageText: View) {
@@ -420,9 +420,9 @@ object NCWThemeUtils
         opacity: Int = 128,
         isSelected:Boolean=false
     ) {
-        val baseColor = Color.parseColor(NCWChatSdk.getUpdateHeaderConfiguration().backgroundColor?: "#374E57") // Default color if null
+        val baseColor = Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().backgroundColor) // Default color if null
         val colorWithOpacity= if(isSelected){
-            Color.parseColor(NCWChatSdk.getUpdateHeaderConfiguration().backgroundColor)
+            Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().backgroundColor)
         }else{
             Color.argb(opacity, Color.red(baseColor), Color.green(baseColor), Color.blue(baseColor))
         }

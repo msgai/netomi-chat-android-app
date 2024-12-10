@@ -164,6 +164,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
         NCWChatSdk.getUpdatedUserConfiguration()
         NCWChatSdk.getUpdatedChatWindowConfiguration()
         NCWChatSdk.getUpdatedBubbleConfiguration()
+        NCWChatSdk.getUpdatedOtherConfiguration()
 
         // Set up message adapter and recycler view
         setupMessageList()
@@ -228,40 +229,16 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
     }
 
     private fun backClicked() {
-        NCWDialogUtils.showCustomDialog(
-            context = this,
-            title = getString(R.string.end_chat_ques),
-            subtitle = getString(R.string.Are_you_sure_you_want_to_exit_from_this_chat),
-            yesText = getString(R.string.return_later),
-            noText = getString(R.string.end_chat),
-            titleColor = Color.BLACK,
-            subtitleColor = Color.DKGRAY,
-            backgroundColor = Color.LTGRAY,
-            noButtonBackgroundColor = themeData?.mobileConfig?.lightTheme?.headerConfig?.backgroundColor?.let {
-                NCWThemeUtils.parseColor(
-                    it
-                )
-            } ?: Color.WHITE,
-            yesButtonBackgroundColor = themeData?.mobileConfig?.lightTheme?.botConfig?.backgroundColor?.let {
-                NCWThemeUtils.parseColor(
-                    it
-                )
-            } ?: Color.WHITE,
-            onYesClick = {
-                finish()
-            },
-            onNoClick = {
-                hitEndChatAPI()
+        val bottomSheet = NCWEndChatBottomSheet(
+            onConfirmClick = {isEndChat ->
+                if(isEndChat){
+                    hitEndChatAPI()
+                }else{
+                    finish()
+                }
             }
         )
-
-
-       /* val bottomSheet = NCWEndChatBottomSheet(
-            onReturnLaterClick = {  },
-            onEndChatClick = {  },
-            onConfirmClick = {  }
-        )
-        bottomSheet.show(supportFragmentManager, "EndChatBottomSheet")*/
+        bottomSheet.show(supportFragmentManager, "EndChatBottomSheet")
 
     }
 

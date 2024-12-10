@@ -1,5 +1,6 @@
 package com.netomi.chat.ui.view
 import android.app.Dialog
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,16 +11,14 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
-import com.netomi.chat.config.NCWChatSdk
-import com.netomi.chat.utils.NCWAppUtils
-import com.netomi.chat.utils.NCWDialogUtils
+import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWEndChatBottomSheet(
-    private val onReturnLaterClick: () -> Unit,
-    private val onEndChatClick: () -> Unit,
-    private val onConfirmClick: () -> Unit
+    private val onConfirmClick: (isEndChat: Boolean) -> Unit
 ) : BottomSheetDialogFragment() {
+
+    private var isEndChat:Boolean=false
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
@@ -50,15 +49,21 @@ class NCWEndChatBottomSheet(
         val btnConfirm=view.findViewById<Button>(R.id.btn_confirm)
         val tvSubTxtReturn=view.findViewById<TextView>(R.id.subtextReturnLater)
         val tvSubTxtEnd=view.findViewById<TextView>(R.id.subtextEndChat)
+        val tvTitle=view.findViewById<TextView>(R.id.title)
         NCWThemeUtils.applyButtonBackgroundWithCorners(btnConfirm, isSelected = false)
         NCWThemeUtils.setRadioButtonUserConfig(rbReturnLater)
         NCWThemeUtils.setRadioButtonUserConfig(rbEndChat)
 
-        NCWThemeUtils.setTimeStampColor(tvSubTxtEnd)
-        NCWThemeUtils.setTimeStampColor(tvSubTxtReturn)
+
+        tvSubTxtEnd.setTextColor(Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().descriptionColor))
+        tvSubTxtReturn.setTextColor(Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().descriptionColor))
+        tvTitle.setTextColor(Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().titleColor))
+        btnConfirm.isEnabled=false
 
         rbReturnLater.setOnClickListener {
             if (rbReturnLater.isChecked) {
+                isEndChat=false
+                btnConfirm.isEnabled=true
                 NCWThemeUtils.applyButtonBackgroundWithCorners(btnConfirm, isSelected = true)
                 rbEndChat.isChecked = false // Ensure the other radio button is unchecked
             }
@@ -66,13 +71,15 @@ class NCWEndChatBottomSheet(
 
         rbEndChat.setOnClickListener {
             if (rbEndChat.isChecked) {
+                isEndChat=true
+                btnConfirm.isEnabled=true
                 NCWThemeUtils.applyButtonBackgroundWithCorners(btnConfirm, isSelected = true)
                 rbReturnLater.isChecked = false // Ensure the other radio button is unchecked
             }
         }
 
         btnConfirm.setOnClickListener {
-            onConfirmClick.invoke()
+            onConfirmClick.invoke(isEndChat)
             dismiss()
         }
     }
