@@ -79,6 +79,7 @@ import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FILE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_IMAGE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_INDICATOR
+import com.netomi.chat.utils.NCWAppConstant.TYPE_INITIAL
 import com.netomi.chat.utils.NCWAppConstant.TYPE_REQUEST
 import com.netomi.chat.utils.NCWAppConstant.TYPE_RESPONSE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
@@ -243,6 +244,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
     }
 
     private fun hitEndChatAPI() {
+        if (!NCWAppUtils.isNetworkAvailable(this)) {
+            NCWAppUtils.showToast(this, "Please check your network and try again.")
+            return
+        }
+        showProgressBar()
         chatViewModel.hitEndChatAPI(
             NCWEndChatRequest(
                 botRefId = botRefId!!, com.netomi.chat.model.endchat.NCWRequestBody(
@@ -302,6 +308,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
             uploadKeyPrefix = uploadKeyPrefix
         )
         chatViewModel.getPreSignedUrl(mediaUpload)
+        checkForInitialMessage()
     }
 
     /**
@@ -318,12 +325,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
         if (messageContent.isNotEmpty()) {
             val timeStamp = System.currentTimeMillis()
             val payload = createPayload(messageContent, messageContent, timeStamp)
+            checkForInitialMessage()
             checkForPreviousQuickReply()
             chatViewModel.sendMessage(messageContent, timeStamp)
             chatViewModel.sendMessageAPI(payload)
             messageInputField.text.clear()
         }
         idleTimeoutManager.checkForTimeout()
+    }
+
+    private fun checkForInitialMessage(){
+        messageList.removeIf { it.sender == TYPE_INITIAL }
     }
 
     /**
@@ -387,7 +399,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
         themeData?.initialFlows?.header?.let { header ->
             messageList.add(
                 NCWMessage(
-                    sender = TYPE_RESPONSE,
+                    sender = TYPE_INITIAL,
                     type = MessageType.TEXT,
                     message = header,
                     timestamp = System.currentTimeMillis()
@@ -407,7 +419,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
             messageList.add(
                 NCWMessage(
-                    sender = TYPE_RESPONSE,
+                    sender = TYPE_INITIAL,
                     timestamp = System.currentTimeMillis(),
                     quickReply = NCWQuickReply(options = ArrayList(options))
                 )
@@ -512,6 +524,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
     override fun onQuickReply(option: NCWQuickReplyOption?, position: Int) {
 
         if (connectionStatus==NCWConnectionStatus.CONNECTED.toString()) {
+
             messageList[position].isQuickReplyVisible = false
             onQuickReplyClicked(option)
         }
@@ -632,7 +645,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
     private fun onQuickReplyClicked(option: NCWQuickReplyOption?) {
         option?.label?.takeIf { it.isNotEmpty() }?.let { label ->
             val timeStamp = System.currentTimeMillis()
-            val payload = option.metadata?.let { createPayload(it, label, timeStamp) }
+            val payload = option.metadata?.let {
+                checkForInitialMessage()
+                createPayload(it, label, timeStamp) }
             chatViewModel.sendMessage(label, timeStamp)
             if (payload != null) {
                 chatViewModel.sendMessageAPI(payload)
@@ -903,10 +918,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
             is NCWState.Success -> {
                 onApiSuccess(response.data, response.apiConstant)
+
             }
 
             is NCWState.Error -> {
-                Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
+              //  Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
                hideProgressBar()
             }
 
@@ -1348,6 +1364,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
             }
 
             NCWRoutes.ROUTE_END_CHAT -> {
+                hideProgressBar()
                 NCWThemeUtils.setConversationID(null)
                 finish()
             }
