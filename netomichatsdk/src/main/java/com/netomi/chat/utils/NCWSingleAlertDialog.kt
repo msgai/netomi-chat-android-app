@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.view.Window
+import android.view.WindowManager
 import androidx.appcompat.widget.AppCompatTextView
 import com.netomi.chat.R
 
@@ -21,6 +22,14 @@ object NCWSingleAlertDialog {
         dialog.setCancelable(false)
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(R.layout.alert_dialog_sdk)
+
+        val layoutParams = dialog.window?.attributes
+        layoutParams?.width = WindowManager.LayoutParams.MATCH_PARENT
+        layoutParams?.height = WindowManager.LayoutParams.WRAP_CONTENT
+        dialog.window?.attributes = layoutParams
+
+
+
         val tvTitle: AppCompatTextView = dialog.findViewById(R.id.tvTitle)
 
         val tvSubtitle: AppCompatTextView = dialog.findViewById(R.id.tvSubtitle)
@@ -30,6 +39,8 @@ object NCWSingleAlertDialog {
         tvSubtitle.text = subtitle
         tvOk.text=yesText
 
+        NCWThemeUtils.setTitleColor(tvTitle)
+        NCWThemeUtils.setDescriptionColor(tvSubtitle)
         NCWThemeUtils.createRoundedDrawable(tvOk)
 
         tvOk.setOnClickListener {
