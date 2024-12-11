@@ -19,6 +19,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.view.NCWChatActivity"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
 
         <provider
