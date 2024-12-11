@@ -54,8 +54,9 @@
                 android:layout_height="32dp"
                 android:buttonTint="@color/black"
                 android:text="Return Later :"
+                android:textStyle="bold"
                 android:textColor="@color/black"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/subtextReturnLater"
@@ -90,8 +91,9 @@
                 android:layout_height="32dp"
                 android:buttonTint="@color/black"
                 android:text="End Chat :"
+                android:textStyle="bold"
                 android:textColor="@color/black"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/subtextEndChat"
@@ -99,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="32dp"
                 android:layout_marginEnd="32dp"
-                android:text="Chat session will be saved and you can continue the conversation from where you left."
+                android:text="Chat will end and you won't be able to resume later."
                 android:textColor="@color/gray"
                 android:textSize="14sp"/>
         </LinearLayout>
