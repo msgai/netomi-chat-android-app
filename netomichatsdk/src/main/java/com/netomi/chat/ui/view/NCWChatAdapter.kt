@@ -224,7 +224,7 @@ class NCWChatAdapter(
                 }
 
                 MessageType.IMAGE -> {
-                    Glide.with(itemView.context).load(message.largeImageUrl).into(imageView)
+                    Glide.with(itemView.context).load(message.largeImageUrl).placeholder(R.drawable.ic_image_holder).into(imageView)
                     imageView.visibility = View.VISIBLE
                     receiverImageCard.visibility = View.VISIBLE
                 }
@@ -245,7 +245,8 @@ class NCWChatAdapter(
                 MessageType.VIDEO -> {
                     Glide.with(itemView.context)
                         .load(message.thumbnailUrl)
-                        .apply(RequestOptions().frame(1000)) 
+                        .apply(RequestOptions().frame(1000))
+                        .placeholder(R.drawable.ic_video_holder)
                         .into(videoView)
 
                     videoView.visibility = View.VISIBLE
