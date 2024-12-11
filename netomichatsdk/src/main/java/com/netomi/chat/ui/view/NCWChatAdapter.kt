@@ -150,7 +150,7 @@ class NCWChatAdapter(
           imageView.visibility = View.VISIBLE
           senderImageCard.visibility = View.VISIBLE
           val image= if (message.message!=null) Uri.parse(message.message) else message.largeImageUrl
-          Glide.with(itemView.context).load(image).into(imageView)
+          Glide.with(itemView.context).load(image).placeholder(R.drawable.ic_image_holder).into(imageView)
       }
 
       private fun setupVideoMessage(message: NCWMessage) {
@@ -160,6 +160,7 @@ class NCWChatAdapter(
           Glide.with(itemView.context)
               .load(message.message ?: message.thumbnailUrl)
               .apply(RequestOptions().frame(1000))  // Show first frame for preview
+              .placeholder(R.drawable.ic_video_holder)
               .into(videoView)
       }
   }
@@ -223,7 +224,7 @@ class NCWChatAdapter(
                 }
 
                 MessageType.IMAGE -> {
-                    Glide.with(itemView.context).load(message.largeImageUrl).into(imageView)
+                    Glide.with(itemView.context).load(message.largeImageUrl).placeholder(R.drawable.ic_image_holder).into(imageView)
                     imageView.visibility = View.VISIBLE
                     receiverImageCard.visibility = View.VISIBLE
                 }
@@ -244,7 +245,8 @@ class NCWChatAdapter(
                 MessageType.VIDEO -> {
                     Glide.with(itemView.context)
                         .load(message.thumbnailUrl)
-                        .apply(RequestOptions().frame(1000)) 
+                        .apply(RequestOptions().frame(1000))
+                        .placeholder(R.drawable.ic_video_holder)
                         .into(videoView)
 
                     videoView.visibility = View.VISIBLE
