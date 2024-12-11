@@ -1,16 +1,26 @@
 package com.netomi.chat.utils
 
 import android.app.Activity
+import android.content.ContentResolver
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Build
 import android.text.Html
 import android.view.inputmethod.InputMethodManager
-import android.widget.TextView
+import android.webkit.MimeTypeMap
 import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.netomi.chat.utils.NCWAppConstant.TIME_AM_PM
+import com.netomi.chat.utils.NCWAppConstant.TYPE_FILE
+import com.netomi.chat.utils.NCWAppConstant.TYPE_IMAGE
+import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -69,25 +79,135 @@ object NCWAppUtils {
 
     fun showMediaOptionDialog(
         context: Context,
-        cameraClickCallback: () -> Unit,
-        galleryClickCallback: () -> Unit
+        imageClick: () -> Unit,
+        videoClick: () -> Unit
     ) {
-        val items = arrayOf("Camera", "Gallery")
+        val items = arrayOf("Capture Image",  "Capture Video")
         MaterialAlertDialogBuilder(context)
             .setItems(items) { dialog, which ->
                 when (which) {
                     0 -> {
-                        cameraClickCallback.invoke()
+                        imageClick.invoke()
                         dialog.dismiss()
                     }
                     1 -> {
-                        galleryClickCallback.invoke()
+                        videoClick.invoke()
                         dialog.dismiss()
                     }
                 }
             }.show()
     }
 
+  /*  fun prepareFilePart(file: File): MultipartBody.Part {
+        val requestFile = RequestBody.create("application/octet-stream".toMediaTypeOrNull(), file)
+        return MultipartBody.Part.createFormData("file", file.name, requestFile)
+    }
+*/
+  fun prepareFilePart(file: File): MultipartBody.Part {
+        val requestFile = file.asRequestBody("application/octet-stream".toMediaTypeOrNull())
+        return MultipartBody.Part.createFormData("file", file.name, requestFile)
+    }
+
+    fun getFileContentType(file: File): String {
+        return when (file.extension.lowercase()) {
+            "png" -> "image/png"
+            "jpg", "jpeg" -> "image/jpeg"
+            "pdf" -> "application/pdf"
+            "mp4" -> "video/mp4"
+            "mov" -> "video/quicktime"
+            "avi" -> "video/x-msvideo"
+            "mkv" -> "video/x-matroska"
+            "webm" -> "video/webm"
+            "mp3" -> "audio/mpeg"
+            "wav" -> "audio/wav"
+            "aac" -> "audio/aac"
+            "ogg" -> "audio/ogg"
+            "doc" -> "application/msword"
+            else -> "application/octet-stream"
+        }
+    }
+    fun getTypeFromContent(type: String): String {
+        return when (type) {
+            "image/png", "image/jpeg" -> TYPE_IMAGE
+            "video/quicktime",  "video/mp4" -> TYPE_VIDEO
+            else -> TYPE_FILE
+        }
+    }
+    fun formatFileSize(fileSizeInBytes: Long): String {
+        return when {
+            fileSizeInBytes >= 1_048_576 -> {
+                // Convert to MB
+                val sizeInMb = fileSizeInBytes / 1_048_576.0
+                String.format("%.2f MB", sizeInMb)
+            }
+            fileSizeInBytes >= 1_024 -> {
+                // Convert to KB
+                val sizeInKb = fileSizeInBytes / 1_024.0
+                String.format("%.2f KB", sizeInKb)
+            }
+            else -> {
+                // Show bytes
+                "$fileSizeInBytes Bytes"
+            }
+        }
+    }
+
+
+    fun createRequestBody(value: String): RequestBody {
+        return RequestBody.create("text/plain".toMediaTypeOrNull(), value) // Create RequestBody for other fields
+    }
+
+    fun getPrefix(mediaPath: String): String {
+        val parts = mediaPath.split("/") // Split the string by "/"
+        return parts.take(parts.size - 1).joinToString("/") // Join all parts except the last one
+    }
+
+
+    fun getMimeType(context: Context, uri: Uri): String? {
+
+        //Check uri format to avoid null
+        val extension: String? = if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
+            //If scheme is a content
+            val mime = MimeTypeMap.getSingleton()
+            mime.getExtensionFromMimeType(context.contentResolver.getType(uri))
+        } else {
+            //If scheme is a File
+            //This will replace white spaces with %20 and also other special characters. This will avoid returning null values on file name with spaces and special characters.
+            MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(File(uri.path)).toString())
+        }
+        return extension
+    }
+
+    fun getFileFromUri(context: Context, uri: Uri): File? {
+        // Since `photoUri` is created from `createImageFile`, it already points to the file
+        return if ("file" == uri.scheme) {
+            File(uri.path!!)
+        } else {
+            // For safety, copy content to a cache file if the URI scheme isn't "file"
+            val tempFile = File(context.cacheDir, "temp_${System.currentTimeMillis()}.jpg")
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                tempFile.outputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+            }
+            tempFile
+        }
+    }
+
+    fun isFileSizeValid(context: Context, fileSizeInBytes: Long?, maxFileSizeInBytes: Long?): Boolean {
+        //val fileSizeInMB = fileSizeInBytes?.toDouble()?.div(1024 * 1024) ?: 0.0
+        val maxFileSizeInMB = maxFileSizeInBytes?.toDouble()?.div(1024 * 1024) ?: 0.0
+
+        if (fileSizeInBytes != null && maxFileSizeInBytes != null && fileSizeInBytes > maxFileSizeInBytes) {
+            /*showToast(
+                context = context,
+                message = "File size should not be greater than ${String.format("%.2f", maxFileSizeInMB)} MB"
+            )*/
+
+            return false
+        }
+        return true
+    }
 
 
 }

@@ -2,7 +2,7 @@ package com.netomi.chat.data.network
 
 import android.content.Context
 import com.netomi.chat.data.apiconstant.NCWApiConstant.HEADER_BEARER
-import com.netomi.chat.utils.AppSharedPreferences
+import com.netomi.chat.utils.NCWAppSharedPreferences
 import com.netomi.chat.utils.NCWAppConstant
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -54,8 +54,8 @@ object NCWRetrofitClient {
 
     private fun getOkHttpClient(context: Context): OkHttpClient {
         return OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             .addInterceptor(AuthInterceptor(context))  // Adding the interceptor
             .build()
@@ -86,7 +86,7 @@ object NCWRetrofitClient {
      */
     class AuthInterceptor(private val context: Context) : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {
-            val sessionToken = AppSharedPreferences(context).getString(NCWAppConstant.SESSION_TOKEN)
+            val sessionToken = NCWAppSharedPreferences(context).getString(NCWAppConstant.SESSION_TOKEN)
 
             // Start building the request
             val requestBuilder = chain.request().newBuilder()

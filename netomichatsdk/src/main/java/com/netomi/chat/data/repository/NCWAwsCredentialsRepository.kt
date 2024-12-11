@@ -40,9 +40,8 @@ class NCWAwsCredentialsRepository private constructor(context: Context) {
         val iotEndpoint = sharedPreferences.getString(AWS_IOT_ENDPOINT, null) ?: ""
         val expiresIn = sharedPreferences.getLong(EXPIRE_TIME, 0)
 
-        //return NCWAwsCredentials(accessKey, secretKey, sessionToken, iotEndpoint)
-
-        return if (accessKey.isNotEmpty() && secretKey.isNotEmpty() && sessionToken.isNotEmpty() && iotEndpoint.isNotEmpty()) {
+        return NCWAwsCredentials(accessKey, secretKey, sessionToken, iotEndpoint, ((expiresIn - System.currentTimeMillis()) / 1000).toInt())
+      /*  return if (accessKey.isNotEmpty() && secretKey.isNotEmpty() && sessionToken.isNotEmpty() && iotEndpoint.isNotEmpty()) {
             if (System.currentTimeMillis() < expiresIn) {
                 NCWAwsCredentials(accessKey, secretKey, sessionToken, iotEndpoint, ((expiresIn - System.currentTimeMillis()) / 1000).toInt())
             } else {
@@ -50,7 +49,7 @@ class NCWAwsCredentialsRepository private constructor(context: Context) {
             }
         } else {
             null // Missing credentials
-        }
+        }*/
     }
 
     fun clearCredentials() {

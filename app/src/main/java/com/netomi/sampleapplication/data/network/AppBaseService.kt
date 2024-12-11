@@ -1,7 +1,7 @@
 package com.netomi.sampleapplication.data.network
 
 import com.netomi.chat.utils.NCWBaseResponse
-import com.netomi.chat.utils.State
+import com.netomi.chat.utils.NCWState
 import okhttp3.ResponseBody
 import org.json.JSONException
 import org.json.JSONObject
@@ -49,49 +49,49 @@ abstract class AppBaseService{
         timeout: Long = 10000L, // 10 sec
         showLoader: Boolean = true,
         call: suspend () -> Response<T>
-    ): State<T> {
+    ): NCWState<T> {
         val response: Response<T>
         try {
             if (showLoader) {
-                State.loading<T>(apiConstant, State.LoadingType.LOADER)
+                NCWState.loading<T>(apiConstant, NCWState.LoadingType.LOADER)
             }
             response = call.invoke()
             if (response.isSuccessful && response.body() != null) {
                 return (response.body() as NCWBaseResponse<*>).let {
                     when (it.code) {
                         in 100..199 -> {
-                            State.success(response.body()!!,apiConstant)
+                            NCWState.success(response.body()!!,apiConstant)
                         }
                         in 200..299 -> {
-                            State.success(response.body()!!,apiConstant)
+                            NCWState.success(response.body()!!,apiConstant)
                         }
                         in 300..399 -> {
-                            State.success(response.body()!!,apiConstant)
+                            NCWState.success(response.body()!!,apiConstant)
                         }
                         in 400..499 -> {
-                            State.error(it.message, it.code)
+                            NCWState.error(it.message, it.code)
                         }
                         in 500..599 -> {
-                            State.error(it.message, it.code)
+                            NCWState.error(it.message, it.code)
                         }
                         else -> {
-                            State.error(it.message, it.code)
+                            NCWState.error(it.message, it.code)
                         }
                     }
                 }
             } else {
                 val errorBody = response.errorBody()
                 return if (errorBody != null) {
-                    State.error(parseError(errorBody), code = response.code())
+                    NCWState.error(parseError(errorBody), code = response.code())
                 } else {
-                    State.error(
+                    NCWState.error(
                         mapApiException(response.code()),
                         code = response.code()
                     )
                 }
             }
         } catch (t: Throwable) {
-            return State.error(mapToNetworkError(t))
+            return NCWState.error(mapToNetworkError(t))
         }
     }
 

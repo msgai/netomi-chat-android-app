@@ -6,4 +6,15 @@
     <string name="connection_lost">Connection lost</string>
     <string name="reconnecting">Reconnecting</string>
     <string name="unknown">Unknown</string>
+    <string name="exit_chat">Exit Chat</string>
+    <string name="Are_you_sure_you_want_to_exit_from_this_chat">Are you sure you want to end this chat?</string>
+    <string name="return_later">Return Later</string>
+    <string name="end_chat">End Chat</string>
+    <string name="end_chat_ques">End Chat?</string>
+    <string name="not_sent_tap_to_retry">Not sent, Tap to retry</string>
+    <string name="close_chat">Close Chat?</string>
+    <string name="limit_exceed">Limit Exceed</string>
+    <string name="okay">Okay</string>
+    <string name="upload_file_max_size">Upload a file (maximum size: %1$s)</string>
+
 </resources>

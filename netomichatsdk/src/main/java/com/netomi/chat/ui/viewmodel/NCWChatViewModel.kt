@@ -5,17 +5,26 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.netomi.chat.data.repository.NCWChatRepository
-import com.netomi.chat.model.GetConversationIdResponse
+import com.netomi.chat.model.NCWGetChatHistoryResponse
+import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
-import com.netomi.chat.model.SendMessageResponse
+import com.netomi.chat.model.NCWSendMessageResponse
+import com.netomi.chat.model.chat_history.NCWGetChatHistoryPayload
+import com.netomi.chat.model.endchat.NCWEndChatRequest
+import com.netomi.chat.model.endchat.NCWEndChatResponse
+import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
+import com.netomi.chat.model.messages.NCWWebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
-import com.netomi.chat.model.messages.WebhookPayload
+import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
+import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
+import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWBaseResponse
-import com.netomi.chat.utils.State
+import com.netomi.chat.utils.NCWState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 /**
  * ViewModel for managing chat messages in the NCWChat application
@@ -38,28 +47,41 @@ import kotlinx.coroutines.withContext
 class NCWChatViewModel(application: Application) : AndroidViewModel(application) {
     private val chatRepository = NCWChatRepository(application.applicationContext)
 
-    private val _chatMessages = SingleLiveEvent<State<NCWBaseResponse<ArrayList<NCWMessage>>>>()
+    private val _chatMessages = NCWSingleLiveEvent<NCWState<NCWBaseResponse<ArrayList<NCWMessage>>>>()
     val chatMessages get() = _chatMessages
 
-    private val _sendMessages = SingleLiveEvent<NCWMessage>()
+    private val _sendMessages = NCWSingleLiveEvent<NCWMessage>()
     val sendMessages get() = _sendMessages
 
 
-    private val _sendMessage = SingleLiveEvent<State<SendMessageResponse>>()
+    private val _sendMessage = NCWSingleLiveEvent<NCWState<NCWSendMessageResponse>>()
     val sendMessage get() = _sendMessage
 
+    private val _NCW_endChatResponse=NCWSingleLiveEvent<NCWState<NCWEndChatResponse>>()
+    val endChatResponse get()=_NCW_endChatResponse
 
-    private var _getConversationId =
+
+   /* private var _getConversationId =
         SingleLiveEvent<State<GetConversationIdResponse>>()
+    val getConversationId get() = _getConversationId*/
+   private val _getConversationId = NCWSingleLiveEvent<NCWState<NCWGetConversationIdResponse>>()
     val getConversationId get() = _getConversationId
 
-    private var _getAWSMQTTCredentials= SingleLiveEvent<State<MQTTCredentialsResponse>>()
+
+    private var _getAWSMQTTCredentials= NCWSingleLiveEvent<NCWState<MQTTCredentialsResponse>>()
     val getAWSMQTTCredentials get()= _getAWSMQTTCredentials
 
-
-    private var _awsMessage = SingleLiveEvent<String>()
+    private var _awsMessage = NCWSingleLiveEvent<String>()
     val awsMessage get() = _awsMessage
 
+    private var _getChatHistory= NCWSingleLiveEvent<NCWState<NCWGetChatHistoryResponse>>()
+    val getChatHistory get()= _getChatHistory
+
+    private var _getSignedUrl= NCWSingleLiveEvent<NCWState<NCWGetPreSignedUrl>>()
+    val getSignedUrl get()= _getSignedUrl
+
+    private var _getUploadedMediaUrl= NCWSingleLiveEvent<NCWState<NCWGetMediaUploadUrl>>()
+    val getUploadedMediaUrl get()= _getUploadedMediaUrl
     init {
         loadChatHistory()
     }
@@ -78,19 +100,19 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
     /**
      * @param content The content of the message to be sent.
      */
-    fun sendMessage(content: String) {
+    fun sendMessage(content: String, timestamp: Long) {
         val newMessage = NCWMessage(
             id = System.currentTimeMillis().toString(),
             message = content,
-            timestamp = System.currentTimeMillis(),
+            timestamp =timestamp,
             type = MessageType.TEXT,
-            sender = "User",
+            sender = NCWAppConstant.TYPE_REQUEST,
         )
         // val response = chatRepository.sendMessage(newMessage)
         _sendMessages.value = newMessage
     }
 
-    fun sendMessageAPI(message: WebhookPayload) {
+    fun sendMessageAPI(message: NCWWebhookPayload) {
 
         viewModelScope.launch(Dispatchers.IO) {
             val response = chatRepository.sendMessage(message)
@@ -126,6 +148,52 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
                 }
             }
         }
+    }
+
+    fun getChatHistory(payload: NCWGetChatHistoryPayload?) {
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.getChatHistory(payload,_getChatHistory)
+Log.e("DataaResposne","response"+response)
+            withContext(Dispatchers.Main) {
+                _getChatHistory.value = response // Use setValue on the Main thread
+            }
+        }
+
+    }
+
+    fun getPreSignedUrl(payload: NCWSignedUrlPayload) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.getPreSignedUrl(payload)
+            Log.e("DataaResposne","response"+response)
+            withContext(Dispatchers.Main) {
+                _getSignedUrl.value = response // Use setValue on the Main thread
+            }
+        }
+    }
+
+    fun uploadFile(mediaUri: File?, response: NCWGetPreSignedUrl) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.uploadFile(mediaUri,response)
+            Log.e("uploadFile","response"+response)
+            withContext(Dispatchers.Main) {
+                _getUploadedMediaUrl.value = response // Use setValue on the Main thread
+            }
+        }
+    }
+
+    fun hitEndChatAPI(message: NCWEndChatRequest) {
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.hitEndChatAPI(message)
+
+            withContext(Dispatchers.Main) {
+                Log.e("sendMessageAPI", "response " + response)
+                _NCW_endChatResponse.value = response
+            }
+        }
+
+
     }
 
 }

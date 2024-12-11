@@ -4,14 +4,6 @@ import android.content.Context
 import com.netomi.sampleapplication.data.network.AppApiInterface
 import com.netomi.sampleapplication.data.network.AppBaseService
 import com.netomi.sampleapplication.data.network.AppRetrofitClient
-import com.netomi.chat.model.GetConversationIdResponse
-import com.netomi.chat.model.NCWMessage
-import com.netomi.chat.model.SendMessageResponse
-import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
-import com.netomi.chat.model.messages.WebhookPayload
-import com.netomi.chat.utils.NCWBaseResponse
-import com.netomi.chat.utils.Routes
-import com.netomi.chat.utils.State
 
 /**
  * Repository responsible for managing chat-related data operations.
