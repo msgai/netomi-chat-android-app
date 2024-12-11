@@ -6,12 +6,15 @@ import com.netomi.chat.model.NCWSendMessageResponse
 import com.netomi.chat.model.chat_history.NCWGetChatHistoryPayload
 import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEndChatResponse
+import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
+import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackResponse
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.NCWWebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.utils.NCWRoutes.ROUTE_END_CHAT
+import com.netomi.chat.utils.NCWRoutes.ROUTE_FEEDBACK_CHAT
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_CHAT
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_CONVERSATION_ID
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_MQTT_CREDENTIALS
@@ -148,5 +151,8 @@ interface NCWApiInterface {
 
     @POST(ROUTE_END_CHAT)
     suspend fun hitEndChatAPI(@Body payload: NCWEndChatRequest?): Response<NCWEndChatResponse>
+
+    @POST(ROUTE_FEEDBACK_CHAT)
+    suspend fun hitFeedbackAPI(@Body payload: NCWFeedbackRequest?): Response<NCWFeedbackResponse>
 
 }
