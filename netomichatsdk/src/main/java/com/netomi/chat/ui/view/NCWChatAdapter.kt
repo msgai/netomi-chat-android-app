@@ -32,12 +32,14 @@ class NCWChatAdapter(
         private const val VIEW_TYPE_REQUEST = 1
         private const val VIEW_TYPE_RESPONSE = 2
         private const val VIEW_TYPE_INDICATOR = 3
+        private const val VIEW_TYPE_FORM = 4
     }
 
     override fun getItemViewType(position: Int): Int {
         return when (messages[position].sender) {
             NCWAppConstant.TYPE_REQUEST -> VIEW_TYPE_REQUEST
             NCWAppConstant.TYPE_INDICATOR -> VIEW_TYPE_INDICATOR
+            NCWAppConstant.TYPE_FORM-> VIEW_TYPE_FORM
             else -> VIEW_TYPE_RESPONSE
         }
     }
@@ -46,11 +48,13 @@ class NCWChatAdapter(
         val view = when (viewType) {
             VIEW_TYPE_REQUEST -> inflater.inflate(R.layout.layout_request, parent, false)
             VIEW_TYPE_INDICATOR -> inflater.inflate(R.layout.layout_add_loader, parent, false)
+            VIEW_TYPE_FORM -> inflater.inflate(R.layout.layout_form, parent, false)
             else -> inflater.inflate(R.layout.layout_response, parent, false)
         }
         return when (viewType) {
             VIEW_TYPE_REQUEST -> RequestViewHolder(view, themeData,actionCallback)
             VIEW_TYPE_INDICATOR -> InitialViewHolder(view)
+            VIEW_TYPE_FORM -> FormViewHolder(view)
             else -> ResponseViewHolder(view,themeData,actionCallback)
         }
     }
@@ -60,6 +64,7 @@ class NCWChatAdapter(
         when (holder) {
             is RequestViewHolder -> holder.bind(message)
             is ResponseViewHolder -> holder.bind(message,position)
+            is FormViewHolder->holder.bind(message)
            // is InitialViewHolder -> holder.bind(message,position)
         }
     }
@@ -165,6 +170,29 @@ class NCWChatAdapter(
       }
   }
 
+
+
+
+    class FormViewHolder(
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView) {
+
+        private val rootLayout: ConstraintLayout = itemView.findViewById(R.id.constRow)
+        private val tvFormTitle: TextView = itemView.findViewById(R.id.tvFormTitle)
+        private val recyclerViewForm: RecyclerView = itemView.findViewById(R.id.formRecyclerView)
+
+        fun bind(message: NCWMessage) {
+            NCWThemeUtils.setBotConfig(rootLayout)
+            tvFormTitle.text= message.formSchema?.properties?.question ?: ""
+
+            recyclerViewForm.layoutManager =
+                LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
+            val formAdapter = NCWFormAdapter(message.formSchema?.schema ?: emptyList())
+            recyclerViewForm.adapter = formAdapter
+
+        }
+
+    }
 
     class InitialViewHolder(
         itemView: View,

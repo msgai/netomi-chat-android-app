@@ -1,5 +1,6 @@
 package com.netomi.chat.model
 
+import com.netomi.chat.model.messages.FormSchema
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.NCWCarouselButton
 import com.netomi.chat.model.messages.NCWCarouselElement
@@ -24,7 +25,8 @@ data class NCWMessage(
     var fileUrl: String? = null,
     val fileSize: String? = null,
     var isRetry :Boolean=false,
-     var attachmentList: ArrayList<NCWAttachmentList>? = null
+     var attachmentList: ArrayList<NCWAttachmentList>? = null,
+    var formSchema: FormSchema? = null
 
     )
 

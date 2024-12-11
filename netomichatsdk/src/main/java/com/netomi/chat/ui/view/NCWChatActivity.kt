@@ -33,6 +33,7 @@ import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.netomi.chat.R
 import com.netomi.chat.awsiot.NCWConnectionStatus
 import com.netomi.chat.model.NCWGetChatHistoryResponse
@@ -46,6 +47,7 @@ import com.netomi.chat.model.chat_history.NCWHistoryRequestBody
 import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEventData
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
+import com.netomi.chat.model.messages.FormSchema
 import com.netomi.chat.model.messages.NCWAdditionalAttributes
 import com.netomi.chat.model.messages.NCWAttachment
 import com.netomi.chat.model.messages.NCWAttachmentList
@@ -78,6 +80,7 @@ import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
 import com.netomi.chat.utils.NCWAppConstant.SESSION
 import com.netomi.chat.utils.NCWAppConstant.SIZE_LIMIT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FILE
+import com.netomi.chat.utils.NCWAppConstant.TYPE_FORM
 import com.netomi.chat.utils.NCWAppConstant.TYPE_IMAGE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_INDICATOR
 import com.netomi.chat.utils.NCWAppConstant.TYPE_INITIAL
@@ -712,15 +715,56 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
         chatViewModel.awsMessage.observe(this) { jsonMessage ->
             try {
-                val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
-                val newMessages =
-                    response.attachments?.mapNotNull { mapAttachmentToMessage(it) } ?: emptyList()
+                Log.e("Jsonn","Testtt "+jsonMessage)
 
-                if (newMessages.isNotEmpty()) {
-                    newMessages.forEachIndexed { index, message ->
-                        message.isSameTimeMessage = index == 0
+                val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
+
+                if (response.customFields?.isNotEmpty() == true)
+                {
+                    Log.e("Dataa","Idffff" + (response.customFields?.get(0)?.values ?: null))
+                    val gson = Gson()
+
+                    response.customFields?.forEach { customField ->
+                        if (customField.name == "FORM_SCHEMA" && !customField.values.isNullOrEmpty()) {
+                            val formSchemas: List<FormSchema> = gson.fromJson(
+                                customField.values[0],
+                                object : TypeToken<List<FormSchema>>() {}.type
+                            )
+
+                            Log.e("ForrrrSizeee","formSchemas "+formSchemas.size)
+
+                            formSchemas.forEach { schema ->
+                                Log.e("FormSchema", schema.properties.question)
+                                schema.schema.forEach { component ->
+                                    Log.e("Component", component.componentName)
+                                }
+                            }
+                            val formSchemasModel= formSchemas[0]
+
+                            val newMessages =NCWMessage(
+                                sender = TYPE_FORM,
+                                timestamp = System.currentTimeMillis(),
+                                formSchema = formSchemasModel
+
+                            )
+                            updateMessageList(newMessages)
+                        }
+
                     }
-                    updateMessageList(newMessages)
+
+                }
+                else {
+Log.e("Dataa","Elseee" +response)
+                    val newMessages =
+                        response.attachments?.mapNotNull { mapAttachmentToMessage(it) }
+                            ?: emptyList()
+
+                    if (newMessages.isNotEmpty()) {
+                        newMessages.forEachIndexed { index, message ->
+                            message.isSameTimeMessage = index == 0
+                        }
+                        updateMessageList(newMessages)
+                    }
                 }
 
             } catch (e: Exception) {

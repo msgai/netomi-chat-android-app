@@ -8,11 +8,12 @@ data class NCWGenericChannelResponse(
     val channel: String? = null,
     val requestId: String? = null,
     val requestPayload: NCWRequestPayload? = null,
-    val customFields: List<Any> = emptyList(),
+
     val botId: String? = null,
     val attachments: List<NCWAttachment>? = null,
     val customPayload: NCWCustomPayload? = null,
-    val triggerType: String? = null
+    val triggerType: String? = null,
+    val customFields: List<CustomField>? = null,
 )
 
 data class NCWRequestPayload(
@@ -99,14 +100,4 @@ data class NCWCustomPayload(
     val TRANSLATE_LANGUAGE: String? = null
 )
 
-
-data class NCWButtons(
-
-    var type: String? = null,
-    var url: String? = null,
-    var title: String? = null,
-    var messengerExtensions: Boolean? = null
-
-
-)
 
