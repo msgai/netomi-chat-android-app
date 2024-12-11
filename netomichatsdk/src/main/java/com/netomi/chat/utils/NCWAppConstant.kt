@@ -20,6 +20,9 @@ object NCWAppConstant {
     const val TYPE_RESPONSE="RESPONSE"
     const val TYPE_REQUEST="REQUEST"
     const val TYPE_INITIAL="INITIAL"
+    const val SESSION="session"
+    const val SIZE_LIMIT="limit"
+
 
     const val BOT="BOT"
 

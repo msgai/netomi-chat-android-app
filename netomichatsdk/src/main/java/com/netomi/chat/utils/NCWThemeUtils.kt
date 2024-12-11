@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
-import android.util.Log
 import android.view.View
 import android.view.Window
 import android.widget.Button
@@ -15,7 +14,6 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.TextView
-import androidx.appcompat.widget.ThemeUtils
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
@@ -197,8 +195,8 @@ object NCWThemeUtils
      */
      fun createRoundedDrawable(view: View) {
 
-        themeData?.mobileConfig?.lightTheme?.headerConfig?.let {
-            val parsedColor = Color.parseColor(it.backgroundColor ?: "#374E57")
+        themeData?.mobileConfig?.lightTheme?.otherConfig?.let {
+            val parsedColor = Color.parseColor(it.backgroundColor)
             val backgroundDrawable = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
                 cornerRadius = 16f
@@ -206,8 +204,23 @@ object NCWThemeUtils
             }
             view.background = backgroundDrawable
         }
+        if (view is TextView)
+        setTitleColor(view)
 
     }
+
+    fun setTitleColor(textView: TextView){
+        themeData?.mobileConfig?.lightTheme?.otherConfig?.let { otherConfig ->
+            otherConfig.titleColor?.let { color -> setTextColor(textView, color) }
+        }
+    }
+
+    fun setDescriptionColor(textView: TextView){
+        themeData?.mobileConfig?.lightTheme?.otherConfig?.let { otherConfig ->
+            otherConfig.descriptionColor?.let { color -> setTextColor(textView, color) }
+        }
+    }
+
 
 
 
@@ -429,7 +442,7 @@ object NCWThemeUtils
 
         val backgroundDrawable = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
-            cornerRadius = 100f
+            cornerRadius = 50f
             setColor(colorWithOpacity)
         }
         button.background = backgroundDrawable

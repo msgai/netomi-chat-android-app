@@ -199,10 +199,11 @@ object NCWAppUtils {
         val maxFileSizeInMB = maxFileSizeInBytes?.toDouble()?.div(1024 * 1024) ?: 0.0
 
         if (fileSizeInBytes != null && maxFileSizeInBytes != null && fileSizeInBytes > maxFileSizeInBytes) {
-            showToast(
+            /*showToast(
                 context = context,
                 message = "File size should not be greater than ${String.format("%.2f", maxFileSizeInMB)} MB"
-            )
+            )*/
+
             return false
         }
         return true

@@ -68,7 +68,6 @@ import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.NCWChatActionCallback
 import com.netomi.chat.utils.DeviceInfo
 import com.netomi.chat.utils.DeviceInfoUtil
-import com.netomi.chat.utils.NCWDialogUtils
 import com.netomi.chat.utils.NCWFilePath
 import com.netomi.chat.utils.NCWImageUtils
 import com.netomi.chat.utils.NCWAppConstant.ARG_MEDIA_URL
@@ -76,6 +75,8 @@ import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
 import com.netomi.chat.utils.NCWAppConstant.DATE_FORMAT
 import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
+import com.netomi.chat.utils.NCWAppConstant.SESSION
+import com.netomi.chat.utils.NCWAppConstant.SIZE_LIMIT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FILE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_IMAGE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_INDICATOR
@@ -93,7 +94,6 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.UUID
-
 /**
  * Activity responsible for displaying the chat interface and handling user interactions.
  *
@@ -216,7 +216,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
         themeData?.endChat?.idleTimeout?.let {
             idleTimeoutManager = NCWIdleTimeoutManager(
                 idleTimeoutMillis = it,
-                onTimeout = { handleSessionTimeout() }
+                onTimeout = { handleSessionTimeout("Session Timeout","Your session has expired due to inactivity.","OK",SESSION) }
             )
 
         }
@@ -288,14 +288,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
     /**
      * Handles the session timeout logic.
      */
-    private fun handleSessionTimeout() {
+    private fun handleSessionTimeout(title: String, subtitle: String, submitText: String,from:String) {
 
         NCWSingleAlertDialog.showSingleButtonDialog(
             context = this,
-            title = "Session Timeout",
-            subtitle = "Your session has expired due to inactivity.",
-            yesText = "OK",
+            title = title,
+            subtitle = subtitle,
+            yesText = submitText,
             onYesClick = {
+                if (from== SESSION)
                 finish()
             },
         )
@@ -1066,7 +1067,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
             videoUri?.let { uri ->
                 fileSend = NCWImageUtils.getVideoFileFromUri(this,uri)
                 val type = fileSend?.let { it1 -> NCWAppUtils.getFileContentType(it1) }
-                if (!validateFile(fileSend, type))
+                if (!validateFile(fileSend))
                     return@registerForActivityResult
 
                 uri?.let { uri ->
@@ -1098,9 +1099,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
                 fileSend = photoUri?.let { NCWAppUtils.getFileFromUri(this, it) }
 
-                if (!isFileSizeValid(this, fileSend?.length(), themeData?.fileSharing?.fileSize)) {
+               /* if (!isFileSizeValid(this, fileSend?.length(), themeData?.fileSharing?.fileSize)) {
                     return@registerForActivityResult
-                }
+                }*/
+                if (!validateFile(fileSend))
+                    return@registerForActivityResult
+
                 photoUri?.let { uri ->
                     addMediaMessage(fileSend,uri, MessageType.IMAGE)
                 }
@@ -1116,6 +1120,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
             }
         }
 
+    private fun showLimitExceedPopup() {
+        val maxSize = themeData?.fileSharing?.fileSize?.let(NCWAppUtils::formatFileSize)
+        val messageIssue = getString(R.string.upload_file_max_size, maxSize ?: "N/A")
+        handleSessionTimeout(
+            getString(R.string.limit_exceed),
+            messageIssue,
+            getString(R.string.okay),
+            SIZE_LIMIT
+        )
+    }
+
 
     private fun createImageFile(): File? {
         val timeStamp: String = SimpleDateFormat(DATE_FORMAT).format(Date())
@@ -1124,7 +1139,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
     }
 
     // Common function to validate file size and type
-    private fun validateFile(file: File?, mimeType: String?): Boolean {
+    private fun validateFile(file: File?): Boolean {
 
         // Validate file type
        val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
@@ -1144,6 +1159,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
         }
         // Validate file size
         if (!isFileSizeValid(this, file?.length(), themeData?.fileSharing?.fileSize)) {
+            showLimitExceedPopup()
             return false
         }
 
@@ -1177,7 +1193,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
         Log.e("FileSelection", "Type: $mimeType, File path: ${fileSend?.absolutePath}")
 
         // Validate file size and type
-        if (!validateFile(fileSend, mimeType)) return
+        if (!validateFile(fileSend)) return
 
         checkForPreviousQuickReply()
 
