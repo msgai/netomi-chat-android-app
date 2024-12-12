@@ -16,14 +16,14 @@ data class FormSchema(
 
 data class Properties(
     val intentId: String,
-    val question: String,
+    val question: String?=null,
     val version: String,
     val backEnabled: Boolean,
     val skipEnabled: Boolean,
     val restartEnabled: Boolean,
     val isCustomReplyEnabled: Boolean,
     val formSubmissionProperties: FormSubmissionProperties,
-    val description: String
+    val description: String?=null
 )
 
 data class FormSubmissionProperties(
@@ -36,16 +36,24 @@ data class Component(
     val id: String,
     val component: String,
     val type: String,
+    val subType: String?=null,
     val children: Int,
     val output: String,
     val variableType: String,
     val labels: List<String>?,
-    val attributes: List<Attribute>?,
+    val groupLabel: String?=null,
+    val attributes: List<Attribute>?=null,
     val validations: List<Validation>?,
     val componentName: String,
     val additionalSettings: Map<String, Setting>,
     val dropDownSelections: Map<String, Setting>,
-    val optionList: List<Option>?
+    val optionList: List<Option>?,
+    val Validation:IsValidation?=null
+)
+data class IsValidation(
+    val value: Boolean=false,
+    val name: String?=null
+
 )
 
 data class Attribute(

@@ -180,10 +180,20 @@ class NCWChatAdapter(
         private val rootLayout: ConstraintLayout = itemView.findViewById(R.id.constRow)
         private val tvFormTitle: TextView = itemView.findViewById(R.id.tvFormTitle)
         private val recyclerViewForm: RecyclerView = itemView.findViewById(R.id.formRecyclerView)
+        private val tvFormDesc: TextView = itemView.findViewById(R.id.tvFormDesc)
 
         fun bind(message: NCWMessage) {
             NCWThemeUtils.setBotConfig(rootLayout)
+            NCWThemeUtils.setBotTextColor(tvFormTitle)
+            NCWThemeUtils.setTimeStampColor(tvFormTitle)
             tvFormTitle.text= message.formSchema?.properties?.question ?: ""
+            if (message.formSchema?.properties?.description.isNullOrEmpty())
+                tvFormDesc.visibility=View.GONE
+            else
+            {
+                tvFormDesc.visibility=View.VISIBLE
+                tvFormDesc.text= message.formSchema?.properties?.description ?: ""
+            }
 
             recyclerViewForm.layoutManager =
                 LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)

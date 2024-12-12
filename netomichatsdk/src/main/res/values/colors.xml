@@ -6,4 +6,7 @@
     <color name="gray_light">#E0E0E0</color>
     <color name="light_yellow">#FFF6E0</color>
     <color name="white">#FFFFFF</color>
+    <color name="hint_color">#808080</color>
+    <color name="error_color">#ec3023</color>
+
 </resources>

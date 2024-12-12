@@ -5,8 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="20dp"
-    android:layout_marginEnd="90dp"
+    android:layout_marginEnd="50dp"
     android:layout_marginTop="5dp"
+    android:padding="10dp"
     android:background="@drawable/bg_receiver_message">
 
 
@@ -14,13 +15,26 @@
         android:id="@+id/tvFormTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="5dp"
         android:layout_marginTop="10dp"
         android:text="Form "
+        android:textStyle="bold"
         android:textColor="@android:color/black"
         android:textSize="14sp"
-       app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvFormDesc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:text="Form Desc "
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvFormTitle" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/formRecyclerView"
@@ -31,7 +45,7 @@
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvFormTitle" />
+        app:layout_constraintTop_toBottomOf="@id/tvFormDesc" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

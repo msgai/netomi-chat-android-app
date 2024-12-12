@@ -733,12 +733,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
                             Log.e("ForrrrSizeee","formSchemas "+formSchemas.size)
 
-                            formSchemas.forEach { schema ->
+                        /*    formSchemas.forEach { schema ->
                                 Log.e("FormSchema", schema.properties.question)
                                 schema.schema.forEach { component ->
                                     Log.e("Component", component.componentName)
                                 }
-                            }
+                            }*/
                             val formSchemasModel= formSchemas[0]
 
                             val newMessages =NCWMessage(

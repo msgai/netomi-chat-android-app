@@ -140,6 +140,12 @@ object NCWThemeUtils
         }
     }
 
+    fun setBotTextColor(textView: TextView) {
+        themeData?.mobileConfig?.lightTheme?.botConfig?.let { botConfig ->
+                botConfig.textColor?.let { color -> setTextColor(textView, color) }
+        }
+    }
+
     /**
      * Applies a customizable GradientDrawable background to a Chip.
      *
