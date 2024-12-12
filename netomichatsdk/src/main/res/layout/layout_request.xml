@@ -179,6 +179,7 @@
             android:id="@+id/downloadDoc"
             android:layout_width="26dp"
             android:layout_height="26dp"
+            android:visibility="invisible"
             android:src="@drawable/ic_file_download"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

@@ -212,7 +212,8 @@ class NCWChatAdapter(
             when (message.type) {
                 MessageType.TEXT -> {
                     message.message?.let {
-                      messageText.text=NCWAppUtils.setHtmText(it)
+                      //messageText.text=NCWAppUtils.setHtmText(it)
+                        NCWAppUtils.setHtmlText(messageText,it)
                         messageText.visibility = View.VISIBLE
                         NCWThemeUtils.setBotConfig(messageText)
                     } ?: run {

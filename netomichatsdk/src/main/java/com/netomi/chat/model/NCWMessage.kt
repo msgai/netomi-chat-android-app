@@ -43,6 +43,16 @@ enum class MessageType(val typeName: String) {
         }
     }
 }
-/*enum class MessageType {
-    TEXT1, IMAGE, VIDEO
-}*/
+enum class CarouselButtonType(val value: String) {
+    WEB("WEB"),
+    CALL("CALL"),
+    POST_BACK("POST_BACK");
+
+    companion object {
+        // Helper method to map String to CarouselButtonType
+        fun fromValue(value: String?): CarouselButtonType? {
+            return values().find { it.value == value }
+        }
+    }
+}
+
