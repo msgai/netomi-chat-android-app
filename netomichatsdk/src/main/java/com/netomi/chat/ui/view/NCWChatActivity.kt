@@ -35,6 +35,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.netomi.chat.R
 import com.netomi.chat.awsiot.NCWConnectionStatus
+import com.netomi.chat.model.CarouselButtonType
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.model.MessageType
@@ -658,7 +659,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
     override fun carouselButtonAction(it: NCWCarouselButton?) {
         Log.e("NCWCarouselButton","NCWCarouselButton "+it)
-        it?.url?.let { url ->
+       /* it?.url?.let { url ->
             try {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 startActivity(intent) // Directly start the activity
@@ -666,8 +667,35 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
                 Log.e("OpenURL", "Failed to open URL: $url", e)
                 NCWAppUtils.showToast(this, "Unable to open the link")
             }
+        }*/
+
+        when (CarouselButtonType.fromValue(it?.type)) {
+            CarouselButtonType.WEB -> {
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it?.url))
+                    startActivity(intent) // Directly start the activity
+                } catch (e: Exception) {
+                    Log.e("OpenURL", "Failed to open URL: ${it?.url}", e)
+                    NCWAppUtils.showToast(this, "Unable to open the link")
+                }
+            }
+            CarouselButtonType.CALL -> {
+                makePhoneCall(it?.payload)
+            }
+            CarouselButtonType.POST_BACK -> {
+                it?.payload?.let { it1 -> sendMessage(it1) }
+            }
+            else -> {
+                // Handle unknown type (optional)
+                Log.e("Carousel", "Unknown button type: ${it?.type}")
+            }
         }
 
+    }
+
+    private fun makePhoneCall(phoneNumber: String?) {
+            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
+            startActivity(intent)
     }
 
 
