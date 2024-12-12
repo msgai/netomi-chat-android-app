@@ -89,7 +89,9 @@ import com.netomi.chat.utils.NCWAppConstant.TYPE_RESPONSE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
+import com.netomi.chat.utils.NCWFeedbackActionCallback
 import com.netomi.chat.utils.NCWRoutes
+import com.netomi.chat.utils.NCWRoutes.ROUTE_FEEDBACK_CHAT
 import com.netomi.chat.utils.NCWSingleAlertDialog
 import com.netomi.chat.utils.NCWState
 import com.netomi.chat.utils.NCWThemeUtils
@@ -115,7 +117,7 @@ import java.util.UUID
  * This activity is intended to be launched by the host application or as part of the Chat SDK.
  *
  */
-class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
+class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackActionCallback {
 
     private val chatViewModel: NCWChatViewModel by viewModels()
     private val ncwAwsCredentialsViewModel: NCWAwsCredentialsViewModel by viewModels()
@@ -550,7 +552,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
      */
     private fun setupMessageList() {
         messageList = mutableListOf()
-        messageAdapter = NCWChatAdapter(messageList, themeData, this)
+        messageAdapter = NCWChatAdapter(messageList, themeData, this,this)
 
         chatRecyclerView.layoutManager = LinearLayoutManager(this)
         chatRecyclerView.adapter = messageAdapter
@@ -1451,7 +1453,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
             }
 
             NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
-             Toast.makeText(this, "Feedback", Toast.LENGTH_SHORT).show()
+                messageAdapter.notifyDataSetChanged()
             }
 
             else -> {
@@ -1566,5 +1568,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
     {
         progressBar.visibility = View.GONE
         constProgressBar.visibility = View.GONE
+    }
+
+    override fun onThumbUpClick() {
+        //hitFeedbackAPI("d6a229ab-bedd-4a79-9436-7ab46e44955e","POSITIVE")
+    }
+
+    override fun onThumbDownClick() {
+        //hitFeedbackAPI("d6a229ab-bedd-4a79-9436-7ab46e44955e","NEGATIVE")
     }
 }

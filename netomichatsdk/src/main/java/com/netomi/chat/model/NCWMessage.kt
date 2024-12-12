@@ -24,8 +24,9 @@ data class NCWMessage(
     var fileUrl: String? = null,
     val fileSize: String? = null,
     var isRetry :Boolean=false,
-     var attachmentList: ArrayList<NCWAttachmentList>? = null
-
+    var attachmentList: ArrayList<NCWAttachmentList>? = null,
+    var likeSelected: Boolean = false,
+    var dislikeSelected: Boolean = false
     )
 
 enum class MessageType(val typeName: String) {
