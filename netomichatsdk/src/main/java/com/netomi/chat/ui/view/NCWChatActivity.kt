@@ -33,6 +33,7 @@ import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.netomi.chat.R
 import com.netomi.chat.awsiot.NCWConnectionStatus
 import com.netomi.chat.model.CarouselButtonType
@@ -49,6 +50,7 @@ import com.netomi.chat.model.endchat.NCWEventData
 import com.netomi.chat.model.feedback.feedbackrequest.NCWEventInfo
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
+import com.netomi.chat.model.messages.FormSchema
 import com.netomi.chat.model.messages.NCWAdditionalAttributes
 import com.netomi.chat.model.messages.NCWAttachment
 import com.netomi.chat.model.messages.NCWAttachmentList
@@ -82,6 +84,7 @@ import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
 import com.netomi.chat.utils.NCWAppConstant.SESSION
 import com.netomi.chat.utils.NCWAppConstant.SIZE_LIMIT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FILE
+import com.netomi.chat.utils.NCWAppConstant.TYPE_FORM
 import com.netomi.chat.utils.NCWAppConstant.TYPE_IMAGE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_INDICATOR
 import com.netomi.chat.utils.NCWAppConstant.TYPE_INITIAL
@@ -209,7 +212,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
         ivMenuOption.setOnClickListener {
             Toast.makeText(this, R.string.under_development, Toast.LENGTH_SHORT).show()
-            //hitFeedbackAPI("7832f6fc-ec56-4ba7-8177-d293750d5cb4","POSITIVE")
         }
         ivMenu.setOnClickListener {
             Toast.makeText(this, R.string.under_development, Toast.LENGTH_SHORT).show()
@@ -662,15 +664,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
     override fun carouselButtonAction(it: NCWCarouselButton?) {
         Log.e("NCWCarouselButton","NCWCarouselButton "+it)
-       /* it?.url?.let { url ->
-            try {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                startActivity(intent) // Directly start the activity
-            } catch (e: Exception) {
-                Log.e("OpenURL", "Failed to open URL: $url", e)
-                NCWAppUtils.showToast(this, "Unable to open the link")
-            }
-        }*/
 
         when (CarouselButtonType.fromValue(it?.type)) {
             CarouselButtonType.WEB -> {
@@ -780,21 +773,57 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
         chatViewModel.awsMessage.observe(this) { jsonMessage ->
             try {
+                Log.e("Jsonn","Testtt "+jsonMessage)
+
                 val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
-                      val newMessages =
-                          response.attachments?.mapNotNull {
-                              mapAttachmentToMessage(
-                                  it
-                              )
-                          } ?: emptyList()
 
-                      if (newMessages.isNotEmpty()) {
-                          newMessages.forEachIndexed { index, message ->
-                              message.isSameTimeMessage = index == 0
-                          }
-                          updateMessageList(newMessages)
-                      }
+                if (response.customFields?.isNotEmpty() == true)
+                {
+                    Log.e("Dataa","Idffff" + (response.customFields?.get(0)?.values ?: null))
+                    val gson = Gson()
 
+                    response.customFields?.forEach { customField ->
+                        if (customField.name == "FORM_SCHEMA" && !customField.values.isNullOrEmpty()) {
+                            val formSchemas: List<FormSchema> = gson.fromJson(
+                                customField.values[0],
+                                object : TypeToken<List<FormSchema>>() {}.type
+                            )
+
+                            Log.e("ForrrrSizeee","formSchemas "+formSchemas.size)
+
+                        /*    formSchemas.forEach { schema ->
+                                Log.e("FormSchema", schema.properties.question)
+                                schema.schema.forEach { component ->
+                                    Log.e("Component", component.componentName)
+                                }
+                            }*/
+                            val formSchemasModel= formSchemas[0]
+
+                            val newMessages =NCWMessage(
+                                sender = TYPE_FORM,
+                                timestamp = System.currentTimeMillis(),
+                                formSchema = formSchemasModel
+
+                            )
+                            updateMessageList(newMessages)
+                        }
+
+                    }
+
+                }
+                else {
+Log.e("Dataa","Elseee" +response)
+                    val newMessages =
+                        response.attachments?.mapNotNull { mapAttachmentToMessage(it) }
+                            ?: emptyList()
+
+                    if (newMessages.isNotEmpty()) {
+                        newMessages.forEachIndexed { index, message ->
+                            message.isSameTimeMessage = index == 0
+                        }
+                        updateMessageList(newMessages)
+                    }
+                }
 
             } catch (e: Exception) {
                 Log.e("ParsingError", "Failed to parse JSON: ${e.localizedMessage}")

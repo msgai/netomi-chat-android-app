@@ -1,5 +1,6 @@
 package com.netomi.chat.model
 
+import com.netomi.chat.model.messages.FormSchema
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.NCWCarouselButton
 import com.netomi.chat.model.messages.NCWCarouselElement
@@ -28,6 +29,8 @@ data class NCWMessage(
     var attachmentList: ArrayList<NCWAttachmentList>? = null,
     var likeSelected: Boolean = false,
     var dislikeSelected: Boolean = false,
+    var formSchema: FormSchema? = null
+
     )
 
 enum class MessageType(val typeName: String) {
