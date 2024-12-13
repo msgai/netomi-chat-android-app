@@ -53,6 +53,7 @@ import com.netomi.chat.model.messages.NCWAdditionalAttributes
 import com.netomi.chat.model.messages.NCWAttachment
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.NCWCarouselButton
+import com.netomi.chat.model.messages.NCWCustomPayload
 import com.netomi.chat.model.messages.NCWGenericChannelResponse
 import com.netomi.chat.model.messages.NCWMessagePayload
 import com.netomi.chat.model.messages.NCWQuickReply
@@ -780,15 +781,20 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
         chatViewModel.awsMessage.observe(this) { jsonMessage ->
             try {
                 val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
-                val newMessages =
-                    response.attachments?.mapNotNull { mapAttachmentToMessage(it) } ?: emptyList()
+                      val newMessages =
+                          response.attachments?.mapNotNull {
+                              mapAttachmentToMessage(
+                                  it
+                              )
+                          } ?: emptyList()
 
-                if (newMessages.isNotEmpty()) {
-                    newMessages.forEachIndexed { index, message ->
-                        message.isSameTimeMessage = index == 0
-                    }
-                    updateMessageList(newMessages)
-                }
+                      if (newMessages.isNotEmpty()) {
+                          newMessages.forEachIndexed { index, message ->
+                              message.isSameTimeMessage = index == 0
+                          }
+                          updateMessageList(newMessages)
+                      }
+
 
             } catch (e: Exception) {
                 Log.e("ParsingError", "Failed to parse JSON: ${e.localizedMessage}")
@@ -880,7 +886,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
             title = if (messageType == MessageType.CARD) attach.title else null,
             buttons = if (messageType == MessageType.CARD) attach.buttons else arrayListOf(),
             largeImageUrl = if (messageType == MessageType.IMAGE) attach.largeImageUrl else null,
-            quickReply = attach.quickReply
+            quickReply = attach.quickReply,
         )
     }
 
@@ -1469,7 +1475,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
             if (response.triggerType == TYPE_RESPONSE) {
                 val newMessages =
-                    response.attachments?.mapNotNull { mapAttachmentToMessage(it) } ?: emptyList()
+                    response.attachments?.mapNotNull { mapAttachmentToMessage(it,
+                    ) } ?: emptyList()
                 if (newMessages.isNotEmpty()) {
                     newMessages.forEachIndexed { index, message ->
                         message.isSameTimeMessage = index == 0
