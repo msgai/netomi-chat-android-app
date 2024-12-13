@@ -48,11 +48,14 @@ data class Component(
     val additionalSettings: Map<String, Setting>,
     val dropDownSelections: Map<String, Setting>,
     val optionList: List<Option>?,
-    val Validation:IsValidation?=null
+    val config:FileConfig
+
 )
-data class IsValidation(
-    val value: Boolean=false,
-    val name: String?=null
+data class FileConfig(
+    val attachmentTypes: List<String>,
+    val isShowAttachmentTypesEnabled: Boolean,
+    val fileUploadType: String,
+    val maxUploadSizeAllowed: Int
 
 )
 

@@ -1,6 +1,7 @@
 package com.netomi.chat.ui.view
 
 import android.net.Uri
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -197,7 +198,12 @@ class NCWChatAdapter(
 
             recyclerViewForm.layoutManager =
                 LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
-            val formAdapter = NCWFormAdapter(message.formSchema?.schema ?: emptyList())
+            val formAdapter = NCWFormAdapter(message.formSchema?.schema ?: emptyList()){callBack->
+                Log.e("SelectedComponent","iiit "+callBack)
+                if (callBack != null) {
+                    Log.e("SelectedComponent","iiit "+callBack.config)
+                }
+            }
             recyclerViewForm.adapter = formAdapter
 
         }

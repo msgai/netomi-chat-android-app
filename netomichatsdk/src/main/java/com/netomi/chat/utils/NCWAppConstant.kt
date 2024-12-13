@@ -25,6 +25,8 @@ object NCWAppConstant {
 
     const val TYPE_FORM="FORM"
 
+    const val FORM_DATE_FORMAT="dd/mm/yyyy"
+
 
     const val BOT="BOT"
 

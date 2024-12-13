@@ -30,7 +30,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.netomi.chat.R
 import com.netomi.chat.model.messages.Component
-import com.netomi.chat.utils.NCWDatePickerUtil
+import com.netomi.chat.utils.NCWAppConstant.FORM_DATE_FORMAT
 import com.netomi.chat.utils.NCWThemeUtils
 import java.util.Calendar
 
@@ -43,11 +43,11 @@ data class FormData(
     var dateInput: String? = null
 )
 
-class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<NCWFormAdapter.FormViewHolder>() {
+class NCWFormAdapter(private val items: List<Component>,private val callBack: (Component?) -> Unit) : RecyclerView.Adapter<NCWFormAdapter.FormViewHolder>() {
 
 
     private val inputValues = mutableMapOf<String, Any?>()
-    private val inputValuesSelected = MutableList(items.size) { FormData() } // List to hold FormData for each item
+    private val inputValuesSelected = MutableList(items.size) { FormData() }
 
     inner class FormViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -104,7 +104,6 @@ class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<
             formContainer.addView(textView)
             inputValues[component.id] = editText
 
-            // Check if Validation is enabled
             val isValidationEnabled = component.dropDownSelections["Validation"]?.value == true
             if (isValidationEnabled) {
                 val validations = component.validations ?: emptyList()
@@ -124,8 +123,6 @@ class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<
                                 errorMessage = it.errorMessage
                             }
                         }
-
-                        // Check for max length if no min error
                         if (errorMessage == null) {
                             maxValidation?.let {
                                 val maxLength = it.value[0].toIntOrNull()
@@ -165,120 +162,6 @@ class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<
             }
         }
 
-
-        /*  private fun createTextInput(component: Component) {
-              addLabel(component)
-
-              // Create EditText and TextView for input and validation messages
-              val editText = EditText(itemView.context).apply {
-                  hint = component.attributes?.get(0)?.value?.toString()?.replace("[", "")?.replace("]", "")
-                  setHintTextColor(ContextCompat.getColor(context, R.color.hint_color))
-                  createDrawable(this)
-                  setPadding(16, 30, 16, 30)
-                  setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                  layoutParams = defaultLayoutParams()
-              }
-
-              val textView = TextView(itemView.context).apply {
-                  layoutParams = defaultLayoutParams()
-                  setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                  setTextColor(ContextCompat.getColor(context, R.color.error_color))
-                  visibility = View.GONE
-              }
-
-              // Add validation if present
-              val validations = component.validations
-              val minValidation = validations?.find { it.subType == "length-min-char" }
-              val maxValidation = validations?.find { it.subType == "length-max-char" }
-
-              if (component.Validation.name=="Validation"&& component.Validation.value)
-
-              formContainer.addView(editText)
-              formContainer.addView(textView)
-              inputValues[component.id] = editText
-
-              // Add TextWatcher to validate input dynamically
-              editText.addTextChangedListener(object : TextWatcher {
-                  override fun afterTextChanged(s: Editable?) {
-                      val inputText = s.toString()
-                      var errorMessage: String? = null
-
-                      minValidation?.let {
-                          val minLength = it.value[0].toIntOrNull()
-                          if (minLength != null && inputText.length < minLength) {
-                              errorMessage = it.errorMessage
-                          }
-                      }
-
-                      // Check for max length if no min error
-                      if (errorMessage == null) {
-                          maxValidation?.let {
-                              val maxLength = it.value[0].toIntOrNull()
-                              if (maxLength != null && inputText.length > maxLength) {
-                                  errorMessage = it.errorMessage
-                              }
-                          }
-                      }
-
-                      // Display or hide error message
-                      if (errorMessage != null) {
-                          textView.text = errorMessage
-                          textView.visibility = View.VISIBLE
-                      } else {
-                          textView.visibility = View.GONE
-                      }
-
-                      // Store valid input value
-                      if (errorMessage == null) {
-                          inputValuesSelected[adapterPosition].textInput = inputText
-                      }
-                  }
-
-                  override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                  override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-              })
-          }*/
-
-
-        /* private fun createTextInput(component: Component) {
-             addLabel(component)
-             val editText = EditText(itemView.context).apply {
-                 hint = component.attributes?.get(0)?.value?.toString()?.replace("[", "")?.replace("]", "")
-                 setHintTextColor(ContextCompat.getColor(context, R.color.hint_color))
-                 createDrawable(this)
-                 setPadding(16, 30, 16, 30)
-                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                 layoutParams = defaultLayoutParams()
-
-             }
-             val textView = TextView(itemView.context).apply {
-                 layoutParams = defaultLayoutParams()
-                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                 setTextColor(ContextCompat.getColor(context, R.color.error_color))
-                 visibility = View.GONE
-             }
-
-             // Add validation if present
-             val validations = component.validations
-             val minValidation = validations?.find { it.subType == "length-min-char" }
-             val maxValidation = validations?.find { it.subType == "length-max-char" }
-
-
-
-             formContainer.addView(editText)
-             inputValues[component.id] = editText
-             Log.e("AddInputValue","sss "+inputValues)
-             editText.addTextChangedListener(object : TextWatcher {
-                 override fun afterTextChanged(s: Editable?) {
-
-                     inputValuesSelected[adapterPosition].textInput = s.toString()
-                 }
-                 // Implement other TextWatcher methods
-                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-             })
-         }*/
-
         private fun createTextArea(component: Component) {
             addLabel(component)
             val editText = EditText(itemView.context).apply {
@@ -297,11 +180,9 @@ class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<
                 override fun afterTextChanged(s: Editable?) {
                     inputValuesSelected[adapterPosition].textInput = s.toString()
                 }
-                // Implement other TextWatcher methods
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             })
-            Log.e("AddInputValue","2222 "+inputValues)
         }
 
         private fun createRadioGroup(component: Component) {
@@ -322,7 +203,7 @@ class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<
             }
             formContainer.addView(radioGroup)
             inputValues[component.id] = radioGroup
-            Log.e("AddInputValue","3333 "+inputValues)
+
         }
 
         private fun createCheckboxGroup(component: Component) {
@@ -344,7 +225,7 @@ class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<
 
                 formContainer.addView(checkBox)
                 inputValues[component.id] = checkBox
-                Log.e("AddInputValue","4444 "+inputValues)
+
             }
         }
         private fun createDropdown(component: Component) {
@@ -380,7 +261,6 @@ class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<
                         arrowIcon.setImageResource(R.drawable.ic_arrow_dropdown)
                         inputValues[component.id] = option
                         inputValuesSelected[adapterPosition].dropdownSelection = option
-                        Log.e("AddInputValue","5555 "+inputValues)
                     }
                 }
                 itemsContainer.addView(optionView)
@@ -394,13 +274,13 @@ class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<
             val textView = TextView(itemView.context).apply {
                 setPadding(10, 30, 16, 30)
                 createDrawable(this)
-                text = "dd/mm/yyyyy"
+                text = FORM_DATE_FORMAT
 
                 setOnClickListener {
                    /* NCWDatePickerUtil.showDatePicker(itemView.context) { selectedDate ->
                         text = selectedDate
                         inputValues[component.id] = selectedDate
-                        Log.e("AddInputValue", "66666 " + inputValues)
+
                     }*/
                    val calendar = Calendar.getInstance()
                     DatePickerDialog(
@@ -408,7 +288,6 @@ class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<
                         { _, year, month, dayOfMonth ->
                             text = "$dayOfMonth/${month + 1}/$year"
                             inputValues[component.id] = text
-                            Log.e("AddInputValue","66666 "+inputValues)
                         },
                         calendar.get(Calendar.YEAR),
                         calendar.get(Calendar.MONTH),
@@ -429,6 +308,8 @@ class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<
             val formatHint: TextView = fileInputView.findViewById(R.id.format_hint)
 
             fileInputView.setOnClickListener {
+
+                callBack(component)
                /* openFilePicker { fileUri ->
                     // Handle the selected file
                     uploadText.text = fileUri?.lastPathSegment ?: "No file selected"
@@ -437,7 +318,6 @@ class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<
             }
             formContainer.addView(fileInputView)
             inputValues[component.id] = null
-            Log.e("AddInputValue","77777 "+inputValues)
         }
 
 
@@ -473,6 +353,7 @@ class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<
             context: Context,
             component: Component
         ) {
+
             val btnSubmit = TextView(context).apply {
                 text = "Submit"
                 id = View.generateViewId()
@@ -492,7 +373,7 @@ class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<
         }
         private fun setupSubmitButton(btnSubmit: TextView, component: Component) {
             btnSubmit.setOnClickListener {
-                Log.e("Dataaa", "InputValues Size: ${inputValues.size}") // Log the size of inputValues
+                Log.e("CheckList", "InputValues Size: ${inputValues.size}")
 
                 val submissionDataList = mutableListOf<Pair<String, Any?>>()
 
@@ -501,7 +382,7 @@ class NCWFormAdapter(private val items: List<Component>) : RecyclerView.Adapter<
                     submissionDataList.add(Pair(component.id, formData))
                 }
 
-                Log.e("GetListtt","sss "+submissionDataList)
+                Log.e("CheckList", "All Values $submissionDataList")
 
                 val submissionData = mutableMapOf<String, Any?>()
 
