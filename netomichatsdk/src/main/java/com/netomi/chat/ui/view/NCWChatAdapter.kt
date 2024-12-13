@@ -20,12 +20,14 @@ import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWChatActionCallback
+import com.netomi.chat.utils.NCWFeedbackActionCallback
 import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWChatAdapter(
     private val messages: MutableList<NCWMessage>,
     private val themeData: NCWThemeResponse?,
-    private val actionCallback: NCWChatActionCallback
+    private val actionCallback: NCWChatActionCallback,
+    private val feedbackActionCallBack:NCWFeedbackActionCallback
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -51,7 +53,7 @@ class NCWChatAdapter(
         return when (viewType) {
             VIEW_TYPE_REQUEST -> RequestViewHolder(view, themeData,actionCallback)
             VIEW_TYPE_INDICATOR -> InitialViewHolder(view)
-            else -> ResponseViewHolder(view,themeData,actionCallback)
+            else -> ResponseViewHolder(view,themeData,actionCallback,feedbackActionCallBack)
         }
     }
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -176,7 +178,8 @@ class NCWChatAdapter(
     class ResponseViewHolder(
         itemView: View,
         val themeData: NCWThemeResponse?,
-        private val chatActionCallback:NCWChatActionCallback
+        private val chatActionCallback:NCWChatActionCallback,
+        private val feedbackActionCallBack: NCWFeedbackActionCallback
     ) : RecyclerView.ViewHolder(itemView) {
         private val messageText: TextView = itemView.findViewById(R.id.tvReceiverMessage)
         private val imageView: ImageView = itemView.findViewById(R.id.receiverImage)
@@ -192,6 +195,8 @@ class NCWChatAdapter(
         private val buttonRecyclerView: RecyclerView = itemView.findViewById(R.id.buttonRecyclerView)
         private val tvTime: TextView = itemView.findViewById(R.id.tvTime)
         private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
+        private val thumbUpImageButton: ImageView = itemView.findViewById(R.id.thumbUpButton)
+        private val thumbDownImageButton: ImageView = itemView.findViewById(R.id.thumbDownButton)
 
         fun bind(message: NCWMessage,position: Int) {
             // Hide all views initially to avoid redundant visibility changes
@@ -208,6 +213,18 @@ class NCWChatAdapter(
             NCWThemeUtils.setTimeStampColor(tvTime)
             imgBot.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.INVISIBLE
             tvTime.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.GONE
+            NCWThemeUtils.setBotConfig(thumbUpImageButton)
+            NCWThemeUtils.setBotConfig(thumbDownImageButton)
+            if(message.likeSelected){
+                thumbUpImageButton.setImageResource(R.drawable.thumps_up_selected)
+                thumbDownImageButton.setImageResource(R.drawable.thumps_down_unselected)
+            }else if (message.dislikeSelected){
+                thumbUpImageButton.setImageResource(R.drawable.thumps_up_unselected)
+                thumbDownImageButton.setImageResource(R.drawable.thumps_down_selected)
+            }else{
+                thumbUpImageButton.setImageResource(R.drawable.thumps_down_unselected)
+                thumbDownImageButton.setImageResource(R.drawable.thumps_up_unselected)
+            }
 
             when (message.type) {
                 MessageType.TEXT -> {
@@ -306,6 +323,19 @@ class NCWChatAdapter(
             }
             cardVideo.setOnClickListener {
                 chatActionCallback.onMediaClick(message)
+            }
+            // Thumbs-up click listener
+           thumbUpImageButton.setOnClickListener {
+                message.likeSelected = !message.likeSelected
+                message.dislikeSelected = false // Ensure only one can be selected
+                feedbackActionCallBack.onThumbUpClick()
+            }
+
+            // Thumbs-down click listener
+            thumbDownImageButton.setOnClickListener {
+                message.dislikeSelected = !message.dislikeSelected
+                message.likeSelected = false // Ensure only one can be selected
+                feedbackActionCallBack.onThumbDownClick()
             }
         }
     }

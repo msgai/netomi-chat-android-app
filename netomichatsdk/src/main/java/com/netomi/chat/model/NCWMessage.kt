@@ -3,6 +3,7 @@ package com.netomi.chat.model
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.NCWCarouselButton
 import com.netomi.chat.model.messages.NCWCarouselElement
+import com.netomi.chat.model.messages.NCWCustomPayload
 import com.netomi.chat.model.messages.NCWQuickReply
 
 data class NCWMessage(
@@ -24,8 +25,9 @@ data class NCWMessage(
     var fileUrl: String? = null,
     val fileSize: String? = null,
     var isRetry :Boolean=false,
-     var attachmentList: ArrayList<NCWAttachmentList>? = null
-
+    var attachmentList: ArrayList<NCWAttachmentList>? = null,
+    var likeSelected: Boolean = false,
+    var dislikeSelected: Boolean = false,
     )
 
 enum class MessageType(val typeName: String) {
