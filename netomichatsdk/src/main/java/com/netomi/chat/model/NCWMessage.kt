@@ -29,7 +29,6 @@ data class NCWMessage(
     var attachmentList: ArrayList<NCWAttachmentList>? = null,
     var likeSelected: Boolean = false,
     var dislikeSelected: Boolean = false,
-     var attachmentList: ArrayList<NCWAttachmentList>? = null,
     var formSchema: FormSchema? = null
 
     )
