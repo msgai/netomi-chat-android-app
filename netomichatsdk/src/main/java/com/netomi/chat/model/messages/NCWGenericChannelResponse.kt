@@ -97,7 +97,13 @@ data class NCWCarouselButton(
 )
 
 data class NCWCustomPayload(
-    val TRANSLATE_LANGUAGE: String? = null
+    val TRANSLATE_LANGUAGE: String? = null,
+    val CHUNK_INDEX: String?=null,
+    val CHUNK_STATUS:String?=null,
+    val PARTIAL_RESPONSE:String?=null,
+    val INPUT_REQUEST_TIME:String?=null,
+    val FINAL_CHUNK_TIME:String?=null,
+    val FIRST_CHUNK_TIME:String?=null
 )
 
 

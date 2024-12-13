@@ -36,6 +36,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.netomi.chat.R
 import com.netomi.chat.awsiot.NCWConnectionStatus
+import com.netomi.chat.model.CarouselButtonType
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.model.MessageType
@@ -46,12 +47,15 @@ import com.netomi.chat.model.chat_history.NCWGetChatHistoryPayload
 import com.netomi.chat.model.chat_history.NCWHistoryRequestBody
 import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEventData
+import com.netomi.chat.model.feedback.feedbackrequest.NCWEventInfo
+import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.FormSchema
 import com.netomi.chat.model.messages.NCWAdditionalAttributes
 import com.netomi.chat.model.messages.NCWAttachment
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.NCWCarouselButton
+import com.netomi.chat.model.messages.NCWCustomPayload
 import com.netomi.chat.model.messages.NCWGenericChannelResponse
 import com.netomi.chat.model.messages.NCWMessagePayload
 import com.netomi.chat.model.messages.NCWQuickReply
@@ -89,7 +93,9 @@ import com.netomi.chat.utils.NCWAppConstant.TYPE_RESPONSE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
+import com.netomi.chat.utils.NCWFeedbackActionCallback
 import com.netomi.chat.utils.NCWRoutes
+import com.netomi.chat.utils.NCWRoutes.ROUTE_FEEDBACK_CHAT
 import com.netomi.chat.utils.NCWSingleAlertDialog
 import com.netomi.chat.utils.NCWState
 import com.netomi.chat.utils.NCWThemeUtils
@@ -115,7 +121,7 @@ import java.util.UUID
  * This activity is intended to be launched by the host application or as part of the Chat SDK.
  *
  */
-class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
+class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackActionCallback {
 
     private val chatViewModel: NCWChatViewModel by viewModels()
     private val ncwAwsCredentialsViewModel: NCWAwsCredentialsViewModel by viewModels()
@@ -272,6 +278,36 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
             )
         )
     }
+
+
+    private fun hitFeedbackAPI(requestId: String,feedbackValue: String) {
+        if (!NCWAppUtils.isNetworkAvailable(this)) {
+            NCWAppUtils.showToast(this, "Please check your network and try again.")
+            return
+        }
+        //showProgressBar()
+        chatViewModel.hitFeedbackAPI(
+            NCWFeedbackRequest(botRefId!!,com.netomi.chat.model.feedback.feedbackresponse.NCWRequestBody(
+                botReferenceId = botRefId!!,
+                channelId = "NETOMI_WEB_WIDGET",
+                conversationId = conversationID!!,
+                eventData = com.netomi.chat.model.feedback.feedbackrequest.NCWEventData(
+                    eventInfo = NCWEventInfo(
+                        attachmentIndex = 1,
+                        feedbackValue = feedbackValue,
+                        requestId = "7832f6fc-ec56-4ba7-8177-d293750d5cb4"
+                    ),
+                    eventType = "WIDGET_EVENT",
+                    subType = "FEEDBACK"
+            ),
+                eventName = "FEEDBACK",
+                isPublishToMQTT = false,
+                requestType = "NETOMI",
+                timestamp = System.currentTimeMillis(),
+                triggerType = "EVENT")
+        ))
+    }
+
 
     override fun onResume() {
         super.onResume()
@@ -519,7 +555,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
      */
     private fun setupMessageList() {
         messageList = mutableListOf()
-        messageAdapter = NCWChatAdapter(messageList, themeData, this)
+        messageAdapter = NCWChatAdapter(messageList, themeData, this,this)
 
         chatRecyclerView.layoutManager = LinearLayoutManager(this)
         chatRecyclerView.adapter = messageAdapter
@@ -628,16 +664,34 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
 
     override fun carouselButtonAction(it: NCWCarouselButton?) {
         Log.e("NCWCarouselButton","NCWCarouselButton "+it)
-        it?.url?.let { url ->
-            try {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                startActivity(intent) // Directly start the activity
-            } catch (e: Exception) {
-                Log.e("OpenURL", "Failed to open URL: $url", e)
-                NCWAppUtils.showToast(this, "Unable to open the link")
+
+        when (CarouselButtonType.fromValue(it?.type)) {
+            CarouselButtonType.WEB -> {
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it?.url))
+                    startActivity(intent) // Directly start the activity
+                } catch (e: Exception) {
+                    Log.e("OpenURL", "Failed to open URL: ${it?.url}", e)
+                    NCWAppUtils.showToast(this, "Unable to open the link")
+                }
+            }
+            CarouselButtonType.CALL -> {
+                makePhoneCall(it?.payload)
+            }
+            CarouselButtonType.POST_BACK -> {
+                it?.payload?.let { it1 -> sendMessage(it1) }
+            }
+            else -> {
+                // Handle unknown type (optional)
+                Log.e("Carousel", "Unknown button type: ${it?.type}")
             }
         }
 
+    }
+
+    private fun makePhoneCall(phoneNumber: String?) {
+            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
+            startActivity(intent)
     }
 
 
@@ -708,6 +762,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback {
         chatViewModel.getUploadedMediaUrl.observe(this) { media ->
             handleApiCallback(media as NCWState<Any>)
 
+        }
+
+        chatViewModel.feedbackResponse.observe(this){ feedback ->
+            handleApiCallback(feedback as NCWState<Any>)
         }
 
 
@@ -857,7 +915,7 @@ Log.e("Dataa","Elseee" +response)
             title = if (messageType == MessageType.CARD) attach.title else null,
             buttons = if (messageType == MessageType.CARD) attach.buttons else arrayListOf(),
             largeImageUrl = if (messageType == MessageType.IMAGE) attach.largeImageUrl else null,
-            quickReply = attach.quickReply
+            quickReply = attach.quickReply,
         )
     }
 
@@ -1428,6 +1486,14 @@ Log.e("Dataa","Elseee" +response)
                 NCWThemeUtils.setConversationID(null)
                 finish()
             }
+
+            NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
+                messageAdapter.notifyDataSetChanged()
+            }
+
+            else -> {
+                Toast.makeText(this, "Else..", Toast.LENGTH_SHORT).show()
+            }
         }
 
     }
@@ -1438,7 +1504,8 @@ Log.e("Dataa","Elseee" +response)
 
             if (response.triggerType == TYPE_RESPONSE) {
                 val newMessages =
-                    response.attachments?.mapNotNull { mapAttachmentToMessage(it) } ?: emptyList()
+                    response.attachments?.mapNotNull { mapAttachmentToMessage(it,
+                    ) } ?: emptyList()
                 if (newMessages.isNotEmpty()) {
                     newMessages.forEachIndexed { index, message ->
                         message.isSameTimeMessage = index == 0
@@ -1537,5 +1604,13 @@ Log.e("Dataa","Elseee" +response)
     {
         progressBar.visibility = View.GONE
         constProgressBar.visibility = View.GONE
+    }
+
+    override fun onThumbUpClick() {
+        //hitFeedbackAPI("d6a229ab-bedd-4a79-9436-7ab46e44955e","POSITIVE")
+    }
+
+    override fun onThumbDownClick() {
+        //hitFeedbackAPI("d6a229ab-bedd-4a79-9436-7ab46e44955e","NEGATIVE")
     }
 }

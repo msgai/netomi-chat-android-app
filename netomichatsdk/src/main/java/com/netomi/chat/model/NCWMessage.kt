@@ -4,6 +4,7 @@ import com.netomi.chat.model.messages.FormSchema
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.NCWCarouselButton
 import com.netomi.chat.model.messages.NCWCarouselElement
+import com.netomi.chat.model.messages.NCWCustomPayload
 import com.netomi.chat.model.messages.NCWQuickReply
 
 data class NCWMessage(
@@ -25,6 +26,9 @@ data class NCWMessage(
     var fileUrl: String? = null,
     val fileSize: String? = null,
     var isRetry :Boolean=false,
+    var attachmentList: ArrayList<NCWAttachmentList>? = null,
+    var likeSelected: Boolean = false,
+    var dislikeSelected: Boolean = false,
      var attachmentList: ArrayList<NCWAttachmentList>? = null,
     var formSchema: FormSchema? = null
 
@@ -45,6 +49,16 @@ enum class MessageType(val typeName: String) {
         }
     }
 }
-/*enum class MessageType {
-    TEXT1, IMAGE, VIDEO
-}*/
+enum class CarouselButtonType(val value: String) {
+    WEB("WEB"),
+    CALL("CALL"),
+    POST_BACK("POST_BACK");
+
+    companion object {
+        // Helper method to map String to CarouselButtonType
+        fun fromValue(value: String?): CarouselButtonType? {
+            return values().find { it.value == value }
+        }
+    }
+}
+

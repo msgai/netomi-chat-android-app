@@ -8,8 +8,10 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.text.Html
+import android.text.method.LinkMovementMethod
 import android.view.inputmethod.InputMethodManager
 import android.webkit.MimeTypeMap
+import android.widget.TextView
 import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.netomi.chat.utils.NCWAppConstant.TIME_AM_PM
@@ -55,6 +57,13 @@ object NCWAppUtils {
         } else {
             Html.fromHtml(input).toString().trim()
         }
+    }
+
+    fun setHtmlText(textView: TextView, input: String) {
+        val formattedText = Html.fromHtml(input, Html.FROM_HTML_MODE_LEGACY)
+        textView.text = formattedText.trim()
+
+        textView.movementMethod= LinkMovementMethod.getInstance()
     }
 
 
