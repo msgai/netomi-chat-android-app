@@ -50,12 +50,13 @@ import com.netomi.chat.model.endchat.NCWEventData
 import com.netomi.chat.model.feedback.feedbackrequest.NCWEventInfo
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
+import com.netomi.chat.model.messages.Component
+import com.netomi.chat.model.messages.FileUploadData
 import com.netomi.chat.model.messages.FormSchema
 import com.netomi.chat.model.messages.NCWAdditionalAttributes
 import com.netomi.chat.model.messages.NCWAttachment
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.NCWCarouselButton
-import com.netomi.chat.model.messages.NCWCustomPayload
 import com.netomi.chat.model.messages.NCWGenericChannelResponse
 import com.netomi.chat.model.messages.NCWMessagePayload
 import com.netomi.chat.model.messages.NCWQuickReply
@@ -83,8 +84,10 @@ import com.netomi.chat.utils.NCWAppConstant.DATE_FORMAT
 import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
 import com.netomi.chat.utils.NCWAppConstant.SESSION
 import com.netomi.chat.utils.NCWAppConstant.SIZE_LIMIT
+import com.netomi.chat.utils.NCWAppConstant.TYPE_ATTACHMENT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FILE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FORM
+import com.netomi.chat.utils.NCWAppConstant.TYPE_FORM_ATTACHMENT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_IMAGE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_INDICATOR
 import com.netomi.chat.utils.NCWAppConstant.TYPE_INITIAL
@@ -95,7 +98,6 @@ import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
 import com.netomi.chat.utils.NCWFeedbackActionCallback
 import com.netomi.chat.utils.NCWRoutes
-import com.netomi.chat.utils.NCWRoutes.ROUTE_FEEDBACK_CHAT
 import com.netomi.chat.utils.NCWSingleAlertDialog
 import com.netomi.chat.utils.NCWState
 import com.netomi.chat.utils.NCWThemeUtils
@@ -155,6 +157,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     private var isLoaderActive: Boolean = false
     private lateinit var tvBrandName: TextView
 
+    private var formComponent: Component? =null
+
+    private var attachmentType: String? =TYPE_ATTACHMENT
 
     private var deviceInfo: ArrayList<DeviceInfo> = arrayListOf()
 
@@ -202,10 +207,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
         }
 
         attachmentIcon.setOnClickListener {
-            if (arePermissionsGranted())
-                showMediaOptions()
-            else
-                requestPermissionsAndShowMediaOptions()
+            attachmentType=TYPE_ATTACHMENT
+           showMedia()
 
 
         }
@@ -236,6 +239,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                 backClicked()
             }
         })
+    }
+
+    private fun showMedia() {
+        if (arePermissionsGranted())
+            showMediaOptions()
+        else
+            requestPermissionsAndShowMediaOptions()
     }
 
     private fun backClicked() {
@@ -555,10 +565,43 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
      */
     private fun setupMessageList() {
         messageList = mutableListOf()
-        messageAdapter = NCWChatAdapter(messageList, themeData, this,this)
+        messageAdapter = NCWChatAdapter(messageList, themeData, this, this, { it ->
+            if (it != null) {
+                attachmentType = TYPE_FORM_ATTACHMENT
+                formComponent = it
+                Log.e("FtetteCompooe", "sS $formComponent")
+                showMedia()
+            }
+        }, { payload, label ->
+            // Handle the payload and label response here
+            println("Payload: $payload")
+            println("Label: $label")
+            val timeStamp = System.currentTimeMillis()
+            val createPayload = payload?.let { createPayload(it, label, timeStamp) }
+            if (createPayload != null) {
+                chatViewModel.sendMessageAPI(createPayload)
+            }
+        })
 
+// Set the layout manager and adapter for the RecyclerView
         chatRecyclerView.layoutManager = LinearLayoutManager(this)
         chatRecyclerView.adapter = messageAdapter
+    }
+
+
+
+    // Initialize the ActivityResultLauncher
+    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            val fileUri: Uri? = data?.data
+            val mimeType = contentResolver.getType(result.data?.data!!)
+            fileSend = fileUri?.let { NCWImageUtils.getFileFromUri(this, it) }
+            fileSend?.let {
+                getPreSignedUrl(mimeType, it.name)
+
+            }
+        }
     }
 
     override fun onQuickReply(option: NCWQuickReplyOption?, position: Int) {
@@ -657,6 +700,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     private fun handleMediaMessage(message: NCWMessage) {
         val selectedMediaUri: Uri = Uri.parse(message.message)
         val type = contentResolver.getType(selectedMediaUri)
+
         handleFileSelection(selectedMediaUri, type)
     }
 
@@ -1065,8 +1109,6 @@ Log.e("Dataa","Elseee" +response)
 
                 else if (payload is NCWSignedUrlPayload) {
 
-                    Log.e("MedianName","saas"+payload.uploadKeyPrefix )
-                    Log.e("MedianName","messageList "+messageList )
                     val position = messageList.indexOfLast { it.title == payload.uploadKeyPrefix }
                     if (position != -1) {
                         val item = messageList[position]
@@ -1323,6 +1365,55 @@ Log.e("Dataa","Elseee" +response)
 
     // File selection (PDF, DOC, etc.)
     private fun openFile() {
+
+        if (attachmentType== TYPE_ATTACHMENT) {
+            val fileIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                type = "*/*"
+                addCategory(Intent.CATEGORY_OPENABLE)
+            }
+            fileLauncher.launch(fileIntent)
+        }
+        else{
+            formComponent?.let { openFormPicker(component = it) }
+        }
+    }
+    private fun openFormPicker(component: Component) {
+        val attachmentTypes: List<String> = component.config?.attachmentTypes ?: emptyList()
+        val mimeTypes = mutableListOf<String>()
+        if (attachmentTypes.contains("PNG")) {
+            mimeTypes.add("image/png")
+        }
+        if (attachmentTypes.contains("JPG")) {
+            mimeTypes.add("image/jpeg")
+        }
+        if (attachmentTypes.contains("JPEG")) {
+            mimeTypes.add("image/jpeg") // JPEG is the same as JPG
+        }
+        if (attachmentTypes.contains("GIF")) {
+            mimeTypes.add("image/gif")
+        }
+        // Check for video and document types
+        if (attachmentTypes.contains("MP4")) {
+            mimeTypes.add("video/mp4")
+        }
+        if (attachmentTypes.contains("PDF")) {
+            mimeTypes.add("application/pdf")
+        }
+        if (attachmentTypes.contains("TXT")) {
+            mimeTypes.add("text/plain")
+        }
+
+        // If no specific types are matched, allow all file types
+        if (mimeTypes.isEmpty()) {
+            mimeTypes.add("*/*")
+        }
+        /*val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
+            addCategory(Intent.CATEGORY_OPENABLE)
+        }*/
+        // Start the file picker activity using ActivityResultLauncher
+        //fileLauncher.launch(Intent.createChooser(intent, "Select a file"))
+
         val fileIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
             type = "*/*"
             addCategory(Intent.CATEGORY_OPENABLE)
@@ -1346,12 +1437,50 @@ Log.e("Dataa","Elseee" +response)
             if (result.resultCode == Activity.RESULT_OK && result.data != null) {
                 val type = contentResolver.getType(result.data?.data!!)
                 val selectedMediaUri: Uri? = result.data?.data!!
-                handleFileSelection(selectedMediaUri, type)
+                if (attachmentType== TYPE_ATTACHMENT) {
+                    handleFileSelection(selectedMediaUri, type)
+                }
+                else{
+                    handleFormFileSelection(selectedMediaUri, type)
+                }
             }
         }
 
-// Function to add document message
+    private fun handleFormFileSelection(
+        selectedMediaUri: Uri?,
+        mimeType: String?,
+        isGallery: Boolean = false
+    ) {
+        if (selectedMediaUri == null) {
+            Log.e("FileSelection", "No media selected")
+            return
+        }
+        fileSend = if (isGallery) {
+            NCWFilePath().getPath(this, selectedMediaUri)?.let { File(it) }
+        } else {
+            NCWImageUtils.getFileFromUri(this, selectedMediaUri)
+        }
 
+        if (fileSend == null) {
+            Log.e("FileSelection", "Failed to get file from URI")
+            return
+        }
+      /*  // Validate file size and type
+        if (!validateFile(fileSend)) return
+
+        // Validate file size
+        if (!isFileSizeValid(this, fileSend?.length(), formComponent?.config?.maxUploadSizeAllowed)) {
+            showLimitExceedPopup()
+            return
+        }*/
+
+        fileSend?.let {
+            getPreSignedUrl(mimeType, it.name)
+
+        }
+    }
+
+      // Function to add document message
     private fun addDocMessage(file: File?, selectedMediaUri: Uri, type: MessageType) {
         val newMessage = NCWMessage(
             sender = TYPE_REQUEST,
@@ -1416,18 +1545,17 @@ Log.e("Dataa","Elseee" +response)
 
             NCWRoutes.ROUTE_SEND_CHAT -> {
                 val sendMessageResponse = apiResponse as NCWSendMessageResponse
-               hideProgressBar()
+                hideProgressBar()
             }
 
             NCWRoutes.ROUTE_GET_CHAT -> {
                 val response = apiResponse as NCWGetChatHistoryResponse
                 if (response != null && response.responses.size > 0) {
                     parseHistoryItems(response.responses)
-                }
-                else{
+                } else {
                     loadInitialMessages()
                 }
-              hideProgressBar()
+                hideProgressBar()
             }
 
             NCWRoutes.ROUTE_GET_PRESIGNED_URL -> {
@@ -1442,44 +1570,99 @@ Log.e("Dataa","Elseee" +response)
                 val mediaType = response.type?.let { NCWAppUtils.getTypeFromContent(it) }
                 Log.e("MediaType", "Determined media type: $mediaType")
 
-                val attachmentList = arrayListOf(
-                    NCWAttachmentList().apply {
-                        type = mediaType
-                        actualType = mediaType
-                        attachmentId = UUID.randomUUID().toString()
-                        percentage = 10
-                        fileType = response.type
-                        title = response.title
-                        fileSize = response.fileSize
-                        largeImageUrl = if (mediaType == TYPE_IMAGE) response.url else null
-                        thumbnailUrl = if (mediaType == TYPE_VIDEO) response.url else null
-                        fileURL = if (mediaType == TYPE_FILE) response.url else null
-                    }
-                )
+                if (attachmentType == TYPE_ATTACHMENT) {
 
-                val position = messageList.indexOfLast { it.title == response.title }
-                if (position != -1) {
-                    val item = messageList[position]
-                    item.attachmentList=attachmentList
-                    when (mediaType) {
-                        TYPE_IMAGE -> item.largeImageUrl = response.url
-                        TYPE_VIDEO -> item.thumbnailUrl = response.url
-                        TYPE_FILE -> item.fileUrl = response.url
+                    val attachmentList = arrayListOf(
+                        NCWAttachmentList().apply {
+                            type = mediaType
+                            actualType = mediaType
+                            attachmentId = UUID.randomUUID().toString()
+                            percentage = 10
+                            fileType = response.type
+                            title = response.title
+                            fileSize = response.fileSize
+                            largeImageUrl = if (mediaType == TYPE_IMAGE) response.url else null
+                            thumbnailUrl = if (mediaType == TYPE_VIDEO) response.url else null
+                            fileURL = if (mediaType == TYPE_FILE) response.url else null
+                        }
+                    )
+
+                    val position = messageList.indexOfLast { it.title == response.title }
+                    if (position != -1) {
+                        val item = messageList[position]
+                        item.attachmentList = attachmentList
+                        when (mediaType) {
+                            TYPE_IMAGE -> item.largeImageUrl = response.url
+                            TYPE_VIDEO -> item.thumbnailUrl = response.url
+                            TYPE_FILE -> item.fileUrl = response.url
+                        }
                     }
+
+                    Log.e("attachmentList", "attachmentList" + attachmentList)
+                    val timeStamp = System.currentTimeMillis()
+                    val payload = createPayload(
+                        "event://;LEARN_ATTRIBUTE_EVENT;ATTACHMENT::value=Media has been uploaded",
+                        "Attachment has been uploaded",
+                        timeStamp,
+                        attachmentList
+                    )
+                    chatViewModel.sendMessageAPI(payload)
                 }
 
-                Log.e("attachmentList", "attachmentList" + attachmentList)
-                val timeStamp = System.currentTimeMillis()
-                val payload = createPayload(
-                    "event://;LEARN_ATTRIBUTE_EVENT;ATTACHMENT::value=Media has been uploaded",
-                    "Attachment has been uploaded",
-                    timeStamp,
-                    attachmentList
-                )
-                chatViewModel.sendMessageAPI(payload)
+                else {
+                    hideProgressBar()
+                    val position = messageList.indexOfLast { it.sender == TYPE_FORM }
+                    if (position != -1) {
+
+                        val item = messageList[position]
+//                        formComponent?.mediaType =mediaType
+//                        formComponent?.fileUrl = response.url
+//                        formComponent?.title =response.title
+//                        formComponent?.fileSize = response.fileSize
+                    //    Log.e("formComponent", "fileUpload url: ${formComponent?.fileUrl}")
+
+                        if (formComponent != null) {
+                            val fileUploadData = FileUploadData(mediaType, response.url, response.title, response.fileSize)
+                            Log.e("Debug", "Before fileUpload: ${fileUploadData}")
+                            Log.e("Debug", "Before add: ${formComponent?.fileUpload}")
+                            // Check if fileUpload is initialized; if not, initialize it
+                            if (formComponent!!.fileUpload == null) {
+                                formComponent?.fileUpload= ArrayList()
+                            }
+                            formComponent?.fileUpload?.add(fileUploadData)
+                            Log.e("Debug", "After add: ${formComponent?.fileUpload}")
+                           // item.formSchema?.schema?.get(0)?.fileUpload?.add(fileUpload)
+                        } else {
+                            Log.e("formComponent", "Cannot add fileUpload, formComponent is null")
+                        }
+                      //  Log.e("Debug", "formComponent hashCode: ${formComponent.hashCode()}")
+                       // Log.e("Debug", "schema[0] hashCode: ${item.formSchema?.schema?.get(0)?.hashCode()}")
+
+                        // Add to item.formSchema if needed
+                        val targetComponent = item.formSchema?.schema?.get(0)
+                        if (targetComponent != null && targetComponent == formComponent) {
+                            val fileUpload = FileUploadData(mediaType, response.url, response.title, response.fileSize)
+                            targetComponent.fileUpload?.add(fileUpload)
+                            Log.e("Debug", "schema[0] fileUpload size: ${targetComponent.fileUpload?.size}")
+                        } else {
+                            Log.e("Debug", "schema[0] and formComponent do not match or are null")
+                        }
+//                        item.formSchema?.schema?.get(0)?.mediaType =mediaType
+//                        item.formSchema?.schema?.get(0)?.fileUrl =response.url
+//                        item.formSchema?.schema?.get(0)?.title =response.title
+//                        item.formSchema?.schema?.get(0)?.fileSize =response.fileSize
+
+                        messageAdapter.notifyItemChanged(position)
+                        (chatRecyclerView.findViewHolderForAdapterPosition(position) as? NCWChatAdapter.FormViewHolder)?.updateFormAdapterData(item.formSchema?.schema ?: emptyList())
 
 
+                    }
+
+
+
+                }
             }
+
 
             NCWRoutes.ROUTE_END_CHAT -> {
                 hideProgressBar()

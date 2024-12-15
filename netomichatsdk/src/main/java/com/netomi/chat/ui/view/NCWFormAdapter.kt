@@ -27,9 +27,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.netomi.chat.R
 import com.netomi.chat.model.messages.Component
+import com.netomi.chat.model.messages.FileUploadData
+
 import com.netomi.chat.utils.NCWAppConstant.FORM_DATE_FORMAT
 import com.netomi.chat.utils.NCWThemeUtils
 import java.util.Calendar
@@ -38,16 +41,26 @@ data class FormData(
     var textInput: String? = null,
     var selectedRadio: String? = null,
     var selectedCheckboxes: List<String> = emptyList(),
-    var fileUri: Uri? = null,
     var dropdownSelection: String? = null,
-    var dateInput: String? = null
+    var dateInput: String? = null,
+    var fileUpload: ArrayList<FileUploadData>?= arrayListOf()
 )
 
-class NCWFormAdapter(private val items: List<Component>,private val callBack: (Component?) -> Unit) : RecyclerView.Adapter<NCWFormAdapter.FormViewHolder>() {
+class NCWFormAdapter(private val items: ArrayList<Component>, private val callBack: (Component?) -> Unit,private val formData: (String?, String?) -> Unit) : RecyclerView.Adapter<NCWFormAdapter.FormViewHolder>() {
 
 
     private val inputValues = mutableMapOf<String, Any?>()
     private val inputValuesSelected = MutableList(items.size) { FormData() }
+
+    fun updateFileUpload(position: Int, updatedFile: FileUploadData) {
+      /*  if (position in items.indices) {
+
+        }*/
+    }
+
+    fun updateItem(position: Int, component: Component) {
+        items[position] = component
+    }
 
     inner class FormViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -288,6 +301,7 @@ class NCWFormAdapter(private val items: List<Component>,private val callBack: (C
                         { _, year, month, dayOfMonth ->
                             text = "$dayOfMonth/${month + 1}/$year"
                             inputValues[component.id] = text
+                            inputValuesSelected[adapterPosition].dateInput=text.toString()
                         },
                         calendar.get(Calendar.YEAR),
                         calendar.get(Calendar.MONTH),
@@ -298,7 +312,6 @@ class NCWFormAdapter(private val items: List<Component>,private val callBack: (C
             }
             formContainer.addView(textView)
         }
-
         private fun createFileInput(component: Component) {
             val fileInputView = LayoutInflater.from(itemView.context)
                 .inflate(R.layout.custom_file_input_view, formContainer, false) as ConstraintLayout
@@ -306,19 +319,102 @@ class NCWFormAdapter(private val items: List<Component>,private val callBack: (C
             val uploadIcon: ImageView = fileInputView.findViewById(R.id.upload_icon)
             val uploadText: TextView = fileInputView.findViewById(R.id.upload_text)
             val formatHint: TextView = fileInputView.findViewById(R.id.format_hint)
+            val recyclerDoc: RecyclerView = fileInputView.findViewById(R.id.recyclerDoc)
 
-            fileInputView.setOnClickListener {
+            NCWThemeUtils.setUserConfigTextColor(uploadText)
+            NCWThemeUtils.setTimeStampColor(formatHint)
 
-                callBack(component)
-               /* openFilePicker { fileUri ->
+            try {
+                if (!component.fileUpload.isNullOrEmpty()) {
+                    Log.d("FileUpload", "All files: ${component.fileUpload}")
+                    recyclerDoc.visibility = View.VISIBLE
+
+                    inputValuesSelected[adapterPosition].fileUpload?.addAll(component.fileUpload!!)
+                    if (recyclerDoc.adapter == null) {
+                        recyclerDoc.layoutManager = LinearLayoutManager(
+                            itemView.context,
+                            LinearLayoutManager.VERTICAL,
+                            false
+                        )
+                        recyclerDoc.adapter = NCWFormFilesAdapter(component.fileUpload!!) { selectedOption ->
+                            Log.d("SelectedOption", "Selected file: $selectedOption")
+                        }
+                    } else {
+                        recyclerDoc.adapter!!.notifyDataSetChanged()
+                        // (recyclerDoc.adapter as? NCWFormFilesAdapter)?.updateData(component.fileUpload)
+                    }
+                } else {
+                    recyclerDoc.visibility = View.GONE
+                }
+            } catch (ex: Exception) {
+                Log.e("Exception", "Error inflating file input: ${ex.message}", ex)
+            }
+
+            uploadIcon.setOnClickListener {
+                callBack(component) // Trigger the callback when upload icon is clicked
+            }
+
+            formContainer.addView(fileInputView)
+            inputValues[component.id] = fileInputView
+        }
+
+
+        /*   private fun createFileInput(component: Component) {
+               val fileInputView = LayoutInflater.from(itemView.context)
+                   .inflate(R.layout.custom_file_input_view, formContainer, false) as ConstraintLayout
+
+               val uploadIcon: ImageView = fileInputView.findViewById(R.id.upload_icon)
+               val uploadText: TextView = fileInputView.findViewById(R.id.upload_text)
+               val formatHint: TextView = fileInputView.findViewById(R.id.format_hint)
+               val recyclerDoc: RecyclerView = fileInputView.findViewById(R.id.recyclerDoc)
+
+               NCWThemeUtils.setUserConfigTextColor(uploadText)
+               NCWThemeUtils.setTimeStampColor(formatHint)
+
+
+               try {
+                   if (component.fileUpload.size>0){
+                       Log.e("JASSSSSSS"," All"+component.fileUpload)
+                       recyclerDoc.visibility=View.VISIBLE
+
+   Log.e("JASSSSSSS","JASSSSSSS1 "+component.fileUpload)
+                       Log.e("fileUpload","fileUpload Size"+ component.fileUpload.size)
+                       if (recyclerDoc.adapter == null) {
+                           recyclerDoc.layoutManager =
+                               LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
+                       }
+                       val chipAdapter = NCWFormFilesAdapter(component.fileUpload) { selectedOption ->
+                       }
+                       recyclerDoc.adapter = chipAdapter
+                   }
+                   else{
+                       Log.e("JASSSSSSS"," Elseeeeee")
+                       recyclerDoc.visibility=View.GONE
+                   }
+
+               }
+               catch (ex:Exception)
+               {
+
+                   Log.e("JASSSSSSS"," Elsesss"+ex.printStackTrace())
+               }
+
+               Log.e("GetData","component"+component)
+
+               uploadIcon.setOnClickListener {
+
+                   callBack(component)
+                  *//* openFilePicker { fileUri ->
                     // Handle the selected file
                     uploadText.text = fileUri?.lastPathSegment ?: "No file selected"
                     inputValues[component.id] = fileUri
-                }*/
+                }*//*
             }
             formContainer.addView(fileInputView)
-            inputValues[component.id] = null
-        }
+
+
+            inputValues[component.id] = fileInputView
+        }*/
 
 
         private fun addLabel(component: Component) {
@@ -384,6 +480,10 @@ class NCWFormAdapter(private val items: List<Component>,private val callBack: (C
 
                 Log.e("CheckList", "All Values $submissionDataList")
 
+
+
+
+                //formData(inputValuesSelected)
                 val submissionData = mutableMapOf<String, Any?>()
 
                 inputValues.forEach { (key, value) ->
@@ -412,8 +512,114 @@ class NCWFormAdapter(private val items: List<Component>,private val callBack: (C
                     }
                 }
                 Log.e("Dataaa", "Submission Data: $submissionData") // Log the submission data
+
+                // Create the payload and label response
+                val messagePayload = createPayload(inputValuesSelected)
+                val labelResponse = createLabelResponse(inputValuesSelected)
+
+                // Call the formData callback with the payload and label
+                formData(messagePayload, labelResponse)
+
+
             }
         }
+
+        fun createPayload(inputValuesSelected: List<FormData>): String {
+            val stringBuilder = StringBuilder("event://;LEARN_ATTRIBUTE_EVENT;")
+
+            // Iterate over each FormData object
+            inputValuesSelected.forEach { formData ->
+                // Add text input
+                formData.textInput?.let {
+                    stringBuilder.append("DEFAULT_OUTPUT_KEY_INPUT::value=$it&")
+                }
+
+                // Add selected radio
+                formData.selectedRadio?.let {
+                    stringBuilder.append("DEFAULT_OUTPUT_KEY_SELECT::value=$it&")
+                }
+
+                // Add selected checkboxes
+                if (formData.selectedCheckboxes.isNotEmpty()) {
+                    val checkboxes = formData.selectedCheckboxes.joinToString(",")
+                    stringBuilder.append("DEFAULT_OUTPUT_KEY_INPUT::value=$checkboxes&")
+                }
+
+                // Add dropdown selection
+                formData.dropdownSelection?.let {
+                    stringBuilder.append("DEFAULT_OUTPUT_KEY_SELECT::value=$it&")
+                }
+
+                // Add date input
+                formData.dateInput?.let {
+                    stringBuilder.append("DEFAULT_OUTPUT_KEY_INPUT::value=$it&")
+                }
+
+                // Add file URLs
+                formData.fileUpload?.let { fileUploads ->
+                    if (fileUploads.isNotEmpty()) {
+                        val fileUrls = fileUploads.mapNotNull { it.fileUrl }.joinToString(",")
+                        stringBuilder.append("DEFAULT_OUTPUT_KEY_PILL::value=$fileUrls&")
+                    }
+                }
+            }
+
+            // Remove the last '&' if it exists
+            if (stringBuilder.endsWith("&")) {
+                stringBuilder.setLength(stringBuilder.length - 1)
+            }
+
+            return stringBuilder.toString()
+        }
+
+        fun createLabelResponse(inputValuesSelected: List<FormData>): String {
+            val stringBuilder = StringBuilder()
+
+            // Iterate over each FormData object
+            inputValuesSelected.forEach { formData ->
+                // Add text input
+                formData.textInput?.let {
+                    stringBuilder.append("$it\n")
+                }
+
+                // Add selected radio
+                formData.selectedRadio?.let {
+                    stringBuilder.append("$it\n")
+                }
+
+                // Add selected checkboxes
+                if (formData.selectedCheckboxes.isNotEmpty()) {
+                    val checkboxes = formData.selectedCheckboxes.joinToString(",")
+                    stringBuilder.append("$checkboxes\n")
+                }
+
+                // Add dropdown selection
+                formData.dropdownSelection?.let {
+                    stringBuilder.append("$it\n")
+                }
+
+                // Add date input
+                formData.dateInput?.let {
+                    stringBuilder.append("$it\n")
+                }
+
+                // Add file URLs
+                formData.fileUpload?.let { fileUploads ->
+                    if (fileUploads.isNotEmpty()) {
+                        val fileUrls = fileUploads.mapNotNull { it.fileUrl }.joinToString(", ")
+                        stringBuilder.append("$fileUrls\n")
+                    }
+                }
+            }
+
+            // Remove the last newline character if it exists
+            if (stringBuilder.isNotEmpty()) {
+                stringBuilder.setLength(stringBuilder.length - 1)
+            }
+
+            return stringBuilder.toString()
+        }
+
 
         private fun validateInputs(component: Component, inputValues: Map<String, Any?>): Boolean {
             var isValid = true
@@ -474,4 +680,5 @@ class NCWFormAdapter(private val items: List<Component>,private val callBack: (C
     }
 
     override fun getItemCount() = items.size
+
 }

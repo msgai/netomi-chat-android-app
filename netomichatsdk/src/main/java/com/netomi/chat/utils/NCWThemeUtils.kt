@@ -107,7 +107,7 @@ object NCWThemeUtils
         }
     }
 
-    fun setUserConfig(messageText: TextView) {
+    fun setUserConfig(messageText: View) {
         themeData?.mobileConfig?.lightTheme?.userConfig?.let { userConfig ->
             val bubbleConfig = themeData?.mobileConfig?.lightTheme?.bubbleConfig
             val borderRadius = bubbleConfig?.borderRadius?.toFloat() ?: 0f
@@ -115,11 +115,19 @@ object NCWThemeUtils
 
             // Apply background with corner radii
             applyBackgroundWithCorners(messageText, userConfig.backgroundColor, cornerRadii)
-
-            // Set text color
+              if (messageText is TextView)
             userConfig.textColor?.let { color -> setTextColor(messageText, color) }
         }
     }
+
+    fun setUserConfigTextColor(textView: TextView)
+    {
+        themeData?.mobileConfig?.lightTheme?.userConfig?.let { userConfig ->{
+            userConfig.textColor?.let { color -> setTextColor(textView, color) }
+        }}
+    }
+
+
 
 
     fun setRadioButtonUserConfig(messageText: RadioButton) {

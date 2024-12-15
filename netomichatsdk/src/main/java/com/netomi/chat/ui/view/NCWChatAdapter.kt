@@ -17,6 +17,7 @@ import com.google.android.material.chip.ChipGroup
 import com.netomi.chat.R
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
+import com.netomi.chat.model.messages.Component
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppUtils
@@ -28,7 +29,9 @@ class NCWChatAdapter(
     private val messages: MutableList<NCWMessage>,
     private val themeData: NCWThemeResponse?,
     private val actionCallback: NCWChatActionCallback,
-    private val feedbackActionCallBack:NCWFeedbackActionCallback
+    private val feedbackActionCallBack:NCWFeedbackActionCallback,
+    private val callBack: (Component?) -> Unit,
+    private val formData: (String?, String?) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -67,7 +70,7 @@ class NCWChatAdapter(
         when (holder) {
             is RequestViewHolder -> holder.bind(message)
             is ResponseViewHolder -> holder.bind(message,position)
-            is FormViewHolder->holder.bind(message)
+            is FormViewHolder->holder.bind(message,callBack,formData)
            // is InitialViewHolder -> holder.bind(message,position)
         }
     }
@@ -184,8 +187,13 @@ class NCWChatAdapter(
         private val tvFormTitle: TextView = itemView.findViewById(R.id.tvFormTitle)
         private val recyclerViewForm: RecyclerView = itemView.findViewById(R.id.formRecyclerView)
         private val tvFormDesc: TextView = itemView.findViewById(R.id.tvFormDesc)
+        private var formAdapter: NCWFormAdapter? = null
 
-        fun bind(message: NCWMessage) {
+        fun bind(
+            message: NCWMessage,
+            callBack: (Component?) -> Unit,
+            formData: (String?, String?) -> Unit
+        ) {
             NCWThemeUtils.setBotConfig(rootLayout)
             NCWThemeUtils.setBotTextColor(tvFormTitle)
             NCWThemeUtils.setTimeStampColor(tvFormTitle)
@@ -200,14 +208,35 @@ class NCWChatAdapter(
 
             recyclerViewForm.layoutManager =
                 LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
-            val formAdapter = NCWFormAdapter(message.formSchema?.schema ?: emptyList()){callBack->
-                Log.e("SelectedComponent","iiit "+callBack)
-                if (callBack != null) {
-                    Log.e("SelectedComponent","iiit "+callBack.config)
-                }
+            formAdapter = message.formSchema?.schema?.let { schema ->
+                NCWFormAdapter(schema, { callBack ->
+                    // Handle the component callback
+                    if (callBack != null) {
+                        callBack(callBack)
+                        // Log.e("SelectedComponent", "iiit " + callBack.config)
+                    }
+                }, { payload, label ->
+                    // Handle the payload and label response here
+                    println("Payload: $payload")
+                    println("Label: $label")
+                    formData(payload,label)
+                })
             }
+
+// Set the adapter to the RecyclerView
             recyclerViewForm.adapter = formAdapter
 
+        }
+
+        fun updateFormAdapterData(components: List<Component>) {
+
+            components.forEachIndexed { index, component ->
+                if (component.component == "file") {
+                    Log.e("Data", "Updating item at position $index")
+                    formAdapter?.updateItem(index, component) // Update the data in the adapter
+                    formAdapter?.notifyItemChanged(index) // Notify only the specific position
+                }
+            }
         }
 
     }
