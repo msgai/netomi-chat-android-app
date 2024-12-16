@@ -776,7 +776,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                 Log.e("Jsonn","Testtt "+jsonMessage)
 
                 val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
-
+                /**
+                 * Handle the Form Response
+                 */
                 if (response.customFields?.isNotEmpty() == true)
                 {
                     Log.e("Dataa","Idffff" + (response.customFields?.get(0)?.values ?: null))
@@ -811,8 +813,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                     }
 
                 }
+                /**
+                 * Handle the normal message
+                 */
                 else {
-Log.e("Dataa","Elseee" +response)
                     val newMessages =
                         response.attachments?.mapNotNull { mapAttachmentToMessage(it) }
                             ?: emptyList()
@@ -821,7 +825,17 @@ Log.e("Dataa","Elseee" +response)
                         newMessages.forEachIndexed { index, message ->
                             message.isSameTimeMessage = index == 0
                         }
-                        updateMessageList(newMessages)
+
+                        if(response.customPayload?.CHUNK_INDEX !=null){
+                            for (i in newMessages.indices) {
+                                updateStreamMessage(newMessages[i])
+                            }
+                        }else{
+                            updateMessageList(newMessages)
+                        }
+
+
+
                     }
                 }
 
@@ -916,8 +930,10 @@ Log.e("Dataa","Elseee" +response)
             buttons = if (messageType == MessageType.CARD) attach.buttons else arrayListOf(),
             largeImageUrl = if (messageType == MessageType.IMAGE) attach.largeImageUrl else null,
             quickReply = attach.quickReply,
+            requestID = attachment.attachment.responseId?.toString()
         )
     }
+
 
     // Overloaded helper function for a single message
     private fun updateMessageList(newMessage: NCWMessage) {
@@ -927,34 +943,37 @@ Log.e("Dataa","Elseee" +response)
         addLoader()
     }
 
+    private fun updateStreamMessage(streamMessage:NCWMessage){
+        addStreamMessages(streamMessage)
+    }
+
     private fun updateMessageList(newMessages: List<NCWMessage>) {
         val typingIndicatorEnabled = themeData?.typingIndicator?.enabled ?: false
+            if (!typingIndicatorEnabled) {
+                addMessages(newMessages)
+                return
+            }
 
-        if (!typingIndicatorEnabled) {
-            addMessages(newMessages)
-            return
-        }
+            val currentTime = System.currentTimeMillis()
+            val elapsedTime = currentTime - loaderAddedTime
 
-        val currentTime = System.currentTimeMillis()
-        val elapsedTime = currentTime - loaderAddedTime
-
-        // Ensure loader remains visible for at least minTime
-        val minTime = themeData?.typingIndicator?.minTime ?: 1000L
-        if (isLoaderActive && elapsedTime < minTime) {
-            Log.e("CallActive", "Waiting for minTime: $minTime")
-            Handler(Looper.getMainLooper()).postDelayed({
-                if (isLoaderActive) { // Double-check if loader is still active
-                    safelyRemoveLoader(newMessages)
-                    Log.e("CallActive", "Removed after minTime")
-                }
-            }, minTime - elapsedTime)
-        } else if (isLoaderActive) { // Ensure loader is active before removing
-            Log.e("CallActive", "Removed loader immediately")
-            safelyRemoveLoader(newMessages)
-        } else {
-            Log.e("CallActive", "Loader already removed, updating messages only")
-            addMessages(newMessages)
-        }
+            // Ensure loader remains visible for at least minTime
+            val minTime = themeData?.typingIndicator?.minTime ?: 1000L
+            if (isLoaderActive && elapsedTime < minTime) {
+                Log.e("CallActive", "Waiting for minTime: $minTime")
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (isLoaderActive) { // Double-check if loader is still active
+                        safelyRemoveLoader(newMessages)
+                        Log.e("CallActive", "Removed after minTime")
+                    }
+                }, minTime - elapsedTime)
+            } else if (isLoaderActive) { // Ensure loader is active before removing
+                Log.e("CallActive", "Removed loader immediately")
+                safelyRemoveLoader(newMessages)
+            } else {
+                Log.e("CallActive", "Loader already removed, updating messages only")
+                addMessages(newMessages)
+            }
 
     }
 
@@ -966,6 +985,10 @@ Log.e("Dataa","Elseee" +response)
             chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
         }
 
+    }
+    // Helper function to add messages and scroll to the latest
+    private fun addStreamMessages(newMessages: NCWMessage) {
+        messageAdapter.updateOrAppendMessage(newMessages)
     }
 
     private fun safelyRemoveLoader(newMessages: List<NCWMessage>) {

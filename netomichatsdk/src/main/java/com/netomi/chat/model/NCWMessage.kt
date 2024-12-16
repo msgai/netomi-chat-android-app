@@ -8,7 +8,7 @@ import com.netomi.chat.model.messages.NCWCustomPayload
 import com.netomi.chat.model.messages.NCWQuickReply
 
 data class NCWMessage(
-    val message: String? = null,
+    var message: String? = null,
     val imageUrl: String? = null,
     val videoUrl: String? = null,
     val type: MessageType=MessageType.TEXT,
@@ -29,7 +29,9 @@ data class NCWMessage(
     var attachmentList: ArrayList<NCWAttachmentList>? = null,
     var likeSelected: Boolean = false,
     var dislikeSelected: Boolean = false,
-    var formSchema: FormSchema? = null
+    var formSchema: FormSchema? = null,
+    var requestID:String?=null,
+    var customPayload: NCWCustomPayload? = null,
 
     )
 

@@ -30,7 +30,8 @@ class NCWChatAdapter(
     private val actionCallback: NCWChatActionCallback,
     private val feedbackActionCallBack:NCWFeedbackActionCallback
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
+    // To map messageIDs to positions in the RecyclerView
+    private val messageMap = mutableMapOf<String, Int>()
     companion object {
         private const val VIEW_TYPE_REQUEST = 1
         private const val VIEW_TYPE_RESPONSE = 2
@@ -381,6 +382,20 @@ class NCWChatAdapter(
                 message.likeSelected = false // Ensure only one can be selected
                 feedbackActionCallBack.onThumbDownClick()
             }
+        }
+    }
+
+    // Function to append text or add a new message
+    fun updateOrAppendMessage(newMessage: NCWMessage) {
+        val index = messages.indexOfFirst { it.requestID == newMessage.requestID && it.sender==newMessage.sender }
+        if (index != -1) {
+            // Message already exists; append text
+            messages[index].message += newMessage.message
+            notifyItemChanged(index)
+        } else {
+            // Add new message to the list
+            messages.add(newMessage)
+            notifyItemInserted(messages.size - 1)
         }
     }
 
