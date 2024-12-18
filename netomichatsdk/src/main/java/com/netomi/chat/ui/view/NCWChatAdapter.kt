@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -35,7 +36,8 @@ class NCWChatAdapter(
     private val callBack: (Component?) -> Unit,
     private val formData: (String?, String?, ArrayList<NCWAttachmentList>) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
+    // To map messageIDs to positions in the RecyclerView
+    private val messageMap = mutableMapOf<String, Int>()
     companion object {
         private const val VIEW_TYPE_REQUEST = 1
         private const val VIEW_TYPE_RESPONSE = 2
@@ -297,6 +299,7 @@ class NCWChatAdapter(
         private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
         private val thumbUpImageButton: ImageView = itemView.findViewById(R.id.thumbUpButton)
         private val thumbDownImageButton: ImageView = itemView.findViewById(R.id.thumbDownButton)
+        private val llFeedback: LinearLayout = itemView.findViewById(R.id.ll_feedback)
 
         fun bind(message: NCWMessage,position: Int) {
             // Hide all views initially to avoid redundant visibility changes
@@ -313,19 +316,31 @@ class NCWChatAdapter(
             NCWThemeUtils.setTimeStampColor(tvTime)
             imgBot.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.INVISIBLE
             tvTime.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.GONE
+            llFeedback.visibility=if(message.isSameTimeMessage)View.VISIBLE else View.GONE
+
             NCWThemeUtils.setBotConfig(thumbUpImageButton)
             NCWThemeUtils.setBotConfig(thumbDownImageButton)
-            if(message.likeSelected){
-                thumbUpImageButton.setImageResource(R.drawable.thumps_up_selected)
-                thumbDownImageButton.setImageResource(R.drawable.thumps_down_unselected)
-            }else if (message.dislikeSelected){
-                thumbUpImageButton.setImageResource(R.drawable.thumps_up_unselected)
-                thumbDownImageButton.setImageResource(R.drawable.thumps_down_selected)
-            }else{
-                thumbUpImageButton.setImageResource(R.drawable.thumps_down_unselected)
-                thumbDownImageButton.setImageResource(R.drawable.thumps_up_unselected)
-            }
+            if (message.isReviewEnabled) {
+                llFeedback.visibility = View.VISIBLE
 
+                when (message.feedbackValue) {
+                    "POSITIVE" -> {
+                        thumbUpImageButton.setImageResource(R.drawable.thumps_up_selected)
+                        thumbDownImageButton.visibility=View.GONE
+                    }
+                    "NEGATIVE" -> {
+                        thumbUpImageButton.visibility=View.GONE
+                        thumbDownImageButton.setImageResource(R.drawable.thumps_down_selected)
+                    }
+                    else -> {
+                        thumbUpImageButton.setImageResource(R.drawable.thumps_up_unselected)
+                        thumbDownImageButton.setImageResource(R.drawable.thumps_down_unselected)
+                    }
+                }
+            } else {
+                Log.e("Feedback", "Feedback Null")
+                llFeedback.visibility = View.GONE
+            }
             when (message.type) {
                 MessageType.TEXT -> {
                     message.message?.let {
@@ -426,17 +441,30 @@ class NCWChatAdapter(
             }
             // Thumbs-up click listener
            thumbUpImageButton.setOnClickListener {
-                message.likeSelected = !message.likeSelected
-                message.dislikeSelected = false // Ensure only one can be selected
-                feedbackActionCallBack.onThumbUpClick()
+                message.feedbackValue = "POSITIVE"
+                feedbackActionCallBack.onThumbUpClick(message.requestID!!)
             }
 
             // Thumbs-down click listener
             thumbDownImageButton.setOnClickListener {
-                message.dislikeSelected = !message.dislikeSelected
-                message.likeSelected = false // Ensure only one can be selected
-                feedbackActionCallBack.onThumbDownClick()
+                message.feedbackValue = "NEGATIVE"
+                feedbackActionCallBack.onThumbDownClick(message.requestID!!)
             }
+        }
+    }
+
+    // Function to append text or add a new message
+    fun updateOrAppendMessage(newMessage: NCWMessage) {
+        val index = messages.indexOfFirst { it.requestID == newMessage.requestID && it.sender==newMessage.sender }
+        if (index != -1) {
+            // Message already exists; append text
+            messages[index].message += newMessage.message
+
+            notifyItemChanged(index)
+        } else {
+            // Add new message to the list
+            messages.add(newMessage)
+            notifyItemInserted(messages.size - 1)
         }
     }
 
