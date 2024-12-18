@@ -43,10 +43,20 @@ data class NCWAttachmentList(
     var largeImageUrl: String? = null,
     var errorMessage: String? = null,
     var thumbnailUrl: String? = null,
-    var fileURL: String? = null
+    var fileURL: String? = null,
+    var values: Values? = null,
+    val timestamp: Long? = null,
 
 
     )
+data class Values(
+    val status: List<String>? = null,
+    val isSchemaForm: List<String>? = null,
+    val schemaFormRequestId: List<String>? = null,
+    val question: List<String>? = null,
+    val optionList: List<String>? = null,
+    val formValues: List<String>? = null
+)
 
 data class NCWAdditionalAttributes(
     val CUSTOM_ATTRIBUTES: ArrayList<DeviceInfo> = arrayListOf()

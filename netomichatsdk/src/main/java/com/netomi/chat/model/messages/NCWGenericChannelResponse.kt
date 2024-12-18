@@ -32,7 +32,7 @@ data class NCWAttachmentListRequest(
 
     var type: String? = null,
     var title: String? = null,
-    var timestamp: Int? = null,
+    var timestamp: Long? = null,
     var largeImageUrl: String? = null,
     var isReviewEnabled: Boolean? = null,
     var thumbnailUrl: String? = null,

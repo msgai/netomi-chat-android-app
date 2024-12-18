@@ -203,7 +203,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
         sendMessageIcon.setOnClickListener {
 
             val messageContent = messageInputField.text.toString()
-            sendMessage(messageContent)
+            try {
+                sendMessage(messageContent)
+            }
+            catch (ex:Exception){
+                Log.e("Exceeee ","dd "+ex.printStackTrace())
+            }
+
         }
 
         attachmentIcon.setOnClickListener {
@@ -444,7 +450,38 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
      * initial greeting or information, allowing the user to see context when
      * they first open the chat.
      */
-    private fun loadInitialMessages() {
+/*    private fun loadInitialMessages() {
+        themeData?.initialFlows?.header?.let { header ->
+            val initialMessage = NCWMessage(
+                sender = TYPE_INITIAL,
+                type = MessageType.TEXT,
+                message = header,
+                timestamp = System.currentTimeMillis()
+            )
+            messageList.add(initialMessage)
+           messageAdapter.notifyItemInserted(messageList.size - 1)
+        }
+
+        // Add quick reply options if available
+        val flows = themeData?.initialFlows?.flows.orEmpty()
+        if (flows.isNotEmpty()) {
+            val options = flows.map { initialData ->
+                NCWQuickReplyOption().apply {
+                    label = initialData.label
+                    metadata = initialData.name
+                }
+            }
+
+            val quickReplyMessage = NCWMessage(
+                sender = TYPE_INITIAL,
+                timestamp = System.currentTimeMillis(),
+                quickReply = NCWQuickReply(options = ArrayList(options))
+            )
+            messageList.add(quickReplyMessage)
+            messageAdapter.notifyItemInserted(messageList.size - 1)
+        }
+    }*/
+   private fun loadInitialMessages() {
         // Add the initial bot message
         themeData?.initialFlows?.header?.let { header ->
             messageList.add(
@@ -455,7 +492,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                     timestamp = System.currentTimeMillis()
                 )
             )
+
         }
+
 
         // Add quick reply options if available
         val flows = themeData?.initialFlows?.flows.orEmpty()
@@ -572,12 +611,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                 Log.e("FtetteCompooe", "sS $formComponent")
                 showMedia()
             }
-        }, { payload, label ->
-            // Handle the payload and label response here
+        }, { payload, label,attachmentList ->
             println("Payload: $payload")
             println("Label: $label")
             val timeStamp = System.currentTimeMillis()
-            val createPayload = payload?.let { createPayload(it, label, timeStamp) }
+            val createPayload = payload?.let { createPayload(it, label, timeStamp,attachmentList) }
             if (createPayload != null) {
                 chatViewModel.sendMessageAPI(createPayload)
             }
@@ -849,7 +887,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                                 formSchema = formSchemasModel
 
                             )
-                            updateMessageList(newMessages)
+                            addSingleMessage(newMessages)
                         }
 
                     }
@@ -965,10 +1003,16 @@ Log.e("Dataa","Elseee" +response)
 
     // Overloaded helper function for a single message
     private fun updateMessageList(newMessage: NCWMessage) {
+       addSingleMessage(newMessage)
+        addLoader()
+    }
+
+    private fun addSingleMessage(newMessage: NCWMessage)
+    {
         messageList.add(newMessage)
         messageAdapter.notifyDataSetChanged()
         chatRecyclerView.scrollToPosition(messageList.size)
-        addLoader()
+
     }
 
     private fun updateMessageList(newMessages: List<NCWMessage>) {
@@ -1611,51 +1655,24 @@ Log.e("Dataa","Elseee" +response)
 
                 else {
                     hideProgressBar()
+
+
                     val position = messageList.indexOfLast { it.sender == TYPE_FORM }
-                    if (position != -1) {
-
-                        val item = messageList[position]
-//                        formComponent?.mediaType =mediaType
-//                        formComponent?.fileUrl = response.url
-//                        formComponent?.title =response.title
-//                        formComponent?.fileSize = response.fileSize
-                    //    Log.e("formComponent", "fileUpload url: ${formComponent?.fileUrl}")
-
-                        if (formComponent != null) {
-                            val fileUploadData = FileUploadData(mediaType, response.url, response.title, response.fileSize)
-                            Log.e("Debug", "Before fileUpload: ${fileUploadData}")
-                            Log.e("Debug", "Before add: ${formComponent?.fileUpload}")
-                            // Check if fileUpload is initialized; if not, initialize it
-                            if (formComponent!!.fileUpload == null) {
-                                formComponent?.fileUpload= ArrayList()
-                            }
-                            formComponent?.fileUpload?.add(fileUploadData)
-                            Log.e("Debug", "After add: ${formComponent?.fileUpload}")
-                           // item.formSchema?.schema?.get(0)?.fileUpload?.add(fileUpload)
-                        } else {
-                            Log.e("formComponent", "Cannot add fileUpload, formComponent is null")
-                        }
-                      //  Log.e("Debug", "formComponent hashCode: ${formComponent.hashCode()}")
-                       // Log.e("Debug", "schema[0] hashCode: ${item.formSchema?.schema?.get(0)?.hashCode()}")
-
-                        // Add to item.formSchema if needed
-                        val targetComponent = item.formSchema?.schema?.get(0)
-                        if (targetComponent != null && targetComponent == formComponent) {
+                    val item = messageList[position]
+                    item.formSchema?.schema?.forEach { targetComponent ->
+                        if (targetComponent.id == formComponent?.id) {
+                            targetComponent.fileUpload = targetComponent.fileUpload ?: ArrayList()
                             val fileUpload = FileUploadData(mediaType, response.url, response.title, response.fileSize)
                             targetComponent.fileUpload?.add(fileUpload)
-                            Log.e("Debug", "schema[0] fileUpload size: ${targetComponent.fileUpload?.size}")
-                        } else {
-                            Log.e("Debug", "schema[0] and formComponent do not match or are null")
+                            Log.e("Debug", "schema[0] fileUpload size: ${targetComponent.fileUpload}")
                         }
-//                        item.formSchema?.schema?.get(0)?.mediaType =mediaType
-//                        item.formSchema?.schema?.get(0)?.fileUrl =response.url
-//                        item.formSchema?.schema?.get(0)?.title =response.title
-//                        item.formSchema?.schema?.get(0)?.fileSize =response.fileSize
-
+                    }
+                    val updatedSchema = item.formSchema?.schema ?: emptyList()
+                    val viewHolder = chatRecyclerView.findViewHolderForAdapterPosition(position)
+                    if (viewHolder is NCWChatAdapter.FormViewHolder) {
+                        formComponent?.let { viewHolder.updateFormAdapterData(updatedSchema, it) }
+                    } else {
                         messageAdapter.notifyItemChanged(position)
-                        (chatRecyclerView.findViewHolderForAdapterPosition(position) as? NCWChatAdapter.FormViewHolder)?.updateFormAdapterData(item.formSchema?.schema ?: emptyList())
-
-
                     }
 
 
@@ -1686,16 +1703,50 @@ Log.e("Dataa","Elseee" +response)
         responses.forEach { response ->
 
             if (response.triggerType == TYPE_RESPONSE) {
-                val newMessages =
-                    response.attachments?.mapNotNull { mapAttachmentToMessage(it,
-                    ) } ?: emptyList()
-                if (newMessages.isNotEmpty()) {
-                    newMessages.forEachIndexed { index, message ->
-                        message.isSameTimeMessage = index == 0
+
+                if (response.customFields?.isNotEmpty() == true) {
+                    Log.e("Dataa", "Idffff" + (response.customFields?.get(0)?.values ?: null))
+                    val gson = Gson()
+
+                    response.customFields.forEach { customField ->
+                        if (customField.name == "FORM_SCHEMA" && !customField.values.isNullOrEmpty()) {
+                            val formSchemas: List<FormSchema> = gson.fromJson(
+                                customField.values[0],
+                                object : TypeToken<List<FormSchema>>() {}.type
+                            )
+
+                            Log.e("ForrrrSizeee", "formSchemas " + formSchemas.size)
+                            val formSchemasModel = formSchemas[0]
+
+
+
+
+                            val newMessages = NCWMessage(
+                                sender = TYPE_FORM,
+                                timestamp = System.currentTimeMillis(),
+                                formSchema = formSchemasModel
+
+                            )
+                            addSingleMessage(newMessages)
+                        }
+
                     }
+
+                } else {
+
+                    val newMessages = response.attachments?.mapNotNull {
+                        mapAttachmentToMessage(
+                            it,
+                        )
+                    } ?: emptyList()
+                    if (newMessages.isNotEmpty()) {
+                        newMessages.forEachIndexed { index, message ->
+                            message.isSameTimeMessage = index == 0
+                        }
+                    }
+                    messageList.addAll(newMessages)
                 }
-                messageList.addAll(newMessages)
-            } else {
+            }else {
                 response.requestPayload?.attachmentList?.takeIf { it.isNotEmpty() }
                     ?.forEach { attachmentListRequest ->
                         val messageType =
@@ -1727,6 +1778,8 @@ Log.e("Dataa","Elseee" +response)
 
             }
         }
+
+
 
 
         messageList.forEach { it.isQuickReplyVisible = false }

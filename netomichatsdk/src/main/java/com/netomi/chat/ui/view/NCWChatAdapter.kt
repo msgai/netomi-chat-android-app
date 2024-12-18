@@ -18,6 +18,7 @@ import com.netomi.chat.R
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.messages.Component
+import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppUtils
@@ -31,7 +32,7 @@ class NCWChatAdapter(
     private val actionCallback: NCWChatActionCallback,
     private val feedbackActionCallBack:NCWFeedbackActionCallback,
     private val callBack: (Component?) -> Unit,
-    private val formData: (String?, String?) -> Unit
+    private val formData: (String?, String?, ArrayList<NCWAttachmentList>) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -192,7 +193,7 @@ class NCWChatAdapter(
         fun bind(
             message: NCWMessage,
             callBack: (Component?) -> Unit,
-            formData: (String?, String?) -> Unit
+            formData: (String?, String?,ArrayList<NCWAttachmentList>) -> Unit
         ) {
             NCWThemeUtils.setBotConfig(rootLayout)
             NCWThemeUtils.setBotTextColor(tvFormTitle)
@@ -209,35 +210,33 @@ class NCWChatAdapter(
             recyclerViewForm.layoutManager =
                 LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
             formAdapter = message.formSchema?.schema?.let { schema ->
-                NCWFormAdapter(schema, { callBack ->
+                NCWFormAdapter(schema, message.formSchema?.properties!!,{ callBack ->
                     // Handle the component callback
                     if (callBack != null) {
                         callBack(callBack)
                         // Log.e("SelectedComponent", "iiit " + callBack.config)
                     }
-                }, { payload, label ->
+                }, { payload, label,attachmentList ->
                     // Handle the payload and label response here
                     println("Payload: $payload")
                     println("Label: $label")
-                    formData(payload,label)
+                    formData(payload,label,attachmentList)
                 })
             }
 
-// Set the adapter to the RecyclerView
             recyclerViewForm.adapter = formAdapter
 
         }
-
-        fun updateFormAdapterData(components: List<Component>) {
-
-            components.forEachIndexed { index, component ->
-                if (component.component == "file") {
-                    Log.e("Data", "Updating item at position $index")
-                    formAdapter?.updateItem(index, component) // Update the data in the adapter
-                    formAdapter?.notifyItemChanged(index) // Notify only the specific position
-                }
+        fun updateFormAdapterData(components: List<Component>, formComponent: Component) {
+            val index = components.indexOfFirst { it.id == formComponent.id }
+            if (index != -1) {
+                Log.e("Data", "Updating item at position $index: $formComponent")
+                formAdapter?.updateItem(index, formComponent)
+            } else {
+                Log.e("UpdateFormAdapterData", "Component not found with id: ${formComponent.id}")
             }
         }
+
 
     }
 
