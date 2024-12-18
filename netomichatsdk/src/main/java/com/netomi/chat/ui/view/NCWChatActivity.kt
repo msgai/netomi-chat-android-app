@@ -37,6 +37,7 @@ import com.google.gson.reflect.TypeToken
 import com.netomi.chat.R
 import com.netomi.chat.awsiot.NCWConnectionStatus
 import com.netomi.chat.model.CarouselButtonType
+import com.netomi.chat.model.CustomFieldName
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.model.MessageType
@@ -50,6 +51,7 @@ import com.netomi.chat.model.endchat.NCWEventData
 import com.netomi.chat.model.feedback.feedbackrequest.NCWEventInfo
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
+import com.netomi.chat.model.messages.CustomField
 import com.netomi.chat.model.messages.FormSchema
 import com.netomi.chat.model.messages.NCWAdditionalAttributes
 import com.netomi.chat.model.messages.NCWAttachment
@@ -774,70 +776,47 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
         chatViewModel.awsMessage.observe(this) { jsonMessage ->
             try {
                 Log.e("Jsonn","Testtt "+jsonMessage)
-
                 val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
-                /**
-                 * Handle the Form Response
-                 */
-                if (response.customFields?.isNotEmpty() == true)
-                {
-                    Log.e("Dataa","Idffff" + (response.customFields?.get(0)?.values ?: null))
-                    val gson = Gson()
-
-                    response.customFields?.forEach { customField ->
-                        if (customField.name == "FORM_SCHEMA" && !customField.values.isNullOrEmpty()) {
-                            val formSchemas: List<FormSchema> = gson.fromJson(
-                                customField.values[0],
-                                object : TypeToken<List<FormSchema>>() {}.type
-                            )
-
-                            Log.e("ForrrrSizeee","formSchemas "+formSchemas.size)
-
-                        /*    formSchemas.forEach { schema ->
-                                Log.e("FormSchema", schema.properties.question)
-                                schema.schema.forEach { component ->
-                                    Log.e("Component", component.componentName)
-                                }
-                            }*/
-                            val formSchemasModel= formSchemas[0]
-
-                            val newMessages =NCWMessage(
-                                sender = TYPE_FORM,
-                                timestamp = System.currentTimeMillis(),
-                                formSchema = formSchemasModel
-
-                            )
-                            updateMessageList(newMessages)
-                        }
-
-                    }
-
-                }
-                /**
-                 * Handle the normal message
-                 */
-                else {
-                    val newMessages =
-                        response.attachments?.mapNotNull { mapAttachmentToMessage(it) }
-                            ?: emptyList()
-
-                    if (newMessages.isNotEmpty()) {
-                        newMessages.forEachIndexed { index, message ->
-                            message.isSameTimeMessage = index == 0
-                        }
-
-                        if(response.customPayload?.CHUNK_INDEX !=null){
-                            for (i in newMessages.indices) {
-                                updateStreamMessage(newMessages[i])
+                if (response.customFields?.isNotEmpty() == true) {
+                    for (customField in response.customFields) {
+                        when (CustomFieldName.fromValue(customField.name)) {
+                            CustomFieldName.FORM_SCHEMA -> {
+                                renderTheFormMessage(response)
                             }
-                        }else{
-                            updateMessageList(newMessages)
+                            CustomFieldName.SURVEY_SCHEMA -> {
+
+                            }
+                           CustomFieldName.DISABLE_INPUT_FIELD -> {
+                              if(customField.values?.get(0) == "true"){
+                                  messageInputField.isEnabled=false
+                                  attachmentIcon.isEnabled=false
+                              }else{
+                                  messageInputField.isEnabled=true
+                                  attachmentIcon.isEnabled=true
+                              }
+
+                            }
+                            CustomFieldName.DISABLE_CHAT_INPUT -> {
+
+                            }
+                           CustomFieldName.END_CHAT -> {
+
+                            }
+                            else -> {
+
+                            }
                         }
-
-
-
                     }
                 }
+
+               /* if (response.customFields?.isNotEmpty() == true && response.customFields[0].name=="FORM_SCHEMA") {
+                    renderTheFormMessage(response)
+                }
+                else {
+                    renderTheNormalMessage(response)
+                }*/
+
+                renderTheNormalMessage(response)
 
             } catch (e: Exception) {
                 Log.e("ParsingError", "Failed to parse JSON: ${e.localizedMessage}")
@@ -906,6 +885,82 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
             handleApiCallback(messages as NCWState<Any>)
         }
     }
+
+    private fun setEnabledConstraintLayout(layout: ConstraintLayout, enabled: Boolean) {
+        layout.isClickable = enabled
+        layout.isFocusable = enabled
+        layout.alpha = if (enabled) 1.0f else 0.5f
+
+        for (i in 0 until layout.childCount) {
+            val child = layout.getChildAt(i)
+            child.isEnabled = enabled
+        }
+    }
+
+    private fun renderTheFormMessage(response: NCWGenericChannelResponse?) {
+        val gson = Gson()
+        response?.customFields?.forEach { customField ->
+            if (customField.name == "FORM_SCHEMA" && !customField.values.isNullOrEmpty()) {
+                val formSchemas: List<FormSchema> = gson.fromJson(
+                    customField.values[0],
+                    object : TypeToken<List<FormSchema>>() {}.type
+                )
+
+                Log.e("ForrrrSizeee","formSchemas "+formSchemas.size)
+
+                /*    formSchemas.forEach { schema ->
+                        Log.e("FormSchema", schema.properties.question)
+                        schema.schema.forEach { component ->
+                            Log.e("Component", component.componentName)
+                        }
+                    }*/
+                val formSchemasModel= formSchemas[0]
+
+                val newMessages =NCWMessage(
+                    sender = TYPE_FORM,
+                    timestamp = System.currentTimeMillis(),
+                    formSchema = formSchemasModel
+
+                )
+                updateMessageList(newMessages)
+            }
+
+        }
+    }
+
+    private fun renderTheNormalMessage(response: NCWGenericChannelResponse?) {
+        val newMessages =
+            response?.attachments?.mapNotNull { mapAttachmentToMessage(it,response.requestId!!) }
+                ?: emptyList()
+
+        if (newMessages.isNotEmpty()) {
+            newMessages.forEachIndexed { index, message ->
+                message.isSameTimeMessage = index == 0
+            }
+            val customPayload=response?.customPayload
+            if(customPayload?.CHUNK_INDEX !=null && customPayload.CHUNK_INDEX.toInt()== 0 && customPayload.CHUNK_STATUS.equals("IN-PROGRESS")){
+                Log.e("Streaming Chunk","Streaming Chunk")
+                for (i in newMessages.indices) {
+                    updateStreamMessage(newMessages[i])
+                }
+            } else if(customPayload?.CHUNK_INDEX !=null && customPayload.CHUNK_INDEX.toInt()>0 && (customPayload.CHUNK_STATUS.equals("SUCCESS") || customPayload.CHUNK_STATUS.equals("IN-PROGRESS"))){
+                Log.e("Streaming Chunk","Streaming Chunk")
+                for (i in newMessages.indices) {
+                    updateStreamMessage(newMessages[i])
+                }
+            }else if(customPayload?.CHUNK_INDEX !=null && customPayload.CHUNK_INDEX.toInt()== 0 && customPayload.CHUNK_STATUS.equals("SUCCESS")){
+                Log.e("Streaming Chunk","Streaming Chunk Not")
+                updateMessageList(newMessages)
+            }
+            else{
+                Log.e("Streaming Chunk","Streaming Chunk Not")
+                updateMessageList(newMessages)
+
+            }
+
+        }
+    }
+
     private fun setUIState(enabled: Boolean) {
 
         sendMessageIcon.isEnabled=enabled
@@ -915,7 +970,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
 
     // Helper function to map attachments to NCWMessage
-    private fun mapAttachmentToMessage(attachment: NCWAttachment): NCWMessage? {
+    private fun mapAttachmentToMessage(attachment: NCWAttachment,requestId: String): NCWMessage? {
         val attach = attachment.attachment ?: return null
         val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
 
@@ -930,7 +985,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
             buttons = if (messageType == MessageType.CARD) attach.buttons else arrayListOf(),
             largeImageUrl = if (messageType == MessageType.IMAGE) attach.largeImageUrl else null,
             quickReply = attach.quickReply,
-            requestID = attachment.attachment.responseId?.toString()
+            requestID = requestId
         )
     }
 
@@ -1527,7 +1582,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
             if (response.triggerType == TYPE_RESPONSE) {
                 val newMessages =
-                    response.attachments?.mapNotNull { mapAttachmentToMessage(it,
+                    response.attachments?.mapNotNull { mapAttachmentToMessage(it,response.requestId!!
                     ) } ?: emptyList()
                 if (newMessages.isNotEmpty()) {
                     newMessages.forEachIndexed { index, message ->

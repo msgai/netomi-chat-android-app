@@ -63,6 +63,7 @@ data class NCWAttachmentContent(
     val carouselImageAspectRatio: String? = null,
     val thumbnailUrl: String? = null,
     val title: String? = null,
+    val feedbackValue: String?=null,
     var buttons: ArrayList<NCWCarouselButton> = arrayListOf()
 
 )

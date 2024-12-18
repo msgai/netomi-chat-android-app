@@ -258,6 +258,7 @@ class NCWChatAdapter(
             NCWThemeUtils.setTimeStampColor(tvTime)
             imgBot.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.INVISIBLE
             tvTime.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.GONE
+
             NCWThemeUtils.setBotConfig(thumbUpImageButton)
             NCWThemeUtils.setBotConfig(thumbDownImageButton)
             if(message.likeSelected){
@@ -391,6 +392,7 @@ class NCWChatAdapter(
         if (index != -1) {
             // Message already exists; append text
             messages[index].message += newMessage.message
+
             notifyItemChanged(index)
         } else {
             // Add new message to the list

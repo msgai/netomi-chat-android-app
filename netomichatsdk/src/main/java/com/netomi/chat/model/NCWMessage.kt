@@ -63,3 +63,19 @@ enum class CarouselButtonType(val value: String) {
     }
 }
 
+enum class CustomFieldName(val value: String) {
+    FORM_SCHEMA("FORM_SCHEMA"),
+    SURVEY_SCHEMA("SURVEY_SCHEMA"),
+    DISABLE_INPUT_FIELD("DISABLE_INPUT_FIELD"),
+    DISABLE_CHAT_INPUT("DISABLE_CHAT_INPUT"),
+    END_CHAT("END_CHAT");
+
+
+    companion object {
+        // Helper method to map String to CarouselButtonType
+        fun fromValue(value: String?): CustomFieldName? {
+            return values().find { it.value == value }
+        }
+    }
+}
+
