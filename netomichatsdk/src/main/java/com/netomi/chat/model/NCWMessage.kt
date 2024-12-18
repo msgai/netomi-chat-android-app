@@ -27,11 +27,11 @@ data class NCWMessage(
     val fileSize: String? = null,
     var isRetry :Boolean=false,
     var attachmentList: ArrayList<NCWAttachmentList>? = null,
-    var likeSelected: Boolean = false,
-    var dislikeSelected: Boolean = false,
     var formSchema: FormSchema? = null,
     var requestID:String?=null,
     var customPayload: NCWCustomPayload? = null,
+    var feedbackValue: String?=null,
+    var isReviewEnabled: Boolean = false,
 
     )
 

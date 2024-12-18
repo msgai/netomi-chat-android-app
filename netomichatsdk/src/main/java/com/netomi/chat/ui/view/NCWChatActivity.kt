@@ -295,12 +295,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                 conversationId = conversationID!!,
                 eventData = com.netomi.chat.model.feedback.feedbackrequest.NCWEventData(
                     eventInfo = NCWEventInfo(
-                        attachmentIndex = 1,
+                        attachmentIndex = 0,
                         feedbackValue = feedbackValue,
-                        requestId = "7832f6fc-ec56-4ba7-8177-d293750d5cb4"
+                        requestId = requestId
                     ),
-                    eventType = "WIDGET_EVENT",
-                    subType = "FEEDBACK"
+                    eventType = "FEEDBACK",
+                    subType = "REVIEW"
             ),
                 eventName = "FEEDBACK",
                 isPublishToMQTT = false,
@@ -767,7 +767,22 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
         }
 
         chatViewModel.feedbackResponse.observe(this){ feedback ->
-            handleApiCallback(feedback as NCWState<Any>)
+            when (feedback) {
+                is NCWState.Loading -> {
+                    showProgressBar()
+                }
+
+                is NCWState.Success -> {
+                    messageAdapter.notifyDataSetChanged()
+                }
+
+                is NCWState.Error -> {
+                    hideProgressBar()
+                }
+                else-> {
+
+                }
+            }
         }
 
 
@@ -777,6 +792,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
             try {
                 Log.e("Jsonn","Testtt "+jsonMessage)
                 val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
+
                 if (response.customFields?.isNotEmpty() == true) {
                     for (customField in response.customFields) {
                         when (CustomFieldName.fromValue(customField.name)) {
@@ -807,14 +823,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                             }
                         }
                     }
-                }
+                }else{
 
-               /* if (response.customFields?.isNotEmpty() == true && response.customFields[0].name=="FORM_SCHEMA") {
-                    renderTheFormMessage(response)
                 }
-                else {
-                    renderTheNormalMessage(response)
-                }*/
 
                 renderTheNormalMessage(response)
 
@@ -884,18 +895,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
         chatViewModel.endChatResponse.observe(this) { messages ->
             handleApiCallback(messages as NCWState<Any>)
         }
+
     }
 
-    private fun setEnabledConstraintLayout(layout: ConstraintLayout, enabled: Boolean) {
-        layout.isClickable = enabled
-        layout.isFocusable = enabled
-        layout.alpha = if (enabled) 1.0f else 0.5f
-
-        for (i in 0 until layout.childCount) {
-            val child = layout.getChildAt(i)
-            child.isEnabled = enabled
-        }
-    }
 
     private fun renderTheFormMessage(response: NCWGenericChannelResponse?) {
         val gson = Gson()
@@ -929,6 +931,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     }
 
     private fun renderTheNormalMessage(response: NCWGenericChannelResponse?) {
+        Log.e("Normal Message", "Normal Message")
         val newMessages =
             response?.attachments?.mapNotNull { mapAttachmentToMessage(it,response.requestId!!) }
                 ?: emptyList()
@@ -985,7 +988,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
             buttons = if (messageType == MessageType.CARD) attach.buttons else arrayListOf(),
             largeImageUrl = if (messageType == MessageType.IMAGE) attach.largeImageUrl else null,
             quickReply = attach.quickReply,
-            requestID = requestId
+            requestID = requestId,
+            feedbackValue = attach.feedbackValue,
+            isReviewEnabled = attach.isReviewEnabled
+
         )
     }
 
@@ -1565,9 +1571,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                 finish()
             }
 
-            NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
-                messageAdapter.notifyDataSetChanged()
-            }
 
             else -> {
                 Toast.makeText(this, "Else..", Toast.LENGTH_SHORT).show()
@@ -1684,11 +1687,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
         constProgressBar.visibility = View.GONE
     }
 
-    override fun onThumbUpClick() {
-        //hitFeedbackAPI("d6a229ab-bedd-4a79-9436-7ab46e44955e","POSITIVE")
+    override fun onThumbUpClick(requestId: String) {
+        Log.e("RequestId ThumbUp",requestId)
+        hitFeedbackAPI(requestId,"POSITIVE")
     }
 
-    override fun onThumbDownClick() {
-        //hitFeedbackAPI("d6a229ab-bedd-4a79-9436-7ab46e44955e","NEGATIVE")
+    override fun onThumbDownClick(requestId: String) {
+        Log.e("RequestId ThumbDown",requestId)
+        hitFeedbackAPI(requestId,"NEGATIVE")
     }
 }

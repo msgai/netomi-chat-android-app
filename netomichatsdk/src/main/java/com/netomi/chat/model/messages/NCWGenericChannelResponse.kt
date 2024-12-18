@@ -51,7 +51,7 @@ data class NCWAttachmentContent(
     val text: String? = null,
     val description: String? = null,
     val timestamp: Long? = null,
-    val isReviewEnabled: Boolean? = null,
+    val isReviewEnabled: Boolean=false,
     val attachmentResponseType: String? = null,
     val intentId: String? = null,
     val responseId: Int? = null,
