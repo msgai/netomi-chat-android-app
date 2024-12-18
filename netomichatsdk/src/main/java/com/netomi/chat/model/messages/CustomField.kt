@@ -1,5 +1,7 @@
 package com.netomi.chat.model.messages
 
+import com.netomi.chat.ui.view.FormData
+
 data class CustomField(
     val botId: String,
     val name: String,
@@ -11,7 +13,9 @@ data class CustomField(
 
 data class FormSchema(
     val properties: Properties,
-    val schema: ArrayList<Component>
+    val schema: ArrayList<Component>,
+    var formData: ArrayList<FormData>?=null
+
 )
 
 data class Properties(
@@ -49,10 +53,6 @@ data class Component(
     val dropDownSelections: Map<String, Setting>,
     val optionList: List<Option>?,
     val config:FileConfig?=null,
-   // var mediaType:String?=null,
-   // var fileUrl:String?=null,
-  //  var title: String? = null,
-  //  var fileSize: Long? = null,
     var fileUpload: ArrayList<FileUploadData>?=null
 
 

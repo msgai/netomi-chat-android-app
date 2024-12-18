@@ -1,5 +1,6 @@
-package com.netomi.chat.ui.view
+package com.netomi.chat.ui.  view
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
@@ -210,7 +211,7 @@ class NCWChatAdapter(
             recyclerViewForm.layoutManager =
                 LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
             formAdapter = message.formSchema?.schema?.let { schema ->
-                NCWFormAdapter(schema, message.formSchema?.properties!!,{ callBack ->
+                NCWFormAdapter(schema, message.formSchema!!,{ callBack ->
                     // Handle the component callback
                     if (callBack != null) {
                         callBack(callBack)
@@ -226,6 +227,33 @@ class NCWChatAdapter(
 
             recyclerViewForm.adapter = formAdapter
 
+         //   recyclerViewForm.isEnabled = message.formSchema?.formData.isNullOrEmpty()
+
+            /*if (!message.formSchema?.formData.isNullOrEmpty()) {
+                Log.e("recyclerViewForm.isEnabled", "recyclerViewForm.isEnabled Ifff")
+                recyclerViewForm.isEnabled = false
+                recyclerViewForm.isClickable = false
+            } else {
+                Log.e("recyclerViewForm.isEnabled", "recyclerViewForm.isEnabled Elseeee")
+                recyclerViewForm.isEnabled = true
+                recyclerViewForm.isClickable = true
+            }*/
+
+            if (message.formSchema?.formData.isNullOrEmpty()) {
+                Log.e("formSchema","Uuuduudd")
+                formAdapter?.isClickable =true
+            } else {
+                Log.e("formSchema ","Elllssseee")
+                formAdapter?.isClickable =false
+            }
+
+
+
+
+        }
+
+        class NonInteractiveLayoutManager(context: Context) : LinearLayoutManager(context) {
+            override fun canScrollVertically(): Boolean = false
         }
         fun updateFormAdapterData(components: List<Component>, formComponent: Component) {
             val index = components.indexOfFirst { it.id == formComponent.id }

@@ -97,6 +97,7 @@ import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
 import com.netomi.chat.utils.NCWFeedbackActionCallback
+import com.netomi.chat.utils.NCWParsingUtils.parsePayloadToFormData
 import com.netomi.chat.utils.NCWRoutes
 import com.netomi.chat.utils.NCWSingleAlertDialog
 import com.netomi.chat.utils.NCWState
@@ -619,6 +620,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
             if (createPayload != null) {
                 chatViewModel.sendMessageAPI(createPayload)
             }
+
         })
 
 // Set the layout manager and adapter for the RecyclerView
@@ -1253,18 +1255,16 @@ Log.e("Dataa","Elseee" +response)
         if (result.resultCode == RESULT_OK) {
             val videoUri: Uri? = result.data?.data
             videoUri?.let { uri ->
-                fileSend = NCWImageUtils.getVideoFileFromUri(this,uri)
-                val type = fileSend?.let { it1 -> NCWAppUtils.getFileContentType(it1) }
-                if (!validateFile(fileSend))
-                    return@registerForActivityResult
+                fileSend = NCWImageUtils.getVideoFileFromUri(this, uri)
+                val type = fileSend?.let { NCWAppUtils.getFileContentType(it) }
 
-                uri?.let { uri ->
-                    addMediaMessage(fileSend,uri, MessageType.VIDEO)
-                }
-                fileSend?.let {
-                    getPreSignedUrl(type, it.name)
+                if (attachmentType == TYPE_ATTACHMENT) {
+                    if (!validateFile(fileSend)) return@registerForActivityResult
 
+                    addMediaMessage(fileSend, uri, MessageType.VIDEO)
                 }
+
+                fileSend?.let { getPreSignedUrl(type, it.name) }
             }
         }
     }
@@ -1283,30 +1283,29 @@ Log.e("Dataa","Elseee" +response)
 
     private val cameraLauncherMain =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-            if (success) {
-
-                fileSend = photoUri?.let { NCWAppUtils.getFileFromUri(this, it) }
-
-               /* if (!isFileSizeValid(this, fileSend?.length(), themeData?.fileSharing?.fileSize)) {
-                    return@registerForActivityResult
-                }*/
-                if (!validateFile(fileSend))
-                    return@registerForActivityResult
-
-                photoUri?.let { uri ->
-                    addMediaMessage(fileSend,uri, MessageType.IMAGE)
-                }
-
-                val type =
-                    photoUri?.let { fileSend?.let { it1 -> NCWAppUtils.getFileContentType(it1) } }
-                fileSend?.let {
-                    getPreSignedUrl(type, it.name)
-
-                }
-            } else {
+            if (!success) {
                 Toast.makeText(this, "Failed to capture image", Toast.LENGTH_SHORT).show()
+                return@registerForActivityResult
             }
+
+            val file = photoUri?.let { NCWAppUtils.getFileFromUri(this, it) }
+            fileSend = file ?: return@registerForActivityResult
+
+            val fileType = fileSend?.let { NCWAppUtils.getFileContentType(it) }
+
+            when (attachmentType) {
+                TYPE_ATTACHMENT -> {
+                    if (!validateFile(fileSend)) return@registerForActivityResult
+
+                    photoUri?.let { uri ->
+                        addMediaMessage(fileSend, uri, MessageType.IMAGE)
+                    }
+                }
+            }
+
+            fileSend?.let { getPreSignedUrl(fileType, it.name) }
         }
+
 
     private fun showLimitExceedPopup() {
         val maxSize = themeData?.fileSharing?.fileSize?.let(NCWAppUtils::formatFileSize)
@@ -1471,7 +1470,13 @@ Log.e("Dataa","Elseee" +response)
             if (result.resultCode == Activity.RESULT_OK && result.data != null) {
                 val type = contentResolver.getType(result.data?.data!!)
                 val selectedMediaUri: Uri? = result.data?.data!!
-                handleFileSelection(selectedMediaUri, type, isGallery = true)
+                if (attachmentType== TYPE_ATTACHMENT) {
+                    handleFileSelection(selectedMediaUri, type, isGallery = true)
+                }
+                else{
+                    handleFormFileSelection(selectedMediaUri, type,isGallery = true)
+                }
+
             }
         }
 
@@ -1700,8 +1705,84 @@ Log.e("Dataa","Elseee" +response)
 
     private fun parseHistoryItems(responses: ArrayList<NCWGenericChannelResponse>) {
 
-        responses.forEach { response ->
+        /* responses.forEach { response ->
 
+                   if (response.triggerType == TYPE_RESPONSE) {
+
+                       if (response.customFields?.isNotEmpty() == true) {
+                           Log.e("Dataa", "Idffff" + (response.customFields?.get(0)?.values ?: null))
+                           val gson = Gson()
+
+                           response.customFields.forEach { customField ->
+                               if (customField.name == "FORM_SCHEMA" && !customField.values.isNullOrEmpty()) {
+                                   val formSchemas: List<FormSchema> = gson.fromJson(
+                                       customField.values[0],
+                                       object : TypeToken<List<FormSchema>>() {}.type
+                                   )
+
+                                   Log.e("ForrrrSizeee", "formSchemas " + formSchemas.size)
+                                   val formSchemasModel = formSchemas[0]
+
+
+
+
+                                   val newMessages = NCWMessage(
+                                       sender = TYPE_FORM,
+                                       timestamp = System.currentTimeMillis(),
+                                       formSchema = formSchemasModel
+
+                                   )
+                                   addSingleMessage(newMessages)
+                               }
+
+                           }
+
+                       } else {
+                           val newMessages = response.attachments?.mapNotNull {
+                               mapAttachmentToMessage(
+                                   it,
+                               )
+                           } ?: emptyList()
+                           if (newMessages.isNotEmpty()) {
+                               newMessages.forEachIndexed { index, message ->
+                                   message.isSameTimeMessage = index == 0
+                               }
+                           }
+                           messageList.addAll(newMessages)
+                       }
+                   }else {
+                       response.requestPayload?.attachmentList?.takeIf { it.isNotEmpty() }
+                           ?.forEach { attachmentListRequest ->
+                               val messageType = attachmentListRequest.type?.let { MessageType.fromTypeName(it) }
+
+                               messageType?.let {
+                                   val newMessage = NCWMessage(
+                                       sender = TYPE_REQUEST,
+                                       type = it,
+                                       timestamp = response.timestamp ?: System.currentTimeMillis(),
+                                       largeImageUrl = if (it == MessageType.IMAGE) attachmentListRequest.largeImageUrl else null,
+                                       thumbnailUrl = if (it == MessageType.VIDEO) attachmentListRequest.thumbnailUrl else null,
+                                       fileUrl = if (it == MessageType.FILE) attachmentListRequest.fileURL else null,
+                                       fileSize = attachmentListRequest.fileSize,
+                                       title = attachmentListRequest.title
+                                   )
+                                   messageList.add(newMessage)
+                               }
+                           } ?: run {
+                           val newMessage = NCWMessage(
+                               id = System.currentTimeMillis().toString(),
+                               message = response.requestPayload?.messagePayload?.text,
+                               timestamp = response.timestamp ?: System.currentTimeMillis(),
+                               type = MessageType.TEXT,
+                               sender = TYPE_REQUEST,
+                           )
+                           messageList.add(newMessage)
+                       }
+
+                   }
+               }*/
+
+        responses.forEachIndexed { index, response ->
             if (response.triggerType == TYPE_RESPONSE) {
 
                 if (response.customFields?.isNotEmpty() == true) {
@@ -1720,37 +1801,49 @@ Log.e("Dataa","Elseee" +response)
 
 
 
+                            if (index + 1 < responses.size) {
+                                val nextResponse = responses[index + 1]
 
-                            val newMessages = NCWMessage(
-                                sender = TYPE_FORM,
-                                timestamp = System.currentTimeMillis(),
-                                formSchema = formSchemasModel
+                                // Extract message payload data from the next response
+                                val nextMessagePayload = nextResponse.requestPayload?.messagePayload?.text
+                                val formData= nextMessagePayload?.let {
+                                    parsePayloadToFormData(
+                                        it
+                                    )
+                                }
+                                Log.e("NextPayload", "formData: $formData")
+                                formSchemasModel.formData=formData
+                                Log.e("NextPayload", "Next response message payload: $nextMessagePayload")
 
-                            )
-                            addSingleMessage(newMessages)
+                                // You can now use the current formSchemasModel and nextMessagePayload together
+                                val newMessages = NCWMessage(
+                                    sender = TYPE_FORM,
+                                    timestamp = System.currentTimeMillis(),
+                                    formSchema = formSchemasModel,
+                                    message = nextMessagePayload
+                                )
+                                addSingleMessage(newMessages)
+                            }
                         }
-
                     }
-
                 } else {
-
+                    // Existing logic for attachments
                     val newMessages = response.attachments?.mapNotNull {
-                        mapAttachmentToMessage(
-                            it,
-                        )
+                        mapAttachmentToMessage(it)
                     } ?: emptyList()
+
                     if (newMessages.isNotEmpty()) {
-                        newMessages.forEachIndexed { index, message ->
-                            message.isSameTimeMessage = index == 0
+                        newMessages.forEachIndexed { idx, message ->
+                            message.isSameTimeMessage = idx == 0
                         }
                     }
                     messageList.addAll(newMessages)
                 }
-            }else {
+            } else {
+                // Existing logic for request payloads
                 response.requestPayload?.attachmentList?.takeIf { it.isNotEmpty() }
                     ?.forEach { attachmentListRequest ->
-                        val messageType =
-                            attachmentListRequest.type?.let { MessageType.fromTypeName(it) }
+                        val messageType = attachmentListRequest.type?.let { MessageType.fromTypeName(it) }
 
                         messageType?.let {
                             val newMessage = NCWMessage(
@@ -1775,10 +1868,8 @@ Log.e("Dataa","Elseee" +response)
                     )
                     messageList.add(newMessage)
                 }
-
             }
         }
-
 
 
 
