@@ -931,7 +931,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     }
 
     private fun renderTheNormalMessage(response: NCWGenericChannelResponse?) {
-        Log.e("Normal Message", "Normal Message")
         val newMessages =
             response?.attachments?.mapNotNull { mapAttachmentToMessage(it,response.requestId!!) }
                 ?: emptyList()
