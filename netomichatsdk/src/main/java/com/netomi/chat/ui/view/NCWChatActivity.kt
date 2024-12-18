@@ -1700,9 +1700,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                         attachmentList
                     )
                     chatViewModel.sendMessageAPI(payload)
-                }
-
-                else {
+                } else {
                     hideProgressBar()
 
 
@@ -1711,9 +1709,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                     item.formSchema?.schema?.forEach { targetComponent ->
                         if (targetComponent.id == formComponent?.id) {
                             targetComponent.fileUpload = targetComponent.fileUpload ?: ArrayList()
-                            val fileUpload = FileUploadData(mediaType, response.url, response.title, response.fileSize)
+                            val fileUpload = FileUploadData(
+                                mediaType,
+                                response.url,
+                                response.title,
+                                response.fileSize
+                            )
                             targetComponent.fileUpload?.add(fileUpload)
-                            Log.e("Debug", "schema[0] fileUpload size: ${targetComponent.fileUpload}")
+                            Log.e(
+                                "Debug",
+                                "schema[0] fileUpload size: ${targetComponent.fileUpload}"
+                            )
                         }
                     }
                     val updatedSchema = item.formSchema?.schema ?: emptyList()
@@ -1725,26 +1731,27 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                     }
 
 
-
+                }
             }
 
 
-            NCWRoutes.ROUTE_END_CHAT -> {
-                hideProgressBar()
-                NCWThemeUtils.setConversationID(null)
-                finish()
+                NCWRoutes.ROUTE_END_CHAT -> {
+                    hideProgressBar()
+                    NCWThemeUtils.setConversationID(null)
+                    finish()
+                }
+
+                NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
+                    messageAdapter.notifyDataSetChanged()
+                }
+
+                else -> {
+                    Toast.makeText(this, "Else..", Toast.LENGTH_SHORT).show()
+                }
             }
 
-            NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
-                messageAdapter.notifyDataSetChanged()
-            }
-
-            else -> {
-                Toast.makeText(this, "Else..", Toast.LENGTH_SHORT).show()
-            }
         }
 
-    }
 
     private fun parseHistoryItems(responses: ArrayList<NCWGenericChannelResponse>) {
 
@@ -1872,7 +1879,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                 } else {
                     // Existing logic for attachments
                     val newMessages = response.attachments?.mapNotNull {
-                        mapAttachmentToMessage(it)
+                        mapAttachmentToMessage(it,response.requestId!!)
                     } ?: emptyList()
 
                     if (newMessages.isNotEmpty()) {
