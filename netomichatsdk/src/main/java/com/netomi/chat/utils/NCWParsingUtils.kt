@@ -2,6 +2,8 @@ package com.netomi.chat.utils
 
 import com.netomi.chat.model.messages.FileUploadData
 import com.netomi.chat.ui.view.FormData
+import java.net.HttpURLConnection
+import java.net.URL
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -51,5 +53,28 @@ object NCWParsingUtils {
         } catch (e: ParseException) {
             null
         }
+    }
+
+
+
+    fun getFileSizeFromUrl(fileUrl: String, callback: (Long?) -> Unit) {
+        Thread {
+            var connection: HttpURLConnection? = null
+            try {
+                val url = URL(fileUrl)
+                connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "HEAD" // Set request method to HEAD
+                connection.connect()
+
+                // Get the content length from the headers
+                val fileSize = connection.contentLengthLong
+                callback(fileSize) // Return the file size through the callback
+            } catch (e: Exception) {
+                e.printStackTrace()
+                callback(null) // Return null in case of an error
+            } finally {
+                connection?.disconnect()
+            }
+        }.start()
     }
 }

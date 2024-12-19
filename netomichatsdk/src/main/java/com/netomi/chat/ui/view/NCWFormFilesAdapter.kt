@@ -1,5 +1,6 @@
 package com.netomi.chat.ui.view
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,9 +12,11 @@ import com.netomi.chat.R
 
 import com.netomi.chat.model.messages.FileUploadData
 import com.netomi.chat.utils.NCWAppUtils
+import com.netomi.chat.utils.NCWAppUtils.formatFileSize
+import com.netomi.chat.utils.NCWParsingUtils.getFileSizeFromUrl
 import com.netomi.chat.utils.NCWThemeUtils
 
-class NCWFormFilesAdapter(private val items: List<FileUploadData>, private val onDelete: (FileUploadData?) -> Unit) : RecyclerView.Adapter<NCWFormFilesAdapter.ViewHolder>() {
+class NCWFormFilesAdapter(private val items: List<FileUploadData>, val isClickable:Boolean,private val onDelete: (FileUploadData?) -> Unit) : RecyclerView.Adapter<NCWFormFilesAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -37,11 +40,31 @@ class NCWFormFilesAdapter(private val items: List<FileUploadData>, private val o
         NCWThemeUtils.setUserConfigTextColor(holder.tvDocName)
         NCWThemeUtils.setTimeStampColor(holder.tvDocType)
 
-        holder.tvDocName.text=item.title
+        holder.icDelete.visibility = if (isClickable) View.VISIBLE else View.GONE
+        item.title?.let {
+            holder.tvDocName.text = it
+        } ?: run {
+            item.fileUrl?.let { fileUrl ->
+                val fileName = fileUrl.substringAfterLast("/")
+                holder.tvDocName.text = fileName
+            }
+        }
+
         if (item.fileSize!=null)
-            holder.tvDocType.text= NCWAppUtils.formatFileSize(item.fileSize!!.toLong())
+            holder.tvDocType.text= formatFileSize(item.fileSize!!.toLong())
+        else
+            item.fileUrl?.let {
+                getFileSizeFromUrl(it) { fileSize ->
+                    if (fileSize != null) {
+                        holder.tvDocType.text=formatFileSize(fileSize)
+                    } else {
+                        Log.e("File","Failed to retrieve file size.")
+                    }
+                }
+            }
 
         holder.icDelete.setOnClickListener {
+
 onDelete(item)
         }
     }

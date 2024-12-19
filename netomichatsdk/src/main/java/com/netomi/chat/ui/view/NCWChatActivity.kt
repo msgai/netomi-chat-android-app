@@ -108,6 +108,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.UUID
+
 /**
  * Activity responsible for displaying the chat interface and handling user interactions.
  *
@@ -126,7 +127,7 @@ import java.util.UUID
  * This activity is intended to be launched by the host application or as part of the Chat SDK.
  *
  */
-class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackActionCallback {
+class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackActionCallback {
 
     private val chatViewModel: NCWChatViewModel by viewModels()
     private val ncwAwsCredentialsViewModel: NCWAwsCredentialsViewModel by viewModels()
@@ -160,13 +161,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     private var isLoaderActive: Boolean = false
     private lateinit var tvBrandName: TextView
 
-    private var formComponent: Component? =null
+    private var formComponent: Component? = null
 
-    private var attachmentType: String? =TYPE_ATTACHMENT
+    private var attachmentType: String? = TYPE_ATTACHMENT
 
     private var deviceInfo: ArrayList<DeviceInfo> = arrayListOf()
 
-    private var connectionStatus:String? = ""
+    private var connectionStatus: String? = ""
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -195,6 +196,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
         deviceInfo.add(device)
         Log.d("DeviceInfo", "Device Info: $deviceInfo")
 
+
         if (NCWThemeUtils.getConversationID() == null) {
             loadInitialMessages()
             chatViewModel.getConversationId(botRefId)
@@ -210,8 +212,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
         }
 
         attachmentIcon.setOnClickListener {
-            attachmentType=TYPE_ATTACHMENT
-           showMedia()
+            attachmentType = TYPE_ATTACHMENT
+            showMedia()
 
 
         }
@@ -231,7 +233,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
         themeData?.endChat?.idleTimeout?.let {
             idleTimeoutManager = NCWIdleTimeoutManager(
                 idleTimeoutMillis = it,
-                onTimeout = { handleSessionTimeout("Session Timeout","Your session has expired due to inactivity.","OK",SESSION) }
+                onTimeout = {
+                    handleSessionTimeout(
+                        "Session Timeout",
+                        "Your session has expired due to inactivity.",
+                        "OK",
+                        SESSION
+                    )
+                }
             )
 
         }
@@ -253,10 +262,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
     private fun backClicked() {
         val bottomSheet = NCWEndChatBottomSheet(
-            onConfirmClick = {isEndChat ->
-                if(isEndChat){
+            onConfirmClick = { isEndChat ->
+                if (isEndChat) {
                     hitEndChatAPI()
-                }else{
+                } else {
                     finish()
                 }
             }
@@ -293,32 +302,35 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     }
 
 
-    private fun hitFeedbackAPI(requestId: String,feedbackValue: String) {
+    private fun hitFeedbackAPI(requestId: String, feedbackValue: String) {
         if (!NCWAppUtils.isNetworkAvailable(this)) {
             NCWAppUtils.showToast(this, "Please check your network and try again.")
             return
         }
         //showProgressBar()
         chatViewModel.hitFeedbackAPI(
-            NCWFeedbackRequest(botRefId!!,com.netomi.chat.model.feedback.feedbackresponse.NCWRequestBody(
-                botReferenceId = botRefId!!,
-                channelId = "NETOMI_WEB_WIDGET",
-                conversationId = conversationID!!,
-                eventData = com.netomi.chat.model.feedback.feedbackrequest.NCWEventData(
-                    eventInfo = NCWEventInfo(
-                        attachmentIndex = 0,
-                        feedbackValue = feedbackValue,
-                        requestId = requestId
+            NCWFeedbackRequest(
+                botRefId!!, com.netomi.chat.model.feedback.feedbackresponse.NCWRequestBody(
+                    botReferenceId = botRefId!!,
+                    channelId = "NETOMI_WEB_WIDGET",
+                    conversationId = conversationID!!,
+                    eventData = com.netomi.chat.model.feedback.feedbackrequest.NCWEventData(
+                        eventInfo = NCWEventInfo(
+                            attachmentIndex = 0,
+                            feedbackValue = feedbackValue,
+                            requestId = requestId
+                        ),
+                        eventType = "FEEDBACK",
+                        subType = "REVIEW"
                     ),
-                    eventType = "FEEDBACK",
-                    subType = "REVIEW"
-            ),
-                eventName = "FEEDBACK",
-                isPublishToMQTT = false,
-                requestType = "NETOMI",
-                timestamp = System.currentTimeMillis(),
-                triggerType = "EVENT")
-        ))
+                    eventName = "FEEDBACK",
+                    isPublishToMQTT = false,
+                    requestType = "NETOMI",
+                    timestamp = System.currentTimeMillis(),
+                    triggerType = "EVENT"
+                )
+            )
+        )
     }
 
 
@@ -340,7 +352,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     /**
      * Handles the session timeout logic.
      */
-    private fun handleSessionTimeout(title: String, subtitle: String, submitText: String,from:String) {
+    private fun handleSessionTimeout(
+        title: String,
+        subtitle: String,
+        submitText: String,
+        from: String
+    ) {
 
         NCWSingleAlertDialog.showSingleButtonDialog(
             context = this,
@@ -348,8 +365,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
             subtitle = subtitle,
             yesText = submitText,
             onYesClick = {
-                if (from== SESSION)
-                finish()
+                if (from == SESSION)
+                    finish()
             },
         )
     }
@@ -387,7 +404,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
         idleTimeoutManager.checkForTimeout()
     }
 
-    private fun checkForInitialMessage(){
+    private fun checkForInitialMessage() {
         messageList.removeIf { it.sender == TYPE_INITIAL }
     }
 
@@ -575,11 +592,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                 Log.e("FtetteCompooe", "sS $formComponent")
                 showMedia()
             }
-        }, { payload, label,attachmentList ->
+        }, { payload, label, attachmentList ->
             println("Payload: $payload")
             println("Label: $label")
             val timeStamp = System.currentTimeMillis()
-            val createPayload = payload?.let { createPayload(it, label, timeStamp,attachmentList) }
+            val createPayload = payload?.let { createPayload(it, label, timeStamp, attachmentList) }
             if (createPayload != null) {
                 chatViewModel.sendMessageAPI(createPayload)
             }
@@ -592,24 +609,24 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     }
 
 
-
     // Initialize the ActivityResultLauncher
-    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data: Intent? = result.data
-            val fileUri: Uri? = data?.data
-            val mimeType = contentResolver.getType(result.data?.data!!)
-            fileSend = fileUri?.let { NCWImageUtils.getFileFromUri(this, it) }
-            fileSend?.let {
-                getPreSignedUrl(mimeType, it.name)
+    private val filePickerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                val fileUri: Uri? = data?.data
+                val mimeType = contentResolver.getType(result.data?.data!!)
+                fileSend = fileUri?.let { NCWImageUtils.getFileFromUri(this, it) }
+                fileSend?.let {
+                    getPreSignedUrl(mimeType, it.name)
 
+                }
             }
         }
-    }
 
     override fun onQuickReply(option: NCWQuickReplyOption?, position: Int) {
 
-        if (connectionStatus==NCWConnectionStatus.CONNECTED.toString()) {
+        if (connectionStatus == NCWConnectionStatus.CONNECTED.toString()) {
 
             messageList[position].isQuickReplyVisible = false
             onQuickReplyClicked(option)
@@ -708,9 +725,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     }
 
 
-
     override fun carouselButtonAction(it: NCWCarouselButton?) {
-        Log.e("NCWCarouselButton","NCWCarouselButton "+it)
+        Log.e("NCWCarouselButton", "NCWCarouselButton " + it)
 
         when (CarouselButtonType.fromValue(it?.type)) {
             CarouselButtonType.WEB -> {
@@ -722,12 +738,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                     NCWAppUtils.showToast(this, "Unable to open the link")
                 }
             }
+
             CarouselButtonType.CALL -> {
                 makePhoneCall(it?.payload)
             }
+
             CarouselButtonType.POST_BACK -> {
                 it?.payload?.let { it1 -> sendMessage(it1) }
             }
+
             else -> {
                 // Handle unknown type (optional)
                 Log.e("Carousel", "Unknown button type: ${it?.type}")
@@ -737,8 +756,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     }
 
     private fun makePhoneCall(phoneNumber: String?) {
-            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
-            startActivity(intent)
+        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
+        startActivity(intent)
     }
 
 
@@ -752,7 +771,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
             val timeStamp = System.currentTimeMillis()
             val payload = option.metadata?.let {
                 checkForInitialMessage()
-                createPayload(it, label, timeStamp) }
+                createPayload(it, label, timeStamp)
+            }
             chatViewModel.sendMessage(label, timeStamp)
             if (payload != null) {
                 chatViewModel.sendMessageAPI(payload)
@@ -781,7 +801,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
      * in the chat data or configuration.
      */
     private fun observeChatMessages() {
-       // Observe the chat messages LiveData from the ViewModel
+        // Observe the chat messages LiveData from the ViewModel
         chatViewModel.sendMessage.observe(this) { messages ->
             handleApiCallback(messages as NCWState<Any>)
         }
@@ -811,7 +831,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
         }
 
-        chatViewModel.feedbackResponse.observe(this){ feedback ->
+        chatViewModel.feedbackResponse.observe(this) { feedback ->
             when (feedback) {
                 is NCWState.Loading -> {
                     showProgressBar()
@@ -824,7 +844,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                 is NCWState.Error -> {
                     hideProgressBar()
                 }
-                else-> {
+
+                else -> {
 
                 }
             }
@@ -835,7 +856,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
         chatViewModel.awsMessage.observe(this) { jsonMessage ->
             try {
-                Log.e("Jsonn","Testtt "+jsonMessage)
+                Log.e("Jsonn", "Testtt " + jsonMessage)
                 val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
 
                 if (response.customFields?.isNotEmpty() == true) {
@@ -844,35 +865,39 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                             CustomFieldName.FORM_SCHEMA -> {
                                 renderTheFormMessage(response)
                             }
+
                             CustomFieldName.SURVEY_SCHEMA -> {
 
                             }
-                           CustomFieldName.DISABLE_INPUT_FIELD -> {
-                              if(customField.values?.get(0) == "true"){
-                                  messageInputField.isEnabled=false
-                                  attachmentIcon.isEnabled=false
-                              }else{
-                                  messageInputField.isEnabled=true
-                                  attachmentIcon.isEnabled=true
-                              }
+
+                            CustomFieldName.DISABLE_INPUT_FIELD -> {
+                                if (customField.values?.get(0) == "true") {
+                                    messageInputField.isEnabled = false
+                                    attachmentIcon.isEnabled = false
+                                } else {
+                                    messageInputField.isEnabled = true
+                                    attachmentIcon.isEnabled = true
+                                }
 
                             }
+
                             CustomFieldName.DISABLE_CHAT_INPUT -> {
 
                             }
-                           CustomFieldName.END_CHAT -> {
+
+                            CustomFieldName.END_CHAT -> {
 
                             }
+
                             else -> {
 
                             }
                         }
                     }
-                }else{
-
+                } else {
                 }
-
                 renderTheNormalMessage(response)
+
 
             } catch (e: Exception) {
                 Log.e("ParsingError", "Failed to parse JSON: ${e.localizedMessage}")
@@ -887,7 +912,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
 
         ncwAwsCredentialsViewModel.connectionStatus.observe(this) { status ->
-            connectionStatus=status
+            connectionStatus = status
             when (status) {
 
                 NCWConnectionStatus.CONNECTING.toString() -> {
@@ -953,7 +978,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                     object : TypeToken<List<FormSchema>>() {}.type
                 )
 
-                Log.e("ForrrrSizeee","formSchemas "+formSchemas.size)
+                Log.e("ForrrrSizeee", "formSchemas " + formSchemas.size)
 
                 /*    formSchemas.forEach { schema ->
                         Log.e("FormSchema", schema.properties.question)
@@ -961,15 +986,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                             Log.e("Component", component.componentName)
                         }
                     }*/
-                val formSchemasModel= formSchemas[0]
+                val formSchemasModel = formSchemas[0]
 
-                val newMessages =NCWMessage(
+                val newMessages = NCWMessage(
                     sender = TYPE_FORM,
                     timestamp = System.currentTimeMillis(),
                     formSchema = formSchemasModel
 
                 )
-                updateMessageList(newMessages)
+                addSingleMessage(newMessages)
             }
 
         }
@@ -977,30 +1002,38 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
     private fun renderTheNormalMessage(response: NCWGenericChannelResponse?) {
         val newMessages =
-            response?.attachments?.mapNotNull { mapAttachmentToMessage(it,response.requestId!!) }
+            response?.attachments?.mapNotNull { mapAttachmentToMessage(it, response.requestId!!) }
                 ?: emptyList()
 
         if (newMessages.isNotEmpty()) {
             newMessages.forEachIndexed { index, message ->
                 message.isSameTimeMessage = index == 0
             }
-            val customPayload=response?.customPayload
-            if(customPayload?.CHUNK_INDEX !=null && customPayload.CHUNK_INDEX.toInt()== 0 && customPayload.CHUNK_STATUS.equals("IN-PROGRESS")){
-                Log.e("Streaming Chunk","Streaming Chunk")
+            val customPayload = response?.customPayload
+            if (customPayload?.CHUNK_INDEX != null && customPayload.CHUNK_INDEX.toInt() == 0 && customPayload.CHUNK_STATUS.equals(
+                    "IN-PROGRESS"
+                )
+            ) {
+                Log.e("Streaming Chunk", "Streaming Chunk")
                 for (i in newMessages.indices) {
                     updateStreamMessage(newMessages[i])
                 }
-            } else if(customPayload?.CHUNK_INDEX !=null && customPayload.CHUNK_INDEX.toInt()>0 && (customPayload.CHUNK_STATUS.equals("SUCCESS") || customPayload.CHUNK_STATUS.equals("IN-PROGRESS"))){
-                Log.e("Streaming Chunk","Streaming Chunk")
+            } else if (customPayload?.CHUNK_INDEX != null && customPayload.CHUNK_INDEX.toInt() > 0 && (customPayload.CHUNK_STATUS.equals(
+                    "SUCCESS"
+                ) || customPayload.CHUNK_STATUS.equals("IN-PROGRESS"))
+            ) {
+                Log.e("Streaming Chunk", "Streaming Chunk")
                 for (i in newMessages.indices) {
                     updateStreamMessage(newMessages[i])
                 }
-            }else if(customPayload?.CHUNK_INDEX !=null && customPayload.CHUNK_INDEX.toInt()== 0 && customPayload.CHUNK_STATUS.equals("SUCCESS")){
-                Log.e("Streaming Chunk","Streaming Chunk Not")
+            } else if (customPayload?.CHUNK_INDEX != null && customPayload.CHUNK_INDEX.toInt() == 0 && customPayload.CHUNK_STATUS.equals(
+                    "SUCCESS"
+                )
+            ) {
+                Log.e("Streaming Chunk", "Streaming Chunk Not")
                 updateMessageList(newMessages)
-            }
-            else{
-                Log.e("Streaming Chunk","Streaming Chunk Not")
+            } else {
+                Log.e("Streaming Chunk", "Streaming Chunk Not")
                 updateMessageList(newMessages)
 
             }
@@ -1010,17 +1043,25 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
     private fun setUIState(enabled: Boolean) {
 
-        sendMessageIcon.isEnabled=enabled
+        sendMessageIcon.isEnabled = enabled
         messageInputField.isEnabled = enabled
         attachmentIcon.isEnabled = enabled
     }
 
 
     // Helper function to map attachments to NCWMessage
-    private fun mapAttachmentToMessage(attachment: NCWAttachment,requestId: String): NCWMessage? {
+    private fun mapAttachmentToMessage(attachment: NCWAttachment, requestId: String): NCWMessage? {
         val attach = attachment.attachment ?: return null
         val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
 
+        if (attach.text.isNullOrEmpty() &&
+            attach.elements.isNullOrEmpty() &&
+            attach.thumbnailUrl.isNullOrEmpty() &&
+            attach.largeImageUrl.isNullOrEmpty() &&
+            attach.quickReply == null
+        ) {
+            return null
+        }
         return NCWMessage(
             sender = TYPE_RESPONSE,
             type = messageType,
@@ -1042,49 +1083,48 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
     // Overloaded helper function for a single message
     private fun updateMessageList(newMessage: NCWMessage) {
-       addSingleMessage(newMessage)
+        addSingleMessage(newMessage)
         addLoader()
     }
 
-    private fun addSingleMessage(newMessage: NCWMessage)
-    {
+    private fun addSingleMessage(newMessage: NCWMessage) {
         messageList.add(newMessage)
         messageAdapter.notifyDataSetChanged()
         chatRecyclerView.scrollToPosition(messageList.size)
 
     }
 
-    private fun updateStreamMessage(streamMessage:NCWMessage){
+    private fun updateStreamMessage(streamMessage: NCWMessage) {
         addStreamMessages(streamMessage)
     }
 
     private fun updateMessageList(newMessages: List<NCWMessage>) {
         val typingIndicatorEnabled = themeData?.typingIndicator?.enabled ?: false
-            if (!typingIndicatorEnabled) {
-                addMessages(newMessages)
-                return
-            }
+        if (!typingIndicatorEnabled) {
+            addMessages(newMessages)
+            return
+        }
 
-            val currentTime = System.currentTimeMillis()
-            val elapsedTime = currentTime - loaderAddedTime
+        val currentTime = System.currentTimeMillis()
+        val elapsedTime = currentTime - loaderAddedTime
 
-            // Ensure loader remains visible for at least minTime
-            val minTime = themeData?.typingIndicator?.minTime ?: 1000L
-            if (isLoaderActive && elapsedTime < minTime) {
-                Log.e("CallActive", "Waiting for minTime: $minTime")
-                Handler(Looper.getMainLooper()).postDelayed({
-                    if (isLoaderActive) { // Double-check if loader is still active
-                        safelyRemoveLoader(newMessages)
-                        Log.e("CallActive", "Removed after minTime")
-                    }
-                }, minTime - elapsedTime)
-            } else if (isLoaderActive) { // Ensure loader is active before removing
-                Log.e("CallActive", "Removed loader immediately")
-                safelyRemoveLoader(newMessages)
-            } else {
-                Log.e("CallActive", "Loader already removed, updating messages only")
-                addMessages(newMessages)
-            }
+        // Ensure loader remains visible for at least minTime
+        val minTime = themeData?.typingIndicator?.minTime ?: 1000L
+        if (isLoaderActive && elapsedTime < minTime) {
+            Log.e("CallActive", "Waiting for minTime: $minTime")
+            Handler(Looper.getMainLooper()).postDelayed({
+                if (isLoaderActive) { // Double-check if loader is still active
+                    safelyRemoveLoader(newMessages)
+                    Log.e("CallActive", "Removed after minTime")
+                }
+            }, minTime - elapsedTime)
+        } else if (isLoaderActive) { // Ensure loader is active before removing
+            Log.e("CallActive", "Removed loader immediately")
+            safelyRemoveLoader(newMessages)
+        } else {
+            Log.e("CallActive", "Loader already removed, updating messages only")
+            addMessages(newMessages)
+        }
 
     }
 
@@ -1097,6 +1137,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
         }
 
     }
+
     // Helper function to add messages and scroll to the latest
     private fun addStreamMessages(newMessages: NCWMessage) {
         messageAdapter.updateOrAppendMessage(newMessages)
@@ -1150,7 +1191,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     private fun handleApiCallback(response: NCWState<Any>) {
         when (response) {
             is NCWState.Loading -> {
-               showProgressBar()
+                showProgressBar()
             }
 
             is NCWState.Success -> {
@@ -1159,8 +1200,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
             }
 
             is NCWState.Error -> {
-              //  Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
-               hideProgressBar()
+                //  Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
+                hideProgressBar()
             }
 
             is NCWState.SendMessageError<*, *> -> {
@@ -1181,7 +1222,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                             else -> {
                                 payload.requestBody?.attachmentList?.any { attachment ->
                                     if (attachment.title == message.title) {
-                                        message.isRetry = true  // Update retry flag for matching attachment
+                                        message.isRetry =
+                                            true  // Update retry flag for matching attachment
                                         true
                                     } else {
                                         false
@@ -1195,9 +1237,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                     if (updated) {
                         messageAdapter.notifyDataSetChanged()
                     }
-                }
-
-                else if (payload is NCWSignedUrlPayload) {
+                } else if (payload is NCWSignedUrlPayload) {
 
                     val position = messageList.indexOfLast { it.title == payload.uploadKeyPrefix }
                     if (position != -1) {
@@ -1206,7 +1246,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
                         messageAdapter.notifyItemChanged(position)
                     }
                 }
-              hideProgressBar()
+                hideProgressBar()
             }
 
             else -> {
@@ -1294,7 +1334,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     }
 
     private val videoLauncher = registerForActivityResult(
-    ActivityResultContracts.StartActivityForResult()
+        ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             val videoUri: Uri? = result.data?.data
@@ -1373,7 +1413,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     private fun validateFile(file: File?): Boolean {
 
         // Validate file type
-       val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
+        val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
         val fileExtension =
             file?.extension?.lowercase()?.let { if (!it.startsWith(".")) ".$it" else it }
 
@@ -1409,7 +1449,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
             return
         }
 
-       // Get the file from the URI
+        // Get the file from the URI
         fileSend = if (isGallery) {
             NCWFilePath().getPath(this, selectedMediaUri)?.let { File(it) }
         } else {
@@ -1430,8 +1470,18 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
         when {
             mimeType == null -> Log.e("FileSelection", "Unknown MIME type")
-            mimeType.startsWith("image/") -> addMediaMessage(fileSend,selectedMediaUri, MessageType.IMAGE)
-            mimeType.startsWith("video/") -> addMediaMessage(fileSend,selectedMediaUri, MessageType.VIDEO)
+            mimeType.startsWith("image/") -> addMediaMessage(
+                fileSend,
+                selectedMediaUri,
+                MessageType.IMAGE
+            )
+
+            mimeType.startsWith("video/") -> addMediaMessage(
+                fileSend,
+                selectedMediaUri,
+                MessageType.VIDEO
+            )
+
             else -> addDocMessage(fileSend, selectedMediaUri, MessageType.FILE)
         }
 
@@ -1453,17 +1503,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     // File selection (PDF, DOC, etc.)
     private fun openFile() {
 
-        if (attachmentType== TYPE_ATTACHMENT) {
+        if (attachmentType == TYPE_ATTACHMENT) {
             val fileIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
                 type = "*/*"
                 addCategory(Intent.CATEGORY_OPENABLE)
             }
             fileLauncher.launch(fileIntent)
-        }
-        else{
+        } else {
             formComponent?.let { openFormPicker(component = it) }
         }
     }
+
     private fun openFormPicker(component: Component) {
         val attachmentTypes: List<String> = component.config?.attachmentTypes ?: emptyList()
         val mimeTypes = mutableListOf<String>()
@@ -1514,11 +1564,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
             if (result.resultCode == Activity.RESULT_OK && result.data != null) {
                 val type = contentResolver.getType(result.data?.data!!)
                 val selectedMediaUri: Uri? = result.data?.data!!
-                if (attachmentType== TYPE_ATTACHMENT) {
+                if (attachmentType == TYPE_ATTACHMENT) {
                     handleFileSelection(selectedMediaUri, type, isGallery = true)
-                }
-                else{
-                    handleFormFileSelection(selectedMediaUri, type,isGallery = true)
+                } else {
+                    handleFormFileSelection(selectedMediaUri, type, isGallery = true)
                 }
 
             }
@@ -1530,10 +1579,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
             if (result.resultCode == Activity.RESULT_OK && result.data != null) {
                 val type = contentResolver.getType(result.data?.data!!)
                 val selectedMediaUri: Uri? = result.data?.data!!
-                if (attachmentType== TYPE_ATTACHMENT) {
+                if (attachmentType == TYPE_ATTACHMENT) {
                     handleFileSelection(selectedMediaUri, type)
-                }
-                else{
+                } else {
                     handleFormFileSelection(selectedMediaUri, type)
                 }
             }
@@ -1558,14 +1606,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
             Log.e("FileSelection", "Failed to get file from URI")
             return
         }
-      /*  // Validate file size and type
-        if (!validateFile(fileSend)) return
+        /*  // Validate file size and type
+          if (!validateFile(fileSend)) return
 
-        // Validate file size
-        if (!isFileSizeValid(this, fileSend?.length(), formComponent?.config?.maxUploadSizeAllowed)) {
-            showLimitExceedPopup()
-            return
-        }*/
+          // Validate file size
+          if (!isFileSizeValid(this, fileSend?.length(), formComponent?.config?.maxUploadSizeAllowed)) {
+              showLimitExceedPopup()
+              return
+          }*/
 
         fileSend?.let {
             getPreSignedUrl(mimeType, it.name)
@@ -1573,7 +1621,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
         }
     }
 
-      // Function to add document message
+    // Function to add document message
     private fun addDocMessage(file: File?, selectedMediaUri: Uri, type: MessageType) {
         val newMessage = NCWMessage(
             sender = TYPE_REQUEST,
@@ -1593,7 +1641,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
     }
 
     // Add media message (image or video) to the chat
-    private fun addMediaMessage(file: File?,uri: Uri, type: MessageType) {
+    private fun addMediaMessage(file: File?, uri: Uri, type: MessageType) {
 
         val newMessage = NCWMessage(
             sender = TYPE_REQUEST,
@@ -1735,178 +1783,180 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
             }
 
 
-                NCWRoutes.ROUTE_END_CHAT -> {
-                    hideProgressBar()
-                    NCWThemeUtils.setConversationID(null)
-                    finish()
-                }
-
-                NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
-                    messageAdapter.notifyDataSetChanged()
-                }
-
-                else -> {
-                    Toast.makeText(this, "Else..", Toast.LENGTH_SHORT).show()
-                }
+            NCWRoutes.ROUTE_END_CHAT -> {
+                hideProgressBar()
+                NCWThemeUtils.setConversationID(null)
+                finish()
             }
 
+            NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
+                messageAdapter.notifyDataSetChanged()
+            }
+
+            else -> {
+                Toast.makeText(this, "Else..", Toast.LENGTH_SHORT).show()
+            }
         }
+
+    }
 
 
     private fun parseHistoryItems(responses: ArrayList<NCWGenericChannelResponse>) {
 
-        /* responses.forEach { response ->
-
-                   if (response.triggerType == TYPE_RESPONSE) {
-
-                       if (response.customFields?.isNotEmpty() == true) {
-                           Log.e("Dataa", "Idffff" + (response.customFields?.get(0)?.values ?: null))
-                           val gson = Gson()
-
-                           response.customFields.forEach { customField ->
-                               if (customField.name == "FORM_SCHEMA" && !customField.values.isNullOrEmpty()) {
-                                   val formSchemas: List<FormSchema> = gson.fromJson(
-                                       customField.values[0],
-                                       object : TypeToken<List<FormSchema>>() {}.type
-                                   )
-
-                                   Log.e("ForrrrSizeee", "formSchemas " + formSchemas.size)
-                                   val formSchemasModel = formSchemas[0]
-
-
-
-
-                                   val newMessages = NCWMessage(
-                                       sender = TYPE_FORM,
-                                       timestamp = System.currentTimeMillis(),
-                                       formSchema = formSchemasModel
-
-                                   )
-                                   addSingleMessage(newMessages)
-                               }
-
-                           }
-
-                       } else {
-                           val newMessages = response.attachments?.mapNotNull {
-                               mapAttachmentToMessage(
-                                   it,
-                               )
-                           } ?: emptyList()
-                           if (newMessages.isNotEmpty()) {
-                               newMessages.forEachIndexed { index, message ->
-                                   message.isSameTimeMessage = index == 0
-                               }
-                           }
-                           messageList.addAll(newMessages)
-                       }
-                   }else {
-                       response.requestPayload?.attachmentList?.takeIf { it.isNotEmpty() }
-                           ?.forEach { attachmentListRequest ->
-                               val messageType = attachmentListRequest.type?.let { MessageType.fromTypeName(it) }
-
-                               messageType?.let {
-                                   val newMessage = NCWMessage(
-                                       sender = TYPE_REQUEST,
-                                       type = it,
-                                       timestamp = response.timestamp ?: System.currentTimeMillis(),
-                                       largeImageUrl = if (it == MessageType.IMAGE) attachmentListRequest.largeImageUrl else null,
-                                       thumbnailUrl = if (it == MessageType.VIDEO) attachmentListRequest.thumbnailUrl else null,
-                                       fileUrl = if (it == MessageType.FILE) attachmentListRequest.fileURL else null,
-                                       fileSize = attachmentListRequest.fileSize,
-                                       title = attachmentListRequest.title
-                                   )
-                                   messageList.add(newMessage)
-                               }
-                           } ?: run {
-                           val newMessage = NCWMessage(
-                               id = System.currentTimeMillis().toString(),
-                               message = response.requestPayload?.messagePayload?.text,
-                               timestamp = response.timestamp ?: System.currentTimeMillis(),
-                               type = MessageType.TEXT,
-                               sender = TYPE_REQUEST,
-                           )
-                           messageList.add(newMessage)
-                       }
-
-                   }
-               }*/
 
         responses.forEachIndexed { index, response ->
             if (response.triggerType == TYPE_RESPONSE) {
 
+                /*   if (response.customFields?.isNotEmpty() == true) {
+                       Log.e("Dataa", "Idffff" + (response.customFields?.get(0)?.values ?: null))
+                       val gson = Gson()
+
+                       response.customFields.forEach { customField ->
+                           if (customField.name == "FORM_SCHEMA" && !customField.values.isNullOrEmpty()) {
+                               val formSchemas: List<FormSchema> = gson.fromJson(
+                                   customField.values[0],
+                                   object : TypeToken<List<FormSchema>>() {}.type
+                               )
+                               val formSchemasModel = formSchemas[0]
+
+                               if (index + 1 < responses.size) {
+                                   val nextResponse = responses[index + 1]
+
+                                   // Extract message payload data from the next response
+                                   val nextMessagePayload = nextResponse.requestPayload?.messagePayload?.text
+                                   val formData= nextMessagePayload?.let {
+                                       parsePayloadToFormData(
+                                           it
+                                       )
+                                   }
+                                   Log.e("NextPayload", "formData: $formData")
+                                   formSchemasModel.formData=formData
+                                   Log.e("NextPayload", "Next response message payload: $nextMessagePayload")
+
+                                   // You can now use the current formSchemasModel and nextMessagePayload together
+                                   val newMessages = NCWMessage(
+                                       sender = TYPE_FORM,
+                                       timestamp = System.currentTimeMillis(),
+                                       formSchema = formSchemasModel,
+                                       message = nextMessagePayload
+                                   )
+                                   addSingleMessage(newMessages)
+                               }
+                           }
+
+                       }
+                   }
+   */
+
+                val gson = Gson()
                 if (response.customFields?.isNotEmpty() == true) {
-                    Log.e("Dataa", "Idffff" + (response.customFields?.get(0)?.values ?: null))
-                    val gson = Gson()
-
-                    response.customFields.forEach { customField ->
-                        if (customField.name == "FORM_SCHEMA" && !customField.values.isNullOrEmpty()) {
-                            val formSchemas: List<FormSchema> = gson.fromJson(
-                                customField.values[0],
-                                object : TypeToken<List<FormSchema>>() {}.type
-                            )
-
-                            Log.e("ForrrrSizeee", "formSchemas " + formSchemas.size)
-                            val formSchemasModel = formSchemas[0]
-
-
-
-                            if (index + 1 < responses.size) {
-                                val nextResponse = responses[index + 1]
-
-                                // Extract message payload data from the next response
-                                val nextMessagePayload = nextResponse.requestPayload?.messagePayload?.text
-                                val formData= nextMessagePayload?.let {
-                                    parsePayloadToFormData(
-                                        it
-                                    )
-                                }
-                                Log.e("NextPayload", "formData: $formData")
-                                formSchemasModel.formData=formData
-                                Log.e("NextPayload", "Next response message payload: $nextMessagePayload")
-
-                                // You can now use the current formSchemasModel and nextMessagePayload together
-                                val newMessages = NCWMessage(
-                                    sender = TYPE_FORM,
-                                    timestamp = System.currentTimeMillis(),
-                                    formSchema = formSchemasModel,
-                                    message = nextMessagePayload
+                    for (customField in response.customFields) {
+                        when (CustomFieldName.fromValue(customField.name)) {
+                            CustomFieldName.FORM_SCHEMA -> {
+                                //  renderTheFormMessage(response)
+                                val formSchemas: List<FormSchema> = gson.fromJson(
+                                    customField.values?.get(0),
+                                    object : TypeToken<List<FormSchema>>() {}.type
                                 )
-                                addSingleMessage(newMessages)
-                            }
-                        }
-                    }
-                } else {
-                    // Existing logic for attachments
-                    val newMessages = response.attachments?.mapNotNull {
-                        mapAttachmentToMessage(it,response.requestId!!)
-                    } ?: emptyList()
+                                val formSchemasModel = formSchemas[0]
 
-                    if (newMessages.isNotEmpty()) {
-                        newMessages.forEachIndexed { idx, message ->
-                            message.isSameTimeMessage = idx == 0
+                                if (index + 1 < responses.size) {
+                                    val nextResponse = responses[index + 1]
+
+                                    // Extract message payload data from the next response
+                                    val nextMessagePayload =
+                                        nextResponse.requestPayload?.messagePayload?.text
+                                    val formData = nextMessagePayload?.let {
+                                        parsePayloadToFormData(
+                                            it
+                                        )
+                                    }
+                                    Log.e("NextPayload", "formData: $formData")
+                                    formSchemasModel.formData = formData
+                                    Log.e(
+                                        "NextPayload",
+                                        "Next response message payload: $nextMessagePayload"
+                                    )
+
+                                    // You can now use the current formSchemasModel and nextMessagePayload together
+                                    val newMessages = NCWMessage(
+                                        sender = TYPE_FORM,
+                                        timestamp = System.currentTimeMillis(),
+                                        formSchema = formSchemasModel,
+                                        message = nextMessagePayload
+                                    )
+                                    addSingleMessage(newMessages)
+                                }
+                            }
+
+                            CustomFieldName.SURVEY_SCHEMA -> {
+
+                            }
+
+                            CustomFieldName.DISABLE_INPUT_FIELD -> {
+                                if (customField.values?.get(0) == "true") {
+                                    messageInputField.isEnabled = false
+                                    attachmentIcon.isEnabled = false
+                                } else {
+                                    messageInputField.isEnabled = true
+                                    attachmentIcon.isEnabled = true
+                                }
+
+                            }
+
+                            CustomFieldName.DISABLE_CHAT_INPUT -> {
+
+                            }
+
+                            CustomFieldName.END_CHAT -> {
+
+                            }
+
+
+                            else -> {}
                         }
+
+
                     }
-                    messageList.addAll(newMessages)
                 }
-            } else {
+                // else {
+                // Existing logic for attachments
+                val newMessages = response.attachments?.mapNotNull {
+                    mapAttachmentToMessage(it, response.requestId!!)
+                } ?: emptyList()
+
+                if (newMessages.isNotEmpty()) {
+                    newMessages.forEachIndexed { idx, message ->
+                        message.isSameTimeMessage = idx == 0
+                    }
+                }
+                messageList.addAll(newMessages)
+                //  }
+            }
+
+
+            // Type Request
+
+            else {
                 // Existing logic for request payloads
                 response.requestPayload?.attachmentList?.takeIf { it.isNotEmpty() }
                     ?.forEach { attachmentListRequest ->
-                        val messageType = attachmentListRequest.type?.let { MessageType.fromTypeName(it) }
-
-                        messageType?.let {
-                            val newMessage = NCWMessage(
-                                sender = TYPE_REQUEST,
-                                type = it,
-                                timestamp = response.timestamp ?: System.currentTimeMillis(),
-                                largeImageUrl = if (it == MessageType.IMAGE) attachmentListRequest.largeImageUrl else null,
-                                thumbnailUrl = if (it == MessageType.VIDEO) attachmentListRequest.thumbnailUrl else null,
-                                fileUrl = if (it == MessageType.FILE) attachmentListRequest.fileURL else null,
-                                fileSize = attachmentListRequest.fileSize,
-                                title = attachmentListRequest.title
-                            )
-                            messageList.add(newMessage)
+                        val messageType =
+                            attachmentListRequest.type?.let { MessageType.fromTypeName(it) }
+                        if (messageType != MessageType.MESSAGEINFO) {
+                            messageType?.let {
+                                val newMessage = NCWMessage(
+                                    sender = TYPE_REQUEST,
+                                    type = it,
+                                    timestamp = response.timestamp ?: System.currentTimeMillis(),
+                                    largeImageUrl = if (it == MessageType.IMAGE) attachmentListRequest.largeImageUrl else null,
+                                    thumbnailUrl = if (it == MessageType.VIDEO) attachmentListRequest.thumbnailUrl else null,
+                                    fileUrl = if (it == MessageType.FILE) attachmentListRequest.fileURL else null,
+                                    fileSize = attachmentListRequest.fileSize,
+                                    title = attachmentListRequest.title
+                                )
+                                messageList.add(newMessage)
+                            }
                         }
                     } ?: run {
                     val newMessage = NCWMessage(
@@ -1971,25 +2021,24 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback,NCWFeedbackAc
 
     }
 
-    private fun showProgressBar()
-    {
+    private fun showProgressBar() {
 
         progressBar.visibility = View.VISIBLE
         constProgressBar.visibility = View.VISIBLE
     }
-    private fun hideProgressBar()
-    {
+
+    private fun hideProgressBar() {
         progressBar.visibility = View.GONE
         constProgressBar.visibility = View.GONE
     }
 
     override fun onThumbUpClick(requestId: String) {
-        Log.e("RequestId ThumbUp",requestId)
-        hitFeedbackAPI(requestId,"POSITIVE")
+        Log.e("RequestId ThumbUp", requestId)
+        hitFeedbackAPI(requestId, "POSITIVE")
     }
 
     override fun onThumbDownClick(requestId: String) {
-        Log.e("RequestId ThumbDown",requestId)
-        hitFeedbackAPI(requestId,"NEGATIVE")
+        Log.e("RequestId ThumbDown", requestId)
+        hitFeedbackAPI(requestId, "NEGATIVE")
     }
 }

@@ -229,6 +229,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             formSchema.formData?.get(adapterPosition)?.textAreaInput?.let {
                 editText.setText(it)
             }
+            editText.isEnabled = isClickable
         }
 
         private fun setupValidation(
@@ -270,30 +271,27 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             }
         }
 
-
-
-
         private fun createRadioGroup(component: Component) {
             addRadioLabel(component)
+
             val radioGroup = RadioGroup(itemView.context).apply {
                 layoutParams = defaultLayoutParams()
             }
+            val isRadiaClickable=isClickable
+
             component.optionList?.forEach { option ->
                 val radioButton = RadioButton(itemView.context).apply {
                     text = option.value
+                    isEnabled = isRadiaClickable
                     setOnCheckedChangeListener { _, isChecked ->
-                        if (isChecked && isClickable) {
-                            inputValuesSelected[adapterPosition].selectedRadio = text.toString()
-                        }
-                    }
-                    /*setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) {
                             inputValuesSelected[adapterPosition].selectedRadio = text.toString()
                         }
-                    }*/
+                    }
                 }
                 radioGroup.addView(radioButton)
             }
+
             formContainer.addView(radioGroup)
             inputValues[component.id] = radioGroup
 
@@ -301,16 +299,12 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 val radioSelected = formSchema.formData?.get(adapterPosition)?.selectedRadio
                 radioGroup.children.forEach { view ->
                     if (view is RadioButton) {
-                        if (view.text == radioSelected) {
-                            view.isChecked = true
-                        }
+                        view.isChecked = view.text == radioSelected
                     }
                 }
-
             }
-            radioGroup.isEnabled=isClickable
-
         }
+
         private fun createCheckboxGroup(component: Component) {
             addRadioLabel(component)
 
@@ -369,7 +363,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 val optionView = TextView(itemView.context).apply {
                     text = option
                     textSize = 14f
-                    setPadding(10, 11, 10, 11)
+                    setPadding(10, 16, 10, 16)
                     setOnClickListener {
                         selectedText.text = option
                         isDropdownOpen = false
@@ -399,7 +393,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
             // Create the date input TextView
             val textView = TextView(itemView.context).apply {
-                setPadding(10, 30, 16, 30)
+                setPadding(16, 30, 16, 30)
                 createDrawable(this)
                 text = FORM_DATE_FORMAT
                 layoutParams = defaultLayoutParams()
@@ -597,7 +591,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                             LinearLayoutManager.VERTICAL,
                             false
                         )
-                        recyclerDoc.adapter = NCWFormFilesAdapter(component.fileUpload!!) { selectedOption ->
+                        recyclerDoc.adapter = NCWFormFilesAdapter(component.fileUpload!!,isClickable) { selectedOption ->
                             Log.d("SelectedOption", "Selected file: $selectedOption")
                             component.fileUpload?.remove(selectedOption)
                             inputValuesSelected.getOrNull(adapterPosition)?.fileUpload?.remove(selectedOption)
@@ -609,8 +603,26 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 } else {
                     recyclerDoc.visibility = View.GONE
                 }
+
+
             } catch (ex: Exception) {
                 Log.e("Exception", "Error inflating file input: ${ex.message}", ex)
+            }
+
+            formSchema.formData?.get(adapterPosition)?.fileUpload?.let {
+                recyclerDoc.visibility = View.VISIBLE
+                if (recyclerDoc.adapter == null) {
+                    recyclerDoc.layoutManager = LinearLayoutManager(
+                        itemView.context,
+                        LinearLayoutManager.VERTICAL,
+                        false
+                    )
+                    recyclerDoc.adapter = NCWFormFilesAdapter(formSchema.formData?.get(adapterPosition)?.fileUpload!!,isClickable){
+
+                    }
+
+                }
+
             }
 
 
