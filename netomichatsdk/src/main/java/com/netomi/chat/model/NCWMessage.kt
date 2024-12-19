@@ -41,7 +41,9 @@ enum class MessageType(val typeName: String) {
     VIDEO("ai.msg.domain.responses.core.Video"),
     CAROUSEL("ai.msg.domain.responses.core.Carousel"),
     CARD("ai.msg.domain.responses.core.Card"),
-    FILE("ai.msg.domain.responses.core.GenericFileAttachment");
+    FILE("ai.msg.domain.responses.core.GenericFileAttachment"),
+    MESSAGEINFO("ai.msg.domain.responses.core.MessageInfoAttachment");
+
 
 
     companion object {

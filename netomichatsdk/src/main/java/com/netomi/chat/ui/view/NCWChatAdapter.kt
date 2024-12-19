@@ -1,5 +1,6 @@
-package com.netomi.chat.ui.view
+package com.netomi.chat.ui.  view
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,6 +19,8 @@ import com.google.android.material.chip.ChipGroup
 import com.netomi.chat.R
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
+import com.netomi.chat.model.messages.Component
+import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppUtils
@@ -29,7 +32,9 @@ class NCWChatAdapter(
     private val messages: MutableList<NCWMessage>,
     private val themeData: NCWThemeResponse?,
     private val actionCallback: NCWChatActionCallback,
-    private val feedbackActionCallBack:NCWFeedbackActionCallback
+    private val feedbackActionCallBack:NCWFeedbackActionCallback,
+    private val callBack: (Component?) -> Unit,
+    private val formData: (String?, String?, ArrayList<NCWAttachmentList>) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     // To map messageIDs to positions in the RecyclerView
     private val messageMap = mutableMapOf<String, Int>()
@@ -69,7 +74,7 @@ class NCWChatAdapter(
         when (holder) {
             is RequestViewHolder -> holder.bind(message)
             is ResponseViewHolder -> holder.bind(message,position)
-            is FormViewHolder->holder.bind(message)
+            is FormViewHolder->holder.bind(message,callBack,formData)
            // is InitialViewHolder -> holder.bind(message,position)
         }
     }
@@ -186,8 +191,13 @@ class NCWChatAdapter(
         private val tvFormTitle: TextView = itemView.findViewById(R.id.tvFormTitle)
         private val recyclerViewForm: RecyclerView = itemView.findViewById(R.id.formRecyclerView)
         private val tvFormDesc: TextView = itemView.findViewById(R.id.tvFormDesc)
+        private var formAdapter: NCWFormAdapter? = null
 
-        fun bind(message: NCWMessage) {
+        fun bind(
+            message: NCWMessage,
+            callBack: (Component?) -> Unit,
+            formData: (String?, String?,ArrayList<NCWAttachmentList>) -> Unit
+        ) {
             NCWThemeUtils.setBotConfig(rootLayout)
             NCWThemeUtils.setBotTextColor(tvFormTitle)
             NCWThemeUtils.setTimeStampColor(tvFormTitle)
@@ -202,15 +212,61 @@ class NCWChatAdapter(
 
             recyclerViewForm.layoutManager =
                 LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
-            val formAdapter = NCWFormAdapter(message.formSchema?.schema ?: emptyList()){callBack->
-                Log.e("SelectedComponent","iiit "+callBack)
-                if (callBack != null) {
-                    Log.e("SelectedComponent","iiit "+callBack.config)
-                }
+            formAdapter = message.formSchema?.schema?.let { schema ->
+                NCWFormAdapter(schema, message.formSchema!!,{ callBack ->
+                    // Handle the component callback
+                    if (callBack != null) {
+                        callBack(callBack)
+                        // Log.e("SelectedComponent", "iiit " + callBack.config)
+                    }
+                }, { payload, label,attachmentList ->
+                    // Handle the payload and label response here
+                    println("Payload: $payload")
+                    println("Label: $label")
+                    formData(payload,label,attachmentList)
+                })
             }
+
             recyclerViewForm.adapter = formAdapter
 
+         //   recyclerViewForm.isEnabled = message.formSchema?.formData.isNullOrEmpty()
+
+            /*if (!message.formSchema?.formData.isNullOrEmpty()) {
+                Log.e("recyclerViewForm.isEnabled", "recyclerViewForm.isEnabled Ifff")
+                recyclerViewForm.isEnabled = false
+                recyclerViewForm.isClickable = false
+            } else {
+                Log.e("recyclerViewForm.isEnabled", "recyclerViewForm.isEnabled Elseeee")
+                recyclerViewForm.isEnabled = true
+                recyclerViewForm.isClickable = true
+            }*/
+
+            if (message.formSchema?.formData.isNullOrEmpty()) {
+                Log.e("formSchema","Uuuduudd")
+                formAdapter?.isClickable =true
+            } else {
+                Log.e("formSchema ","Elllssseee")
+                formAdapter?.isClickable =false
+            }
+
+
+
+
         }
+
+        class NonInteractiveLayoutManager(context: Context) : LinearLayoutManager(context) {
+            override fun canScrollVertically(): Boolean = false
+        }
+        fun updateFormAdapterData(components: List<Component>, formComponent: Component) {
+            val index = components.indexOfFirst { it.id == formComponent.id }
+            if (index != -1) {
+                Log.e("Data", "Updating item at position $index: $formComponent")
+                formAdapter?.updateItem(index, formComponent)
+            } else {
+                Log.e("UpdateFormAdapterData", "Component not found with id: ${formComponent.id}")
+            }
+        }
+
 
     }
 

@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
+import android.util.Log
 import android.view.View
 import android.view.Window
 import android.widget.Button
@@ -107,7 +108,7 @@ object NCWThemeUtils
         }
     }
 
-    fun setUserConfig(messageText: TextView) {
+    fun setUserConfig(messageText: View) {
         themeData?.mobileConfig?.lightTheme?.userConfig?.let { userConfig ->
             val bubbleConfig = themeData?.mobileConfig?.lightTheme?.bubbleConfig
             val borderRadius = bubbleConfig?.borderRadius?.toFloat() ?: 0f
@@ -115,11 +116,19 @@ object NCWThemeUtils
 
             // Apply background with corner radii
             applyBackgroundWithCorners(messageText, userConfig.backgroundColor, cornerRadii)
-
-            // Set text color
+              if (messageText is TextView)
             userConfig.textColor?.let { color -> setTextColor(messageText, color) }
         }
     }
+
+    fun setUserConfigTextColor(textView: TextView)
+    {
+        themeData?.mobileConfig?.lightTheme?.userConfig?.let { userConfig ->{
+            userConfig.textColor?.let { color -> setTextColor(textView, color) }
+        }}
+    }
+
+
 
 
     fun setRadioButtonUserConfig(messageText: RadioButton) {
@@ -263,12 +272,14 @@ object NCWThemeUtils
         window: Window
     ) {
         val gradientDrawable = createGradientDrawable()
-        headerContainer.background = gradientDrawable
-        rootLayout.background = gradientDrawable
-        window.apply {
-            statusBarColor = Color.TRANSPARENT
-            decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        if (gradientDrawable != null) {
+            headerContainer.background = gradientDrawable
+            rootLayout.background = gradientDrawable
+            window.apply {
+                statusBarColor = Color.TRANSPARENT
+                decorView.systemUiVisibility =
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            }
         }
     }
 
@@ -314,11 +325,55 @@ object NCWThemeUtils
      * @return A GradientDrawable with specified direction and colors.
      */
     private fun createGradientDrawable(): GradientDrawable? {
-        val direction = GradientDrawable.Orientation.values()
-            .getOrElse(themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientDirection ?: 0) { GradientDrawable.Orientation.LEFT_RIGHT }
-        val gradientColors = themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientColors?.map { Color.parseColor(it) }?.toIntArray()
-        return gradientColors?.let { GradientDrawable(direction, it) }
+        try {
+            Log.e("Hereee", "adddddd ${themeData?.mobileConfig?.lightTheme}")
+
+            // Ensure a valid gradient direction
+            val direction = GradientDrawable.Orientation.values()
+                .getOrElse(themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientDirection ?: 0) {
+                    GradientDrawable.Orientation.LEFT_RIGHT
+                }
+
+            // Parse and validate gradient colors
+            val gradientColors = themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientColors
+                ?.mapNotNull { color ->
+                    try {
+                        Color.parseColor(color)
+                    } catch (e: IllegalArgumentException) {
+                        Log.e("ColorParseError", "Invalid color: $color")
+                        null // Ignore invalid color strings
+                    }
+                }?.toIntArray()
+
+            // Ensure gradient colors are valid
+            if (gradientColors == null || gradientColors.isEmpty()) {
+                Log.e("GradientError", "Gradient colors are null or empty")
+                return null
+            }
+
+            // Create and return the GradientDrawable
+            return GradientDrawable(direction, gradientColors)
+        } catch (ex: Exception) {
+            Log.e("Exception", "Error creating gradient drawable: $ex")
+            return null
+        }
     }
+
+    /* private fun createGradientDrawable(): GradientDrawable? {
+         try {
+             Log.e("Hereee","adddddd "+themeData?.mobileConfig?.lightTheme)
+             val direction = GradientDrawable.Orientation.values()
+                 .getOrElse(themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientDirection ?: 0) { GradientDrawable.Orientation.LEFT_RIGHT }
+             val gradientColors = themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientColors?.map { Color.parseColor(it) }?.toIntArray()
+             return gradientColors?.let { GradientDrawable(direction, it) }
+
+         }
+         catch (ex:Exception){
+             Log.e("Exception","saassa "+ex )
+         }
+         return null
+
+     }*/
 
 
 
