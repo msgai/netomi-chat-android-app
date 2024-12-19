@@ -29,6 +29,17 @@ import java.util.Locale
 
 
 object NCWAppUtils {
+
+    private val emailPattern = android.util.Patterns.EMAIL_ADDRESS
+    private val urlPattern = android.util.Patterns.WEB_URL
+
+    fun isValidEmail(input: String): Boolean {
+        return emailPattern.matcher(input).matches()
+    }
+
+    fun isValidUrl(input: String): Boolean {
+        return urlPattern.matcher(input).matches()
+    }
     fun hideKeyboard(context: Activity) {
         val inputManager: InputMethodManager =
             context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
