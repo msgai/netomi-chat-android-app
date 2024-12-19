@@ -143,14 +143,16 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 editText.addTextChangedListener(object : TextWatcher {
                     override fun afterTextChanged(s: Editable?) {
                         val inputText = s.toString()
-                        val errorMessage = inputFieldValidation(inputText, validations)
+                        if (inputText.isNotEmpty()) {
+                            val errorMessage = inputFieldValidation(inputText, validations)
 
-                        if (errorMessage != null) {
-                            errorTextView.text = errorMessage
-                            errorTextView.visibility = View.VISIBLE
-                        } else {
-                            errorTextView.visibility = View.GONE
-                            inputValuesSelected[adapterPosition].textInput = inputText
+                            if (errorMessage != null) {
+                                errorTextView.text = errorMessage
+                                errorTextView.visibility = View.VISIBLE
+                            } else {
+                                errorTextView.visibility = View.GONE
+                                inputValuesSelected[adapterPosition].textInput = inputText
+                            }
                         }
                     }
 
