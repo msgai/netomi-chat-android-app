@@ -64,6 +64,7 @@ import com.netomi.chat.model.messages.NCWQuickReply
 import com.netomi.chat.model.messages.NCWQuickReplyOption
 import com.netomi.chat.model.messages.NCWRequestBody
 import com.netomi.chat.model.messages.NCWWebhookPayload
+import com.netomi.chat.model.messages.SurveyField
 import com.netomi.chat.model.mqtt.NCWCredentials
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
@@ -867,6 +868,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                             }
 
                             CustomFieldName.SURVEY_SCHEMA -> {
+                                renderTheSurveyMessage(response)
 
                             }
 
@@ -966,6 +968,22 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             handleApiCallback(messages as NCWState<Any>)
         }
 
+    }
+// Rammmmmmmm
+    private fun renderTheSurveyMessage(response: NCWGenericChannelResponse?) {
+        val gson = Gson()
+        response?.customFields?.forEach { customField ->
+            if (!customField.values.isNullOrEmpty()) {
+                val surveyField: SurveyField = gson.fromJson(
+                    customField.values[0],
+                    object : TypeToken<SurveyField>() {}.type
+                )
+                Log.e("SurveyField", "SurveyField " + surveyField)
+                val bottomSheet = NCWSurveyBottomSheet(surveyField)
+                bottomSheet.show(supportFragmentManager, "SurveyOptionsBottomSheet")
+            }
+
+        }
     }
 
 
@@ -1307,7 +1325,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
         }
 
-// Rammmmmmm
     // Function to show camera and gallery options
     private fun showMediaOptions() {
 

@@ -11,6 +11,7 @@ data class CustomField(
     val active: Boolean?
 )
 
+
 data class FormSchema(
     val properties: Properties,
     val schema: ArrayList<Component>,
