@@ -1,5 +1,6 @@
 package com.netomi.chat.utils
 
+import android.util.Log
 import com.netomi.chat.model.messages.FileUploadData
 import com.netomi.chat.ui.view.FormData
 import java.net.HttpURLConnection
@@ -11,7 +12,11 @@ import java.util.Locale
 
 object NCWParsingUtils {
 
-    fun parsePayloadToFormData(payload: String): ArrayList<FormData> {
+    fun parsePayloadToFormData(payload: String): ArrayList<FormData>? {
+
+        if (!payload.contains("event://;LEARN_ATTRIBUTE_EVENT;")) {
+            return null // Return null if the substring is not found
+        }
         val cleanedPayload = payload.substringAfter("event://;LEARN_ATTRIBUTE_EVENT;")
         val keyValuePairs = cleanedPayload.split("&")
 
@@ -36,6 +41,7 @@ object NCWParsingUtils {
                 }
                 "DEFAULT_OUTPUT_KEY_PILL" -> {
                     val fileUrls = value?.split(",")?.map { FileUploadData(fileUrl = it) } ?: emptyList()
+
                     formData.fileUpload = ArrayList(fileUrls)
                 }
             }
