@@ -51,7 +51,6 @@ import com.netomi.chat.model.endchat.NCWEventData
 import com.netomi.chat.model.feedback.feedbackrequest.NCWEventInfo
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
-import com.netomi.chat.model.messages.CustomField
 import com.netomi.chat.model.messages.Component
 import com.netomi.chat.model.messages.FileUploadData
 import com.netomi.chat.model.messages.FormSchema
@@ -98,6 +97,7 @@ import com.netomi.chat.utils.NCWAppConstant.TYPE_RESPONSE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
+import com.netomi.chat.utils.NCWAppUtils.isFormSizeValid
 import com.netomi.chat.utils.NCWFeedbackActionCallback
 import com.netomi.chat.utils.NCWParsingUtils.parsePayloadToFormData
 import com.netomi.chat.utils.NCWRoutes
@@ -1347,6 +1347,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                     addMediaMessage(fileSend, uri, MessageType.VIDEO)
                 }
+                else{
+                    if (!validateFormAttachment(fileSend)) return@registerForActivityResult
+                }
 
                 fileSend?.let { getPreSignedUrl(type, it.name) }
             }
@@ -1385,15 +1388,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                         addMediaMessage(fileSend, uri, MessageType.IMAGE)
                     }
                 }
+                else->{
+                    if (!validateFormAttachment(fileSend)) return@registerForActivityResult
+                }
             }
 
             fileSend?.let { getPreSignedUrl(fileType, it.name) }
         }
 
 
-    private fun showLimitExceedPopup() {
-        val maxSize = themeData?.fileSharing?.fileSize?.let(NCWAppUtils::formatFileSize)
-        val messageIssue = getString(R.string.upload_file_max_size, maxSize ?: "N/A")
+    private fun showLimitExceedPopup(messageIssue: String) {
+
         handleSessionTimeout(
             getString(R.string.limit_exceed),
             messageIssue,
@@ -1407,6 +1412,37 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         val timeStamp: String = SimpleDateFormat(DATE_FORMAT).format(Date())
         val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
+    }
+
+    // Common function to validate file size and type
+    private fun validateFormAttachment(file: File?): Boolean {
+
+        val supportedExtensions = formComponent?.config?.attachmentTypes?.map { it.lowercase() } ?: emptyList()
+        Log.e("supportedExtensions", "supportedExtensions: $supportedExtensions")
+
+// Normalize the file extension (remove the dot and convert to lowercase)
+        val fileExtension = file?.extension?.lowercase()?.removePrefix(".")
+
+        Log.e("fileExtension", "fileExtension: $fileExtension")
+
+// Check if the file extension is supported (case insensitive and without the dot)
+        if (!supportedExtensions.contains(fileExtension)) {
+            NCWAppUtils.showToast(
+                this,
+                "Unsupported file type selected. Supported types: ${supportedExtensions.joinToString(", ")}"
+            )
+            return false
+        }
+        // Validate file size
+        if (!file?.let { formComponent?.let { it1 -> isFormSizeValid(it1, it) } }!!) {
+            val maxUploadSizeAllowedMB = formComponent?.config?.maxUploadSizeAllowed ?: 0
+            val messageIssue = getString(R.string.upload_file_max_size, maxUploadSizeAllowedMB ?: "N/A")
+
+            showLimitExceedPopup(messageIssue)
+            return false
+        }
+
+        return true
     }
 
     // Common function to validate file size and type
@@ -1430,7 +1466,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
         // Validate file size
         if (!isFileSizeValid(this, file?.length(), themeData?.fileSharing?.fileSize)) {
-            showLimitExceedPopup()
+            val maxSize = themeData?.fileSharing?.fileSize?.let(NCWAppUtils::formatFileSize)
+            val messageIssue = getString(R.string.upload_file_max_size, maxSize ?: "N/A")
+            showLimitExceedPopup(messageIssue)
             return false
         }
 
@@ -1606,14 +1644,34 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             Log.e("FileSelection", "Failed to get file from URI")
             return
         }
-        /*  // Validate file size and type
-          if (!validateFile(fileSend)) return
+        if (!validateFormAttachment(fileSend)) return
 
-          // Validate file size
-          if (!isFileSizeValid(this, fileSend?.length(), formComponent?.config?.maxUploadSizeAllowed)) {
-              showLimitExceedPopup()
-              return
-          }*/
+
+/*// Calculate the total current file size in MB
+        val previousFileInMB = formComponent?.fileUpload
+            ?.filter { it.fileSize != null }
+            ?.sumOf {
+                // Log each file size conversion for debugging
+                val fileSizeMB = it.fileSize!!.toDouble() / (1024 * 1024) // Use Double for precision
+                Log.e("Chesize", "Converted file size: $fileSizeMB MB")
+                fileSizeMB
+            }
+            ?: 0.0 // Default to 0.0 if no file size available
+val currentFileSizeMB= fileSend!!.length()/ (1024 * 1024)
+val allSize=previousFileInMB+currentFileSizeMB
+        Log.e("Chesize", "Total file size in MB: $previousFileInMB MB")
+Log.e("Checkkk","currentFileSizeMB "+previousFileInMB)
+        Log.e("Checkkk","maxUploadSizeAllowedMB "+maxUploadSizeAllowedMB)
+// Check if the total file size exceeds the allowed limit
+        if (allSize > maxUploadSizeAllowedMB) {
+           // val maxSize = themeData?.fileSharing?.fileSize?.let(NCWAppUtils::formatFileSize)
+            val messageIssue = getString(R.string.upload_file_max_size, maxUploadSizeAllowedMB ?: "N/A")
+            showLimitExceedPopup(messageIssue)
+            return
+        }*/
+
+
+
 
         fileSend?.let {
             getPreSignedUrl(mimeType, it.name)

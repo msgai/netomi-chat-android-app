@@ -14,6 +14,7 @@ import android.webkit.MimeTypeMap
 import android.widget.TextView
 import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.netomi.chat.model.messages.Component
 import com.netomi.chat.utils.NCWAppConstant.TIME_AM_PM
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FILE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_IMAGE
@@ -223,6 +224,24 @@ object NCWAppUtils {
                 context = context,
                 message = "File size should not be greater than ${String.format("%.2f", maxFileSizeInMB)} MB"
             )*/
+
+            return false
+        }
+        return true
+    }
+
+    fun isFormSizeValid(formComponent: Component, fileSend: File): Boolean {
+        val maxUploadSizeAllowedMB = formComponent?.config?.maxUploadSizeAllowed ?: 0 // Default to 0 if null, unit is MB
+        val previousFileInMB = formComponent?.fileUpload
+            ?.filter { it.fileSize != null } // Ensure fileSize is not null
+            ?.sumOf {
+                it.fileSize!!.toDouble() / (1024 * 1024) // Convert bytes to MB
+            }
+            ?: 0.0
+        val currentFileSizeMB = fileSend?.length()?.toDouble()?.div(1024 * 1024) ?: 0.0
+        val allSize = previousFileInMB + currentFileSizeMB
+
+        if (allSize > maxUploadSizeAllowedMB) {
 
             return false
         }
