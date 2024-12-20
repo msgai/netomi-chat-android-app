@@ -1869,52 +1869,64 @@ Log.e("Checkkk","currentFileSizeMB "+previousFileInMB)
 
         responses.forEachIndexed { index, response ->
             if (response.triggerType == TYPE_RESPONSE) {
-
-                /*   if (response.customFields?.isNotEmpty() == true) {
-                       Log.e("Dataa", "Idffff" + (response.customFields?.get(0)?.values ?: null))
-                       val gson = Gson()
-
-                       response.customFields.forEach { customField ->
-                           if (customField.name == "FORM_SCHEMA" && !customField.values.isNullOrEmpty()) {
-                               val formSchemas: List<FormSchema> = gson.fromJson(
-                                   customField.values[0],
-                                   object : TypeToken<List<FormSchema>>() {}.type
-                               )
-                               val formSchemasModel = formSchemas[0]
-
-                               if (index + 1 < responses.size) {
-                                   val nextResponse = responses[index + 1]
-
-                                   // Extract message payload data from the next response
-                                   val nextMessagePayload = nextResponse.requestPayload?.messagePayload?.text
-                                   val formData= nextMessagePayload?.let {
-                                       parsePayloadToFormData(
-                                           it
-                                       )
-                                   }
-                                   Log.e("NextPayload", "formData: $formData")
-                                   formSchemasModel.formData=formData
-                                   Log.e("NextPayload", "Next response message payload: $nextMessagePayload")
-
-                                   // You can now use the current formSchemasModel and nextMessagePayload together
-                                   val newMessages = NCWMessage(
-                                       sender = TYPE_FORM,
-                                       timestamp = System.currentTimeMillis(),
-                                       formSchema = formSchemasModel,
-                                       message = nextMessagePayload
-                                   )
-                                   addSingleMessage(newMessages)
-                               }
-                           }
-
-                       }
-                   }
-   */
-
                 val gson = Gson()
                 if (response.customFields?.isNotEmpty() == true) {
                     for (customField in response.customFields) {
                         when (CustomFieldName.fromValue(customField.name)) {
+                            CustomFieldName.FORM_SCHEMA -> {
+                                val formSchemas: List<FormSchema> = gson.fromJson(
+                                    customField.values?.get(0),
+                                    object : TypeToken<List<FormSchema>>() {}.type
+                                )
+                                val formSchemasModel = formSchemas.firstOrNull()
+
+                                formSchemasModel?.let { schema ->
+                                    val nextMessagePayload = responses.getOrNull(index + 1)
+                                        ?.requestPayload?.messagePayload?.text
+
+                                    val formData = nextMessagePayload?.let { parsePayloadToFormData(it) }
+
+                                    Log.e("NextPayload", "formData: $formData, size: ${formData?.size}")
+
+                                    if (!formData.isNullOrEmpty()) {
+                                        schema.formData = formData
+                                    }
+
+                                    // Create and add the new message
+                                    addSingleMessage(
+                                        NCWMessage(
+                                            sender = TYPE_FORM,
+                                            timestamp = System.currentTimeMillis(),
+                                            formSchema = schema
+                                        )
+                                    )
+                                }
+                            }
+
+                            CustomFieldName.SURVEY_SCHEMA -> {
+
+                            }
+
+                            CustomFieldName.DISABLE_INPUT_FIELD -> {
+                                val isEnabled = customField.values?.getOrNull(0) != "true"
+                                messageInputField.isEnabled = isEnabled
+                                attachmentIcon.isEnabled = isEnabled
+                            }
+
+                            CustomFieldName.DISABLE_CHAT_INPUT -> {
+                                // Handle DISABLE_CHAT_INPUT
+                            }
+
+                            CustomFieldName.END_CHAT -> {
+                                // Handle END_CHAT
+                            }
+
+                            else -> {
+                                // Handle any other cases
+                            }
+                        }
+
+                        /*when (CustomFieldName.fromValue(customField.name)) {
                             CustomFieldName.FORM_SCHEMA -> {
                                 //  renderTheFormMessage(response)
                                 val formSchemas: List<FormSchema> = gson.fromJson(
@@ -1925,28 +1937,53 @@ Log.e("Checkkk","currentFileSizeMB "+previousFileInMB)
 
                                 if (index + 1 < responses.size) {
                                     val nextResponse = responses[index + 1]
+                                    val nextMessagePayload = nextResponse.requestPayload?.messagePayload?.text
+                                  Log.e("Nextt","sss "+nextMessagePayload)
+                                    if (!nextMessagePayload.isNullOrEmpty() ) {
 
-                                    // Extract message payload data from the next response
-                                    val nextMessagePayload =
-                                        nextResponse.requestPayload?.messagePayload?.text
-                                    val formData = nextMessagePayload?.let {
-                                        parsePayloadToFormData(
-                                            it
+                                        val formData = parsePayloadToFormData(
+                                            nextMessagePayload
                                         )
-                                    }
-                                    Log.e("NextPayload", "formData: $formData")
-                                    formSchemasModel.formData = formData
-                                    Log.e(
-                                        "NextPayload",
-                                        "Next response message payload: $nextMessagePayload"
-                                    )
+                                        Log.e("NextPayload", "formData: $formData")
+                                        Log.e("NextPayload", "formData: ${formData?.size}")
+                                        if (!formData.isNullOrEmpty() && formData.size>0 ) {
+                                            formSchemasModel.formData = formData
+                                            Log.e(
+                                                "NextPayload",
+                                                "Next response message payload: $nextMessagePayload"
+                                            )
 
-                                    // You can now use the current formSchemasModel and nextMessagePayload together
+                                            val newMessages = NCWMessage(
+                                                sender = TYPE_FORM,
+                                                timestamp = System.currentTimeMillis(),
+                                                formSchema = formSchemasModel
+                                            )
+                                            addSingleMessage(newMessages)
+                                        }
+                                        else{
+                                            val newMessages = NCWMessage(
+                                                sender = TYPE_FORM,
+                                                timestamp = System.currentTimeMillis(),
+                                                formSchema = formSchemasModel,
+                                            )
+                                            addSingleMessage(newMessages)
+                                        }
+                                    }
+                                    else{
+                                        val newMessages = NCWMessage(
+                                            sender = TYPE_FORM,
+                                            timestamp = System.currentTimeMillis(),
+                                            formSchema = formSchemasModel,
+                                        )
+                                        addSingleMessage(newMessages)
+                                    }
+
+                                }
+                                else{
                                     val newMessages = NCWMessage(
                                         sender = TYPE_FORM,
                                         timestamp = System.currentTimeMillis(),
                                         formSchema = formSchemasModel,
-                                        message = nextMessagePayload
                                     )
                                     addSingleMessage(newMessages)
                                 }
@@ -1957,13 +1994,13 @@ Log.e("Checkkk","currentFileSizeMB "+previousFileInMB)
                             }
 
                             CustomFieldName.DISABLE_INPUT_FIELD -> {
-                                if (customField.values?.get(0) == "true") {
-                                    messageInputField.isEnabled = false
-                                    attachmentIcon.isEnabled = false
-                                } else {
-                                    messageInputField.isEnabled = true
-                                    attachmentIcon.isEnabled = true
-                                }
+//                                if (customField.values?.get(0) == "true") {
+//                                    messageInputField.isEnabled = false
+//                                    attachmentIcon.isEnabled = false
+//                                } else {
+//                                    messageInputField.isEnabled = true
+//                                    attachmentIcon.isEnabled = true
+//                                }
 
                             }
 
@@ -1977,7 +2014,7 @@ Log.e("Checkkk","currentFileSizeMB "+previousFileInMB)
 
 
                             else -> {}
-                        }
+                        }*/
 
 
                     }

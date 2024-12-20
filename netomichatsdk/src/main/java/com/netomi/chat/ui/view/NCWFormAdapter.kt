@@ -231,6 +231,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             // Check if validation is enabled
             val isValidationEnabled = component.dropDownSelections["Validation"]?.value == true
             if (isValidationEnabled) {
+                if (editText.text.isNotEmpty())
                 setupValidation(editText, errorTextView, component.validations)
             } else {
                 // Handle simple text change without validation
@@ -725,8 +726,23 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                         LinearLayoutManager.VERTICAL,
                         false
                     )
-                    recyclerDoc.adapter = NCWFormFilesAdapter(formSchema.formData?.get(adapterPosition)?.fileUpload!!,isClickable){
+                    val formDataList=formSchema.formData?.get(adapterPosition)?.fileUpload
 
+                    if (!formDataList.isNullOrEmpty() && formDataList.size>0) {
+                        if (formDataList[0].fileUrl!=null && formDataList[0].fileUrl?.isNotEmpty() == true) {
+                            recyclerDoc.adapter = NCWFormFilesAdapter(
+                                formSchema.formData?.get(adapterPosition)?.fileUpload!!,
+                                isClickable
+                            ) {
+
+                            }
+                        }
+                        else{
+                            recyclerDoc.visibility = View.GONE
+                        }
+                    }
+                    else{
+                        recyclerDoc.visibility = View.GONE
                     }
 
                 }
