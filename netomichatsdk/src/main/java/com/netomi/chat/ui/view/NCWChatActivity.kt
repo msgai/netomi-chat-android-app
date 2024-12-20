@@ -285,7 +285,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 botRefId = botRefId!!, com.netomi.chat.model.endchat.NCWRequestBody(
                     botReferenceId = botRefId!!,
                     channelId = "NETOMI_WEB_WIDGET",
-                    conversationId = conversationID!!,
+                    conversationId = conversationID?:"",
                     NCWEventData = NCWEventData(
                         eventType = "WIDGET_EVENT",
                         subType = "CHAT_END"
@@ -1307,14 +1307,19 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
         }
 
-
+// Rammmmmmm
     // Function to show camera and gallery options
     private fun showMediaOptions() {
 
+    val supportedExtensions = when (attachmentType) {
+        TYPE_ATTACHMENT -> themeData?.fileSharing?.list?.map { it.removePrefix(".") } ?: emptyList()
+        else -> formComponent?.config?.attachmentTypes?.map { it.lowercase() } ?: emptyList()
+    }
         val bottomSheet = NCWMediaOptionsBottomSheet(
             onCameraClick = { showCameraVideoOption() },
             onGalleryClick = { openGallery() },
-            onFileClick = { openFile() }
+            onFileClick = { openFile() },
+            supportedExtensions
         )
         bottomSheet.show(supportFragmentManager, "MediaOptionsBottomSheet")
     }
