@@ -43,6 +43,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
     private lateinit var preferences: AppSharedPreferences
     private val onboardingViewModel: OnboardingViewModel by viewModels()
     private lateinit var botList: MutableList<Bot>
+    private var name:String=""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +66,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
             }
         }
 
-        val name = preferences.getString(SharePreferenceConstant.NAME)
+        name = preferences.getString(SharePreferenceConstant.NAME)
         usernameTextView.text = name
 
 
@@ -86,18 +87,11 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
             when (item.itemId) {
                 R.id.itemHome -> {
                     loadFragment(HomeFragment())
-                    llParent.visibility = View.VISIBLE
-                    tvTitle.visibility = View.GONE
-                    usernameTextView.text = name
-                    tvWelcome.text = "Welcome"
-                    drawerLayout.closeDrawers() // Close all open drawers
+                  // Close all open drawers
 
                 }
 
                 R.id.itemAgent -> {
-                    llParent.visibility = View.GONE
-                    tvTitle.visibility = View.VISIBLE
-                    drawerLayout.closeDrawers() //
                     loadFragment(ChangeAiAgentFragment())
                 }
             }
@@ -153,11 +147,30 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         window.statusBarColor = ContextCompat.getColor(this, R.color.status_bar)
     }
 
-    // Utility function to load a fragment
     fun loadFragment(fragment: Fragment) {
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        if (currentFragment != null && currentFragment::class == fragment::class) {
+            return
+        }
+        when (fragment) {
+            is HomeFragment -> {
+                llParent.visibility = View.VISIBLE
+                tvTitle.visibility = View.GONE
+                usernameTextView.text = name
+                tvWelcome.text = "Welcome"
+                drawerLayout.closeDrawers()
+            }
+            is ChangeAiAgentFragment -> {
+                llParent.visibility = View.GONE
+                tvTitle.visibility = View.VISIBLE
+                drawerLayout.closeDrawers() //
+            }
+            else ->   tvTitle.visibility = View.VISIBLE
+        }
+
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
-            .addToBackStack(null) // Optional, if you want to add fragment to back stack
+            .addToBackStack(null)
             .commit()
     }
 
