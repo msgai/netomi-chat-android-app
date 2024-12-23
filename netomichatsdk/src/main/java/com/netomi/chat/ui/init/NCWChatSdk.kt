@@ -11,6 +11,7 @@ import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
 import com.netomi.chat.model.theme.light_theme.NCWOtherConfig
 import com.netomi.chat.model.theme.light_theme.NCWUserConfig
 import com.netomi.chat.ui.view.NCWChatActivity
+import com.netomi.chat.utils.Environment
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWThemeUtils
@@ -20,6 +21,7 @@ object NCWChatSdk {
 
 
     private var botRefId: String? = null
+    private var currentEnvironment: Environment = Environment.qa
 
     /**
      * Initializes the NCWChat SDK with the provided bot reference ID.
@@ -34,6 +36,10 @@ object NCWChatSdk {
         } else {
             Log.e("NCWChatSdk", "No network available during initialization.")
         }
+    }
+
+    fun setThemeData(){
+        NCWThemeUtils.setThemeData(null)
     }
 
 
@@ -134,6 +140,28 @@ object NCWChatSdk {
         return ncwSdkConfig ?: HeaderConfig()  // Provide default config if not initialized
     }*/
 
+    /**
+     * Sets the environment based on the key.
+     * @param key The key to decide the environment (e.g., "prod", "stage", "dev").
+     */
+    fun setEnvironment(key: String) {
+        currentEnvironment = when (key.lowercase()) {
+            "us" -> Environment.us
+            "sg" -> Environment.sg
+            "eu" -> Environment.eu
+            "qa" -> Environment.qa
+            "qaint" -> Environment.qaint
+            "dev" -> Environment.dev
+            else -> throw IllegalArgumentException("Invalid environment key: $key")
+        }
+    }
+
+    /**
+     * Retrieves the current base URL.
+     */
+    fun getBaseUrl(): String {
+        return currentEnvironment.baseUrl
+    }
 
     fun updateBotConfiguration(config: NCWBotConfig){
         val currentConfig = botConfig ?: NCWBotConfig()

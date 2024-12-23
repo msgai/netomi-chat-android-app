@@ -2,6 +2,7 @@ package com.netomi.chat.data.network
 
 import android.content.Context
 import com.netomi.chat.data.apiconstant.NCWApiConstant.HEADER_BEARER
+import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.utils.NCWAppSharedPreferences
 import com.netomi.chat.utils.NCWAppConstant
 import okhttp3.Interceptor
@@ -72,7 +73,7 @@ object NCWRetrofitClient {
      */
     fun getInstance(context: Context): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(NCWChatSdk.getBaseUrl())
             .client(getOkHttpClient(context))
             .addConverterFactory(GsonConverterFactory.create())
             .build()

@@ -28,7 +28,7 @@ object NCWThemeUtils
     private var themeData: NCWThemeResponse? = null
 
     // Set theme data globally
-    fun setThemeData(themeResponse: NCWThemeResponse) {
+    fun setThemeData(themeResponse: NCWThemeResponse?) {
         themeData = themeResponse
     }
     fun getThemeData():NCWThemeResponse?{
