@@ -599,6 +599,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             val createPayload = payload?.let { createPayload(it, label, timeStamp, attachmentList) }
             if (createPayload != null) {
                 chatViewModel.sendMessageAPI(createPayload)
+                addLoader()
             }
 
         })
