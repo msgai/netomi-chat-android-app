@@ -457,25 +457,38 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
           }
 
         }
-
         private fun createDateInput(component: Component) {
             addLabel(component)
 
             lateinit var textViewError: TextView
 
+            val container = RelativeLayout(itemView.context).apply {
+                layoutParams = defaultLayoutParams()
+                createDrawable(this)
+                setPadding(16, 16, 16, 16)
+            }
+
             // Create the date input TextView
             val textView = TextView(itemView.context).apply {
-                setPadding(16, 30, 16, 30)
-                createDrawable(this)
+                id = View.generateViewId()
                 text = FORM_DATE_FORMAT
-                layoutParams = defaultLayoutParams()
+                setPadding(10, 0, 16, 0)
+                layoutParams = RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    addRule(RelativeLayout.ALIGN_PARENT_START)
+                    addRule(RelativeLayout.CENTER_VERTICAL)
+                    marginEnd = 48
+                }
+                setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
 
                 setOnClickListener {
                     val calendar = Calendar.getInstance()
                     DatePickerDialog(
                         context, AlertDialog.THEME_HOLO_LIGHT,
                         { _, year, month, dayOfMonth ->
-                         //   val selectedDate = "$dayOfMonth-${month + 1}-$year"
                             val selectedDate = "${month + 1}-$dayOfMonth-$year"
                             val errorMessage = validateDate(selectedDate, component)
                             if (errorMessage == null) {
@@ -495,6 +508,18 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 }
             }
 
+            val dateIcon = ImageView(itemView.context).apply {
+                id = View.generateViewId()
+                setImageResource(R.drawable.ic_calendar)
+                layoutParams = RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    addRule(RelativeLayout.ALIGN_PARENT_END)
+                    addRule(RelativeLayout.CENTER_VERTICAL)
+                }
+            }
+
             // Initialize the error TextView
             textViewError = TextView(itemView.context).apply {
                 layoutParams = defaultLayoutParams()
@@ -502,8 +527,13 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 setTextColor(ContextCompat.getColor(context, R.color.error_color))
                 visibility = View.GONE
             }
-            textView.isEnabled=isClickable
-            formContainer.addView(textView)
+            textView.isEnabled = isClickable
+
+            // Add the TextView and icon to the container
+            container.addView(textView)
+            container.addView(dateIcon)
+
+            formContainer.addView(container)
             formContainer.addView(textViewError)
 
             inputValues[component.id] = DateField(textView, textViewError)
@@ -514,10 +544,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                     textView.text = textInput.toString()
                 }
             }
-
-
         }
-
 
         private fun inputFieldValidation(inputText: String, validations: List<Validation>): String? {
             validations.forEach { validation ->
@@ -901,7 +928,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
         private fun showFormSubmittedView(parentLayout: LinearLayout, context: Context) {
             val horizontalLayout = LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
-                gravity = Gravity.END
+                gravity = Gravity.CENTER_VERTICAL
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
@@ -909,20 +936,6 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                     setMargins(0, 20, 0, 20)
                 }
             }
-
-            val successMessage = TextView(context).apply {
-                text = "Form Submitted Successfully"
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-                setTextColor(ContextCompat.getColor(context, R.color.black))
-                gravity = Gravity.CENTER_VERTICAL // Align text vertically in the middle
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    setMargins(0, 0, 10, 0) // Add some space between text and icon
-                }
-            }
-
             val successIcon = ImageView(context).apply {
                 setImageResource(R.drawable.ic_form_submitted)
                 layoutParams = LinearLayout.LayoutParams(
@@ -930,12 +943,29 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 ).apply {
                     gravity = Gravity.CENTER_VERTICAL
+                    setMargins(0, 0, 10, 0)
                 }
             }
 
+
+            val successMessage = TextView(context).apply {
+                text = "Submitted"
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+                setTextColor(ContextCompat.getColor(context, R.color.black))
+                gravity = Gravity.CENTER_VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(0, 0, 10, 0)
+                }
+            }
+
+
             // Add text and icon to the horizontal layout
-            horizontalLayout.addView(successMessage)
             horizontalLayout.addView(successIcon)
+            horizontalLayout.addView(successMessage)
+
 
             // Add the horizontal layout to the parent layout
             parentLayout.addView(horizontalLayout)
