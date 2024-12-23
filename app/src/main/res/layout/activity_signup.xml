@@ -6,13 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    tools:context=".ui.SignupActivity">
+    tools:context=".ui.activity.SignupActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".ui.SignupActivity">
+        tools:context=".ui.activity.SignupActivity">
 
         <!-- Guidelines for vertical margins -->
         <androidx.constraintlayout.widget.Guideline
