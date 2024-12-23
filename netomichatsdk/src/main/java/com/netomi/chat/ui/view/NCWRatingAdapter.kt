@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.netomi.chat.R
 import com.netomi.chat.utils.NCWThemeUtils
 
-class RatingAdapter(
+class NCWRatingAdapter(
     private val context: Context,
     private val upperBound: Int,
     private val ratingTypeEnabled: String,

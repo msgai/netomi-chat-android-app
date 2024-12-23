@@ -69,8 +69,7 @@
             android:textColor="#374E57"
             android:textAppearance="?attr/textAppearanceBody1"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintTop_toTopOf="parent" />
 
 
         <RadioGroup
@@ -164,6 +163,8 @@
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:layout_marginTop="10dp"
+            android:padding="8dp"
+            android:gravity="top"
             android:maxLines="5"
             android:background="@drawable/bg_stroke_rounded_white"
             android:visibility="visible"

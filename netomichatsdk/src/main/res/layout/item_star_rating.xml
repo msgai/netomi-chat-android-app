@@ -6,7 +6,7 @@
     android:layout_marginStart="5dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/bg_stroke_rounded_white"
-    android:padding="8dp">
+    android:padding="5dp">
 
     <ImageView
         android:id="@+id/starIcon"
