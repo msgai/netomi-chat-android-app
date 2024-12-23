@@ -20,6 +20,8 @@ object NCWAppConstant {
     const val TYPE_RESPONSE="RESPONSE"
     const val TYPE_REQUEST="REQUEST"
     const val TYPE_INITIAL="INITIAL"
+
+    const val TYPE_EVENT="EVENT"
     const val SESSION="session"
     const val SIZE_LIMIT="limit"
 
@@ -45,5 +47,21 @@ object NCWAppConstant {
     const val TYPE_CAROUSEL="ai.msg.domain.responses.core.Carousel"
 
     const val DATE_FORMAT="yyyyMMdd_HHmmss"
+
+    object RatingType {
+        const val STAR = "STAR"
+        const val NUM_10 = "NUM_10"
+        const val NUM_5 = "NUM_5"
+        const val EMOJI = "EMOJI"
+        const val THUMBS_UP_DOWN = "THUMBS_UP_DOWN"
+
+        const val STAR_VALUE = 0
+        const val NUM_VALUE = 1
+        const val EMOJI_VALUE = 2
+        const val THUMBS_UP_DOWN_VALUE = 3
+    }
+
+
+
 
 }

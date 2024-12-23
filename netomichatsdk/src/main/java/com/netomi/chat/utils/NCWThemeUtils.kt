@@ -224,6 +224,23 @@ object NCWThemeUtils
 
     }
 
+    fun createRoundedDrawableClose(view: View) {
+        themeData?.mobileConfig?.lightTheme?.userConfig?.let { userConfig ->
+            val parsedColor = Color.parseColor( userConfig.backgroundColor)
+            val backgroundDrawable = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 16f
+                setColor(parsedColor)
+            }
+            view.background = backgroundDrawable
+
+
+
+            if (view is TextView)
+                userConfig.textColor?.let { color -> setTextColor(view, color) }
+        }
+    }
+
     fun setTitleColor(textView: TextView){
         themeData?.mobileConfig?.lightTheme?.otherConfig?.let { otherConfig ->
             otherConfig.titleColor?.let { color -> setTextColor(textView, color) }

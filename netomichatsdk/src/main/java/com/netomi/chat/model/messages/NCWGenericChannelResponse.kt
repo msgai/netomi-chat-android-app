@@ -1,5 +1,7 @@
 package com.netomi.chat.model.messages
 
+import com.netomi.chat.survey.EventData
+
 data class NCWGenericChannelResponse(
     val type: String? = null,
     val botReferenceId: String? = null,
@@ -14,7 +16,9 @@ data class NCWGenericChannelResponse(
     val customPayload: NCWCustomPayload? = null,
     val triggerType: String? = null,
     val customFields: List<CustomField>? = null,
+    val eventObject: EventObject? = null
 )
+
 
 data class NCWRequestPayload(
     val conversationId: String? = null,
@@ -105,6 +109,18 @@ data class NCWCustomPayload(
     val INPUT_REQUEST_TIME:String?=null,
     val FINAL_CHUNK_TIME:String?=null,
     val FIRST_CHUNK_TIME:String?=null
+)
+data class EventObject(
+    val triggerType: String,
+    val eventData: EventData,
+    val eventName: String,
+    val botReferenceId: String,
+    val botId: String,
+    val conversationId: String,
+    val requestId: String,
+    val channelId: String,
+    val isPublishToMQTT: Boolean,
+    val timestamp: Long
 )
 
 
