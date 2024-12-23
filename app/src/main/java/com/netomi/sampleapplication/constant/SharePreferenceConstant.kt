@@ -18,6 +18,7 @@ package com.netomi.sampleapplication.constant
 object SharePreferenceConstant {
     const val LOGIN = "login"
     const val NAME = "name"
+    const val BOT_RESPONSE="BotResponse"
 
 
 }

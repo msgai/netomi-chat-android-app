@@ -1,19 +1,11 @@
-package com.netomi.sampleapplication.ui
+package com.netomi.sampleapplication.ui.activity
 
 import android.content.Intent
-import android.graphics.Typeface
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.TextPaint
 import android.text.TextWatcher
-import android.text.method.LinkMovementMethod
-import android.text.style.ClickableSpan
-import android.text.style.StyleSpan
 import android.view.View
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
@@ -21,68 +13,93 @@ import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import com.netomi.sampleapplication.R
 import com.netomi.sampleapplication.constant.AppConstant
 import com.netomi.sampleapplication.constant.SharePreferenceConstant
 import com.netomi.sampleapplication.utils.AppSharedPreferences
 
-class LoginActivity : AppCompatActivity() {
-
+class SignupActivity : AppCompatActivity() {
     private lateinit var emailEditText: AppCompatEditText
     private lateinit var passwordEditText: AppCompatEditText
+    private lateinit var nameEditText: AppCompatEditText
+    private lateinit var phoneEditText: AppCompatEditText
+
     private lateinit var signupTextView: AppCompatTextView
-    private lateinit var createAccount: AppCompatTextView
-    private lateinit var forgotPasswordTextView: AppCompatTextView
+    private lateinit var loginTextView: AppCompatTextView
+
     private lateinit var emailValid: AppCompatTextView
     private lateinit var passwordValid: AppCompatTextView
+
+    private lateinit var nameValid: AppCompatTextView
+    private lateinit var phoneValid: AppCompatTextView
+
     private lateinit var passwordTextInputLayout: ConstraintLayout
     private lateinit var emailTextInputLayout: ConstraintLayout
-    private lateinit var loginButton: AppCompatButton
+
+    private lateinit var phoneTextInputLayout: ConstraintLayout
+    private lateinit var nameTextInputLayout: ConstraintLayout
+
+    private lateinit var createButton: AppCompatButton
     private lateinit var passwordToggle: AppCompatImageView
 
     private var isPasswordVisible = false
     private var emailValidB = false
     private var passwordValidB = false
+    private var nameValidB = false
+    private var phoneValidB = false
 
-    private lateinit var preferences :AppSharedPreferences
+    private lateinit var preferences : AppSharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         preferences = AppSharedPreferences(this)
-        setContentView(R.layout.activity_login)
+        setContentView(R.layout.activity_signup)
 
         initViews() // Initialize all views
         setupFocusListeners() // Set up focus listeners for email and password fields
         setupTextWatchers() // Set up text watchers for validation
         setupPasswordToggle() // Set up password visibility toggle
         enableButton() // Enable/disable login button based on validations
+
     }
 
     // Initialize all the views
     private fun initViews() {
-        createAccount = findViewById(R.id.createAccount)
+        loginTextView = findViewById(R.id.loginTextView)
         signupTextView = findViewById(R.id.signupTextView)
-        forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView)
+
         emailValid = findViewById(R.id.emailValidTextview)
         passwordValid = findViewById(R.id.passwordValidTextview)
+
+        nameValid = findViewById(R.id.nameValidTextview)
+        phoneValid = findViewById(R.id.phoneValidTextview)
+
         emailEditText = findViewById(R.id.emailEditText)
         passwordEditText = findViewById(R.id.passwordEditText)
+
+        nameEditText = findViewById(R.id.nameEditText)
+        phoneEditText = findViewById(R.id.phoneEditText)
+
         emailTextInputLayout = findViewById(R.id.emailTextInputLayout)
         passwordTextInputLayout = findViewById(R.id.passwordTextInputLayout)
-        loginButton = findViewById(R.id.loginButton)
+
+        nameTextInputLayout = findViewById(R.id.nameTextInputLayout)
+        phoneTextInputLayout = findViewById(R.id.phoneTextInputLayout)
+
+        createButton = findViewById(R.id.createButton)
         passwordToggle = findViewById(R.id.passwordToggle)
 
-        // Set login button click listener
-        loginButton.setOnClickListener {
+        // Set create button click listener
+        createButton.setOnClickListener {
             preferences.setBoolean(SharePreferenceConstant.LOGIN,true)
-            preferences.setString(SharePreferenceConstant.NAME,"Guest User")
+            preferences.setString(SharePreferenceConstant.NAME,nameEditText.text?.trim().toString())
             startActivity(Intent(this, HomeActivity::class.java))
             finishAffinity()
         }
 
-        createAccount.setOnClickListener {
-            startActivity(Intent(this, SignupActivity::class.java))
+        loginTextView.setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
             finishAffinity()
         }
     }
@@ -91,6 +108,9 @@ class LoginActivity : AppCompatActivity() {
     private fun setupFocusListeners() {
         setFocusChangeListener(emailEditText, emailTextInputLayout)
         setFocusChangeListener(passwordEditText, passwordTextInputLayout)
+
+        setFocusChangeListener(nameEditText, nameTextInputLayout)
+        setFocusChangeListener(phoneEditText, phoneTextInputLayout)
     }
 
     // Helper function for setting focus listeners
@@ -107,6 +127,8 @@ class LoginActivity : AppCompatActivity() {
     private fun setupTextWatchers() {
         emailEditText.addTextChangedListener(createTextWatcher(::validateEmail))
         passwordEditText.addTextChangedListener(createTextWatcher(::validatePassword))
+        nameEditText.addTextChangedListener(createTextWatcher(::validateName))
+        phoneEditText.addTextChangedListener(createTextWatcher(::validatePhoneNumber))
     }
 
     // Helper function to create TextWatcher with a validation function
@@ -142,10 +164,36 @@ class LoginActivity : AppCompatActivity() {
         enableButton() // Enable button if both email and password are valid
     }
 
+    // Validate name format and update UI accordingly
+    private fun validateName() {
+        val nameText = nameEditText.text.toString()
+        nameValidB = nameText.isNotBlank() && nameText.length >= 2 // Add specific rules as needed
+        nameValid.visibility = if (nameValidB) View.GONE else View.VISIBLE
+        nameValid.text = if (nameValidB) "" else getString(R.string.enter_your_name)
+        nameTextInputLayout.setBackgroundResource(
+            if (nameValidB) R.drawable.rounded_active_edittext_background
+            else R.drawable.rounded_error_edittext_background
+        )
+        enableButton() // Enable button if all fields are valid
+    }
+
+    // Validate phone number format and update UI accordingly
+    private fun validatePhoneNumber() {
+        val phoneText = phoneEditText.text.toString()
+        phoneValidB = phoneText.matches(AppConstant.phonePattern.toRegex()) // Define a pattern in AppConstant
+        phoneValid.visibility = if (phoneValidB) View.GONE else View.VISIBLE
+        phoneValid.text = if (phoneValidB) "" else getString(R.string.invalid_phone_format)
+        phoneTextInputLayout.setBackgroundResource(
+            if (phoneValidB) R.drawable.rounded_active_edittext_background
+            else R.drawable.rounded_error_edittext_background
+        )
+        enableButton() // Enable button if all fields are valid
+    }
+
     // Enable or disable the login button based on validation states
     private fun enableButton() {
-        loginButton.isEnabled = emailValidB && passwordValidB
-        loginButton.alpha = if (loginButton.isEnabled) 1f else 0.5f
+        createButton.isEnabled = emailValidB && passwordValidB && phoneValidB &&nameValidB
+        createButton.alpha = if (createButton.isEnabled) 1f else 0.5f
     }
 
     // Handle password visibility toggle (show/hide password)
@@ -162,34 +210,7 @@ class LoginActivity : AppCompatActivity() {
             passwordToggle.setImageResource(
                 if (isPasswordVisible) R.drawable.ic_eye_view else R.drawable.ic_eye_hide
             )
-           passwordEditText.setSelection(passwordEditText.text?.length ?: 0) // Keep cursor at the end
+            passwordEditText.setSelection(passwordEditText.text?.length ?: 0) // Keep cursor at the end
         }
-    }
-
-    // Set up the clickable "Create account" text
-    private fun spannableString() {
-        val text = getString(R.string.don_t_have_an_account_create_account)
-        val spannableString = SpannableString(text)
-
-        val clickableSpan = object : ClickableSpan() {
-            override fun onClick(widget: View) {
-                Toast.makeText(this@LoginActivity,
-                    getString(R.string.create_account_clicked), Toast.LENGTH_SHORT).show()
-            }
-
-            // Remove underline and set custom color for the clickable text
-            override fun updateDrawState(ds: TextPaint) {
-                super.updateDrawState(ds)
-                ds.color = ContextCompat.getColor(this@LoginActivity, R.color.black)
-                ds.isUnderlineText = false
-            }
-        }
-
-        // Make "Create account" bold
-        spannableString.setSpan(StyleSpan(Typeface.BOLD), 22, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        spannableString.setSpan(clickableSpan, 22, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-        signupTextView.text = spannableString
-        signupTextView.movementMethod = LinkMovementMethod.getInstance() // Enable clickable link behavior
     }
 }

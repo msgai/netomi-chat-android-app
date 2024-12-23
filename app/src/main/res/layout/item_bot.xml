@@ -1,0 +1,76 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+   android:layout_margin="4dp"
+    android:background="@drawable/background_card"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/rbBotSelect"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:buttonTint="@color/charcoal_blue" />
+
+        <TextView
+            android:id="@+id/tvBotName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/proxima_nova_alt_semibold"
+            android:text="Bot Name"
+            android:textColor="@color/charcoal_blue"
+            android:textSize="20sp" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="36dp">
+
+        <TextView
+            android:id="@+id/tvBotId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bot ID: xxxxxxx"
+            android:textColor="@color/charcoal_blue"
+            android:textSize="14sp"
+            android:fontFamily="@font/proxima_nova_regular"/>
+
+        <TextView
+            android:id="@+id/tvBotRefId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/proxima_nova_regular"
+            android:text="Bot Ref ID: xxxxxxx"
+            android:textColor="@color/charcoal_blue"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvBotVersion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/proxima_nova_regular"
+            android:text="Version: Live"
+            android:textColor="@color/charcoal_blue"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvBotEnv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/proxima_nova_regular"
+            android:text="Env: US Prod"
+            android:textColor="@color/charcoal_blue"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+
+</LinearLayout>

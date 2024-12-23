@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/custom_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="@drawable/ic_bg"
+    android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start">
+
+        <!-- Hamburger Icon -->
+        <ImageView
+            android:id="@+id/toolbar_menu_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:contentDescription="@string/navigation_drawer_open"
+            android:padding="4dp"
+            android:src="@drawable/ic_menu" />
+        <TextView
+            android:id="@+id/tv_ai"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Change AI Agent"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center_vertical"
+            android:fontFamily="@font/proxima_nova_bold"
+            android:textColor="@color/gray_black"
+            android:textSize="16sp"
+            android:visibility="visible"/>
+
+        <LinearLayout
+            android:id="@+id/ll_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_welcome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/proxima_nova_regular"
+                android:text="Welcome"
+                android:textColor="@color/gray_black"
+                android:textFontWeight="400"
+                android:textSize="16sp" />
+            <TextView
+                android:id="@+id/tv_user"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textFontWeight="600"
+                android:text="John Doe"
+                android:fontFamily="@font/proxima_nova_bold"
+                android:textColor="@color/gray_black"
+                android:textSize="16sp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</androidx.appcompat.widget.Toolbar>
