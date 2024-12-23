@@ -87,6 +87,7 @@ import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
 import com.netomi.chat.utils.NCWAppConstant.SESSION
 import com.netomi.chat.utils.NCWAppConstant.SIZE_LIMIT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_ATTACHMENT
+import com.netomi.chat.utils.NCWAppConstant.TYPE_EVENT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FILE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FORM
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FORM_ATTACHMENT
@@ -197,8 +198,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         deviceInfo.add(device)
         Log.d("DeviceInfo", "Device Info: $deviceInfo")
 
+/*// Rammmmm
 
-        if (NCWThemeUtils.getConversationID() == null) {
+        conversationID="a00ce1dd-6975-4a69-9ed7-332af54b3b55"
+        chatViewModel.getAWSMQTTCredentials(botRefId)
+        getChatHistory()*/
+
+       if (NCWThemeUtils.getConversationID() == null) {
             loadInitialMessages()
             chatViewModel.getConversationId(botRefId)
         } else {
@@ -602,11 +608,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 chatViewModel.sendMessageAPI(createPayload)
             }
 
+        },{
+            showSubmittedSurvey(it)
         })
 
 // Set the layout manager and adapter for the RecyclerView
         chatRecyclerView.layoutManager = LinearLayoutManager(this)
         chatRecyclerView.adapter = messageAdapter
+    }
+
+    private fun showSubmittedSurvey(ncwMessage: NCWMessage?) {
+Log.e("ShowSurvey","a00ce1dd-6975-4a69-9ed7-332af54b3b55")
     }
 
 
@@ -982,8 +994,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     object : TypeToken<SurveyField>() {}.type
                 )
                 Log.e("SurveyField", "SurveyField " + surveyField)
-                val bottomSheet = NCWSurveyBottomSheet(surveyField,conversationID?:"",botRefId?:""){
-          Log.e("NCWSurveyBottomSheet","NCWSurveyBottomSheet "+it)
+                val bottomSheet = NCWSurveyBottomSheet(response.requestId?:"",surveyField,conversationID?:"",botRefId?:""){
+
                      chatViewModel.hitSubmitSurveyRequestAPI(it)
                 }
                 bottomSheet.show(supportFragmentManager, "SurveyOptionsBottomSheet")
@@ -2062,8 +2074,19 @@ Log.e("Checkkk","currentFileSizeMB "+previousFileInMB)
             }
 
 
-            // Type Request
+           else if (response.triggerType == TYPE_EVENT) {
 
+                val newMessage = NCWMessage(
+                    sender = TYPE_EVENT,
+                    timestamp = response.timestamp ?: System.currentTimeMillis(),
+                   eventObject = response.eventObject,
+                    requestID = response.requestId
+                )
+                messageList.add(newMessage)
+            }
+
+
+            // Type Request
             else {
                 // Existing logic for request payloads
                 response.requestPayload?.attachmentList?.takeIf { it.isNotEmpty() }

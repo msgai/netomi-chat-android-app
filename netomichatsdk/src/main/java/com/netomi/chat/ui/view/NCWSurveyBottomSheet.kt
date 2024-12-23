@@ -15,13 +15,16 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
 import com.netomi.chat.model.messages.SurveyField
 import com.netomi.chat.survey.*
+import com.netomi.chat.utils.NCWThemeUtils
 import java.util.UUID
 
 class NCWSurveyBottomSheet(
-    private val surveyField: SurveyField,
+    private val requestId: String?=null,
+    private val surveyField: SurveyField?=null,
     private val conversationId: String,
     private val botRefId: String,
-    private val onSubmitSurveyRequest: (SubmitSurveyRequest) -> Unit
+    private val onSubmitSurveyRequest: (SubmitSurveyRequest) -> Unit,
+
 ) : BottomSheetDialogFragment() {
 
     private lateinit var recyclerSuggestion: RecyclerView
@@ -57,10 +60,17 @@ class NCWSurveyBottomSheet(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initializeViews(view)
-        setupRadioGroup()
-        setupSubmitButton()
-        configureRatingSection()
+           initializeViews(view)
+            setupRadioGroup()
+            setupSubmitButton()
+            configureRatingSection()
+
+    }
+
+    private fun showSubmittedData(eventData: EventData?) {
+
+
+
     }
 
     private fun initializeViews(view: View) {
@@ -74,6 +84,7 @@ class NCWSurveyBottomSheet(
             tvSuggestionTitle = findViewById(R.id.tvSuggestionTitle)
             edtAdditionalFeedback = findViewById(R.id.edtAdditionFeedback)
             radioGroup = findViewById(R.id.radioGroup)
+
         }
     }
 
@@ -84,11 +95,15 @@ class NCWSurveyBottomSheet(
     }
 
     private fun setupSubmitButton() {
-        view?.findViewById<Button>(R.id.submitButton)?.setOnClickListener {
+       val submitButton =view?.findViewById<TextView>(R.id.submitButton)
+        if (submitButton != null) {
+            NCWThemeUtils.createRoundedDrawable(submitButton)
+        }
+        submitButton?.setOnClickListener {
             val suggestionTitle = if (feedbackValue == "POSITIVE")
-                surveyField.payload?.positiveSuggestionMap?.title
+                surveyField?.payload?.positiveSuggestionMap?.title
             else
-                surveyField.payload?.negativeSuggestionMap?.title
+                surveyField?.payload?.negativeSuggestionMap?.title
 
             val selectedSuggestions = suggestionAdapter.getSelectedOptions()
             val issueResolved = selectedRadioValue == "Yes"
@@ -98,18 +113,22 @@ class NCWSurveyBottomSheet(
             val submitSurveyRequest = SubmitSurveyRequest(
                 botRefId = botRefId,
                 requestBody = RequestBody(
+
+                    triggerType="EVENT",
                     eventData = EventData(
+
                         eventInfo = EventInfo(
-                            surveyId = surveyField.surveyId ?: "",
+
+                            surveyId = surveyField?.surveyId ?: "",
                             feedbackValue = feedbackValue,
-                            requestId = UUID.randomUUID().toString(),
+                            requestId = requestId?:UUID.randomUUID().toString(),
                             submitSurveyInfo = SubmitSurveyInfo(
                                 rating = selectedRating,
                                 suggestions = selectedSuggestions,
                                 suggestionTitle = suggestionTitle ?: "",
                                 issueResolved = issueResolved,
                                 additionalFeedback = edtAdditionalFeedback.text.toString(),
-                                triggerType = surveyField.triggerType ?: ""
+                                triggerType = "EVENT"
                             )
                         )
                     ),
@@ -120,6 +139,16 @@ class NCWSurveyBottomSheet(
             )
 
             onSubmitSurveyRequest(submitSurveyRequest)
+            dismiss()
+        }
+
+        val closeButton = view?.findViewById<TextView>(R.id.closeButton)
+        if (closeButton != null) {
+            NCWThemeUtils.createRoundedDrawableClose(closeButton)
+        }
+
+        closeButton?.setOnClickListener {
+            dismiss()
         }
     }
 
@@ -128,10 +157,12 @@ class NCWSurveyBottomSheet(
         val recyclerRating = view?.findViewById<RecyclerView>(R.id.recyclerRating)
         val tvTitle = view?.findViewById<TextView>(R.id.tvTitle)
 
-        if (surveyField.payload?.feedbackMessage?.enabled == true) {
+        if (surveyField?.payload?.feedbackMessage?.enabled == true) {
             rowRating?.visibility = View.VISIBLE
             tvTitle?.text = surveyField.payload.feedbackMessage.text
-
+            if (tvTitle != null) {
+                NCWThemeUtils.setTitleColor(tvTitle)
+            }
             recyclerRating?.apply {
                 layoutManager = GridLayoutManager(context, 5)
                 adapter = context?.let {
@@ -151,19 +182,24 @@ class NCWSurveyBottomSheet(
     }
 
     private fun showOptionList(selectedRating: Int) {
-        val criteria = surveyField.payload?.surveyRatingTypeEnabledInfo?.criteria ?: 3
+        Log.e("selectedRating ","selectedRating"+selectedRating)
+        val criteria = surveyField?.payload?.surveyRatingTypeEnabledInfo?.criteria ?: 3
+        Log.e("selectedRating ","criteria "+criteria)
         val isPositiveFeedback = selectedRating >= criteria
-
+        Log.e("selectedRating ","isPositiveFeedback "+isPositiveFeedback)
         feedbackValue = if (isPositiveFeedback) "POSITIVE" else "NEGATIVE"
         tvSuggestionTitle.text = if (isPositiveFeedback)
-            surveyField.payload?.positiveSuggestionMap?.title
+            surveyField?.payload?.positiveSuggestionMap?.title
         else
-            surveyField.payload?.negativeSuggestionMap?.title
+            surveyField?.payload?.negativeSuggestionMap?.title
+        if (tvSuggestionTitle != null) {
+            NCWThemeUtils.setTitleColor(tvSuggestionTitle)
+        }
 
         val optionsList = if (isPositiveFeedback)
-            surveyField.payload?.positiveSuggestionMap?.options
+            surveyField?.payload?.positiveSuggestionMap?.options
         else
-            surveyField.payload?.negativeSuggestionMap?.options
+            surveyField?.payload?.negativeSuggestionMap?.options
 
         suggestionAdapter = SuggestionAdapter(optionsList ?: emptyList())
         recyclerSuggestion.layoutManager = GridLayoutManager(context, 2)
@@ -175,18 +211,21 @@ class NCWSurveyBottomSheet(
     }
 
     private fun configureResolutionQuestion() {
-        if (surveyField.payload?.resolutionQuestion?.enabled == true) {
+        if (surveyField?.payload?.resolutionQuestion?.enabled == true) {
             rowResolveIssue.visibility = View.VISIBLE
-            tvIssueTitle.text = surveyField.payload.resolutionQuestion.text
+            tvIssueTitle.text = surveyField?.payload.resolutionQuestion.text
+            NCWThemeUtils.setTitleColor(tvIssueTitle)
+
         } else {
             rowResolveIssue.visibility = View.GONE
         }
     }
 
     private fun configureAdditionalFeedback() {
-        if (surveyField.payload?.additionalFeedback?.enabled == true) {
+        if (surveyField?.payload?.additionalFeedback?.enabled == true) {
             rowAdditionalFeedback.visibility = View.VISIBLE
             tvFeedbackTitle.text = surveyField.payload.additionalFeedback.text
+            NCWThemeUtils.setTitleColor(tvFeedbackTitle)
         } else {
             rowAdditionalFeedback.visibility = View.GONE
         }

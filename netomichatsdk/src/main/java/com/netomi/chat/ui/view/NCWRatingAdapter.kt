@@ -11,6 +11,18 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.netomi.chat.R
+import com.netomi.chat.utils.NCWAppConstant.RatingType.EMOJI
+import com.netomi.chat.utils.NCWAppConstant.RatingType.EMOJI_VALUE
+
+import com.netomi.chat.utils.NCWAppConstant.RatingType.NUM_5
+import com.netomi.chat.utils.NCWAppConstant.RatingType.STAR
+import com.netomi.chat.utils.NCWAppConstant.RatingType.STAR_VALUE
+
+import com.netomi.chat.utils.NCWAppConstant.RatingType.NUM_10
+import com.netomi.chat.utils.NCWAppConstant.RatingType.NUM_VALUE
+import com.netomi.chat.utils.NCWAppConstant.RatingType.THUMBS_UP_DOWN
+import com.netomi.chat.utils.NCWAppConstant.RatingType.THUMBS_UP_DOWN_VALUE
+
 import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWRatingAdapter(
@@ -23,20 +35,22 @@ class NCWRatingAdapter(
     private var selectedRating: Int = 0
 
     override fun getItemViewType(position: Int): Int {
-        return when (ratingTypeEnabled) {
-            "STAR" -> 0
-            "NUM_10", "NUM_5" -> 1
-            "EMOJI" -> 2
-            else -> 0
+       return when (ratingTypeEnabled) {
+           STAR -> STAR_VALUE
+            NUM_10, NUM_5 -> NUM_VALUE
+           EMOJI -> EMOJI_VALUE
+            THUMBS_UP_DOWN -> THUMBS_UP_DOWN_VALUE
+            else -> STAR_VALUE
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(context)
         return when (viewType) {
-            0 -> StarViewHolder(inflater.inflate(R.layout.item_star_rating, parent, false))
-            1 -> NumberViewHolder(inflater.inflate(R.layout.item_number_rating, parent, false))
-            2 -> SmileyViewHolder(inflater.inflate(R.layout.item_smiley_rating, parent, false))
+            STAR_VALUE -> StarViewHolder(inflater.inflate(R.layout.item_star_rating, parent, false))
+            NUM_VALUE -> NumberViewHolder(inflater.inflate(R.layout.item_number_rating, parent, false))
+            EMOJI_VALUE -> SmileyViewHolder(inflater.inflate(R.layout.item_smiley_rating, parent, false))
+            THUMBS_UP_DOWN_VALUE -> ThumbsViewHolder(inflater.inflate(R.layout.item_smiley_rating, parent, false))
             else -> StarViewHolder(inflater.inflate(R.layout.item_star_rating, parent, false))
         }
     }
@@ -47,13 +61,19 @@ class NCWRatingAdapter(
             is StarViewHolder -> holder.bind(rating, rating <= selectedRating)
             is NumberViewHolder -> holder.bind(rating, rating <= selectedRating)
             is SmileyViewHolder -> holder.bind(rating, selectedRating)
+            is ThumbsViewHolder -> holder.bind(rating, selectedRating)
         }
 
         holder.itemView.setOnClickListener {
             selectedRating = rating
+            val finalRating = if (ratingTypeEnabled != "THUMBS_UP_DOWN") {
+                selectedRating
+            } else {
+                if (selectedRating == 1) 2 else 1
+            }
+            onRatingSelected(finalRating)
 
 
-            onRatingSelected(selectedRating)
             notifyDataSetChanged()
         }
     }
@@ -95,6 +115,30 @@ class NCWRatingAdapter(
                 4 -> R.drawable.ic_smiley_good
                 5 -> R.drawable.ic_smiley_very_good
                 else -> R.drawable.ic_smiley_neutral
+            }
+            smileyIcon.setImageResource(smileyRes)
+            if (isSelected == rating) {
+                val tintList =
+                    ColorStateList.valueOf(NCWThemeUtils.parseColor("#E3D076"))
+                ImageViewCompat.setImageTintList(smileyIcon, tintList)
+                constRow.setBackgroundResource(R.drawable.bg_stroke_smily_selected)
+            } else {
+                ImageViewCompat.setImageTintList(smileyIcon, null)
+                smileyIcon.setBackgroundResource(0)
+                constRow.setBackgroundResource(R.drawable.bg_stroke_rounded_white)
+            }
+        }
+    }
+
+
+    inner class ThumbsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val smileyIcon: ImageView = itemView.findViewById(R.id.smileyIcon)
+        private val constRow: ConstraintLayout = itemView.findViewById(R.id.constRow)
+
+        fun bind(rating: Int, isSelected: Int) {
+            val smileyRes = when (rating) {
+                1 -> R.drawable.ic_thumb_up_survey
+                else -> R.drawable.ic_thumb_down_survey
             }
             smileyIcon.setImageResource(smileyRes)
             if (isSelected == rating) {

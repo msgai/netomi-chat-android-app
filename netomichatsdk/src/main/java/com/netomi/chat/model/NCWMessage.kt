@@ -1,5 +1,6 @@
 package com.netomi.chat.model
 
+import com.netomi.chat.model.messages.EventObject
 import com.netomi.chat.model.messages.FormSchema
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.NCWCarouselButton
@@ -32,6 +33,8 @@ data class NCWMessage(
     var customPayload: NCWCustomPayload? = null,
     var feedbackValue: String?=null,
     var isReviewEnabled: Boolean = false,
+    val eventObject: EventObject? = null
+
 
     )
 

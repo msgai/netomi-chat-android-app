@@ -34,7 +34,9 @@ class NCWChatAdapter(
     private val actionCallback: NCWChatActionCallback,
     private val feedbackActionCallBack:NCWFeedbackActionCallback,
     private val callBack: (Component?) -> Unit,
-    private val formData: (String?, String?, ArrayList<NCWAttachmentList>) -> Unit
+    private val formData: (String?, String?, ArrayList<NCWAttachmentList>) -> Unit,
+    private val callBackSurvey: (NCWMessage?) -> Unit,
+
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     // To map messageIDs to positions in the RecyclerView
     private val messageMap = mutableMapOf<String, Int>()
@@ -43,6 +45,7 @@ class NCWChatAdapter(
         private const val VIEW_TYPE_RESPONSE = 2
         private const val VIEW_TYPE_INDICATOR = 3
         private const val VIEW_TYPE_FORM = 4
+        private const val VIEW_TYPE_EVENT = 5
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -50,6 +53,7 @@ class NCWChatAdapter(
             NCWAppConstant.TYPE_REQUEST -> VIEW_TYPE_REQUEST
             NCWAppConstant.TYPE_INDICATOR -> VIEW_TYPE_INDICATOR
             NCWAppConstant.TYPE_FORM-> VIEW_TYPE_FORM
+            NCWAppConstant.TYPE_EVENT->VIEW_TYPE_EVENT
             else -> VIEW_TYPE_RESPONSE
         }
     }
@@ -59,12 +63,14 @@ class NCWChatAdapter(
             VIEW_TYPE_REQUEST -> inflater.inflate(R.layout.layout_request, parent, false)
             VIEW_TYPE_INDICATOR -> inflater.inflate(R.layout.layout_add_loader, parent, false)
             VIEW_TYPE_FORM -> inflater.inflate(R.layout.layout_form, parent, false)
+            VIEW_TYPE_EVENT -> inflater.inflate(R.layout.layout_survey_event, parent, false)
             else -> inflater.inflate(R.layout.layout_response, parent, false)
         }
         return when (viewType) {
             VIEW_TYPE_REQUEST -> RequestViewHolder(view, themeData,actionCallback)
             VIEW_TYPE_INDICATOR -> InitialViewHolder(view)
             VIEW_TYPE_FORM -> FormViewHolder(view)
+            VIEW_TYPE_EVENT -> SurveyViewHolder(view)
             else -> ResponseViewHolder(view,themeData,actionCallback,feedbackActionCallBack)
         }
     }
@@ -75,6 +81,7 @@ class NCWChatAdapter(
             is RequestViewHolder -> holder.bind(message)
             is ResponseViewHolder -> holder.bind(message,position)
             is FormViewHolder->holder.bind(message,callBack,formData)
+            is SurveyViewHolder->holder.bind(message,callBackSurvey)
            // is InitialViewHolder -> holder.bind(message,position)
         }
     }
@@ -270,10 +277,37 @@ class NCWChatAdapter(
 
     }
 
+    class SurveyViewHolder(
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView) {
+
+
+        private val constRowEvent: ConstraintLayout = itemView.findViewById(R.id.constRowEvent)
+        private val tvThank: TextView = itemView.findViewById(R.id.tvThank)
+        private val tvComplete: TextView = itemView.findViewById(R.id.tvComplete)
+        private val tvViewResponse: TextView = itemView.findViewById(R.id.tvViewResponse)
+        fun bind(message: NCWMessage, callBackSurvey: (NCWMessage?) -> Unit) {
+
+            NCWThemeUtils.setBotConfig(constRowEvent)
+            NCWThemeUtils.setTimeStampColor(tvComplete)
+            NCWThemeUtils.setBotTextColor(tvThank)
+            NCWThemeUtils.setBotTextColor(tvViewResponse)
+            constRowEvent.setOnClickListener {
+                callBackSurvey(message)
+            }
+
+        }
+
+
+
+    }
+
     class InitialViewHolder(
         itemView: View,
     ) : RecyclerView.ViewHolder(itemView) {
-        private val LoaderContainer: ConstraintLayout = itemView.findViewById(R.id.constRow)
+
+
+
 
     }
 

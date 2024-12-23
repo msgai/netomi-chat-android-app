@@ -184,25 +184,29 @@
 app:layout_constraintTop_toBottomOf="@+id/rowAdditionalFeedback"
         android:layout_marginTop="16dp">
 
-        <androidx.appcompat.widget.AppCompatButton
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/closeButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textAllCaps="false"
             android:text="Close"
+            android:gravity="center"
+            android:padding="10dp"
             android:textColor="#000000"/>
 
         <Space
             android:layout_width="16dp"
             android:layout_height="wrap_content"/>
 
-        <androidx.appcompat.widget.AppCompatButton
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/submitButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:gravity="center"
             android:textAllCaps="false"
+            android:padding="10dp"
             android:textColor="#000000"
             android:text="Submit"/>
     </LinearLayout>
