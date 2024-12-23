@@ -29,17 +29,17 @@
            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+             />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerRating"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:visibility="gone"
+            android:visibility="visible"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginStart="17dp"
+
             app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
 
@@ -53,6 +53,7 @@
         android:layout_height="wrap_content"
        app:layout_constraintTop_toBottomOf="@+id/rowRating"
         android:padding="8dp"
+        android:visibility="gone"
         android:layout_marginTop="8dp"
 
         app:layout_constraintStart_toStartOf="parent"
@@ -100,7 +101,7 @@
         android:id="@+id/rowSuggestion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
+        android:visibility="gone"
         android:padding="8dp"
         android:layout_marginTop="8dp"
        app:layout_constraintTop_toBottomOf="@+id/rowResolveIssue"
@@ -139,7 +140,7 @@
         android:id="@+id/rowAdditionalFeedback"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
+        android:visibility="gone"
         android:padding="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@+id/rowSuggestion"
@@ -158,11 +159,13 @@
             app:layout_constraintTop_toTopOf="parent"
             />
 
-        <EditText
+        <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/edtAdditionFeedback"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="100dp"
             android:layout_marginTop="10dp"
+            android:maxLines="5"
+            android:background="@drawable/bg_stroke_rounded_white"
             android:visibility="visible"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

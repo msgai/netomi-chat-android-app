@@ -19,4 +19,6 @@ object NCWRoutes {
 
     const val ROUTE_FEEDBACK_CHAT = API + "webhook-event"
 
+    const val ROUTE_SURVEY= "ROUTE_SURVEY"
+
 }

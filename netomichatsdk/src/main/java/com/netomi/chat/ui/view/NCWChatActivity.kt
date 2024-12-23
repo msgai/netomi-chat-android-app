@@ -967,6 +967,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         chatViewModel.endChatResponse.observe(this) { messages ->
             handleApiCallback(messages as NCWState<Any>)
         }
+        chatViewModel.surveyResponse.observe(this) { messages ->
+            handleApiCallback(messages as NCWState<Any>)
+        }
 
     }
 // Rammmmmmmm
@@ -979,7 +982,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     object : TypeToken<SurveyField>() {}.type
                 )
                 Log.e("SurveyField", "SurveyField " + surveyField)
-                val bottomSheet = NCWSurveyBottomSheet(surveyField)
+                val bottomSheet = NCWSurveyBottomSheet(surveyField,conversationID?:"",botRefId?:""){
+          Log.e("NCWSurveyBottomSheet","NCWSurveyBottomSheet "+it)
+                     chatViewModel.hitSubmitSurveyRequestAPI(it)
+                }
                 bottomSheet.show(supportFragmentManager, "SurveyOptionsBottomSheet")
             }
 
@@ -1871,6 +1877,10 @@ Log.e("Checkkk","currentFileSizeMB "+previousFileInMB)
 
             NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
                 messageAdapter.notifyDataSetChanged()
+            }
+            NCWRoutes.ROUTE_SURVEY -> {
+                NCWAppUtils.showToast(this,"Survey Submitted")
+               // messageAdapter.notifyDataSetChanged()
             }
 
             else -> {

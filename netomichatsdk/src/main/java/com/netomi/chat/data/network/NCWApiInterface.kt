@@ -13,6 +13,7 @@ import com.netomi.chat.model.messages.NCWWebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
 import com.netomi.chat.model.theme.NCWThemeResponse
+import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.utils.NCWRoutes.ROUTE_END_CHAT
 import com.netomi.chat.utils.NCWRoutes.ROUTE_FEEDBACK_CHAT
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_CHAT
@@ -154,5 +155,8 @@ interface NCWApiInterface {
 
     @POST(ROUTE_FEEDBACK_CHAT)
     suspend fun hitFeedbackAPI(@Body payload: NCWFeedbackRequest?): Response<NCWFeedbackResponse>
+
+    @POST(ROUTE_END_CHAT)
+    suspend fun hitSubmitSurveyRequestAPI(@Body payload: SubmitSurveyRequest?): Response<NCWEndChatResponse>
 
 }
