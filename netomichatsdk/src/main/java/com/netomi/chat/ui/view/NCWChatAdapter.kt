@@ -494,6 +494,9 @@ class NCWChatAdapter(
             // Message already exists; append text
             messages[index].message += newMessage.message
 
+            // Update isReviewEnabled flag if it changes
+            messages[index].isReviewEnabled = newMessage.isReviewEnabled
+
             notifyItemChanged(index)
         } else {
             // Add new message to the list
