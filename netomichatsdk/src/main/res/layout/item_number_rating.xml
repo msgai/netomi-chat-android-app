@@ -4,20 +4,21 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:layout_marginTop="5dp"
+    android:layout_marginTop="8dp"
     android:layout_marginStart="5dp"
    >
 
     <TextView
         android:id="@+id/numberText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
         android:textSize="14sp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:background="@drawable/bg_stroke_rounded_white"
         android:text="1"
         android:paddingVertical="10dp"
-        android:paddingHorizontal="15dp"
-      />
+        android:paddingHorizontal="10dp"
+        android:gravity="center"
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>
