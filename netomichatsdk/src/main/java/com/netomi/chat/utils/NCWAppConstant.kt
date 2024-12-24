@@ -29,6 +29,8 @@ object NCWAppConstant {
 
     const val FORM_DATE_FORMAT="MM/dd/yyyy"
 
+    const val SHOW_FORM_DATE_FORMAT="dd/mm/yyyy"
+
     const val TYPE_ATTACHMENT="attachment"
     const val TYPE_FORM_ATTACHMENT="form_attachment"
 
