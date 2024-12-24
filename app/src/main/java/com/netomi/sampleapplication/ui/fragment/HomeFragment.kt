@@ -52,12 +52,14 @@ class HomeFragment : Fragment() {
         Log.e("Bot",bot.toString())
         tvBotName.text=bot?.botName
         botList = mutableListOf()
-        Glide.with(requireContext()).load(bot!!.logo).into(imgButton)
+      //  Glide.with(requireContext()).load(bot!!.logo).into(imgButton)
 
-        NCWChatSdk.setEnvironment(bot.env)
+        if (bot != null) {
+            NCWChatSdk.setEnvironment(bot.env)
+        }
         NCWChatSdk.setThemeData()
-        Log.e("RefId",bot.botRefId)
-        bot.botRefId.let { NCWChatSdk.initialize(requireContext(), it) }
+       // Log.e("RefId",bot.botRefId)
+        bot?.botRefId?.let { NCWChatSdk.initialize(requireContext(), it) }
 
         imgButton.setOnClickListener {
             activity?.let { activityContext ->

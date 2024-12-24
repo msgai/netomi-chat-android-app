@@ -225,7 +225,7 @@ object NCWThemeUtils
     }
 
     fun createRoundedDrawableClose(view: View) {
-        themeData?.mobileConfig?.lightTheme?.userConfig?.let { userConfig ->
+        themeData?.mobileConfig?.lightTheme?.botConfig?.let { userConfig ->
             val parsedColor = Color.parseColor( userConfig.backgroundColor)
             val backgroundDrawable = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
