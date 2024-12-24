@@ -71,6 +71,7 @@ import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
+import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
@@ -96,6 +97,8 @@ import com.netomi.chat.utils.NCWAppConstant.TYPE_INDICATOR
 import com.netomi.chat.utils.NCWAppConstant.TYPE_INITIAL
 import com.netomi.chat.utils.NCWAppConstant.TYPE_REQUEST
 import com.netomi.chat.utils.NCWAppConstant.TYPE_RESPONSE
+import com.netomi.chat.utils.NCWAppConstant.TYPE_SHOW_SURVEY
+import com.netomi.chat.utils.NCWAppConstant.TYPE_SUBMITTED_SURVEY
 import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
@@ -198,13 +201,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         deviceInfo.add(device)
         Log.d("DeviceInfo", "Device Info: $deviceInfo")
 
-/*// Rammmmm
-
-        conversationID="a00ce1dd-6975-4a69-9ed7-332af54b3b55"
-        chatViewModel.getAWSMQTTCredentials(botRefId)
-        getChatHistory()*/
-
-       if (NCWThemeUtils.getConversationID() == null) {
+      if (NCWThemeUtils.getConversationID() == null) {
             loadInitialMessages()
             chatViewModel.getConversationId(botRefId)
         } else {
@@ -610,7 +607,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
 
         },{
-            showSubmittedSurvey(it)
+            if (it != null) {
+                showSubmittedSurvey(it)
+            }
         })
 
 // Set the layout manager and adapter for the RecyclerView
@@ -618,9 +617,16 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         chatRecyclerView.adapter = messageAdapter
     }
 
-    private fun showSubmittedSurvey(ncwMessage: NCWMessage?) {
-Log.e("ShowSurvey","a00ce1dd-6975-4a69-9ed7-332af54b3b55")
+    private fun showSubmittedSurvey(ncwMessage: NCWMessage) {
+      Log.e("ShowSurvey","a00ce1dd-6975-4a69-9ed7-332af54b3b55")
+        createAndShowSurveyBottomSheet(
+            requestId = ncwMessage.requestID ?: "",
+            surveyField = ncwMessage.surveyField,
+            TYPE_SUBMITTED_SURVEY,
+            onSubmit = {}
+        )
     }
+
 
 
     // Initialize the ActivityResultLauncher
@@ -985,7 +991,7 @@ Log.e("ShowSurvey","a00ce1dd-6975-4a69-9ed7-332af54b3b55")
         }
 
     }
-// Rammmmmmmm
+
     private fun renderTheSurveyMessage(response: NCWGenericChannelResponse?) {
         val gson = Gson()
         response?.customFields?.forEach { customField ->
@@ -994,15 +1000,41 @@ Log.e("ShowSurvey","a00ce1dd-6975-4a69-9ed7-332af54b3b55")
                     customField.values[0],
                     object : TypeToken<SurveyField>() {}.type
                 )
-                Log.e("SurveyField", "SurveyField " + surveyField)
-                val bottomSheet = NCWSurveyBottomSheet(response.requestId?:"",surveyField,conversationID?:"",botRefId?:""){
+                createAndShowSurveyBottomSheet(
+                    requestId = response.requestId ?: "",
+                    surveyField = surveyField,
+                    TYPE_SHOW_SURVEY,
+                    onSubmit = { submitSurvey->
+                        chatViewModel.hitSubmitSurveyRequestAPI(submitSurvey)
+                        val submitSurveyInfo=submitSurvey.requestBody.eventData.eventInfo.submitSurveyInfo
 
-                     chatViewModel.hitSubmitSurveyRequestAPI(it)
-                }
-                bottomSheet.show(supportFragmentManager, "SurveyOptionsBottomSheet")
+
+                        val newMessage = NCWMessage(
+                            sender = TYPE_EVENT,
+                            timestamp = response.timestamp ?: System.currentTimeMillis(),
+                            surveyField = surveyField,
+                            requestID = response.requestId
+                        )
+                        messageList.add(newMessage)
+                        addLoader()
+
+                        surveyField.submitSurveyInfo=submitSurveyInfo
+
+                    }
+                )
+
             }
 
         }
+    }
+    private fun createAndShowSurveyBottomSheet(
+        requestId: String,
+        surveyField: SurveyField?,
+        from: String,
+        onSubmit: (SubmitSurveyRequest) -> Unit
+    ) {
+        val bottomSheet = NCWSurveyBottomSheet(requestId, surveyField, conversationID ?: "", botRefId ?: "", from, onSubmit)
+        bottomSheet.show(supportFragmentManager, "SurveyOptionsBottomSheet")
     }
 
 
@@ -1211,7 +1243,7 @@ Log.e("ShowSurvey","a00ce1dd-6975-4a69-9ed7-332af54b3b55")
             )
         )
 
-// Schedule maxTime check
+       // Schedule maxTime check
         themeData?.typingIndicator?.maxTime?.let {
             Handler(Looper.getMainLooper()).postDelayed({
                 if (isLoaderActive) {
@@ -1686,34 +1718,6 @@ Log.e("ShowSurvey","a00ce1dd-6975-4a69-9ed7-332af54b3b55")
             return
         }
         if (!validateFormAttachment(fileSend)) return
-
-
-/*// Calculate the total current file size in MB
-        val previousFileInMB = formComponent?.fileUpload
-            ?.filter { it.fileSize != null }
-            ?.sumOf {
-                // Log each file size conversion for debugging
-                val fileSizeMB = it.fileSize!!.toDouble() / (1024 * 1024) // Use Double for precision
-                Log.e("Chesize", "Converted file size: $fileSizeMB MB")
-                fileSizeMB
-            }
-            ?: 0.0 // Default to 0.0 if no file size available
-val currentFileSizeMB= fileSend!!.length()/ (1024 * 1024)
-val allSize=previousFileInMB+currentFileSizeMB
-        Log.e("Chesize", "Total file size in MB: $previousFileInMB MB")
-Log.e("Checkkk","currentFileSizeMB "+previousFileInMB)
-        Log.e("Checkkk","maxUploadSizeAllowedMB "+maxUploadSizeAllowedMB)
-// Check if the total file size exceeds the allowed limit
-        if (allSize > maxUploadSizeAllowedMB) {
-           // val maxSize = themeData?.fileSharing?.fileSize?.let(NCWAppUtils::formatFileSize)
-            val messageIssue = getString(R.string.upload_file_max_size, maxUploadSizeAllowedMB ?: "N/A")
-            showLimitExceedPopup(messageIssue)
-            return
-        }*/
-
-
-
-
         fileSend?.let {
             getPreSignedUrl(mimeType, it.name)
 
@@ -1945,6 +1949,24 @@ Log.e("Checkkk","currentFileSizeMB "+previousFileInMB)
 
                             CustomFieldName.SURVEY_SCHEMA -> {
 
+
+                                    if (!customField.values.isNullOrEmpty()) {
+                                        val surveyField: SurveyField = gson.fromJson(
+                                            customField.values[0],
+                                            object : TypeToken<SurveyField>() {}.type
+                                        )
+                                        val newMessage = NCWMessage(
+                                            sender = TYPE_EVENT,
+                                            timestamp = response.timestamp ?: System.currentTimeMillis(),
+                                            surveyField = surveyField,
+                                            requestID = response.requestId
+                                        )
+                                        messageList.add(newMessage)
+
+
+                                }
+
+
                             }
 
                             CustomFieldName.DISABLE_INPUT_FIELD -> {
@@ -1966,95 +1988,6 @@ Log.e("Checkkk","currentFileSizeMB "+previousFileInMB)
                             }
                         }
 
-                        /*when (CustomFieldName.fromValue(customField.name)) {
-                            CustomFieldName.FORM_SCHEMA -> {
-                                //  renderTheFormMessage(response)
-                                val formSchemas: List<FormSchema> = gson.fromJson(
-                                    customField.values?.get(0),
-                                    object : TypeToken<List<FormSchema>>() {}.type
-                                )
-                                val formSchemasModel = formSchemas[0]
-
-                                if (index + 1 < responses.size) {
-                                    val nextResponse = responses[index + 1]
-                                    val nextMessagePayload = nextResponse.requestPayload?.messagePayload?.text
-                                  Log.e("Nextt","sss "+nextMessagePayload)
-                                    if (!nextMessagePayload.isNullOrEmpty() ) {
-
-                                        val formData = parsePayloadToFormData(
-                                            nextMessagePayload
-                                        )
-                                        Log.e("NextPayload", "formData: $formData")
-                                        Log.e("NextPayload", "formData: ${formData?.size}")
-                                        if (!formData.isNullOrEmpty() && formData.size>0 ) {
-                                            formSchemasModel.formData = formData
-                                            Log.e(
-                                                "NextPayload",
-                                                "Next response message payload: $nextMessagePayload"
-                                            )
-
-                                            val newMessages = NCWMessage(
-                                                sender = TYPE_FORM,
-                                                timestamp = System.currentTimeMillis(),
-                                                formSchema = formSchemasModel
-                                            )
-                                            addSingleMessage(newMessages)
-                                        }
-                                        else{
-                                            val newMessages = NCWMessage(
-                                                sender = TYPE_FORM,
-                                                timestamp = System.currentTimeMillis(),
-                                                formSchema = formSchemasModel,
-                                            )
-                                            addSingleMessage(newMessages)
-                                        }
-                                    }
-                                    else{
-                                        val newMessages = NCWMessage(
-                                            sender = TYPE_FORM,
-                                            timestamp = System.currentTimeMillis(),
-                                            formSchema = formSchemasModel,
-                                        )
-                                        addSingleMessage(newMessages)
-                                    }
-
-                                }
-                                else{
-                                    val newMessages = NCWMessage(
-                                        sender = TYPE_FORM,
-                                        timestamp = System.currentTimeMillis(),
-                                        formSchema = formSchemasModel,
-                                    )
-                                    addSingleMessage(newMessages)
-                                }
-                            }
-
-                            CustomFieldName.SURVEY_SCHEMA -> {
-
-                            }
-
-                            CustomFieldName.DISABLE_INPUT_FIELD -> {
-//                                if (customField.values?.get(0) == "true") {
-//                                    messageInputField.isEnabled = false
-//                                    attachmentIcon.isEnabled = false
-//                                } else {
-//                                    messageInputField.isEnabled = true
-//                                    attachmentIcon.isEnabled = true
-//                                }
-
-                            }
-
-                            CustomFieldName.DISABLE_CHAT_INPUT -> {
-
-                            }
-
-                            CustomFieldName.END_CHAT -> {
-
-                            }
-
-
-                            else -> {}
-                        }*/
 
 
                     }
@@ -2071,24 +2004,11 @@ Log.e("Checkkk","currentFileSizeMB "+previousFileInMB)
                     }
                 }
                 messageList.addAll(newMessages)
-                //  }
+
             }
-
-
-           else if (response.triggerType == TYPE_EVENT) {
-
-                val newMessage = NCWMessage(
-                    sender = TYPE_EVENT,
-                    timestamp = response.timestamp ?: System.currentTimeMillis(),
-                   eventObject = response.eventObject,
-                    requestID = response.requestId
-                )
-                messageList.add(newMessage)
-            }
-
 
             // Type Request
-            else {
+            else if (response.triggerType == TYPE_REQUEST) {
                 // Existing logic for request payloads
                 response.requestPayload?.attachmentList?.takeIf { it.isNotEmpty() }
                     ?.forEach { attachmentListRequest ->

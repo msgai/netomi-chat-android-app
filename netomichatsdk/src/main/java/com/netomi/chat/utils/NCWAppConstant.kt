@@ -48,6 +48,11 @@ object NCWAppConstant {
 
     const val DATE_FORMAT="yyyyMMdd_HHmmss"
 
+
+    const val TYPE_SUBMITTED_SURVEY="submittedSurvey"
+    const val TYPE_SHOW_SURVEY="showSurvey"
+
+
     object RatingType {
         const val STAR = "STAR"
         const val NUM_10 = "NUM_10"
