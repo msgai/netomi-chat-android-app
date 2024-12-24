@@ -78,6 +78,7 @@ import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.NCWChatActionCallback
 import com.netomi.chat.utils.DeviceInfo
 import com.netomi.chat.utils.DeviceInfoUtil
+import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWFilePath
 import com.netomi.chat.utils.NCWImageUtils
 import com.netomi.chat.utils.NCWAppConstant.ARG_MEDIA_URL
@@ -1070,8 +1071,20 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun renderTheNormalMessage(response: NCWGenericChannelResponse?) {
+       var type:String=""
+        if (response?.customPayload?.CHUNK_INDEX != null &&
+            (
+                    (response.customPayload.CHUNK_INDEX.toInt() == 0 && response.customPayload.CHUNK_STATUS == "IN-PROGRESS") ||
+                            (response.customPayload.CHUNK_INDEX.toInt() > 0 &&
+                                    (response.customPayload.CHUNK_STATUS == "SUCCESS" || response.customPayload.CHUNK_STATUS == "IN-PROGRESS"))
+                    )
+        ){
+            type=NCWAppConstant.STREAMING
+        }else{
+            type=NCWAppConstant.NORMAL
+        }
         val newMessages =
-            response?.attachments?.mapNotNull { mapAttachmentToMessage(it, response.requestId!!) }
+            response?.attachments?.mapNotNull { mapAttachmentToMessage(it, response.requestId!!,type) }
                 ?: emptyList()
 
         if (newMessages.isNotEmpty()) {
@@ -1119,17 +1132,19 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
 
     // Helper function to map attachments to NCWMessage
-    private fun mapAttachmentToMessage(attachment: NCWAttachment, requestId: String): NCWMessage? {
+    private fun mapAttachmentToMessage(attachment: NCWAttachment, requestId: String,type: String): NCWMessage? {
         val attach = attachment.attachment ?: return null
         val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
 
-        if (attach.text.isNullOrEmpty() &&
-            attach.elements.isNullOrEmpty() &&
-            attach.thumbnailUrl.isNullOrEmpty() &&
-            attach.largeImageUrl.isNullOrEmpty() &&
-            attach.quickReply == null
-        ) {
-            return null
+        if(type==NCWAppConstant.NORMAL) {
+            if (attach.text.isNullOrEmpty() &&
+                attach.elements.isNullOrEmpty() &&
+                attach.thumbnailUrl.isNullOrEmpty() &&
+                attach.largeImageUrl.isNullOrEmpty() &&
+                attach.quickReply == null
+            ) {
+                return null
+            }
         }
         return NCWMessage(
             sender = TYPE_RESPONSE,
@@ -1995,7 +2010,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 // else {
                 // Existing logic for attachments
                 val newMessages = response.attachments?.mapNotNull {
-                    mapAttachmentToMessage(it, response.requestId!!)
+                    mapAttachmentToMessage(it, response.requestId!!,NCWAppConstant.NORMAL)
                 } ?: emptyList()
 
                 if (newMessages.isNotEmpty()) {

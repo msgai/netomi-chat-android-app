@@ -51,6 +51,8 @@ object NCWAppConstant {
 
     const val TYPE_SUBMITTED_SURVEY="submittedSurvey"
     const val TYPE_SHOW_SURVEY="showSurvey"
+    const val NORMAL="normal"
+    const val STREAMING="streaming"
 
 
     object RatingType {
