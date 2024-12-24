@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.netomi.chat.R
+import com.netomi.chat.utils.NCWThemeUtils
 
 class SuggestionAdapter(
     private val options: List<String>
@@ -21,10 +22,10 @@ class SuggestionAdapter(
             textView.text = option
 
             if (selectedOptions.contains(position)) {
-                textView.setBackgroundResource(R.drawable.bg_suggestion_selected)
+                NCWThemeUtils.createSelectedRoundedDrawable(textView)
                 textView.setTypeface(textView.typeface, Typeface.BOLD)
             } else {
-                textView.setBackgroundResource(R.drawable.bg_suggestion_unselected)
+                NCWThemeUtils.createUnSelectedRoundedDrawable(textView)
                 textView.setTypeface(textView.typeface, Typeface.NORMAL)
             }
 

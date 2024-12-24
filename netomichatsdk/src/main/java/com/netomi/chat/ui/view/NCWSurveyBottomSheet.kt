@@ -90,6 +90,15 @@ class NCWSurveyBottomSheet(
         radioGroup.setOnCheckedChangeListener { _, checkedId ->
             selectedRadioValue = view?.findViewById<RadioButton>(checkedId)?.text.toString()
         }
+        val radioYes = view?.findViewById<RadioButton>(R.id.radioYes)
+        val radioNo = view?.findViewById<RadioButton>(R.id.radioNo)
+
+        if (radioYes != null) {
+            NCWThemeUtils.setRadioButtonUserConfig(radioYes)
+        }
+        if (radioNo != null) {
+            NCWThemeUtils.setRadioButtonUserConfig(radioNo)
+        }
 
         if (from == TYPE_SUBMITTED_SURVEY) {
             radioGroup.check(

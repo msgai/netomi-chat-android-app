@@ -538,5 +538,29 @@ object NCWThemeUtils
 
 
 
+    fun createSelectedRoundedDrawable(view: View) {
+        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+            val parsedColor = Color.parseColor(headerConfig.backgroundColor)
+
+            val backgroundDrawable = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 16f
+                setColor(parseColor("#F6F7F7"))
+                setStroke(2, parsedColor)
+            }
+            view.background = backgroundDrawable
+
+
+        }
+    }
+    fun createUnSelectedRoundedDrawable(view: View) {
+        val backgroundDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 16f
+            setColor(parseColor("#F6F7F7"))
+
+        }
+        view.background = backgroundDrawable
+    }
 
 }
