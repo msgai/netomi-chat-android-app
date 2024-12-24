@@ -12,7 +12,7 @@ class SuggestionAdapter(
     private val options: List<String>
 ) : RecyclerView.Adapter<SuggestionAdapter.SuggestionViewHolder>() {
 
-    private val selectedOptions = mutableSetOf<Int>()
+     val selectedOptions = mutableSetOf<Int>()
 
     inner class SuggestionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textView: TextView = itemView.findViewById(R.id.optionText)

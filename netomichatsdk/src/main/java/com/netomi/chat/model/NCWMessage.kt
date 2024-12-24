@@ -7,6 +7,7 @@ import com.netomi.chat.model.messages.NCWCarouselButton
 import com.netomi.chat.model.messages.NCWCarouselElement
 import com.netomi.chat.model.messages.NCWCustomPayload
 import com.netomi.chat.model.messages.NCWQuickReply
+import com.netomi.chat.model.messages.SurveyField
 
 data class NCWMessage(
     var message: String? = null,
@@ -33,7 +34,7 @@ data class NCWMessage(
     var customPayload: NCWCustomPayload? = null,
     var feedbackValue: String?=null,
     var isReviewEnabled: Boolean = false,
-    val eventObject: EventObject? = null
+    val surveyField: SurveyField? = null
 
 
     )

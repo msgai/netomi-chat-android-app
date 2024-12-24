@@ -1,12 +1,14 @@
 package com.netomi.chat.model.messages
 
+import com.netomi.chat.survey.SubmitSurveyInfo
 
 
 data class SurveyField(
     val surveyId: String?=null,
     val eventType: String?=null,
     val payload: Payload?=null,
-    val triggerType: String?=null
+    val triggerType: String?=null,
+    var submitSurveyInfo: SubmitSurveyInfo
 )
 
 data class Payload(
@@ -50,3 +52,13 @@ data class SurveyRatingTypeEnabledInfo(
     val upperBound: Int?=null,
     val criteria: Int?=null
 )
+
+/*
+data class SubmitSurveyInfo(
+    val rating: Int,
+    val suggestions: List<String>,
+    val issueResolved: Boolean,
+    val additionalFeedback: String,
+    val triggerType: String
+)
+*/

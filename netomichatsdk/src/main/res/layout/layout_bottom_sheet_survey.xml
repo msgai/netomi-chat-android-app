@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/constSurveyForm"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_bottom_sheet"
     android:padding="10dp">
+    <androidx.constraintlayout.widget.ConstraintLayout
+       android:id="@+id/surveyField"
+
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_height="wrap_content">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/rowRating"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -22,7 +30,7 @@
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+
             android:text="Rate your experience"
             android:textSize="14sp"
             android:textColor="#374E57"
@@ -52,18 +60,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
        app:layout_constraintTop_toBottomOf="@+id/rowRating"
-        android:padding="8dp"
         android:visibility="gone"
-        android:layout_marginTop="8dp"
-
+        android:layout_marginTop="10dp"
+android:layout_marginStart="10dp"
         app:layout_constraintStart_toStartOf="parent"
         >
 
         <TextView
             android:id="@+id/tvIssueTitle"
             android:layout_width="0dp"
+            android:layout_marginTop="5dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
             android:text="Did we resolve your issue?"
             android:textSize="14sp"
             android:textColor="#374E57"
@@ -101,8 +108,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:padding="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
        app:layout_constraintTop_toBottomOf="@+id/rowResolveIssue"
         app:layout_constraintStart_toStartOf="parent"
        >
@@ -111,7 +118,7 @@
             android:id="@+id/tvSuggestionTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+
             android:text="What went wrong?"
             android:textSize="14sp"
             android:textColor="#374E57"
@@ -140,8 +147,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:padding="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
         app:layout_constraintTop_toBottomOf="@+id/rowSuggestion"
         app:layout_constraintStart_toStartOf="parent"
         >
@@ -150,7 +158,6 @@
             android:id="@+id/tvFeedbackTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
             android:text="Additional Feedback"
             android:textSize="14sp"
             android:textColor="#374E57"
@@ -175,13 +182,15 @@
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-app:layout_constraintTop_toBottomOf="@+id/rowAdditionalFeedback"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+app:layout_constraintTop_toBottomOf="@+id/surveyField"
         android:layout_marginTop="16dp">
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -210,4 +219,15 @@ app:layout_constraintTop_toBottomOf="@+id/rowAdditionalFeedback"
             android:textColor="#000000"
             android:text="Submit"/>
     </LinearLayout>
+
+    <View
+        android:id="@+id/overlayView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="@+id/surveyField"
+        app:layout_constraintEnd_toEndOf="@+id/surveyField"
+        app:layout_constraintTop_toTopOf="@+id/surveyField"
+        app:layout_constraintBottom_toBottomOf="@+id/surveyField"
+        android:background="@android:color/transparent"
+        android:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -32,10 +32,11 @@ data class EventInfo(
 
 data class SubmitSurveyInfo(
     val rating: Int,
-    val suggestions: List<String>,
-    val suggestionTitle: String,
-    val issueResolved: Boolean,
-    val additionalFeedback: String,
-    val triggerType: String
+    val suggestions: List<String>?,
+    val suggestionTitle: String?,
+    val issueResolved: Boolean?,
+    val additionalFeedback: String?,
+    val triggerType: String?
+
 )
 

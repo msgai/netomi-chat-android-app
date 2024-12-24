@@ -32,13 +32,13 @@ class NCWRatingAdapter(
     private val onRatingSelected: (Int) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var selectedRating: Int = 0
+     var selectedRating: Int = 0
 
     override fun getItemViewType(position: Int): Int {
        return when (ratingTypeEnabled) {
            STAR -> STAR_VALUE
-            NUM_10, NUM_5 -> NUM_VALUE
-           EMOJI -> EMOJI_VALUE
+           NUM_10, NUM_5 -> NUM_VALUE
+            EMOJI -> EMOJI_VALUE
             THUMBS_UP_DOWN -> THUMBS_UP_DOWN_VALUE
             else -> STAR_VALUE
         }
