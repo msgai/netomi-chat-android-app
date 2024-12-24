@@ -7,7 +7,10 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.text.Editable
+import android.text.Spannable
+import android.text.SpannableString
 import android.text.TextWatcher
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
@@ -35,6 +38,7 @@ import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.Validation
 import com.netomi.chat.model.messages.Values
 import com.netomi.chat.utils.NCWAppConstant.FORM_DATE_FORMAT
+import com.netomi.chat.utils.NCWAppConstant.SHOW_FORM_DATE_FORMAT
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWParsingUtils
 import com.netomi.chat.utils.NCWParsingUtils.parseDate
@@ -163,9 +167,11 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
                             if (errorMessage != null) {
                                 errorTextView.text = errorMessage
+                                createErrorDrawable(editText)
                                 errorTextView.visibility = View.VISIBLE
                             } else {
                                 errorTextView.visibility = View.GONE
+                                createDrawable(editText)
                                 inputValuesSelected[adapterPosition].textInput = inputText
                             }
                         }
@@ -271,8 +277,10 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                     if (errorMessage != null) {
                         errorTextView.text = errorMessage
                         errorTextView.visibility = View.VISIBLE
+                        createErrorDrawable(editText)
                     } else {
                         errorTextView.visibility = View.GONE
+                        createDrawable(editText)
                         inputValuesSelected[adapterPosition].textAreaInput = inputText
                     }
                 }
@@ -313,6 +321,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             component.optionList?.forEach { option ->
                 val radioButton = RadioButton(itemView.context).apply {
                     text = option.value
+                    NCWThemeUtils.setRadioButtonUserConfig(this)
                     isEnabled = isRadiaClickable
                     setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) {
@@ -358,6 +367,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             component.optionList?.forEach { option ->
                 val checkBox = CheckBox(itemView.context).apply {
                     text = option.value
+                    NCWThemeUtils.setTitleColor(this)
                     setOnCheckedChangeListener { _, isChecked ->
                         val selectedCheckboxes = inputValuesSelected[adapterPosition].selectedCheckboxes.toMutableList()
                         if (isChecked) {
@@ -428,7 +438,8 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 val optionView = TextView(itemView.context).apply {
                     text = option
                     textSize = 14f
-                    setPadding(10, 16, 10, 16)
+                    setPadding(15, 16, 10, 16)
+                    NCWThemeUtils.setBotTextColor(this)
                     setOnClickListener {
                         selectedText.text = option
                         isDropdownOpen = false
@@ -471,7 +482,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             // Create the date input TextView
             val textView = TextView(itemView.context).apply {
                 id = View.generateViewId()
-                text = FORM_DATE_FORMAT
+                text = SHOW_FORM_DATE_FORMAT
                 setPadding(10, 0, 16, 0)
                 layoutParams = RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
@@ -490,15 +501,18 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                         context, AlertDialog.THEME_HOLO_LIGHT,
                         { _, year, month, dayOfMonth ->
                             val selectedDate = "${month + 1}-$dayOfMonth-$year"
+                            val showSelectedDate = "$dayOfMonth/${month + 1}/$year"
                             val errorMessage = validateDate(selectedDate, component)
                             if (errorMessage == null) {
-                                text = selectedDate
+                                text = showSelectedDate
                                 inputValuesSelected[adapterPosition].dateInput = selectedDate
                                 textViewError.visibility = View.GONE
+                                createDrawable(container)
                             } else {
                                 textViewError.text = errorMessage
                                 textViewError.visibility = View.VISIBLE
-                                text = FORM_DATE_FORMAT
+                                createErrorDrawable(container)
+                                text = SHOW_FORM_DATE_FORMAT
                             }
                         },
                         calendar.get(Calendar.YEAR),
@@ -698,7 +712,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             val fileInputView = LayoutInflater.from(itemView.context)
                 .inflate(R.layout.custom_file_input_view, formContainer, false) as ConstraintLayout
 
-            val uploadIcon: ImageView = fileInputView.findViewById(R.id.upload_icon)
+            val uploadMedia: ConstraintLayout = fileInputView.findViewById(R.id.file_input_container)
             val uploadText: TextView = fileInputView.findViewById(R.id.upload_text)
             val formatHint: TextView = fileInputView.findViewById(R.id.format_hint)
             val recyclerDoc: RecyclerView = fileInputView.findViewById(R.id.recyclerDoc)
@@ -779,35 +793,65 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
 
 
-            uploadIcon.setOnClickListener {
+            uploadMedia.setOnClickListener {
                 callBack(component) // Trigger the callback when upload icon is clicked
             }
-            uploadIcon.isEnabled=isClickable
+            uploadMedia.isEnabled=isClickable
             formContainer.addView(fileInputView)
             inputValues[component.id] = fileInputView
         }
 
         private fun addLabel(component: Component) {
             val textView = TextView(itemView.context).apply {
-                text = component.labels?.firstOrNull() ?: "Label"
+                val label = component.labels?.firstOrNull() ?: "Label"
+                val isRequired = component.additionalSettings["Required"]?.value == true
+
+                text = if (isRequired) {
+                    SpannableString("$label *").apply {
+                        setSpan(
+                            ForegroundColorSpan(Color.RED),
+                            length - 1,
+                            length,
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
+                    }
+                } else {
+                    label
+                }
+
                 typeface = Typeface.DEFAULT_BOLD
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                layoutParams=defaultLayoutParams()
+                layoutParams = defaultLayoutParams()
             }
             NCWThemeUtils.setBotTextColor(textView)
             formContainer.addView(textView)
         }
         private fun addRadioLabel(component: Component) {
             val textView = TextView(itemView.context).apply {
-                text = component.groupLabel
+                val label = component.groupLabel ?: "Label"
+                val isRequired = component.additionalSettings["Required"]?.value == true
+
+                text = if (isRequired) {
+                    SpannableString("$label *").apply {
+                        setSpan(
+                            ForegroundColorSpan(Color.RED),
+                            length - 1,
+                            length,
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
+                    }
+                } else {
+                    label
+                }
+
                 layoutParams = defaultLayoutParams()
                 typeface = Typeface.DEFAULT_BOLD
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                layoutParams=defaultLayoutParams()
             }
             NCWThemeUtils.setBotTextColor(textView)
             formContainer.addView(textView)
         }
+
 
         private fun defaultLayoutParams() = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -824,12 +868,12 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 text = "Submit"
                 id = View.generateViewId()
                 gravity = Gravity.CENTER
-                setPadding(10, 30, 16, 30)
+                setPadding(0, 30, 0, 30)
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 ).apply {
-                    setMargins(10, 30, 16, 30) // Add padding/margins as needed
+                    setMargins(10, 30, 10, 30) // Add padding/margins as needed
                 }
                 NCWThemeUtils.createRoundedDrawable(this)
             }
@@ -1179,6 +1223,18 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
         }
 
     }
+    private fun createErrorDrawable(view :View){
+        val drawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 15f
+            setStroke(2, ContextCompat.getColor(view.context, R.color.error_color))
+            setColor(Color.WHITE)
+        }
+        view.background=drawable
+
+    }
+
+
 
 
 

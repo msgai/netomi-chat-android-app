@@ -214,7 +214,7 @@ object NCWThemeUtils
             val parsedColor = Color.parseColor(it.backgroundColor)
             val backgroundDrawable = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
-                cornerRadius = 16f
+                cornerRadius = 50f
                 setColor(parsedColor)
             }
             view.background = backgroundDrawable
