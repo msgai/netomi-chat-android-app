@@ -10,7 +10,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="start">
+        android:layout_gravity="start"
+        android:orientation="horizontal">
 
         <!-- Hamburger Icon -->
         <ImageView

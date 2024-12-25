@@ -1,4 +1,4 @@
-package com.netomi.chat.ui.  view
+package com.netomi.chat.ui.view
 
 import android.content.Context
 import android.net.Uri
@@ -22,6 +22,10 @@ import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.messages.Component
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.theme.NCWThemeResponse
+import com.netomi.chat.ui.view.NCWCarouselAdapter
+import com.netomi.chat.ui.view.NCWCarouselButtonAdapter
+import com.netomi.chat.ui.view.NCWChipAdapter
+import com.netomi.chat.ui.view.NCWFormAdapter
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWChatActionCallback
@@ -475,14 +479,24 @@ class NCWChatAdapter(
             }
             // Thumbs-up click listener
            thumbUpImageButton.setOnClickListener {
-                message.feedbackValue = "POSITIVE"
-                feedbackActionCallBack.onThumbUpClick(message.requestID!!)
+               if (message.feedbackValue != "POSITIVE") { // Prevent API call if already selected
+                   message.feedbackValue = "POSITIVE"
+                   feedbackActionCallBack.onThumbUpClick(message.requestID!!) // API call
+                   // Update the UI after API hit
+                   thumbUpImageButton.setImageResource(R.drawable.thumps_up_selected)
+                   thumbDownImageButton.visibility = View.GONE
+               }
             }
 
             // Thumbs-down click listener
             thumbDownImageButton.setOnClickListener {
-                message.feedbackValue = "NEGATIVE"
-                feedbackActionCallBack.onThumbDownClick(message.requestID!!)
+                if (message.feedbackValue != "NEGATIVE") { // Prevent API call if already selected
+                    message.feedbackValue = "NEGATIVE"
+                    feedbackActionCallBack.onThumbDownClick(message.requestID!!) // API call
+                    // Update the UI after API hit
+                    thumbDownImageButton.setImageResource(R.drawable.thumps_down_selected)
+                    thumbUpImageButton.visibility = View.GONE
+                }
             }
         }
     }
@@ -495,7 +509,9 @@ class NCWChatAdapter(
             messages[index].message += newMessage.message
 
             // Update isReviewEnabled flag if it changes
-            messages[index].isReviewEnabled = newMessage.isReviewEnabled
+            if(!messages[index].isReviewEnabled) {
+                messages[index].isReviewEnabled = newMessage.isReviewEnabled
+            }
 
             notifyItemChanged(index)
         } else {

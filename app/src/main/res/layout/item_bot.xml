@@ -15,6 +15,7 @@
             android:id="@+id/rbBotSelect"
             android:layout_width="35dp"
             android:layout_height="35dp"
+            android:clickable="false"
             android:buttonTint="@color/charcoal_blue" />
 
         <TextView
