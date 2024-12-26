@@ -98,7 +98,7 @@ class NCWRatingAdapter(
         fun bind(rating: Int, isSelected: Boolean) {
             numberText.text = rating.toString()
             numberText.setBackgroundResource(
-                if (isSelected) R.drawable.bg_selected_rounded else R.drawable.bg_stroke_rounded_white
+                if (isSelected) R.drawable.bg_selected_rounded else R.drawable.bg_rounded_star
             )
         }
     }
@@ -125,7 +125,7 @@ class NCWRatingAdapter(
             } else {
                 ImageViewCompat.setImageTintList(smileyIcon, null)
                 smileyIcon.setBackgroundResource(0)
-                constRow.setBackgroundResource(R.drawable.bg_stroke_rounded_white)
+                constRow.setBackgroundResource(R.drawable.bg_rounded_star)
             }
         }
     }
@@ -149,7 +149,7 @@ class NCWRatingAdapter(
             } else {
                 ImageViewCompat.setImageTintList(smileyIcon, null)
                 smileyIcon.setBackgroundResource(0)
-                constRow.setBackgroundResource(R.drawable.bg_stroke_rounded_white)
+                constRow.setBackgroundResource(R.drawable.bg_rounded_star)
             }
         }
     }

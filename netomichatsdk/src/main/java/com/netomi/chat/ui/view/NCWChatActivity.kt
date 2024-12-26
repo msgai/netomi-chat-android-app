@@ -879,12 +879,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
 
 
-//Rammmmmmmmmm
         chatViewModel.awsMessage.observe(this) { jsonMessage ->
             try {
                 Log.e("Jsonn", "Testtt " + jsonMessage)
                 val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
-
                     if (response.triggerType == TYPE_EVENT) {
                         val eventData = response.eventObject?.eventData
                         val messagePill = when {
@@ -1289,6 +1287,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     // Helper function to add messages and scroll to the latest
     private fun addStreamMessages(newMessages: NCWMessage) {
         messageAdapter.updateOrAppendMessage(newMessages)
+        chatRecyclerView.post {
+            chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
+        }
     }
 
     private fun safelyRemoveLoader(newMessages: List<NCWMessage>) {
@@ -1299,7 +1300,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         chatRecyclerView.post {
             chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
         }
-
     }
 
     private fun removeLoader() {
@@ -1984,7 +1984,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
 
             NCWRoutes.ROUTE_SURVEY -> {
-                NCWAppUtils.showToast(this, "Survey Submitted")
                 // messageAdapter.notifyDataSetChanged()
             }
 

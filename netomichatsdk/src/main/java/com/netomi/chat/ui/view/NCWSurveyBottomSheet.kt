@@ -16,6 +16,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
 import com.netomi.chat.model.messages.SurveyField
@@ -53,13 +54,19 @@ class NCWSurveyBottomSheet(
     private var selectedRadioValue: String = ""
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return super.onCreateDialog(savedInstanceState).apply {
-            setOnShowListener {
-                findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.background =
-                    ContextCompat.getDrawable(requireContext(), R.drawable.bg_bottom_sheet)
-            }
+        val dialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
+
+        dialog.setCancelable(false)
+        dialog.setCanceledOnTouchOutside(false)
+
+        dialog.setOnShowListener {
+            dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.background =
+                ContextCompat.getDrawable(requireContext(), R.drawable.bg_bottom_sheet)
         }
+
+        return dialog
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -85,15 +92,23 @@ class NCWSurveyBottomSheet(
         edtAdditionalFeedback = findViewById(R.id.edtAdditionFeedback)
         val tvFeedbackCount = findViewById<TextView>(R.id.tvFeedbackCount)
         val constAdd = findViewById<ConstraintLayout>(R.id.constAdd)
+        val tvFeedbackTitle = findViewById<TextView>(R.id.tvFeedbackTitle)
+
         tvFeedbackCount.visibility=View.GONE
+
+        tvFeedbackTitle.text= getString(R.string.add_additional_feedback)
         if (from == TYPE_SUBMITTED_SURVEY) {
             constAdd.visibility=View.GONE
             tvFeedbackCount.visibility=View.GONE
+            tvFeedbackTitle.text=getString(R.string.additional_feedback)
         }
+
         constAdd.setOnClickListener {
+            Log.e("Dsggssa","sajajsajs")
             edtAdditionalFeedback.visibility=View.VISIBLE
             constAdd.visibility=View.GONE
             tvFeedbackCount.visibility=View.VISIBLE
+            tvFeedbackTitle.text= getString(R.string.write_your_feedback_here)
         }
 
 
@@ -147,13 +162,13 @@ class NCWSurveyBottomSheet(
 
     private fun setupSubmitButton() {
         setButtonState(false)
-        NCWThemeUtils.createRoundedDrawable(submitButton)
+        NCWThemeUtils.createRoundedDrawableSubmit(submitButton)
         submitButton.setOnClickListener { handleSubmitClick() }
         submitButton.visibility = if (from == TYPE_SUBMITTED_SURVEY) View.GONE else View.VISIBLE
 
         view?.findViewById<TextView>(R.id.closeButton)?.let { closeButton ->
             NCWThemeUtils.createRoundedDrawableClose(closeButton)
-
+            closeButton.text= if (from == TYPE_SUBMITTED_SURVEY) "Close" else "Skip"
             closeButton.setOnClickListener {
                 if (from == TYPE_SUBMITTED_SURVEY) {
                     dismiss()
@@ -319,11 +334,11 @@ class NCWSurveyBottomSheet(
         view?.findViewById<ConstraintLayout>(R.id.rowAdditionalFeedback)?.apply {
             visibility = if (surveyField?.payload?.additionalFeedback?.enabled == true) {
                 view?.findViewById<TextView>(R.id.tvFeedbackTitle)?.apply {
-                    text = surveyField.payload.additionalFeedback.text
+                 //   text = surveyField.payload.additionalFeedback.text
                     NCWThemeUtils.setTitleColor(this)
                 }
                 if (from == TYPE_SUBMITTED_SURVEY) {
-                    edtAdditionalFeedback.setText(surveyField?.submitSurveyInfo?.additionalFeedback.orEmpty())
+                  //  edtAdditionalFeedback.setText(surveyField?.submitSurveyInfo?.additionalFeedback.orEmpty())
                     edtAdditionalFeedback.visibility=View.VISIBLE
                 }
                 View.VISIBLE
