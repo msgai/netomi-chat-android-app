@@ -33,6 +33,7 @@ class NCWSurveyBottomSheet(
     private val botRefId: String,
     private val from: String,
     private val onSubmitSurveyRequest: (SubmitSurveyRequest) -> Unit,
+    private val onSkipSurvey: (String,String) -> Unit,
 ) : BottomSheetDialogFragment() {
 
     private lateinit var recyclerSuggestion: RecyclerView
@@ -41,6 +42,7 @@ class NCWSurveyBottomSheet(
     private lateinit var tvSuggestionTitle: TextView
     private lateinit var radioGroup: RadioGroup
     private lateinit var rowSuggestion: ConstraintLayout
+    private lateinit var submitButton: TextView
 
     private var selectedRating: Int = 0
     private var feedbackValue: String = ""
@@ -79,6 +81,7 @@ class NCWSurveyBottomSheet(
         edtAdditionalFeedback = findViewById(R.id.edtAdditionFeedback)
         radioGroup = findViewById(R.id.radioGroup)
         tvSuggestionTitle = findViewById(R.id.tvSuggestionTitle)
+        submitButton= view.findViewById(R.id.submitButton)
 
         findViewById<View>(R.id.overlayView)?.apply {
             visibility = if (from == TYPE_SUBMITTED_SURVEY) View.VISIBLE else View.GONE
@@ -108,15 +111,29 @@ class NCWSurveyBottomSheet(
     }
 
     private fun setupSubmitButton() {
-        view?.findViewById<TextView>(R.id.submitButton)?.apply {
-            NCWThemeUtils.createRoundedDrawable(this)
-            setOnClickListener { handleSubmitClick() }
-            visibility = if (from == TYPE_SUBMITTED_SURVEY) View.GONE else View.VISIBLE
-        }
+        submitButton.isEnabled=false
+        NCWThemeUtils.createRoundedDrawable(submitButton)
+        submitButton.setOnClickListener { handleSubmitClick() }
+        submitButton.visibility = if (from == TYPE_SUBMITTED_SURVEY) View.GONE else View.VISIBLE
 
-        view?.findViewById<TextView>(R.id.closeButton)?.apply {
-            NCWThemeUtils.createRoundedDrawableClose(this)
-            setOnClickListener { dismiss() }
+        view?.findViewById<TextView>(R.id.closeButton)?.let { closeButton ->
+            NCWThemeUtils.createRoundedDrawableClose(closeButton)
+
+            closeButton.setOnClickListener {
+                if (from == TYPE_SUBMITTED_SURVEY) {
+                    dismiss()
+                } else {
+                    val text = "event://;SKIP_EVENT;resumeWorkflow::value=true^$^requestId::value=$requestId"
+                    onSkipSurvey(text, "SKIP")
+                    dismiss()
+                }
+            }
+
+            closeButton.visibility = if (surveyField?.payload?.isSkipEnabled == true) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
         }
     }
 
@@ -177,6 +194,7 @@ class NCWSurveyBottomSheet(
                     surveyField.payload.ratingTypeEnabled ?: "STAR"
                 ) { rating ->
                     selectedRating = rating
+                    submitButton.isEnabled=true
                     showOptionList(rating)
                 }
             }

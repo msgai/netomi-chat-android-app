@@ -625,12 +625,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun showSubmittedSurvey(ncwMessage: NCWMessage) {
-        Log.e("ShowSurvey", "a00ce1dd-6975-4a69-9ed7-332af54b3b55")
         createAndShowSurveyBottomSheet(
             requestId = ncwMessage.requestID ?: "",
             surveyField = ncwMessage.surveyField,
             TYPE_SUBMITTED_SURVEY,
-            onSubmit = {}
+            onSubmit = {},
+            onSkipSurvey = { _, _ ->
+            }
         )
     }
 
@@ -1059,6 +1060,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                         surveyField.submitSurveyInfo = submitSurveyInfo
 
+                    },{ text,label->
+                        val timeStamp = System.currentTimeMillis()
+                        val payload = createPayload(text, label, timeStamp)
+                        addLoader()
+                        chatViewModel.sendMessageAPI(payload)
                     }
                 )
 
@@ -1071,7 +1077,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         requestId: String,
         surveyField: SurveyField?,
         from: String,
-        onSubmit: (SubmitSurveyRequest) -> Unit
+        onSubmit: (SubmitSurveyRequest) -> Unit,
+        onSkipSurvey: (String,String) -> Unit,
     ) {
         val bottomSheet = NCWSurveyBottomSheet(
             requestId,
@@ -1079,7 +1086,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             conversationID ?: "",
             botRefId ?: "",
             from,
-            onSubmit
+            onSubmit,
+            onSkipSurvey
         )
         bottomSheet.show(supportFragmentManager, "SurveyOptionsBottomSheet")
     }
