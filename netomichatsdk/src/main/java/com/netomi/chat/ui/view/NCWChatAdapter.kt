@@ -22,10 +22,6 @@ import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.messages.Component
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.theme.NCWThemeResponse
-import com.netomi.chat.ui.view.NCWCarouselAdapter
-import com.netomi.chat.ui.view.NCWCarouselButtonAdapter
-import com.netomi.chat.ui.view.NCWChipAdapter
-import com.netomi.chat.ui.view.NCWFormAdapter
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWChatActionCallback
@@ -373,27 +369,34 @@ class NCWChatAdapter(
 
             NCWThemeUtils.setBotConfig(thumbUpImageButton)
             NCWThemeUtils.setBotConfig(thumbDownImageButton)
+            // Initialize Feedback UI based on state
             if (message.isReviewEnabled) {
                 llFeedback.visibility = View.VISIBLE
-
+                updateFeedbackUI(message)
+            } else {
+                llFeedback.visibility = View.GONE
+            }
+       /*     if (message.isReviewEnabled) {
+                Log.e("Feedback", "Feedback Received")
+                llFeedback.visibility = View.VISIBLE
                 when (message.feedbackValue) {
                     "POSITIVE" -> {
-                        thumbUpImageButton.setImageResource(R.drawable.thumps_up_selected)
+                        thumbUpImageButton.setImageResource(R.drawable.thumbs_up_selected)
                         thumbDownImageButton.visibility=View.GONE
                     }
                     "NEGATIVE" -> {
                         thumbUpImageButton.visibility=View.GONE
-                        thumbDownImageButton.setImageResource(R.drawable.thumps_down_selected)
+                        thumbDownImageButton.setImageResource(R.drawable.thumbs_down_selected)
                     }
                     else -> {
-                        thumbUpImageButton.setImageResource(R.drawable.thumps_up_unselected)
-                        thumbDownImageButton.setImageResource(R.drawable.thumps_down_unselected)
+                        thumbUpImageButton.setImageResource(R.drawable.thumbs_up_unselected)
+                        thumbDownImageButton.setImageResource(R.drawable.thumbs_down_unselected)
                     }
                 }
             } else {
                 Log.e("Feedback", "Feedback Null")
                 llFeedback.visibility = View.GONE
-            }
+            }*/
             when (message.type) {
                 MessageType.TEXT -> {
                     message.message?.let {
@@ -496,10 +499,8 @@ class NCWChatAdapter(
            thumbUpImageButton.setOnClickListener {
                if (message.feedbackValue != "POSITIVE") { // Prevent API call if already selected
                    message.feedbackValue = "POSITIVE"
+                   updateFeedbackUI(message)
                    feedbackActionCallBack.onThumbUpClick(message.requestID!!) // API call
-                   // Update the UI after API hit
-                   thumbUpImageButton.setImageResource(R.drawable.thumps_up_selected)
-                   thumbDownImageButton.visibility = View.GONE
                }
             }
 
@@ -507,10 +508,27 @@ class NCWChatAdapter(
             thumbDownImageButton.setOnClickListener {
                 if (message.feedbackValue != "NEGATIVE") { // Prevent API call if already selected
                     message.feedbackValue = "NEGATIVE"
+                    updateFeedbackUI(message)
                     feedbackActionCallBack.onThumbDownClick(message.requestID!!) // API call
-                    // Update the UI after API hit
-                    thumbDownImageButton.setImageResource(R.drawable.thumps_down_selected)
+                }
+            }
+        }
+
+        private fun updateFeedbackUI(message: NCWMessage) {
+            when (message.feedbackValue) {
+                "POSITIVE" -> {
+                    thumbUpImageButton.setImageResource(R.drawable.thumbs_up_selected)
+                    thumbDownImageButton.visibility = View.GONE
+                }
+                "NEGATIVE" -> {
+                    thumbDownImageButton.setImageResource(R.drawable.thumbs_down_selected)
                     thumbUpImageButton.visibility = View.GONE
+                }
+                else -> {
+                    thumbUpImageButton.setImageResource(R.drawable.thumbs_up_unselected)
+                    thumbDownImageButton.setImageResource(R.drawable.thumbs_down_unselected)
+                    thumbUpImageButton.visibility = View.VISIBLE
+                    thumbDownImageButton.visibility = View.VISIBLE
                 }
             }
         }

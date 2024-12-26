@@ -3,10 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="10dp"
-    android:paddingEnd="10dp"
     android:layout_marginTop="5dp"
-    android:background="@android:color/white">
+    android:background="@android:color/white"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp">
 
     <!-- Bot Image -->
     <ImageView
@@ -36,14 +36,14 @@
         android:id="@+id/tvReceiverMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
         android:background="@drawable/bg_receiver_message"
         android:maxWidth="300dp"
-        android:layout_marginTop="5dp"
         android:padding="10dp"
         android:textColor="@android:color/black"
         android:textSize="16sp"
         android:visibility="gone"
-        android:layout_marginStart="5dp"
         app:layout_constraintStart_toEndOf="@id/img_bot"
         app:layout_constraintTop_toBottomOf="@id/tvTime" />
 
@@ -71,20 +71,20 @@
         android:id="@+id/carouselRecyclerView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="17dp"
         android:layout_marginTop="10dp"
         android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="17dp"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/receiverImageCard" />
 
     <!-- CardView for Text Card Message -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cardViewCard"
         android:layout_width="250dp"
-        android:background="@drawable/bg_receiver_message"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:background="@drawable/bg_receiver_message"
         android:padding="5dp"
         android:visibility="gone"
         app:layout_constraintStart_toEndOf="@id/img_bot"
@@ -93,10 +93,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="5dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/cardTitle"
@@ -119,9 +119,9 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/buttonRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_marginTop="10dp"
-               android:layout_marginHorizontal="5dp"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5dp"
+                android:layout_marginTop="10dp" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -133,17 +133,17 @@
         android:layout_marginTop="10dp"
         android:visibility="gone"
 
+        app:chipStrokeWidth="1dp"
         app:layout_constraintStart_toEndOf="@id/img_bot"
         app:layout_constraintTop_toBottomOf="@id/cardViewCard"
-        app:chipStrokeWidth="1dp"
         app:singleSelection="true" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/quickReplyRecyclerView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
         android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/img_bot"
@@ -155,8 +155,8 @@
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_marginTop="10dp"
-        app:cardCornerRadius="5dp"
         android:visibility="gone"
+        app:cardCornerRadius="5dp"
         app:cardElevation="2dp"
         app:layout_constraintStart_toEndOf="@id/img_bot"
         app:layout_constraintTop_toBottomOf="@id/cardViewCard">
@@ -177,10 +177,10 @@
                 android:layout_height="50dp"
                 android:padding="5dp"
                 android:src="@drawable/ic_play"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <LinearLayout
                 android:id="@+id/bottomLeftContainer"
@@ -220,36 +220,39 @@
                 app:layout_constraintEnd_toEndOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
+
     <LinearLayout
         android:id="@+id/ll_feedback"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="28dp"
         android:layout_marginTop="6dp"
+        android:visibility="gone"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardVideo">
-
-        <ImageButton
-            android:id="@+id/thumbDownButton"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:src="@drawable/thumps_down_unselected"
-            android:background="@drawable/bg_rounded_corner"
-            android:layout_marginEnd="4dp"
-            android:contentDescription="Thumb down"
-            android:padding="5dp"/>
 
         <ImageButton
             android:id="@+id/thumbUpButton"
             android:layout_width="35dp"
             android:layout_height="35dp"
-            android:layout_marginStart="4dp"
-            android:src="@drawable/thumps_up_selected"
+            android:layout_marginEnd="4dp"
             android:background="@drawable/bg_rounded_corner"
             android:contentDescription="Thumb up"
-            android:padding="5dp"/>
+            android:padding="5dp"
+            android:src="@drawable/thumbs_up_selected" />
+
+        <ImageButton
+            android:id="@+id/thumbDownButton"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/bg_rounded_corner"
+            android:contentDescription="Thumb down"
+            android:padding="5dp"
+            android:src="@drawable/thumbs_down_unselected" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
