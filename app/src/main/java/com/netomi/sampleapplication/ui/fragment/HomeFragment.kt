@@ -56,6 +56,8 @@ class HomeFragment : Fragment() {
         try {
             NCWChatSdk.setEnvironment(bot!!.env)
             NCWChatSdk.setThemeData()
+            bot.botRefId.let { NCWChatSdk.initialize(requireContext(), it) }
+
             Log.e("Theme","ThemeData Null")
         }catch (e:Exception){
             e.printStackTrace()
