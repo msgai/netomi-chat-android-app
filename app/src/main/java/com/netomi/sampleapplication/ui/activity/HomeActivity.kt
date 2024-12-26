@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -43,6 +44,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
     private lateinit var preferences: AppSharedPreferences
     private val onboardingViewModel: OnboardingViewModel by viewModels()
     private lateinit var botList: MutableList<Bot>
+    private lateinit var progressOverlay: FrameLayout
     private var name:String=""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,12 +53,18 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         botList = mutableListOf()
         onboardingViewModel.getBotListing()
         observeChatMessages()
+        initView()
+
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, HomeFragment())
                 .commit()
+            llParent.visibility = View.VISIBLE
+            tvTitle.visibility = View.GONE
+            usernameTextView.text = name
+            tvWelcome.text = "Welcome"
         }
-        initView()
+
 
         menuIcon.setOnClickListener {
             if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -110,6 +118,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
     private fun handleApiCallback(response: State<Any>) {
         when (response) {
             is State.Loading -> {
+                showLoader(true)
                 Log.e("Loading", "Loading")
             }
 
@@ -121,17 +130,22 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
                 botList.addAll(response.bots)
                 preferences.saveSelectedBot(botList[0])
                 preferences.put(SharePreferenceConstant.BOT_RESPONSE, response)
-
+                showLoader(false)
             }
 
             is State.Error -> {
                 Log.e("Error", "Error")
+                showLoader(false)
             }
 
             else -> {
-
+                showLoader(false)
             }
         }
+    }
+
+    private fun showLoader(show: Boolean) {
+        progressOverlay.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     private fun initView() {
@@ -144,6 +158,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         llParent = findViewById(R.id.ll_parent)
         tvTitle = findViewById(R.id.tv_ai)
         tvWelcome = findViewById(R.id.tv_welcome)
+        progressOverlay = findViewById(R.id.progress_overlay)
         window.statusBarColor = ContextCompat.getColor(this, R.color.status_bar)
     }
 

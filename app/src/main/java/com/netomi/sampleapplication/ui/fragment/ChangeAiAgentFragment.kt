@@ -47,7 +47,7 @@ class ChangeAiAgentFragment : Fragment() {
             selectedBot=bot
             preferences.saveSelectedBot(selectedBot!!)
             (activity as HomeActivity).loadFragment(HomeFragment())
-            Toast.makeText(requireContext(), "Clicked: ${bot.botName}", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(requireContext(), "Clicked: ${bot.botName}", Toast.LENGTH_SHORT).show()
         }
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
