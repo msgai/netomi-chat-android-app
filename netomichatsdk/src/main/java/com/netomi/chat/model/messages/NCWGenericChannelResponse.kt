@@ -1,6 +1,7 @@
 package com.netomi.chat.model.messages
 
 import com.netomi.chat.survey.EventData
+import com.netomi.chat.survey.EventInfo
 
 data class NCWGenericChannelResponse(
     val type: String? = null,
@@ -120,7 +121,9 @@ data class EventObject(
     val requestId: String,
     val channelId: String,
     val isPublishToMQTT: Boolean,
-    val timestamp: Long
+    val timestamp: Long,
+    val subType: String,
 )
+
 
 
