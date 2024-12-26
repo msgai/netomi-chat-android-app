@@ -150,7 +150,7 @@ android:layout_marginStart="10dp"
         android:visibility="gone"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="15dp"
         app:layout_constraintTop_toBottomOf="@+id/rowSuggestion"
         app:layout_constraintStart_toStartOf="parent"
         >
@@ -166,6 +166,39 @@ android:layout_marginStart="10dp"
             app:layout_constraintTop_toTopOf="parent"
             />
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+           android:id="@+id/constAdd"
+            android:layout_width="wrap_content"
+            app:layout_constraintTop_toTopOf="@+id/tvFeedbackTitle"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:id="@+id/imgAdd"
+                android:src="@drawable/ic_add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"></ImageView>
+
+            <TextView
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add"
+                android:textSize="14sp"
+                android:textColor="#374E57"
+
+                app:layout_constraintStart_toEndOf="@+id/imgAdd"
+                app:layout_constraintTop_toTopOf="@+id/imgAdd"
+                app:layout_constraintBottom_toBottomOf="@+id/imgAdd"
+                />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/edtAdditionFeedback"
             android:layout_width="match_parent"
@@ -176,11 +209,25 @@ android:layout_marginStart="10dp"
             android:maxLines="5"
             android:textSize="12sp"
             android:hint="Start typing"
+            android:maxLength="200"
             android:background="@drawable/bg_stroke_rounded_white"
             android:visibility="visible"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvFeedbackTitle" />
+
+        <TextView
+            android:id="@+id/tvFeedbackCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0/200"
+            android:layout_marginTop="5dp"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            app:layout_constraintEnd_toEndOf="parent"
+
+            app:layout_constraintTop_toBottomOf="@id/edtAdditionFeedback"
+            />
 
 
 
