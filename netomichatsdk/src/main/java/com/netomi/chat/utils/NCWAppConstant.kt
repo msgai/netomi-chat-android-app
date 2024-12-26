@@ -22,8 +22,18 @@ object NCWAppConstant {
     const val TYPE_INITIAL="INITIAL"
 
     const val TYPE_EVENT="EVENT"
+    const val TYPE_PILLS="PILLS"
+    const val SUB_TYPE_WAIT="WAIT"
+    const val SUB_TYPE_JOIN="JOIN"
+    const val SUB_TYPE_LEAVE="LEAVE"
+    const val TYPE_AGENT_EVENT="AGENT_EVENT"
+    const val TYPE_QUEUE_POSITION="QUEUE_POSITION"
+
+
+
     const val SESSION="session"
     const val SIZE_LIMIT="limit"
+
 
     const val TYPE_FORM="FORM"
 

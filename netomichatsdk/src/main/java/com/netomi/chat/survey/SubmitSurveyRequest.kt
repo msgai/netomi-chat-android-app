@@ -27,7 +27,14 @@ data class EventInfo(
     val surveyId: String,
     val feedbackValue: String,
     val requestId: String,
-    val submitSurveyInfo: SubmitSurveyInfo
+    val submitSurveyInfo: SubmitSurveyInfo,
+    val queuePosition: String?=null,
+    val estimatedWaitTime: String?=null,
+    val agentId: String?=null,
+    val agentName: String?=null,
+    val agentAvatar: String?=null
+
+
 )
 
 data class SubmitSurveyInfo(

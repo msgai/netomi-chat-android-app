@@ -50,6 +50,7 @@ class NCWChatAdapter(
         private const val VIEW_TYPE_INDICATOR = 3
         private const val VIEW_TYPE_FORM = 4
         private const val VIEW_TYPE_EVENT = 5
+        private const val VIEW_TYPE_PILLS = 6
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -58,6 +59,7 @@ class NCWChatAdapter(
             NCWAppConstant.TYPE_INDICATOR -> VIEW_TYPE_INDICATOR
             NCWAppConstant.TYPE_FORM-> VIEW_TYPE_FORM
             NCWAppConstant.TYPE_EVENT->VIEW_TYPE_EVENT
+            NCWAppConstant.TYPE_PILLS->VIEW_TYPE_PILLS
             else -> VIEW_TYPE_RESPONSE
         }
     }
@@ -68,6 +70,7 @@ class NCWChatAdapter(
             VIEW_TYPE_INDICATOR -> inflater.inflate(R.layout.layout_add_loader, parent, false)
             VIEW_TYPE_FORM -> inflater.inflate(R.layout.layout_form, parent, false)
             VIEW_TYPE_EVENT -> inflater.inflate(R.layout.layout_survey_event, parent, false)
+            VIEW_TYPE_PILLS -> inflater.inflate(R.layout.layout_pills, parent, false)
             else -> inflater.inflate(R.layout.layout_response, parent, false)
         }
         return when (viewType) {
@@ -75,6 +78,7 @@ class NCWChatAdapter(
             VIEW_TYPE_INDICATOR -> InitialViewHolder(view)
             VIEW_TYPE_FORM -> FormViewHolder(view)
             VIEW_TYPE_EVENT -> SurveyViewHolder(view)
+            VIEW_TYPE_PILLS->PillViewHolder(view)
             else -> ResponseViewHolder(view,themeData,actionCallback,feedbackActionCallBack)
         }
     }
@@ -86,7 +90,7 @@ class NCWChatAdapter(
             is ResponseViewHolder -> holder.bind(message,position)
             is FormViewHolder->holder.bind(message,callBack,formData)
             is SurveyViewHolder->holder.bind(message,callBackSurvey)
-           // is InitialViewHolder -> holder.bind(message,position)
+         is PillViewHolder -> holder.bind(message)
         }
     }
 
@@ -302,6 +306,17 @@ class NCWChatAdapter(
 
         }
 
+
+
+    }
+    class PillViewHolder(
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView) {
+
+        private val tvPills: TextView = itemView.findViewById(R.id.tvPills)
+        fun bind(message: NCWMessage) {
+            tvPills.text=message.message
+        }
 
 
     }
