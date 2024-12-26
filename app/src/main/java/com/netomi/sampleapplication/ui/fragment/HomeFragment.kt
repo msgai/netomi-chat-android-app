@@ -53,10 +53,13 @@ class HomeFragment : Fragment() {
         tvBotName.text=bot?.botName
         botList = mutableListOf()
         Glide.with(context ?: return).load(bot?.logo).into(imgButton)
-
-        NCWChatSdk.setEnvironment(bot!!.env)
-        NCWChatSdk.setThemeData()
-        bot.botRefId.let { NCWChatSdk.initialize(requireContext(), it) }
+        try {
+            NCWChatSdk.setEnvironment(bot!!.env)
+            NCWChatSdk.setThemeData()
+            bot.botRefId.let { NCWChatSdk.initialize(requireContext(), it) }
+        }catch (e:Exception){
+            e.printStackTrace()
+        }
 
         imgButton.setOnClickListener {
             activity?.let { activityContext ->
@@ -102,6 +105,13 @@ class HomeFragment : Fragment() {
                 botList.addAll(response.bots)
                 preferences.saveSelectedBot(botList[0])
                 preferences.put(SharePreferenceConstant.BOT_RESPONSE, response)
+                preferences.getSelectedBot()?.env?.let { NCWChatSdk.setEnvironment(it) }
+                NCWChatSdk.setThemeData()
+                preferences.getSelectedBot()?.botRefId.let { it?.let { it1 ->
+                    NCWChatSdk.initialize(requireContext(),
+                        it1
+                    )
+                } }
 
             }
 
