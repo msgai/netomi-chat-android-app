@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
@@ -83,7 +84,8 @@ object NCWThemeUtils
         ivMenuOption: ImageView,
         messageInputField: EditText,
         attachmentIcon: ImageView,
-        sendMessageIcon: ImageView
+        sendMessageIcon: ImageView,
+        cardViewInputBox: CardView
     ) {
         footerContainer.visibility = if (themeData?.isFooterHidden == true) View.GONE else View.VISIBLE
 
@@ -100,13 +102,16 @@ object NCWThemeUtils
                 }
             //    setTint(ivMenuOption, tintColor)
                 setTint(attachmentIcon, tintColor)
-               // setCircularBackgroundAndTint(sendMessageIcon,footerConfig.backgroundColor,tintColor) will change
+               setCircularBackgroundAndTint(sendMessageIcon,footerConfig.sendButtonBackgroundColor,tintColor)
               //  setTint(sendMessageIcon, tintColor)
             }
 
             // Set message input field text color
             footerConfig.inputBoxTextColor?.let { textColor ->
                 parseColor(textColor)?.let { messageInputField.setTextColor(it) }
+            }
+            footerConfig.inputBoxBackgroundColor?.let { inputBoxBackgroundColor ->
+                parseColor(inputBoxBackgroundColor)?.let { cardViewInputBox.setCardBackgroundColor(it) }
             }
         }
     }

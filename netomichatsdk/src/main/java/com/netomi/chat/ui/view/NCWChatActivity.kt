@@ -27,6 +27,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -163,6 +164,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var photoUri: Uri? = null
     private var ncwSdkConfig: NCWHeaderConfig? = null
     private var themeData: NCWThemeResponse? = null
+    private lateinit var cardViewInputBox: CardView
+
 
     private var conversationID: String? = null
     private var botRefId: String? = null
@@ -532,7 +535,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             ivMenuOption,
             messageInputField,
             attachmentIcon,
-            sendMessageIcon
+            sendMessageIcon,
+            cardViewInputBox
         )
 
         // Set attachment icon visibility
@@ -582,6 +586,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         tvBrandName = findViewById(R.id.tvBrand)
         constProgressBar = findViewById(R.id.constLoader)
         progressBar = findViewById(R.id.progress_loader)
+        cardViewInputBox=  findViewById(R.id.cardView)
 
         messageInputField.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
