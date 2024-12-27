@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -96,7 +95,6 @@ class NCWSurveyBottomSheet(
 
         tvFeedbackCount.visibility=View.GONE
 
-        tvFeedbackTitle.text= getString(R.string.add_additional_feedback)
         if (from == TYPE_SUBMITTED_SURVEY) {
             constAdd.visibility=View.GONE
             tvFeedbackCount.visibility=View.GONE
@@ -104,7 +102,6 @@ class NCWSurveyBottomSheet(
         }
 
         constAdd.setOnClickListener {
-            Log.e("Dsggssa","sajajsajs")
             edtAdditionalFeedback.visibility=View.VISIBLE
             constAdd.visibility=View.GONE
             tvFeedbackCount.visibility=View.VISIBLE
@@ -276,11 +273,8 @@ class NCWSurveyBottomSheet(
 
 
     private fun showOptionList(selectedRating: Int) {
-        Log.e("selectedRating ","selectedRating"+selectedRating)
         val criteria = surveyField?.payload?.surveyRatingTypeEnabledInfo?.criteria ?: 3
-        Log.e("selectedRating ","criteria "+criteria)
         val isPositiveFeedback = selectedRating >= criteria
-        Log.e("selectedRating ","isPositiveFeedback "+isPositiveFeedback)
         feedbackValue = if (isPositiveFeedback) "POSITIVE" else "NEGATIVE"
         tvSuggestionTitle.text = if (isPositiveFeedback)
             surveyField?.payload?.positiveSuggestionMap?.title
