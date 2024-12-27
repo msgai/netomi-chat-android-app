@@ -49,7 +49,7 @@
             android:layout_marginStart="5dp"
             android:layout_marginTop="5dp"
             android:text="for completing the survey"
-            android:textColor="#374E57"
+            android:textColor="@color/black"
             android:textSize="12sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvThank"
