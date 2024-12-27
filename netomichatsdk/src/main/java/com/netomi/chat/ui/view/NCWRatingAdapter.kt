@@ -58,7 +58,7 @@ class NCWRatingAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val rating = position + 1
         when (holder) {
-            is StarViewHolder -> holder.bind(rating, rating <= selectedRating)
+            is StarViewHolder -> holder.bind( rating <= selectedRating)
             is NumberViewHolder -> holder.bind(rating, rating <= selectedRating)
             is SmileyViewHolder -> holder.bind(rating, selectedRating)
             is ThumbsViewHolder -> holder.bind(rating, selectedRating)
@@ -84,11 +84,18 @@ class NCWRatingAdapter(
 
     inner class StarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val starIcon: ImageView = itemView.findViewById(R.id.starIcon)
+        private val constStar: ConstraintLayout = itemView.findViewById(R.id.constStar)
 
-        fun bind(rating: Int, isSelected: Boolean) {
+        fun bind(isSelected: Boolean) {
             starIcon.setImageResource(
                 if (isSelected) R.drawable.ic_star_filled else R.drawable.ic_star_outline
             )
+            constStar.setBackgroundResource(
+                if (isSelected) R.drawable.bg_stroke_smily_selected else R.drawable.bg_rounded_star
+            )
+
+
+
         }
     }
 
