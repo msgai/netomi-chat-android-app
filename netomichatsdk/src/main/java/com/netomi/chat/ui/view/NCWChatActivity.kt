@@ -27,6 +27,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.appcompat.widget.ThemeUtils
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -562,6 +563,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
             }
         }
+       // it.chatWindowBackgroundColor
+        themeData?.mobileConfig?.lightTheme?.chatWindowConfig?.let {
+            chatRecyclerView.setBackgroundColor(Color.parseColor(it.chatWindowBackgroundColor))
+        }
+
 
 
     }
