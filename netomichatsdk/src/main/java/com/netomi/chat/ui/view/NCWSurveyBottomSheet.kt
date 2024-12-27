@@ -5,6 +5,7 @@ import android .app.Dialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -152,10 +153,11 @@ class NCWSurveyBottomSheet(
         }
 
         if (from == TYPE_SUBMITTED_SURVEY) {
-            radioGroup.check(
-                if (surveyField?.submitSurveyInfo?.issueResolved == true) R.id.radioYes else R.id.radioNo
-            )
+            surveyField?.submitSurveyInfo?.issueResolved?.let { isResolved ->
+                radioGroup.check(if (isResolved) R.id.radioYes else R.id.radioNo)
+            }
         }
+
     }
 
     private fun setupSubmitButton() {
@@ -197,7 +199,7 @@ class NCWSurveyBottomSheet(
         val selectedSuggestions =if (surveyField?.payload?.reasonOfRating?.enabled ==true)
           suggestionAdapter.getSelectedOptions() else emptyList()
 
-        val issueResolved = selectedRadioValue == "Yes"
+        val issueResolved: Boolean? = if (selectedRadioValue.isNotEmpty()) selectedRadioValue == "Yes" else null
 
         onSubmitSurveyRequest(
             SubmitSurveyRequest(
