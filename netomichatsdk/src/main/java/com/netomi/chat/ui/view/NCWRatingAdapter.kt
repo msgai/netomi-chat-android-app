@@ -100,6 +100,10 @@ class NCWRatingAdapter(
             numberText.setBackgroundResource(
                 if (isSelected) R.drawable.bg_selected_rounded else R.drawable.bg_rounded_star
             )
+            numberText.setTextColor(
+                if (isSelected) context.getColor(R.color.white) else context.getColor(R.color.black)
+            )
+
         }
     }
 

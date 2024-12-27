@@ -1,6 +1,7 @@
 package com.netomi.chat.ui.view
 
-import android.app.Dialog
+
+import android .app.Dialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -193,8 +194,9 @@ class NCWSurveyBottomSheet(
             "POSITIVE" -> surveyField?.payload?.positiveSuggestionMap?.title
             else -> surveyField?.payload?.negativeSuggestionMap?.title
         }
+        val selectedSuggestions =if (surveyField?.payload?.reasonOfRating?.enabled ==true)
+          suggestionAdapter.getSelectedOptions() else emptyList()
 
-        val selectedSuggestions = suggestionAdapter.getSelectedOptions()
         val issueResolved = selectedRadioValue == "Yes"
 
         onSubmitSurveyRequest(
@@ -246,7 +248,13 @@ class NCWSurveyBottomSheet(
                 ) { rating ->
                     selectedRating = rating
                     submitButton.isEnabled=true
-                    showOptionList(rating)
+                    if (surveyField.payload.reasonOfRating?.enabled==true) {
+                        showOptionList(rating)
+                    }
+                    else{
+                        configureResolutionQuestion()
+                        configureAdditionalFeedback()
+                    }
                     setButtonState(true)
                 }
             }
@@ -259,7 +267,9 @@ class NCWSurveyBottomSheet(
                     val rating = surveyField.submitSurveyInfo.rating
                     ratingAdapter?.selectedRating = rating
                     ratingAdapter?.notifyDataSetChanged()
-                    showOptionList(rating)
+                    if (surveyField.payload.reasonOfRating?.enabled==true) {
+                        showOptionList(rating)
+                    }
 
 
                 }
