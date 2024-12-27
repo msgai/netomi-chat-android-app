@@ -224,6 +224,21 @@ object NCWThemeUtils
 
     }
 
+    fun createRoundedDrawableSubmit(view: View) {
+        themeData?.mobileConfig?.lightTheme?.otherConfig?.let { otherConfig ->
+            val parsedColor = Color.parseColor( otherConfig.backgroundColor)
+            val backgroundDrawable = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 16f
+                setColor(parsedColor)
+            }
+            view.background = backgroundDrawable
+
+            if (view is TextView)
+                otherConfig.titleColor?.let { color -> setTextColor(view, color) }
+        }
+    }
+
     fun createRoundedDrawableClose(view: View) {
         themeData?.mobileConfig?.lightTheme?.botConfig?.let { userConfig ->
             val parsedColor = Color.parseColor( userConfig.backgroundColor)
@@ -234,10 +249,8 @@ object NCWThemeUtils
             }
             view.background = backgroundDrawable
 
-
-
             if (view is TextView)
-                userConfig.textColor?.let { color -> setTextColor(view, color) }
+                setTitleColor(view)
         }
     }
 
@@ -540,8 +553,8 @@ object NCWThemeUtils
 
     fun createSelectedRoundedDrawable(view: View) {
         themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
-            val parsedColor = Color.parseColor(headerConfig.backgroundColor)
-
+           // val parsedColor = Color.parseColor(headerConfig.backgroundColor)
+            val parsedColor = Color.parseColor("#000000")
             val backgroundDrawable = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
                 cornerRadius = 16f

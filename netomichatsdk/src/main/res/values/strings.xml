@@ -17,5 +17,9 @@
     <string name="okay">Okay</string>
     <string name="upload_file_max_size">Upload a file (maximum size: %1$s)</string>
     <string name="select">Select</string>
+    <string name="start_typing">Start Typing</string>
+    <string name="additional_feedback">Additional Feedback</string>
+    <string name="add_additional_feedback">Add Additional feedback</string>
+    <string name="write_your_feedback_here">Write your feedback here</string>
 
 </resources>

@@ -33,6 +33,7 @@ object NCWChatSdk {
         this.botRefId = botRefId
         if (NCWAppUtils.isNetworkAvailable(context)) {
             fetchAndStoreTheme(context, botRefId)
+            setConversationEmpty()
         } else {
             Log.e("NCWChatSdk", "No network available during initialization.")
         }
@@ -42,6 +43,9 @@ object NCWChatSdk {
         NCWThemeUtils.setThemeData(null)
     }
 
+    private fun setConversationEmpty(){
+        NCWThemeUtils.setConversationID(null)
+    }
 
     /**
      * Launches the NCW chat activity.
