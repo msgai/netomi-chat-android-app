@@ -13,6 +13,7 @@
         android:layout_width="45dp"
         android:layout_height="45dp"
         android:textSize="14sp"
+        android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:background="@drawable/bg_rounded_star"
