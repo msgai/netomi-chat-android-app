@@ -119,14 +119,11 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         when (response) {
             is State.Loading -> {
                 showLoader(true)
-                Log.e("Loading", "Loading")
             }
 
             is State.Success -> {
-                //onApiSuccess(response.data, response.apiConstant)
-                Log.e("Success", "Success")
                 val response= response.data as BotListingResponse
-                Log.e("Bot List", response.toString())
+                onboardingViewModel.updateBotList(response.bots[0])
                 botList.addAll(response.bots)
                 preferences.saveSelectedBot(botList[0])
                 preferences.put(SharePreferenceConstant.BOT_RESPONSE, response)
@@ -134,7 +131,6 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
             }
 
             is State.Error -> {
-                Log.e("Error", "Error")
                 showLoader(false)
             }
 
