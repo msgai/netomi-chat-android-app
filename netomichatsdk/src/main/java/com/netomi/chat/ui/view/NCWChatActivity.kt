@@ -541,10 +541,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         // Configure footer branding
         themeData?.mobileConfig?.lightTheme?.footerConfig?.let { footerConfig ->
-            if (footerConfig.isFooterHidden) {
+            if (footerConfig.isNetomiBrandingEnabled) {
                 tvBrandName.apply {
                     visibility = View.VISIBLE
-                    text = footerConfig.netomiBrandingText.orEmpty()
+                    text = footerConfig.netomiBrandingText
                     footerConfig.netomiBrandingTextColor?.let {
                         setTextColor(
                             NCWThemeUtils.parseColor(
@@ -555,6 +555,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 }
             } else {
                 tvBrandName.visibility = View.GONE
+
             }
         }
 

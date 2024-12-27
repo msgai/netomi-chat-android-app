@@ -85,6 +85,8 @@ object NCWThemeUtils
         attachmentIcon: ImageView,
         sendMessageIcon: ImageView
     ) {
+        footerContainer.visibility = if (themeData?.isFooterHidden == true) View.GONE else View.VISIBLE
+
         themeData?.mobileConfig?.lightTheme?.footerConfig?.let { footerConfig ->
             // Set background color
             footerConfig.backgroundColor?.let { color ->
@@ -98,6 +100,7 @@ object NCWThemeUtils
                 }
             //    setTint(ivMenuOption, tintColor)
                 setTint(attachmentIcon, tintColor)
+               // setCircularBackgroundAndTint(sendMessageIcon,footerConfig.backgroundColor,tintColor) will change
               //  setTint(sendMessageIcon, tintColor)
             }
 
@@ -426,6 +429,21 @@ object NCWThemeUtils
             imageView.background = drawable
 
             imageView.imageTintList = ColorStateList.valueOf( Color.parseColor(tintColor))
+
+    }
+
+    private fun setCircularBackgroundAndTint(imageView: ImageView, color: String, tintColor: String) {
+
+        val parsedColor = Color.parseColor(color)
+        val tintColor = Color.parseColor(tintColor)
+
+            val drawable = GradientDrawable()
+            drawable.shape = GradientDrawable.OVAL
+            drawable.setColor(parsedColor)
+            drawable.cornerRadius = 50f
+            imageView.background = drawable
+
+            imageView.imageTintList = ColorStateList.valueOf(tintColor)
 
     }
 
