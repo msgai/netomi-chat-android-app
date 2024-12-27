@@ -3,6 +3,7 @@ package com.netomi.sampleapplication.viewmodel
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.netomi.chat.model.NCWGetChatHistoryResponse
@@ -42,7 +43,9 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
     private val _botListing = SingleEvent<State<BotListingResponse>>()
     val botListing get() = _botListing
 
-    //val botList = MutableLiveData<List<Bot>>()
+
+    private val _botList = MutableLiveData<Bot>()
+    val botList: LiveData<Bot> get() = _botList
 
 
 
@@ -54,6 +57,11 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
                 _botListing.value = response // Use setValue on the Main thread
             }
         }
+    }
+
+    // Function to update the bot list
+    fun updateBotList(bots: Bot) {
+        _botList.value = bots
     }
 
 }
