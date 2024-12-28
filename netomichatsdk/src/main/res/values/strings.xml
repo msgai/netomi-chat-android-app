@@ -23,5 +23,6 @@
     <string name="write_your_feedback_here">Write your feedback here</string>
     <string name="skip">Skip</string>
     <string name="submit">Submit</string>
+    <string name="view_response">View response</string>
 
 </resources>

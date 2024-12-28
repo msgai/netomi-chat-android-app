@@ -293,7 +293,7 @@ class NCWChatAdapter(
         fun bind(message: NCWMessage, callBackSurvey: (NCWMessage?) -> Unit) {
 
             NCWThemeUtils.setBotConfig(constRowEvent)
-            NCWThemeUtils.setTimeStampColor(tvComplete)
+            NCWThemeUtils.setBotTextColor(tvComplete)
             NCWThemeUtils.setBotTextColor(tvThank)
             NCWThemeUtils.setBotTextColor(tvViewResponse)
             constRowEvent.setOnClickListener {

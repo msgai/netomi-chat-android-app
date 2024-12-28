@@ -47,7 +47,7 @@ class NCWSurveyBottomSheet(
     private lateinit var radioGroup: RadioGroup
     private lateinit var rowSuggestion: ConstraintLayout
     private lateinit var submitButton: TextView
-
+    private lateinit var viewSpace: View
 
 
     private var selectedRating: Int = 0
@@ -94,7 +94,7 @@ class NCWSurveyBottomSheet(
         val tvFeedbackCount = findViewById<TextView>(R.id.tvFeedbackCount)
         val constAdd = findViewById<ConstraintLayout>(R.id.constAdd)
         val tvFeedbackTitle = findViewById<TextView>(R.id.tvFeedbackTitle)
-
+        viewSpace= findViewById(R.id.space)
         tvFeedbackCount.visibility=View.GONE
 
         if (from == TYPE_SUBMITTED_SURVEY) {
@@ -169,6 +169,7 @@ class NCWSurveyBottomSheet(
         view?.findViewById<TextView>(R.id.closeButton)?.let { closeButton ->
             NCWThemeUtils.createRoundedDrawableClose(closeButton)
             closeButton.text= if (from == TYPE_SUBMITTED_SURVEY) "Close" else "Skip"
+
             closeButton.setOnClickListener {
                 if (from == TYPE_SUBMITTED_SURVEY) {
                     dismiss()
@@ -179,12 +180,25 @@ class NCWSurveyBottomSheet(
                 }
             }
 
-            closeButton.visibility = if (surveyField?.payload?.isSkipEnabled == true) {
+
+            closeButton.visibility = if (from == TYPE_SUBMITTED_SURVEY || surveyField?.payload?.isSkipEnabled == true) {
                 View.VISIBLE
             } else {
                 View.GONE
             }
         }
+        if (from == TYPE_SUBMITTED_SURVEY){
+            viewSpace.visibility=View.GONE
+        }
+        viewSpace.visibility = if (from != TYPE_SUBMITTED_SURVEY && surveyField?.payload?.isSkipEnabled == true) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+
+
+
+
     }
     fun setButtonState(isEnabled: Boolean) {
         submitButton.isEnabled = isEnabled
@@ -237,7 +251,13 @@ class NCWSurveyBottomSheet(
 
         if (surveyField?.payload?.feedbackMessage?.enabled == true) {
             rowRating?.visibility = View.VISIBLE
-            tvTitle?.text = surveyField.payload.feedbackMessage.text
+            if (from == TYPE_SUBMITTED_SURVEY) {
+                tvTitle?.text = getString(R.string.view_response)
+            }
+            else{
+                tvTitle?.text = surveyField.payload.feedbackMessage.text
+            }
+
             if (tvTitle != null) {
                 NCWThemeUtils.setTitleColor(tvTitle)
             }
@@ -281,6 +301,11 @@ class NCWSurveyBottomSheet(
         } else {
             rowRating?.visibility = View.GONE
         }
+
+
+
+
+
     }
 
 
@@ -344,7 +369,7 @@ class NCWSurveyBottomSheet(
                     NCWThemeUtils.setTitleColor(this)
                 }
                 if (from == TYPE_SUBMITTED_SURVEY) {
-                  //  edtAdditionalFeedback.setText(surveyField?.submitSurveyInfo?.additionalFeedback.orEmpty())
+                    edtAdditionalFeedback.setText(surveyField?.submitSurveyInfo?.additionalFeedback.orEmpty())
                     edtAdditionalFeedback.visibility=View.VISIBLE
                 }
                 View.VISIBLE
