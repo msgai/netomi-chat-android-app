@@ -251,12 +251,13 @@ class NCWSurveyBottomSheet(
 
         if (surveyField?.payload?.feedbackMessage?.enabled == true) {
             rowRating?.visibility = View.VISIBLE
-            if (from == TYPE_SUBMITTED_SURVEY) {
+            tvTitle?.text = surveyField.payload.feedbackMessage.text
+          /*  if (from == TYPE_SUBMITTED_SURVEY) {
                 tvTitle?.text = getString(R.string.view_response)
             }
             else{
                 tvTitle?.text = surveyField.payload.feedbackMessage.text
-            }
+            }*/
 
             if (tvTitle != null) {
                 NCWThemeUtils.setTitleColor(tvTitle)
@@ -288,8 +289,16 @@ class NCWSurveyBottomSheet(
 
                 if (from == TYPE_SUBMITTED_SURVEY) {
                     val rating = surveyField.submitSurveyInfo.rating
-                    ratingAdapter?.selectedRating = rating
-                    ratingAdapter?.notifyDataSetChanged()
+                    val  ratingTypeEnabled=surveyField.payload.ratingTypeEnabled
+                    val finalRating = if (ratingTypeEnabled != "THUMBS_UP_DOWN") {
+                        rating
+                    } else {
+                        if (rating == 2) 1 else 2
+                    }
+                    ratingAdapter?.apply {
+                        selectedRating = finalRating
+                        notifyDataSetChanged()
+                    }
                     if (surveyField.payload.reasonOfRating?.enabled==true) {
                         showOptionList(rating)
                     }
