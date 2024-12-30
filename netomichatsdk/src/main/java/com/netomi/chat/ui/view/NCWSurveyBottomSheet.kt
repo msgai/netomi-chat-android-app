@@ -269,6 +269,7 @@ class NCWSurveyBottomSheet(
                     surveyField.payload.ratingTypeEnabled ?: "STAR"
                 ) { rating ->
                     selectedRating = rating
+                    Log.e("Ratidnndn","xzxkzklx "+selectedRating)
                     submitButton.isEnabled=true
                     if (surveyField.payload.reasonOfRating?.enabled==true) {
                         showOptionList(rating)
