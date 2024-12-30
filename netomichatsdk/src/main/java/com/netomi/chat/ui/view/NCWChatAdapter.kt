@@ -376,27 +376,6 @@ class NCWChatAdapter(
             } else {
                 llFeedback.visibility = View.GONE
             }
-       /*     if (message.isReviewEnabled) {
-                Log.e("Feedback", "Feedback Received")
-                llFeedback.visibility = View.VISIBLE
-                when (message.feedbackValue) {
-                    "POSITIVE" -> {
-                        thumbUpImageButton.setImageResource(R.drawable.thumbs_up_selected)
-                        thumbDownImageButton.visibility=View.GONE
-                    }
-                    "NEGATIVE" -> {
-                        thumbUpImageButton.visibility=View.GONE
-                        thumbDownImageButton.setImageResource(R.drawable.thumbs_down_selected)
-                    }
-                    else -> {
-                        thumbUpImageButton.setImageResource(R.drawable.thumbs_up_unselected)
-                        thumbDownImageButton.setImageResource(R.drawable.thumbs_down_unselected)
-                    }
-                }
-            } else {
-                Log.e("Feedback", "Feedback Null")
-                llFeedback.visibility = View.GONE
-            }*/
             when (message.type) {
                 MessageType.TEXT -> {
                     message.message?.let {

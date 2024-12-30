@@ -62,18 +62,15 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateBot(bot: Bot) {
-        Log.e("Bot",bot.toString())
         tvBotName.text=bot.botName
-
         Glide.with(requireContext()).load(bot.logo).into(imgButton)
+        imgButton.setBackgroundResource(R.drawable.float_button_gradient)
         try {
             NCWChatSdk.setEnvironment(bot.env)
             NCWChatSdk.setThemeData()
             bot.botRefId.let { NCWChatSdk.initialize(requireContext(), it) }
-            Log.e("Theme","ThemeData Null")
         }catch (e:Exception){
             e.printStackTrace()
-            Log.e("Theme","Exception")
         }
     }
 

@@ -48,7 +48,7 @@ class ChangeAiAgentFragment : Fragment() {
             // Handle bot item click
             selectedBot=bot
             onboardingViewModel.updateBotList(selectedBot!!)
-            //preferences.saveSelectedBot(selectedBot!!)
+            preferences.saveSelectedBot(selectedBot!!)
 
             (activity as HomeActivity).loadFragment(HomeFragment())
           //  Toast.makeText(requireContext(), "Clicked: ${bot.botName}", Toast.LENGTH_SHORT).show()
