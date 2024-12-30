@@ -1010,11 +1010,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 }
 
                 NCWConnectionStatus.RE_CONNECTED.toString() -> {
-                    connectionHeader.text = getString(R.string.reconnecting)
-                    connectionHeader.setBackgroundColor(Color.BLUE)
-                    connectionHeader.setTextColor(Color.WHITE)
-                    connectionHeader.visibility = View.VISIBLE
-                    setUIState(false)
+                    //connectionHeader.text = getString(R.string.reconnecting)
+                    //connectionHeader.setBackgroundColor(Color.BLUE)
+                    //connectionHeader.setTextColor(Color.WHITE)
+                    //connectionHeader.visibility = View.VISIBLE
+                    setUIState(true)
                 }
 
                 else -> {
