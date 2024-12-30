@@ -38,7 +38,6 @@ import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.Validation
 import com.netomi.chat.model.messages.Values
 import com.netomi.chat.utils.NCWAppConstant.FORM_DATE_FORMAT
-import com.netomi.chat.utils.NCWAppConstant.SHOW_FORM_DATE_FORMAT
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWParsingUtils
 import com.netomi.chat.utils.NCWParsingUtils.parseDate
@@ -237,9 +236,30 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             // Check if validation is enabled
             val isValidationEnabled = component.dropDownSelections["Validation"]?.value == true
             if (isValidationEnabled) {
-                if (editText.text.isNotEmpty())
-                setupValidation(editText, errorTextView, component.validations)
-            } else {
+                val validations = component.validations.orEmpty()
+                editText.addTextChangedListener(object : TextWatcher {
+                    override fun afterTextChanged(s: Editable?) {
+                        val inputText = s.toString()
+                        if (inputText.isNotEmpty()) {
+                            val errorMessage = inputFieldValidation(inputText, validations)
+
+                            if (errorMessage != null) {
+                                errorTextView.text = errorMessage
+                                createErrorDrawable(editText)
+                                errorTextView.visibility = View.VISIBLE
+                            } else {
+                                errorTextView.visibility = View.GONE
+                                createDrawable(editText)
+                                inputValuesSelected[adapterPosition].textInput = inputText
+                            }
+                        }
+                    }
+
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                })
+            }
+             else {
                 // Handle simple text change without validation
                 editText.addTextChangedListener(object : TextWatcher {
                     override fun afterTextChanged(s: Editable?) {
@@ -258,47 +278,6 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 editText.setText(it)
             }
             editText.isEnabled = isClickable
-        }
-
-        private fun setupValidation(
-            editText: EditText,
-            errorTextView: TextView,
-            validations: List<Validation>?
-        ) {
-            if (validations.isNullOrEmpty()) return
-
-            val textContainsValidation = validations.find { it.type == "text" && it.subType == "text-contains" }
-
-            editText.addTextChangedListener(object : TextWatcher {
-                override fun afterTextChanged(s: Editable?) {
-                    val inputText = s.toString()
-                    val errorMessage = validateInput(inputText, textContainsValidation)
-
-                    if (errorMessage != null) {
-                        errorTextView.text = errorMessage
-                        errorTextView.visibility = View.VISIBLE
-                        createErrorDrawable(editText)
-                    } else {
-                        errorTextView.visibility = View.GONE
-                        createDrawable(editText)
-                        inputValuesSelected[adapterPosition].textAreaInput = inputText
-                    }
-                }
-
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            })
-        }
-
-        private fun validateInput(inputText: String, validation: Validation?): String? {
-            if (validation == null) return null
-
-            // Ensure the inputText contains at least one value in the validation list
-            return if (validation.value.any { inputText.contains(it, ignoreCase = true) }) {
-                null
-            } else {
-                validation.errorMessage
-            }
         }
 
         private fun createRadioGroup(component: Component) {
@@ -482,7 +461,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             // Create the date input TextView
             val textView = TextView(itemView.context).apply {
                 id = View.generateViewId()
-                text = SHOW_FORM_DATE_FORMAT
+                text = FORM_DATE_FORMAT
                 setPadding(10, 0, 16, 0)
                 layoutParams = RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
@@ -494,7 +473,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 }
                 setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-
+                NCWThemeUtils.setBotTextColor(this)
                 setOnClickListener {
                     val calendar = Calendar.getInstance()
                     DatePickerDialog(
@@ -512,7 +491,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                 textViewError.text = errorMessage
                                 textViewError.visibility = View.VISIBLE
                                 createErrorDrawable(container)
-                                text = SHOW_FORM_DATE_FORMAT
+                                text = FORM_DATE_FORMAT
                             }
                         },
                         calendar.get(Calendar.YEAR),
@@ -716,11 +695,14 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             val uploadText: TextView = fileInputView.findViewById(R.id.upload_text)
             val formatHint: TextView = fileInputView.findViewById(R.id.format_hint)
             val recyclerDoc: RecyclerView = fileInputView.findViewById(R.id.recyclerDoc)
-
+            val uploadDocTitle: TextView = fileInputView.findViewById(R.id.uploadDocTitle)
+            val label = component.labels?.firstOrNull() ?: ""
+            uploadDocTitle.text=label
+            NCWThemeUtils.setUserConfigTextColor(uploadDocTitle)
             NCWThemeUtils.setUserConfigTextColor(uploadText)
             NCWThemeUtils.setTimeStampColor(formatHint)
 
-            formatHint.text = "Format: ${component.config?.attachmentTypes?.joinToString(",") ?: ""}"
+            formatHint.text = "Format: ${component.config?.attachmentTypes?.joinToString(", ") ?: ""}"
 
             Log.d("FileUpload", "Before files: ${component.fileUpload}")
             try {

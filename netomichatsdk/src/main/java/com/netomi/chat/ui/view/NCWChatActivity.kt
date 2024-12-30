@@ -91,8 +91,10 @@ import com.netomi.chat.utils.NCWAppConstant.SIZE_LIMIT
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_JOIN
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_LEAVE
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_WAIT
+import com.netomi.chat.utils.NCWAppConstant.TYPE_AGENT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_AGENT_EVENT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_ATTACHMENT
+import com.netomi.chat.utils.NCWAppConstant.TYPE_BOT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_EVENT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FILE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FORM
@@ -182,6 +184,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var connectionStatus: String? = ""
 
     private var agentName: String? = ""
+
+    var ownerType: String? = "BOT"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
@@ -455,6 +459,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             botRefId = botRefId,
             requestBody = NCWRequestBody(
                 conversationId = conversationID,
+                ownerType = ownerType,
                 messagePayload = NCWMessagePayload(
                     text = messageContent,
                     label = label,
@@ -891,9 +896,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                             }
                             eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_JOIN -> {
                                 agentName = eventData.eventInfo?.agentName
+                                ownerType= TYPE_AGENT
                                 "$agentName has joined the chat"
+
                             }
                             eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_LEAVE -> {
+                                ownerType= TYPE_BOT
                                 "$agentName has left the chat"
                             }
                             else -> ""
