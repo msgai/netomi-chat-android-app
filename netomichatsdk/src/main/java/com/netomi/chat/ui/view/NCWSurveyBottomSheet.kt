@@ -288,8 +288,16 @@ class NCWSurveyBottomSheet(
 
                 if (from == TYPE_SUBMITTED_SURVEY) {
                     val rating = surveyField.submitSurveyInfo.rating
-                    ratingAdapter?.selectedRating = rating
-                    ratingAdapter?.notifyDataSetChanged()
+                    val  ratingTypeEnabled=surveyField.payload.ratingTypeEnabled
+                    val finalRating = if (ratingTypeEnabled != "THUMBS_UP_DOWN") {
+                        rating
+                    } else {
+                        if (rating == 2) 1 else 2
+                    }
+                    ratingAdapter?.apply {
+                        selectedRating = finalRating
+                        notifyDataSetChanged()
+                    }
                     if (surveyField.payload.reasonOfRating?.enabled==true) {
                         showOptionList(rating)
                     }
