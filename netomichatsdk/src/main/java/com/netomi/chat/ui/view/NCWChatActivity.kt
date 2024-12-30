@@ -455,7 +455,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         val attributes = NCWAdditionalAttributes().apply {
             CUSTOM_ATTRIBUTES.addAll(deviceInfo)
         }
-        Log.e("ownerType","ownerType "+ownerType)
         return NCWWebhookPayload(
             botRefId = botRefId,
             requestBody = NCWRequestBody(
