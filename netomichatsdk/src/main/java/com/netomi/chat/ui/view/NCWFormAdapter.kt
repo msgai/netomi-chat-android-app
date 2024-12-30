@@ -237,9 +237,33 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             // Check if validation is enabled
             val isValidationEnabled = component.dropDownSelections["Validation"]?.value == true
             if (isValidationEnabled) {
+                val validations = component.validations.orEmpty()
+                editText.addTextChangedListener(object : TextWatcher {
+                    override fun afterTextChanged(s: Editable?) {
+                        val inputText = s.toString()
+                        if (inputText.isNotEmpty()) {
+                            val errorMessage = inputFieldValidation(inputText, validations)
+
+                            if (errorMessage != null) {
+                                errorTextView.text = errorMessage
+                                createErrorDrawable(editText)
+                                errorTextView.visibility = View.VISIBLE
+                            } else {
+                                errorTextView.visibility = View.GONE
+                                createDrawable(editText)
+                                inputValuesSelected[adapterPosition].textInput = inputText
+                            }
+                        }
+                    }
+
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                })
+            }
+            /*if (isValidationEnabled) {
                 if (editText.text.isNotEmpty())
                 setupValidation(editText, errorTextView, component.validations)
-            } else {
+            }*/ else {
                 // Handle simple text change without validation
                 editText.addTextChangedListener(object : TextWatcher {
                     override fun afterTextChanged(s: Editable?) {
