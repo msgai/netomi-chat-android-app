@@ -251,12 +251,13 @@ class NCWSurveyBottomSheet(
 
         if (surveyField?.payload?.feedbackMessage?.enabled == true) {
             rowRating?.visibility = View.VISIBLE
-            if (from == TYPE_SUBMITTED_SURVEY) {
+            tvTitle?.text = surveyField.payload.feedbackMessage.text
+          /*  if (from == TYPE_SUBMITTED_SURVEY) {
                 tvTitle?.text = getString(R.string.view_response)
             }
             else{
                 tvTitle?.text = surveyField.payload.feedbackMessage.text
-            }
+            }*/
 
             if (tvTitle != null) {
                 NCWThemeUtils.setTitleColor(tvTitle)
