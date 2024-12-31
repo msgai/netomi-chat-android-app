@@ -58,6 +58,7 @@ import com.netomi.chat.model.messages.NCWAdditionalAttributes
 import com.netomi.chat.model.messages.NCWAttachment
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.NCWCarouselButton
+import com.netomi.chat.model.messages.NCWCustomAttribute
 import com.netomi.chat.model.messages.NCWGenericChannelResponse
 import com.netomi.chat.model.messages.NCWMessagePayload
 import com.netomi.chat.model.messages.NCWQuickReply
@@ -119,6 +120,7 @@ import com.netomi.chat.utils.NCWRoutes
 import com.netomi.chat.utils.NCWSingleAlertDialog
 import com.netomi.chat.utils.NCWState
 import com.netomi.chat.utils.NCWThemeUtils
+import com.netomi.chat.utils.toNCWCustomAttributes
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -180,7 +182,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private var attachmentType: String? = TYPE_ATTACHMENT
 
-    private var deviceInfo: ArrayList<DeviceInfo> = arrayListOf()
+
+    var deviceInfo: List<NCWCustomAttribute>?=null
+
 
     private var connectionStatus: String? = ""
 
@@ -212,7 +216,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         val device = DeviceInfoUtil.getDeviceInfo(this)
-        deviceInfo.add(device)
+        deviceInfo = device.toNCWCustomAttributes()
+
+
         Log.d("DeviceInfo", "Device Info: $deviceInfo")
 
         if (NCWThemeUtils.getConversationID() == null) {
@@ -455,9 +461,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     ): NCWWebhookPayload {
         val messageId = UUID.randomUUID().toString()
 
-        val attributes = NCWAdditionalAttributes().apply {
-            CUSTOM_ATTRIBUTES.addAll(deviceInfo)
-        }
+        val attributes = NCWAdditionalAttributes(
+            CUSTOM_ATTRIBUTES = deviceInfo
+        )
         return NCWWebhookPayload(
             botRefId = botRefId,
             requestBody = NCWRequestBody(

@@ -474,7 +474,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                 NCWThemeUtils.setBotTextColor(this)
-                setOnClickListener {
+                container.setOnClickListener {
                     val calendar = Calendar.getInstance()
                     DatePickerDialog(
                         context, AlertDialog.THEME_HOLO_LIGHT,
