@@ -71,6 +71,7 @@ import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
+import com.netomi.chat.survey.EventData
 import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
@@ -184,6 +185,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var connectionStatus: String? = ""
 
     private var agentName: String? = ""
+    private var agentAvatar: String? = null
+
 
     var ownerType: String? = "BOT"
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -890,36 +893,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
                     if (response.triggerType == TYPE_EVENT) {
                         val eventData = response.eventObject?.eventData
-                        val messagePill = when {
-                            eventData?.eventType == TYPE_QUEUE_POSITION && eventData.subType == SUB_TYPE_WAIT -> {
-                                "Queue Position: ${eventData.eventInfo.queuePosition}"
-                            }
-                            eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_JOIN -> {
-                                agentName = eventData.eventInfo?.agentName
-                                ownerType= TYPE_AGENT
-                                "$agentName has joined the chat"
+                        renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
 
-                            }
-                            eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_LEAVE -> {
-                                ownerType= TYPE_BOT
-                                "$agentName has left the chat"
-                            }
-                            else -> ""
-                        }
-
-                    if (messagePill.isNotEmpty()) {
-                        val message = NCWMessage(
-                            sender = TYPE_PILLS,
-                            timestamp = response.timestamp ?: System.currentTimeMillis(),
-                            message = messagePill
-                        )
-                        messageList.add(message)
-                        messageAdapter.notifyDataSetChanged()
-                        chatRecyclerView.post {
-                            chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
-                        }
-
-                    }
 
                 }
 
@@ -928,6 +903,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     for (customField in response.customFields) {
                         when (CustomFieldName.fromValue(customField.name)) {
                             CustomFieldName.FORM_SCHEMA -> {
+                                removeLoader()
                                 renderTheFormMessage(response)
                             }
 
@@ -1037,6 +1013,41 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     }
 
+    private fun renderPillsMessage(eventData: EventData?, timestamp: Long) {
+        val messagePill = when {
+            eventData?.eventType == TYPE_QUEUE_POSITION && eventData.subType == SUB_TYPE_WAIT -> {
+                "Queue Position: ${eventData.eventInfo.queuePosition}"
+            }
+            eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_JOIN -> {
+                agentName = eventData.eventInfo?.agentName
+                agentAvatar= eventData.eventInfo?.agentAvatar
+                ownerType= TYPE_AGENT
+                "$agentName has joined the chat"
+
+            }
+            eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_LEAVE -> {
+                agentAvatar=null
+                ownerType= TYPE_BOT
+                "$agentName has left the chat"
+            }
+            else -> ""
+        }
+
+        if (messagePill.isNotEmpty()) {
+            val message = NCWMessage(
+                sender = TYPE_PILLS,
+                timestamp = timestamp,
+                message = messagePill
+            )
+            messageList.add(message)
+            messageAdapter.notifyDataSetChanged()
+            chatRecyclerView.post {
+                chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
+            }
+
+        }
+    }
+
     private fun renderTheSurveyMessage(response: NCWGenericChannelResponse?) {
         val gson = Gson()
         response?.customFields?.forEach { customField ->
@@ -1060,6 +1071,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                             timestamp = response.timestamp ?: System.currentTimeMillis(),
                             surveyField = surveyField,
                             requestID = response.requestId
+
                         )
                         messageList.add(newMessage)
                         addLoader()
@@ -1121,8 +1133,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 val newMessages = NCWMessage(
                     sender = TYPE_FORM,
                     timestamp = System.currentTimeMillis(),
-                    formSchema = formSchemasModel
-
+                    formSchema = formSchemasModel,
+                    agentAvatar=agentAvatar
                 )
                 addSingleMessage(newMessages)
             }
@@ -1229,7 +1241,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             quickReply = attach.quickReply,
             requestID = requestId,
             feedbackValue = attach.feedbackValue,
-            isReviewEnabled = attach.isReviewEnabled
+            isReviewEnabled = attach.isReviewEnabled,
+            agentAvatar=agentAvatar
 
         )
     }
@@ -1618,9 +1631,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         // Validate file type
         val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
+        Log.e("deftt","asasassa " +supportedExtensions)
         val fileExtension =
             file?.extension?.lowercase()?.let { if (!it.startsWith(".")) ".$it" else it }
-
+        Log.e("deftt","fileExtension " +fileExtension)
         if (fileExtension !in supportedExtensions) {
             NCWAppUtils.showToast(
                 this,
@@ -2007,6 +2021,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
 
         responses.forEachIndexed { index, response ->
+            if (response.triggerType == TYPE_EVENT) {
+                val eventData = response.eventObject?.eventData
+                renderPillsMessage(eventData,response.timestamp ?: System.currentTimeMillis())
+
+
+            }
+
             if (response.triggerType == TYPE_RESPONSE) {
                 val gson = Gson()
                 if (response.customFields?.isNotEmpty() == true) {

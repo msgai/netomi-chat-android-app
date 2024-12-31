@@ -367,6 +367,13 @@ class NCWChatAdapter(
             tvTime.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.GONE
             llFeedback.visibility=if(message.isSameTimeMessage)View.VISIBLE else View.GONE
 
+            if (message.isSameTimeMessage) {
+                Glide.with(itemView.context)
+                    .load(message.agentAvatar ?: R.drawable.ic_bot_profile)
+                    .placeholder(R.drawable.ic_bot_profile)
+                    .into(imgBot)
+            }
+
             NCWThemeUtils.setBotConfig(thumbUpImageButton)
             NCWThemeUtils.setBotConfig(thumbDownImageButton)
             // Initialize Feedback UI based on state
