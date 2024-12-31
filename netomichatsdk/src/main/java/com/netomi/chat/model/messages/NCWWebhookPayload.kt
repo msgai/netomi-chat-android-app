@@ -59,7 +59,6 @@ data class Values(
 )
 
 data class NCWAdditionalAttributes(
-   // val CUSTOM_ATTRIBUTES: ArrayList<DeviceInfo> = arrayListOf()
     val CUSTOM_ATTRIBUTES: List<NCWCustomAttribute>? = null
 )
 
