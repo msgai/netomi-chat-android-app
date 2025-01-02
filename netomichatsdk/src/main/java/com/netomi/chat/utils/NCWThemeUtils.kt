@@ -87,7 +87,7 @@ object NCWThemeUtils
         sendMessageIcon: ImageView,
         cardViewInputBox: CardView
     ) {
-        footerContainer.visibility = if (themeData?.isFooterHidden == true) View.GONE else View.VISIBLE
+        footerContainer.visibility = if (themeData?.mobileConfig?.lightTheme?.footerConfig?.isFooterHidden == true) View.GONE else View.VISIBLE
 
         themeData?.mobileConfig?.lightTheme?.footerConfig?.let { footerConfig ->
             // Set background color
@@ -100,10 +100,9 @@ object NCWThemeUtils
                 footerConfig.backgroundColor?.let { bgColor ->
                     styleIcon(ivMenuOption, bgColor, tintColor)
                 }
-            //    setTint(ivMenuOption, tintColor)
                 setTint(attachmentIcon, tintColor)
-               setCircularBackgroundAndTint(sendMessageIcon,footerConfig.sendButtonBackgroundColor,tintColor)
-              //  setTint(sendMessageIcon, tintColor)
+               setCircularBackgroundAndTint(sendMessageIcon,footerConfig.sendButtonBackgroundColor,footerConfig.sendButtonColor)
+
             }
 
             // Set message input field text color
