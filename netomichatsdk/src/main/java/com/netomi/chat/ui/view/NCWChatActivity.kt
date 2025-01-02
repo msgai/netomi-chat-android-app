@@ -8,6 +8,8 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -932,11 +934,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                             CustomFieldName.DISABLE_INPUT_FIELD -> {
                                 if (customField.values?.get(0) == "true") {
-                                    messageInputField.isEnabled = false
-                                    attachmentIcon.isEnabled = false
+                                    setUIState(false)
                                 } else {
-                                    messageInputField.isEnabled = true
-                                    attachmentIcon.isEnabled = true
+                                    setUIState(true)
                                 }
 
                             }
@@ -1224,6 +1224,19 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         sendMessageIcon.isEnabled = enabled
         messageInputField.isEnabled = enabled
         attachmentIcon.isEnabled = enabled
+        val alphaValue = if (enabled) 1f else 0.5f
+        sendMessageIcon.alpha = alphaValue
+        messageInputField.alpha = alphaValue
+        attachmentIcon.alpha = alphaValue
+        if (!enabled) {
+            val colorFilter = PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN)
+            sendMessageIcon.colorFilter = colorFilter
+            attachmentIcon.colorFilter = colorFilter
+        } else {
+            sendMessageIcon.clearColorFilter()
+            attachmentIcon.clearColorFilter()
+        }
+
     }
 
 
