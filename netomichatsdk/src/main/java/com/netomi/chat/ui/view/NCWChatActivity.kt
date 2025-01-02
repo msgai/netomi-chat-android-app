@@ -27,6 +27,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.appcompat.widget.ThemeUtils
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -168,6 +170,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var photoUri: Uri? = null
     private var ncwSdkConfig: NCWHeaderConfig? = null
     private var themeData: NCWThemeResponse? = null
+    private lateinit var cardViewInputBox: CardView
+
 
     private var conversationID: String? = null
     private var botRefId: String? = null
@@ -546,7 +550,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             ivMenuOption,
             messageInputField,
             attachmentIcon,
-            sendMessageIcon
+            sendMessageIcon,
+            cardViewInputBox
         )
 
         // Set attachment icon visibility
@@ -555,10 +560,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         // Configure footer branding
         themeData?.mobileConfig?.lightTheme?.footerConfig?.let { footerConfig ->
-            if (footerConfig.isFooterHidden) {
+            if (footerConfig.isNetomiBrandingEnabled) {
                 tvBrandName.apply {
                     visibility = View.VISIBLE
-                    text = footerConfig.netomiBrandingText.orEmpty()
+                    text = footerConfig.netomiBrandingText
                     footerConfig.netomiBrandingTextColor?.let {
                         setTextColor(
                             NCWThemeUtils.parseColor(
@@ -569,8 +574,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 }
             } else {
                 tvBrandName.visibility = View.GONE
+
             }
         }
+       // it.chatWindowBackgroundColor
+        themeData?.mobileConfig?.lightTheme?.chatWindowConfig?.let {
+            chatRecyclerView.setBackgroundColor(Color.parseColor(it.chatWindowBackgroundColor))
+        }
+
 
 
     }
@@ -595,6 +606,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         tvBrandName = findViewById(R.id.tvBrand)
         constProgressBar = findViewById(R.id.constLoader)
         progressBar = findViewById(R.id.progress_loader)
+        cardViewInputBox=  findViewById(R.id.cardView)
 
         messageInputField.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {

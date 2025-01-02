@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
@@ -83,8 +84,11 @@ object NCWThemeUtils
         ivMenuOption: ImageView,
         messageInputField: EditText,
         attachmentIcon: ImageView,
-        sendMessageIcon: ImageView
+        sendMessageIcon: ImageView,
+        cardViewInputBox: CardView
     ) {
+        footerContainer.visibility = if (themeData?.mobileConfig?.lightTheme?.footerConfig?.isFooterHidden == true) View.GONE else View.VISIBLE
+
         themeData?.mobileConfig?.lightTheme?.footerConfig?.let { footerConfig ->
             // Set background color
             footerConfig.backgroundColor?.let { color ->
@@ -96,14 +100,17 @@ object NCWThemeUtils
                 footerConfig.backgroundColor?.let { bgColor ->
                     styleIcon(ivMenuOption, bgColor, tintColor)
                 }
-            //    setTint(ivMenuOption, tintColor)
                 setTint(attachmentIcon, tintColor)
-              //  setTint(sendMessageIcon, tintColor)
+               setCircularBackgroundAndTint(sendMessageIcon,footerConfig.sendButtonBackgroundColor,footerConfig.sendButtonColor)
+
             }
 
             // Set message input field text color
             footerConfig.inputBoxTextColor?.let { textColor ->
                 parseColor(textColor)?.let { messageInputField.setTextColor(it) }
+            }
+            footerConfig.inputBoxBackgroundColor?.let { inputBoxBackgroundColor ->
+                parseColor(inputBoxBackgroundColor)?.let { cardViewInputBox.setCardBackgroundColor(it) }
             }
         }
     }
@@ -426,6 +433,21 @@ object NCWThemeUtils
             imageView.background = drawable
 
             imageView.imageTintList = ColorStateList.valueOf( Color.parseColor(tintColor))
+
+    }
+
+    private fun setCircularBackgroundAndTint(imageView: ImageView, color: String, tintColor: String) {
+
+        val parsedColor = Color.parseColor(color)
+        val tintColor = Color.parseColor(tintColor)
+
+            val drawable = GradientDrawable()
+            drawable.shape = GradientDrawable.OVAL
+            drawable.setColor(parsedColor)
+            drawable.cornerRadius = 50f
+            imageView.background = drawable
+
+            imageView.imageTintList = ColorStateList.valueOf(tintColor)
 
     }
 

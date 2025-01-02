@@ -22,7 +22,7 @@ data class NCWThemeResponse(
     val initialFlows: NCWInitialFlows,
     val isDefaultFullScreen: Boolean,
     val isDefaultOpen: Boolean,
-    val isFooterHidden: Boolean,
+    val isFooterHidden: Boolean=false,
     val isNetomiBrandingEnabled: Boolean,
     val isRestartConversationEnabled: Boolean,
     val knowledgeAI: NCWKnowledgeAI,

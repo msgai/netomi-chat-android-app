@@ -10,5 +10,7 @@ data class NCWFooterConfig(
     val netomiBrandingTextColor: String="#000000",
     val tintColor: String="#000000",
     val iconBackgroundColor:String="#FFFFFF",
-    val sendButtonBackgroundColor:String="#000000"
+    val sendButtonBackgroundColor:String="#000000",
+    val sendButtonColor:String="#FFFFFF"
+
 )
