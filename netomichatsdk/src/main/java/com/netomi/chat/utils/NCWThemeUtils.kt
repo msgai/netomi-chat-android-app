@@ -58,7 +58,9 @@ object NCWThemeUtils
         themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
             // Apply gradient or background color
             if (headerConfig.isGradientAppied) {
-                applyGradient(headerContainer, rootLayout, window)
+                createGradientDrawable()?.let { gradientDrawable ->
+                    applyGradient(headerContainer, rootLayout, window, gradientDrawable)
+                } ?: applyBackgroundColor(headerConfig.backgroundColor, headerContainer, window, context)
             } else {
                 applyBackgroundColor(headerConfig.backgroundColor, headerContainer, window, context)
             }
@@ -306,9 +308,9 @@ object NCWThemeUtils
     private fun applyGradient(
         headerContainer: ConstraintLayout,
         rootLayout: View,
-        window: Window
+        window: Window,
+        gradientDrawable: GradientDrawable?
     ) {
-        val gradientDrawable = createGradientDrawable()
         if (gradientDrawable != null) {
             headerContainer.background = gradientDrawable
             rootLayout.background = gradientDrawable
@@ -383,7 +385,7 @@ object NCWThemeUtils
                 }?.toIntArray()
 
             // Ensure gradient colors are valid
-            if (gradientColors == null || gradientColors.isEmpty()) {
+            if (gradientColors == null || gradientColors.isEmpty() || gradientColors.size < 2) {
                 Log.e("GradientError", "Gradient colors are null or empty")
                 return null
             }
