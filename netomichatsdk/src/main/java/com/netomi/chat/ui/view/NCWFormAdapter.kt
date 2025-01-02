@@ -38,7 +38,6 @@ import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.Validation
 import com.netomi.chat.model.messages.Values
 import com.netomi.chat.utils.NCWAppConstant.FORM_DATE_FORMAT
-import com.netomi.chat.utils.NCWAppConstant.SHOW_FORM_DATE_FORMAT
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWParsingUtils
 import com.netomi.chat.utils.NCWParsingUtils.parseDate
@@ -65,7 +64,8 @@ data class TextAreaInputField(
 )
 data class DateField(
     val dateField: TextView,
-    val errorTextView: TextView
+    val errorTextView: TextView,
+    val container: RelativeLayout
 )
 data class RadioField(
     val radioGroup: RadioGroup,
@@ -137,9 +137,12 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 hint = component.attributes?.getOrNull(0)?.value?.toString()?.removeSurrounding("[", "]")
                 setHintTextColor(ContextCompat.getColor(context, R.color.hint_color))
                 createDrawable(this)
+                isSingleLine=true
+                maxLines=1
                 setPadding(16, 30, 16, 30)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                 layoutParams = defaultLayoutParams()
+
             }
 
             val errorTextView = TextView(itemView.context).apply {
@@ -237,9 +240,30 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             // Check if validation is enabled
             val isValidationEnabled = component.dropDownSelections["Validation"]?.value == true
             if (isValidationEnabled) {
-                if (editText.text.isNotEmpty())
-                setupValidation(editText, errorTextView, component.validations)
-            } else {
+                val validations = component.validations.orEmpty()
+                editText.addTextChangedListener(object : TextWatcher {
+                    override fun afterTextChanged(s: Editable?) {
+                        val inputText = s.toString()
+                        if (inputText.isNotEmpty()) {
+                            val errorMessage = inputFieldValidation(inputText, validations)
+
+                            if (errorMessage != null) {
+                                errorTextView.text = errorMessage
+                                createErrorDrawable(editText)
+                                errorTextView.visibility = View.VISIBLE
+                            } else {
+                                errorTextView.visibility = View.GONE
+                                createDrawable(editText)
+                                inputValuesSelected[adapterPosition].textAreaInput = inputText
+                            }
+                        }
+                    }
+
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                })
+            }
+             else {
                 // Handle simple text change without validation
                 editText.addTextChangedListener(object : TextWatcher {
                     override fun afterTextChanged(s: Editable?) {
@@ -258,47 +282,6 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 editText.setText(it)
             }
             editText.isEnabled = isClickable
-        }
-
-        private fun setupValidation(
-            editText: EditText,
-            errorTextView: TextView,
-            validations: List<Validation>?
-        ) {
-            if (validations.isNullOrEmpty()) return
-
-            val textContainsValidation = validations.find { it.type == "text" && it.subType == "text-contains" }
-
-            editText.addTextChangedListener(object : TextWatcher {
-                override fun afterTextChanged(s: Editable?) {
-                    val inputText = s.toString()
-                    val errorMessage = validateInput(inputText, textContainsValidation)
-
-                    if (errorMessage != null) {
-                        errorTextView.text = errorMessage
-                        errorTextView.visibility = View.VISIBLE
-                        createErrorDrawable(editText)
-                    } else {
-                        errorTextView.visibility = View.GONE
-                        createDrawable(editText)
-                        inputValuesSelected[adapterPosition].textAreaInput = inputText
-                    }
-                }
-
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            })
-        }
-
-        private fun validateInput(inputText: String, validation: Validation?): String? {
-            if (validation == null) return null
-
-            // Ensure the inputText contains at least one value in the validation list
-            return if (validation.value.any { inputText.contains(it, ignoreCase = true) }) {
-                null
-            } else {
-                validation.errorMessage
-            }
         }
 
         private fun createRadioGroup(component: Component) {
@@ -482,7 +465,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             // Create the date input TextView
             val textView = TextView(itemView.context).apply {
                 id = View.generateViewId()
-                text = SHOW_FORM_DATE_FORMAT
+                text = FORM_DATE_FORMAT
                 setPadding(10, 0, 16, 0)
                 layoutParams = RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
@@ -494,14 +477,15 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 }
                 setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-
-                setOnClickListener {
+                NCWThemeUtils.setBotTextColor(this)
+                container.setOnClickListener {
                     val calendar = Calendar.getInstance()
                     DatePickerDialog(
                         context, AlertDialog.THEME_HOLO_LIGHT,
                         { _, year, month, dayOfMonth ->
                             val selectedDate = "${month + 1}-$dayOfMonth-$year"
-                            val showSelectedDate = "$dayOfMonth/${month + 1}/$year"
+                            val showSelectedDate = "${month + 1}/$dayOfMonth/$year"
+                           // val showSelectedDate = "$dayOfMonth/${month + 1}/$year"
                             val errorMessage = validateDate(selectedDate, component)
                             if (errorMessage == null) {
                                 text = showSelectedDate
@@ -512,7 +496,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                 textViewError.text = errorMessage
                                 textViewError.visibility = View.VISIBLE
                                 createErrorDrawable(container)
-                                text = SHOW_FORM_DATE_FORMAT
+                                text = FORM_DATE_FORMAT
                             }
                         },
                         calendar.get(Calendar.YEAR),
@@ -543,6 +527,8 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             }
             textView.isEnabled = isClickable
 
+            container.isEnabled = isClickable
+
             // Add the TextView and icon to the container
             container.addView(textView)
             container.addView(dateIcon)
@@ -550,7 +536,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             formContainer.addView(container)
             formContainer.addView(textViewError)
 
-            inputValues[component.id] = DateField(textView, textViewError)
+            inputValues[component.id] = DateField(textView, textViewError,container)
 
             if (adapterPosition in (formSchema.formData?.indices ?: emptyList())) {
                 val textInput = formSchema.formData?.get(adapterPosition)?.textInput
@@ -716,11 +702,14 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             val uploadText: TextView = fileInputView.findViewById(R.id.upload_text)
             val formatHint: TextView = fileInputView.findViewById(R.id.format_hint)
             val recyclerDoc: RecyclerView = fileInputView.findViewById(R.id.recyclerDoc)
-
+            val uploadDocTitle: TextView = fileInputView.findViewById(R.id.uploadDocTitle)
+            val label = component.labels?.firstOrNull() ?: ""
+            uploadDocTitle.text=label
+            NCWThemeUtils.setUserConfigTextColor(uploadDocTitle)
             NCWThemeUtils.setUserConfigTextColor(uploadText)
             NCWThemeUtils.setTimeStampColor(formatHint)
 
-            formatHint.text = "Format: ${component.config?.attachmentTypes?.joinToString(",") ?: ""}"
+            formatHint.text = "Format: ${component.config?.attachmentTypes?.joinToString(", ") ?: ""}"
 
             Log.d("FileUpload", "Before files: ${component.fileUpload}")
             try {
@@ -1115,6 +1104,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                     val editText = value.editText
                                     val errorTextView = value.errorTextView
                                     if (editText.text.isNullOrBlank()) {
+                                        createErrorDrawable(editText)
                                         errorTextView.visibility = View.VISIBLE
                                         errorTextView.text = "This field is required"
                                         isValid = false
@@ -1134,6 +1124,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                     if (editText.text == FORM_DATE_FORMAT) {
                                         errorTextView.visibility = View.VISIBLE
                                         errorTextView.text = "This field is required"
+                                        createErrorDrawable(value.container)
                                         isValid = false // Set to false only if there's an error
                                     } else {
                                         errorTextView.visibility = View.GONE

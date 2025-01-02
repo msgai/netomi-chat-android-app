@@ -27,7 +27,6 @@ import com.netomi.sampleapplication.viewmodel.OnboardingViewModel
 class HomeFragment : Fragment() {
 
     private val onboardingViewModel: OnboardingViewModel by activityViewModels()
-    private lateinit var botList: MutableList<Bot>
     private lateinit var preferences : AppSharedPreferences
     private lateinit var tvBotName:TextView
     private var isButtonClickable = true
@@ -47,21 +46,9 @@ class HomeFragment : Fragment() {
         // Access your views here using view.findViewById
         imgButton =view.findViewById(R.id.img_chat)
         tvBotName=view.findViewById(R.id.tv_botName)
-
-        val bot=preferences.getSelectedBot()
-        Log.e("Bot",bot.toString())
-        tvBotName.text=bot?.botName
-        botList = mutableListOf()
-        Glide.with(context ?: return).load(bot?.logo).into(imgButton)
-        try {
-            NCWChatSdk.setEnvironment(bot!!.env)
-            NCWChatSdk.setThemeData()
-            bot.botRefId.let { NCWChatSdk.initialize(requireContext(), it) }
-
-            Log.e("Theme","ThemeData Null")
-        }catch (e:Exception){
-            e.printStackTrace()
-            Log.e("Theme","Exception")
+        onboardingViewModel.botList.observe(viewLifecycleOwner) {
+            Log.e("SelectedBot local","Server")
+           updateBot(it)
         }
 
         imgButton.setOnClickListener {
@@ -71,6 +58,19 @@ class HomeFragment : Fragment() {
                     NCWChatSdk.launch(activityContext)
                 }
             }
+        }
+    }
+
+    private fun updateBot(bot: Bot) {
+        tvBotName.text=bot.botName
+        Glide.with(requireContext()).load(bot.logo).into(imgButton)
+        imgButton.setBackgroundResource(R.drawable.float_button_gradient)
+        try {
+            NCWChatSdk.setEnvironment(bot.env)
+            NCWChatSdk.setThemeData()
+            bot.botRefId.let { NCWChatSdk.initialize(requireContext(), it) }
+        }catch (e:Exception){
+            e.printStackTrace()
         }
     }
 
@@ -86,45 +86,5 @@ class HomeFragment : Fragment() {
             isButtonClickable = true
             imgButton.isEnabled = true
         }, 2000)
-    }
-
-    private fun observeChatMessages() {
-        onboardingViewModel.botListing.observe(viewLifecycleOwner) { messages ->
-            handleApiCallback(messages as State<Any>)
-        }
-    }
-
-    private fun handleApiCallback(response: State<Any>) {
-        when (response) {
-            is State.Loading -> {
-                Log.e("Loading", "Loading")
-            }
-
-            is State.Success -> {
-                //onApiSuccess(response.data, response.apiConstant)
-                Log.e("Success", "Success")
-                val response= response.data as BotListingResponse
-                Log.e("Bot List", response.toString())
-                botList.addAll(response.bots)
-                preferences.saveSelectedBot(botList[0])
-                preferences.put(SharePreferenceConstant.BOT_RESPONSE, response)
-                preferences.getSelectedBot()?.env?.let { NCWChatSdk.setEnvironment(it) }
-                NCWChatSdk.setThemeData()
-                preferences.getSelectedBot()?.botRefId.let { it?.let { it1 ->
-                    NCWChatSdk.initialize(requireContext(),
-                        it1
-                    )
-                } }
-
-            }
-
-            is State.Error -> {
-                Log.e("Error", "Error")
-            }
-
-            else -> {
-
-            }
-        }
     }
 }

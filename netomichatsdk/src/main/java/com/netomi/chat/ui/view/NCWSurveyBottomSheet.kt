@@ -5,6 +5,7 @@ import android .app.Dialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,7 +47,7 @@ class NCWSurveyBottomSheet(
     private lateinit var radioGroup: RadioGroup
     private lateinit var rowSuggestion: ConstraintLayout
     private lateinit var submitButton: TextView
-
+    private lateinit var viewSpace: View
 
 
     private var selectedRating: Int = 0
@@ -93,20 +94,23 @@ class NCWSurveyBottomSheet(
         val tvFeedbackCount = findViewById<TextView>(R.id.tvFeedbackCount)
         val constAdd = findViewById<ConstraintLayout>(R.id.constAdd)
         val tvFeedbackTitle = findViewById<TextView>(R.id.tvFeedbackTitle)
-
+        viewSpace= findViewById(R.id.space)
         tvFeedbackCount.visibility=View.GONE
 
         if (from == TYPE_SUBMITTED_SURVEY) {
             constAdd.visibility=View.GONE
-            tvFeedbackCount.visibility=View.GONE
-            tvFeedbackTitle.text=getString(R.string.additional_feedback)
+            tvFeedbackCount.visibility=View.VISIBLE
+
+           // tvFeedbackTitle.text=getString(R.string.additional_feedback)
+            tvFeedbackTitle.text= surveyField?.payload?.additionalFeedback?.text ?: getString(R.string.additional_feedback)
         }
 
         constAdd.setOnClickListener {
             edtAdditionalFeedback.visibility=View.VISIBLE
             constAdd.visibility=View.GONE
             tvFeedbackCount.visibility=View.VISIBLE
-            tvFeedbackTitle.text= getString(R.string.write_your_feedback_here)
+           // tvFeedbackTitle.text= getString(R.string.write_your_feedback_here)
+            tvFeedbackTitle.text= surveyField?.payload?.additionalFeedback?.text ?: getString(R.string.additional_feedback)
         }
 
 
@@ -128,6 +132,7 @@ class NCWSurveyBottomSheet(
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val currentLength = s?.length ?: 0
+                if (s?.trim()?.isNotEmpty() == true)
                 tvFeedbackCount.text = "$currentLength/200"
             }
 
@@ -152,10 +157,11 @@ class NCWSurveyBottomSheet(
         }
 
         if (from == TYPE_SUBMITTED_SURVEY) {
-            radioGroup.check(
-                if (surveyField?.submitSurveyInfo?.issueResolved == true) R.id.radioYes else R.id.radioNo
-            )
+            surveyField?.submitSurveyInfo?.issueResolved?.let { isResolved ->
+                radioGroup.check(if (isResolved) R.id.radioYes else R.id.radioNo)
+            }
         }
+
     }
 
     private fun setupSubmitButton() {
@@ -167,6 +173,7 @@ class NCWSurveyBottomSheet(
         view?.findViewById<TextView>(R.id.closeButton)?.let { closeButton ->
             NCWThemeUtils.createRoundedDrawableClose(closeButton)
             closeButton.text= if (from == TYPE_SUBMITTED_SURVEY) "Close" else "Skip"
+
             closeButton.setOnClickListener {
                 if (from == TYPE_SUBMITTED_SURVEY) {
                     dismiss()
@@ -177,12 +184,25 @@ class NCWSurveyBottomSheet(
                 }
             }
 
-            closeButton.visibility = if (surveyField?.payload?.isSkipEnabled == true) {
+
+            closeButton.visibility = if (from == TYPE_SUBMITTED_SURVEY || surveyField?.payload?.isSkipEnabled == true) {
                 View.VISIBLE
             } else {
                 View.GONE
             }
         }
+        if (from == TYPE_SUBMITTED_SURVEY){
+            viewSpace.visibility=View.GONE
+        }
+        viewSpace.visibility = if (from != TYPE_SUBMITTED_SURVEY && surveyField?.payload?.isSkipEnabled == true) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+
+
+
+
     }
     fun setButtonState(isEnabled: Boolean) {
         submitButton.isEnabled = isEnabled
@@ -197,7 +217,7 @@ class NCWSurveyBottomSheet(
         val selectedSuggestions =if (surveyField?.payload?.reasonOfRating?.enabled ==true)
           suggestionAdapter.getSelectedOptions() else emptyList()
 
-        val issueResolved = selectedRadioValue == "Yes"
+        val issueResolved: Boolean? = if (selectedRadioValue.isNotEmpty()) selectedRadioValue == "Yes" else null
 
         onSubmitSurveyRequest(
             SubmitSurveyRequest(
@@ -236,6 +256,13 @@ class NCWSurveyBottomSheet(
         if (surveyField?.payload?.feedbackMessage?.enabled == true) {
             rowRating?.visibility = View.VISIBLE
             tvTitle?.text = surveyField.payload.feedbackMessage.text
+          /*  if (from == TYPE_SUBMITTED_SURVEY) {
+                tvTitle?.text = getString(R.string.view_response)
+            }
+            else{
+                tvTitle?.text = surveyField.payload.feedbackMessage.text
+            }*/
+
             if (tvTitle != null) {
                 NCWThemeUtils.setTitleColor(tvTitle)
             }
@@ -247,6 +274,7 @@ class NCWSurveyBottomSheet(
                     surveyField.payload.ratingTypeEnabled ?: "STAR"
                 ) { rating ->
                     selectedRating = rating
+                    Log.e("Ratidnndn","xzxkzklx "+selectedRating)
                     submitButton.isEnabled=true
                     if (surveyField.payload.reasonOfRating?.enabled==true) {
                         showOptionList(rating)
@@ -265,8 +293,16 @@ class NCWSurveyBottomSheet(
 
                 if (from == TYPE_SUBMITTED_SURVEY) {
                     val rating = surveyField.submitSurveyInfo.rating
-                    ratingAdapter?.selectedRating = rating
-                    ratingAdapter?.notifyDataSetChanged()
+                    val  ratingTypeEnabled=surveyField.payload.ratingTypeEnabled
+                    val finalRating = if (ratingTypeEnabled != "THUMBS_UP_DOWN") {
+                        rating
+                    } else {
+                        if (rating == 2) 1 else 2
+                    }
+                    ratingAdapter?.apply {
+                        selectedRating = finalRating
+                        notifyDataSetChanged()
+                    }
                     if (surveyField.payload.reasonOfRating?.enabled==true) {
                         showOptionList(rating)
                     }
@@ -279,6 +315,11 @@ class NCWSurveyBottomSheet(
         } else {
             rowRating?.visibility = View.GONE
         }
+
+
+
+
+
     }
 
 
@@ -333,8 +374,31 @@ class NCWSurveyBottomSheet(
             } else View.GONE
         }
     }
-
     private fun configureAdditionalFeedback() {
+        view?.findViewById<ConstraintLayout>(R.id.rowAdditionalFeedback)?.let { additionalFeedbackRow ->
+            val isAdditionalFeedbackEnabled = surveyField?.payload?.additionalFeedback?.enabled == true
+            additionalFeedbackRow.visibility = if (isAdditionalFeedbackEnabled) View.VISIBLE else View.GONE
+
+            if (isAdditionalFeedbackEnabled) {
+                view?.findViewById<TextView>(R.id.tvFeedbackTitle)?.let { feedbackTitle ->
+                    NCWThemeUtils.setTitleColor(feedbackTitle)
+                }
+
+                if (from == TYPE_SUBMITTED_SURVEY) {
+                    edtAdditionalFeedback.apply {
+                        visibility = View.VISIBLE
+                        setText(
+                            if (surveyField?.submitSurveyInfo?.additionalFeedback.isNullOrEmpty()) " "
+                            else surveyField?.submitSurveyInfo?.additionalFeedback
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+
+    /*private fun configureAdditionalFeedback() {
         view?.findViewById<ConstraintLayout>(R.id.rowAdditionalFeedback)?.apply {
             visibility = if (surveyField?.payload?.additionalFeedback?.enabled == true) {
                 view?.findViewById<TextView>(R.id.tvFeedbackTitle)?.apply {
@@ -342,11 +406,15 @@ class NCWSurveyBottomSheet(
                     NCWThemeUtils.setTitleColor(this)
                 }
                 if (from == TYPE_SUBMITTED_SURVEY) {
-                  //  edtAdditionalFeedback.setText(surveyField?.submitSurveyInfo?.additionalFeedback.orEmpty())
                     edtAdditionalFeedback.visibility=View.VISIBLE
+                    if (surveyField?.submitSurveyInfo?.additionalFeedback.isNullOrEmpty())
+                        edtAdditionalFeedback.setText("")
+                    else
+                    edtAdditionalFeedback.setText(surveyField?.submitSurveyInfo?.additionalFeedback.orEmpty())
+
                 }
                 View.VISIBLE
             } else View.GONE
         }
-    }
+    }*/
 }

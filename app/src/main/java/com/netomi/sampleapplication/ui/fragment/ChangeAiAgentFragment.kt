@@ -25,6 +25,7 @@ class ChangeAiAgentFragment : Fragment() {
     private lateinit var adapter: ChangeAiAgentAdapter
     private lateinit var recyclerView: RecyclerView
     private var selectedBot: Bot? = null
+    private val onboardingViewModel: OnboardingViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,9 +43,11 @@ class ChangeAiAgentFragment : Fragment() {
         val botsResponse = preferences.get<BotListingResponse>(SharePreferenceConstant.BOT_RESPONSE)
         val bots = botsResponse?.bots ?: emptyList()
         var bot=preferences.getSelectedBot()
+
         adapter = ChangeAiAgentAdapter(bots,bot!!.botRefId) { bot ->
             // Handle bot item click
             selectedBot=bot
+            onboardingViewModel.updateBotList(selectedBot!!)
             preferences.saveSelectedBot(selectedBot!!)
 
             (activity as HomeActivity).loadFragment(HomeFragment())

@@ -37,7 +37,7 @@ object NCWAppConstant {
 
     const val TYPE_FORM="FORM"
 
-    const val FORM_DATE_FORMAT="MM/dd/yyyy"
+    const val FORM_DATE_FORMAT="mm/dd/yyyy"
 
     const val SHOW_FORM_DATE_FORMAT="dd/mm/yyyy"
 
@@ -45,7 +45,9 @@ object NCWAppConstant {
     const val TYPE_FORM_ATTACHMENT="form_attachment"
 
 
-    const val BOT="BOT"
+    const val TYPE_BOT="BOT"
+    const val TYPE_AGENT="AGENT"
+
 
     const val TIME_AM_PM="hh:mm a"
     const val ARG_MEDIA_URL = "media_url"

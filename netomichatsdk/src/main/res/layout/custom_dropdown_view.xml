@@ -37,6 +37,7 @@ android:layout_marginTop="10dp"
 
     <!-- Dropdown items container -->
     <LinearLayout
+
         android:id="@+id/dropdown_items_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -44,6 +45,7 @@ android:layout_marginTop="10dp"
         android:visibility="gone"
         android:background="@drawable/bg_stroke_rounded_white"
         android:layout_marginTop="4dp"
+        android:layout_marginBottom="5dp"
         >
 
     </LinearLayout>
