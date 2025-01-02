@@ -37,7 +37,7 @@ object NCWAppConstant {
 
     const val TYPE_FORM="FORM"
 
-    const val FORM_DATE_FORMAT="MM/dd/yyyy"
+    const val FORM_DATE_FORMAT="mm/dd/yyyy"
 
     const val SHOW_FORM_DATE_FORMAT="dd/mm/yyyy"
 

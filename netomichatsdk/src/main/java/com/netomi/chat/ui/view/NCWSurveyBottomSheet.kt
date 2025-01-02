@@ -99,15 +99,18 @@ class NCWSurveyBottomSheet(
 
         if (from == TYPE_SUBMITTED_SURVEY) {
             constAdd.visibility=View.GONE
-            tvFeedbackCount.visibility=View.GONE
-            tvFeedbackTitle.text=getString(R.string.additional_feedback)
+            tvFeedbackCount.visibility=View.VISIBLE
+
+           // tvFeedbackTitle.text=getString(R.string.additional_feedback)
+            tvFeedbackTitle.text= surveyField?.payload?.additionalFeedback?.text ?: getString(R.string.additional_feedback)
         }
 
         constAdd.setOnClickListener {
             edtAdditionalFeedback.visibility=View.VISIBLE
             constAdd.visibility=View.GONE
             tvFeedbackCount.visibility=View.VISIBLE
-            tvFeedbackTitle.text= getString(R.string.write_your_feedback_here)
+           // tvFeedbackTitle.text= getString(R.string.write_your_feedback_here)
+            tvFeedbackTitle.text= surveyField?.payload?.additionalFeedback?.text ?: getString(R.string.additional_feedback)
         }
 
 
@@ -129,6 +132,7 @@ class NCWSurveyBottomSheet(
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val currentLength = s?.length ?: 0
+                if (s?.trim()?.isNotEmpty() == true)
                 tvFeedbackCount.text = "$currentLength/200"
             }
 
@@ -370,8 +374,31 @@ class NCWSurveyBottomSheet(
             } else View.GONE
         }
     }
-
     private fun configureAdditionalFeedback() {
+        view?.findViewById<ConstraintLayout>(R.id.rowAdditionalFeedback)?.let { additionalFeedbackRow ->
+            val isAdditionalFeedbackEnabled = surveyField?.payload?.additionalFeedback?.enabled == true
+            additionalFeedbackRow.visibility = if (isAdditionalFeedbackEnabled) View.VISIBLE else View.GONE
+
+            if (isAdditionalFeedbackEnabled) {
+                view?.findViewById<TextView>(R.id.tvFeedbackTitle)?.let { feedbackTitle ->
+                    NCWThemeUtils.setTitleColor(feedbackTitle)
+                }
+
+                if (from == TYPE_SUBMITTED_SURVEY) {
+                    edtAdditionalFeedback.apply {
+                        visibility = View.VISIBLE
+                        setText(
+                            if (surveyField?.submitSurveyInfo?.additionalFeedback.isNullOrEmpty()) " "
+                            else surveyField?.submitSurveyInfo?.additionalFeedback
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+
+    /*private fun configureAdditionalFeedback() {
         view?.findViewById<ConstraintLayout>(R.id.rowAdditionalFeedback)?.apply {
             visibility = if (surveyField?.payload?.additionalFeedback?.enabled == true) {
                 view?.findViewById<TextView>(R.id.tvFeedbackTitle)?.apply {
@@ -379,11 +406,15 @@ class NCWSurveyBottomSheet(
                     NCWThemeUtils.setTitleColor(this)
                 }
                 if (from == TYPE_SUBMITTED_SURVEY) {
-                    edtAdditionalFeedback.setText(surveyField?.submitSurveyInfo?.additionalFeedback.orEmpty())
                     edtAdditionalFeedback.visibility=View.VISIBLE
+                    if (surveyField?.submitSurveyInfo?.additionalFeedback.isNullOrEmpty())
+                        edtAdditionalFeedback.setText("")
+                    else
+                    edtAdditionalFeedback.setText(surveyField?.submitSurveyInfo?.additionalFeedback.orEmpty())
+
                 }
                 View.VISIBLE
             } else View.GONE
         }
-    }
+    }*/
 }

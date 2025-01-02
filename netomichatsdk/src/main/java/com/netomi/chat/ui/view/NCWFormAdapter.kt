@@ -64,7 +64,8 @@ data class TextAreaInputField(
 )
 data class DateField(
     val dateField: TextView,
-    val errorTextView: TextView
+    val errorTextView: TextView,
+    val container: RelativeLayout
 )
 data class RadioField(
     val radioGroup: RadioGroup,
@@ -136,9 +137,12 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 hint = component.attributes?.getOrNull(0)?.value?.toString()?.removeSurrounding("[", "]")
                 setHintTextColor(ContextCompat.getColor(context, R.color.hint_color))
                 createDrawable(this)
+                isSingleLine=true
+                maxLines=1
                 setPadding(16, 30, 16, 30)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                 layoutParams = defaultLayoutParams()
+
             }
 
             val errorTextView = TextView(itemView.context).apply {
@@ -250,7 +254,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                             } else {
                                 errorTextView.visibility = View.GONE
                                 createDrawable(editText)
-                                inputValuesSelected[adapterPosition].textInput = inputText
+                                inputValuesSelected[adapterPosition].textAreaInput = inputText
                             }
                         }
                     }
@@ -480,7 +484,8 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                         context, AlertDialog.THEME_HOLO_LIGHT,
                         { _, year, month, dayOfMonth ->
                             val selectedDate = "${month + 1}-$dayOfMonth-$year"
-                            val showSelectedDate = "$dayOfMonth/${month + 1}/$year"
+                            val showSelectedDate = "${month + 1}/$dayOfMonth/$year"
+                           // val showSelectedDate = "$dayOfMonth/${month + 1}/$year"
                             val errorMessage = validateDate(selectedDate, component)
                             if (errorMessage == null) {
                                 text = showSelectedDate
@@ -522,6 +527,8 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             }
             textView.isEnabled = isClickable
 
+            container.isEnabled = isClickable
+
             // Add the TextView and icon to the container
             container.addView(textView)
             container.addView(dateIcon)
@@ -529,7 +536,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             formContainer.addView(container)
             formContainer.addView(textViewError)
 
-            inputValues[component.id] = DateField(textView, textViewError)
+            inputValues[component.id] = DateField(textView, textViewError,container)
 
             if (adapterPosition in (formSchema.formData?.indices ?: emptyList())) {
                 val textInput = formSchema.formData?.get(adapterPosition)?.textInput
@@ -1097,6 +1104,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                     val editText = value.editText
                                     val errorTextView = value.errorTextView
                                     if (editText.text.isNullOrBlank()) {
+                                        createErrorDrawable(editText)
                                         errorTextView.visibility = View.VISIBLE
                                         errorTextView.text = "This field is required"
                                         isValid = false
@@ -1116,6 +1124,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                     if (editText.text == FORM_DATE_FORMAT) {
                                         errorTextView.visibility = View.VISIBLE
                                         errorTextView.text = "This field is required"
+                                        createErrorDrawable(value.container)
                                         isValid = false // Set to false only if there's an error
                                     } else {
                                         errorTextView.visibility = View.GONE
