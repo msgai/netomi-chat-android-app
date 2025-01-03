@@ -36,7 +36,7 @@ class NCWFormFilesAdapter(private val items: List<FileUploadData>, val isClickab
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
 
-        NCWThemeUtils.setUserConfig(holder.requestDocCard)
+       // NCWThemeUtils.setUserConfig(holder.requestDocCard)
         NCWThemeUtils.setUserConfigTextColor(holder.tvDocName)
         NCWThemeUtils.setTimeStampColor(holder.tvDocType)
 
@@ -66,6 +66,7 @@ class NCWFormFilesAdapter(private val items: List<FileUploadData>, val isClickab
         holder.icDelete.setOnClickListener {
 
 onDelete(item)
+            notifyItemChanged(position)
         }
     }
 
