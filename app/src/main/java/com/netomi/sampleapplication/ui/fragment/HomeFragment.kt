@@ -67,7 +67,6 @@ class HomeFragment : Fragment() {
         imgButton.setBackgroundResource(R.drawable.float_button_gradient)
         try {
             NCWChatSdk.setEnvironment(bot.env)
-            NCWChatSdk.setThemeData()
             bot.botRefId.let { NCWChatSdk.initialize(requireContext(), it) }
         }catch (e:Exception){
             e.printStackTrace()
