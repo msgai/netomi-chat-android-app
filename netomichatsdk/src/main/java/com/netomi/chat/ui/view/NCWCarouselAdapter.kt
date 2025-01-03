@@ -1,5 +1,6 @@
 package com.netomi.chat.ui.view
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,7 +34,8 @@ class NCWCarouselAdapter(private val items: List<NCWCarouselElement>, private va
     override fun onBindViewHolder(holder: CarouselViewHolder, position: Int) {
         val item = items[position]
         holder.tvHeading.text = item.title
-        holder.tvDetail.text = item.subtitle
+        Log.e("subtitle ","sss "+item.subtitle)
+        holder.tvDetail.text = item.subtitle?.trim() ?: ""
         NCWThemeUtils.setBotConfig(holder.rootLayout)
         Glide.with(holder.itemView.context).load(item.imageUrl).into(holder.imgCarousel)
       holder.recyclerViewCarouselButton.layoutManager = LinearLayoutManager(holder.itemView.context, LinearLayoutManager.VERTICAL, false)

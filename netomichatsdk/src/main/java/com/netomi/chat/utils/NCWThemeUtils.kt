@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
+import android.util.Log
 import android.view.View
 import android.view.Window
 import android.widget.Button
@@ -14,6 +15,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
@@ -27,7 +29,7 @@ object NCWThemeUtils
     private var themeData: NCWThemeResponse? = null
 
     // Set theme data globally
-    fun setThemeData(themeResponse: NCWThemeResponse) {
+    fun setThemeData(themeResponse: NCWThemeResponse?) {
         themeData = themeResponse
     }
     fun getThemeData():NCWThemeResponse?{
@@ -56,7 +58,9 @@ object NCWThemeUtils
         themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
             // Apply gradient or background color
             if (headerConfig.isGradientAppied) {
-                applyGradient(headerContainer, rootLayout, window)
+                createGradientDrawable()?.let { gradientDrawable ->
+                    applyGradient(headerContainer, rootLayout, window, gradientDrawable)
+                } ?: applyBackgroundColor(headerConfig.backgroundColor, headerContainer, window, context)
             } else {
                 applyBackgroundColor(headerConfig.backgroundColor, headerContainer, window, context)
             }
@@ -82,8 +86,11 @@ object NCWThemeUtils
         ivMenuOption: ImageView,
         messageInputField: EditText,
         attachmentIcon: ImageView,
-        sendMessageIcon: ImageView
+        sendMessageIcon: ImageView,
+        cardViewInputBox: CardView
     ) {
+        footerContainer.visibility = if (themeData?.mobileConfig?.lightTheme?.footerConfig?.isFooterHidden == true) View.GONE else View.VISIBLE
+
         themeData?.mobileConfig?.lightTheme?.footerConfig?.let { footerConfig ->
             // Set background color
             footerConfig.backgroundColor?.let { color ->
@@ -95,19 +102,22 @@ object NCWThemeUtils
                 footerConfig.backgroundColor?.let { bgColor ->
                     styleIcon(ivMenuOption, bgColor, tintColor)
                 }
-            //    setTint(ivMenuOption, tintColor)
                 setTint(attachmentIcon, tintColor)
-              //  setTint(sendMessageIcon, tintColor)
+               setCircularBackgroundAndTint(sendMessageIcon,footerConfig.sendButtonBackgroundColor,footerConfig.sendButtonColor)
+
             }
 
             // Set message input field text color
             footerConfig.inputBoxTextColor?.let { textColor ->
                 parseColor(textColor)?.let { messageInputField.setTextColor(it) }
             }
+            footerConfig.inputBoxBackgroundColor?.let { inputBoxBackgroundColor ->
+                parseColor(inputBoxBackgroundColor)?.let { cardViewInputBox.setCardBackgroundColor(it) }
+            }
         }
     }
 
-    fun setUserConfig(messageText: TextView) {
+    fun setUserConfig(messageText: View) {
         themeData?.mobileConfig?.lightTheme?.userConfig?.let { userConfig ->
             val bubbleConfig = themeData?.mobileConfig?.lightTheme?.bubbleConfig
             val borderRadius = bubbleConfig?.borderRadius?.toFloat() ?: 0f
@@ -115,11 +125,19 @@ object NCWThemeUtils
 
             // Apply background with corner radii
             applyBackgroundWithCorners(messageText, userConfig.backgroundColor, cornerRadii)
-
-            // Set text color
+              if (messageText is TextView)
             userConfig.textColor?.let { color -> setTextColor(messageText, color) }
         }
     }
+
+    fun setUserConfigTextColor(textView: TextView)
+    {
+        themeData?.mobileConfig?.lightTheme?.userConfig?.let { userConfig ->{
+            userConfig.textColor?.let { color -> setTextColor(textView, color) }
+        }}
+    }
+
+
 
 
     fun setRadioButtonUserConfig(messageText: RadioButton) {
@@ -137,6 +155,12 @@ object NCWThemeUtils
             // Set text color
             if (messageText is TextView)
             botConfig.textColor?.let { color -> setTextColor(messageText, color) }
+        }
+    }
+
+    fun setBotTextColor(textView: TextView) {
+        themeData?.mobileConfig?.lightTheme?.botConfig?.let { botConfig ->
+                botConfig.textColor?.let { color -> setTextColor(textView, color) }
         }
     }
 
@@ -199,7 +223,7 @@ object NCWThemeUtils
             val parsedColor = Color.parseColor(it.backgroundColor)
             val backgroundDrawable = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
-                cornerRadius = 16f
+                cornerRadius = 20f
                 setColor(parsedColor)
             }
             view.background = backgroundDrawable
@@ -207,6 +231,36 @@ object NCWThemeUtils
         if (view is TextView)
         setTitleColor(view)
 
+    }
+
+    fun createRoundedDrawableSubmit(view: View) {
+        themeData?.mobileConfig?.lightTheme?.otherConfig?.let { otherConfig ->
+            val parsedColor = Color.parseColor( otherConfig.backgroundColor)
+            val backgroundDrawable = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 16f
+                setColor(parsedColor)
+            }
+            view.background = backgroundDrawable
+
+            if (view is TextView)
+                otherConfig.titleColor?.let { color -> setTextColor(view, color) }
+        }
+    }
+
+    fun createRoundedDrawableClose(view: View) {
+        themeData?.mobileConfig?.lightTheme?.botConfig?.let { userConfig ->
+            val parsedColor = Color.parseColor( userConfig.backgroundColor)
+            val backgroundDrawable = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 16f
+                setColor(parsedColor)
+            }
+            view.background = backgroundDrawable
+
+            if (view is TextView)
+                setTitleColor(view)
+        }
     }
 
     fun setTitleColor(textView: TextView){
@@ -254,15 +308,17 @@ object NCWThemeUtils
     private fun applyGradient(
         headerContainer: ConstraintLayout,
         rootLayout: View,
-        window: Window
+        window: Window,
+        gradientDrawable: GradientDrawable?
     ) {
-        val gradientDrawable = createGradientDrawable()
-        headerContainer.background = gradientDrawable
-        rootLayout.background = gradientDrawable
-        window.apply {
-            statusBarColor = Color.TRANSPARENT
-            decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        if (gradientDrawable != null) {
+            headerContainer.background = gradientDrawable
+            rootLayout.background = gradientDrawable
+            window.apply {
+                statusBarColor = Color.TRANSPARENT
+                decorView.systemUiVisibility =
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            }
         }
     }
 
@@ -308,11 +364,55 @@ object NCWThemeUtils
      * @return A GradientDrawable with specified direction and colors.
      */
     private fun createGradientDrawable(): GradientDrawable? {
-        val direction = GradientDrawable.Orientation.values()
-            .getOrElse(themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientDirection ?: 0) { GradientDrawable.Orientation.LEFT_RIGHT }
-        val gradientColors = themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientColors?.map { Color.parseColor(it) }?.toIntArray()
-        return gradientColors?.let { GradientDrawable(direction, it) }
+        try {
+            Log.e("Hereee", "adddddd ${themeData?.mobileConfig?.lightTheme}")
+
+            // Ensure a valid gradient direction
+            val direction = GradientDrawable.Orientation.values()
+                .getOrElse(themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientDirection ?: 0) {
+                    GradientDrawable.Orientation.LEFT_RIGHT
+                }
+
+            // Parse and validate gradient colors
+            val gradientColors = themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientColors
+                ?.mapNotNull { color ->
+                    try {
+                        Color.parseColor(color)
+                    } catch (e: IllegalArgumentException) {
+                        Log.e("ColorParseError", "Invalid color: $color")
+                        null // Ignore invalid color strings
+                    }
+                }?.toIntArray()
+
+            // Ensure gradient colors are valid
+            if (gradientColors == null || gradientColors.isEmpty() || gradientColors.size < 2) {
+                Log.e("GradientError", "Gradient colors are null or empty")
+                return null
+            }
+
+            // Create and return the GradientDrawable
+            return GradientDrawable(direction, gradientColors)
+        } catch (ex: Exception) {
+            Log.e("Exception", "Error creating gradient drawable: $ex")
+            return null
+        }
     }
+
+    /* private fun createGradientDrawable(): GradientDrawable? {
+         try {
+             Log.e("Hereee","adddddd "+themeData?.mobileConfig?.lightTheme)
+             val direction = GradientDrawable.Orientation.values()
+                 .getOrElse(themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientDirection ?: 0) { GradientDrawable.Orientation.LEFT_RIGHT }
+             val gradientColors = themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientColors?.map { Color.parseColor(it) }?.toIntArray()
+             return gradientColors?.let { GradientDrawable(direction, it) }
+
+         }
+         catch (ex:Exception){
+             Log.e("Exception","saassa "+ex )
+         }
+         return null
+
+     }*/
 
 
 
@@ -335,6 +435,21 @@ object NCWThemeUtils
             imageView.background = drawable
 
             imageView.imageTintList = ColorStateList.valueOf( Color.parseColor(tintColor))
+
+    }
+
+    private fun setCircularBackgroundAndTint(imageView: ImageView, color: String, tintColor: String) {
+
+        val parsedColor = Color.parseColor(color)
+        val tintColor = Color.parseColor(tintColor)
+
+            val drawable = GradientDrawable()
+            drawable.shape = GradientDrawable.OVAL
+            drawable.setColor(parsedColor)
+            drawable.cornerRadius = 50f
+            imageView.background = drawable
+
+            imageView.imageTintList = ColorStateList.valueOf(tintColor)
 
     }
 
@@ -460,5 +575,29 @@ object NCWThemeUtils
 
 
 
+    fun createSelectedRoundedDrawable(view: View) {
+        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+           // val parsedColor = Color.parseColor(headerConfig.backgroundColor)
+            val parsedColor = Color.parseColor("#000000")
+            val backgroundDrawable = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 16f
+                setColor(parseColor("#F6F7F7"))
+                setStroke(2, parsedColor)
+            }
+            view.background = backgroundDrawable
+
+
+        }
+    }
+    fun createUnSelectedRoundedDrawable(view: View) {
+        val backgroundDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 16f
+            setColor(parseColor("#F6F7F7"))
+
+        }
+        view.background = backgroundDrawable
+    }
 
 }

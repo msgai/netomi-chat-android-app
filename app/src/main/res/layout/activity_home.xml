@@ -5,101 +5,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <!-- Main content -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!-- Main content -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/ic_bg"
         android:orientation="vertical">
-        <!-- Your main content here -->
 
-        <!-- Header with menu, logo, text, and cross icon -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constHeader"
+        <!-- Custom Toolbar -->
+        <include
+            layout="@layout/custom_toolbar" />
+
+        <!-- Fragment Container -->
+        <FrameLayout
+            android:id="@+id/fragment_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
+            android:layout_height="match_parent"/>
 
-            app:layout_constraintTop_toTopOf="parent">
+    </LinearLayout>
 
-            <ImageView
-                android:id="@+id/ivMenu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_menu"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="2dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+    <!-- Transparent overlay with ProgressBar -->
+    <FrameLayout
+        android:id="@+id/progress_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone">
 
-            <TextView
-                android:id="@+id/tvHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:text="Welcome"
-                android:textFontWeight="400"
-                android:textColor="@color/gray_black"
-                android:textSize="16sp"
-                android:layout_marginTop="5dp"
-                android:fontFamily="@font/proxima_nova_regular"
-                app:layout_constraintStart_toEndOf="@+id/ivMenu"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tvHeaderOne"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:textFontWeight="600"
-                android:text="John Doe"
-                android:fontFamily="@font/proxima_nova_bold"
-                android:textColor="@color/gray_black"
-                android:textSize="16sp"
-                app:layout_constraintStart_toEndOf="@+id/ivMenu"
-                app:layout_constraintTop_toBottomOf="@+id/tvHeader" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/netomiChat"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentTop="true"
-            android:textSize="30sp"
-            android:textColor="@color/charcoal_blue"
-            android:gravity="center_horizontal|center_vertical"
-            android:text="Netomi Chat AI"
-            android:layout_marginTop="150dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:alpha="0.4"
-            />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/imgBot"
-            android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:layout_marginTop="50dp"
-            android:src="@drawable/ic_background"
-            app:layout_constraintTop_toBottomOf="@+id/netomiChat" />
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/img_chat"
-            android:layout_margin="40dp"
-            android:background="@drawable/float_button_gradient"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:src="@drawable/ic_chat"
-            android:layout_width="52dp"
-            android:layout_height="52dp"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <ProgressBar
+        android:id="@+id/fullscreen_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+</FrameLayout>
     <!-- Navigation View -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navView"

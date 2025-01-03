@@ -20,11 +20,34 @@ object NCWAppConstant {
     const val TYPE_RESPONSE="RESPONSE"
     const val TYPE_REQUEST="REQUEST"
     const val TYPE_INITIAL="INITIAL"
+
+    const val TYPE_EVENT="EVENT"
+    const val TYPE_PILLS="PILLS"
+    const val SUB_TYPE_WAIT="WAIT"
+    const val SUB_TYPE_JOIN="JOIN"
+    const val SUB_TYPE_LEAVE="LEAVE"
+    const val TYPE_AGENT_EVENT="AGENT_EVENT"
+    const val TYPE_QUEUE_POSITION="QUEUE_POSITION"
+
+
+
     const val SESSION="session"
     const val SIZE_LIMIT="limit"
 
 
-    const val BOT="BOT"
+    const val TYPE_FORM="FORM"
+
+    const val FORM_DATE_FORMAT="mm/dd/yyyy"
+
+    const val SHOW_FORM_DATE_FORMAT="dd/mm/yyyy"
+
+    const val TYPE_ATTACHMENT="attachment"
+    const val TYPE_FORM_ATTACHMENT="form_attachment"
+
+
+    const val TYPE_BOT="BOT"
+    const val TYPE_AGENT="AGENT"
+
 
     const val TIME_AM_PM="hh:mm a"
     const val ARG_MEDIA_URL = "media_url"
@@ -38,5 +61,28 @@ object NCWAppConstant {
     const val TYPE_CAROUSEL="ai.msg.domain.responses.core.Carousel"
 
     const val DATE_FORMAT="yyyyMMdd_HHmmss"
+
+
+    const val TYPE_SUBMITTED_SURVEY="submittedSurvey"
+    const val TYPE_SHOW_SURVEY="showSurvey"
+    const val NORMAL="normal"
+    const val STREAMING="streaming"
+
+
+    object RatingType {
+        const val STAR = "STAR"
+        const val NUM_10 = "NUM_10"
+        const val NUM_5 = "NUM_5"
+        const val EMOJI = "EMOJI"
+        const val THUMBS_UP_DOWN = "THUMBS_UP_DOWN"
+
+        const val STAR_VALUE = 0
+        const val NUM_VALUE = 1
+        const val EMOJI_VALUE = 2
+        const val THUMBS_UP_DOWN_VALUE = 3
+    }
+
+
+
 
 }

@@ -17,4 +17,8 @@ object NCWRoutes {
 
     const val ROUTE_BOT_JSON_CONFIG =API + "webhook-history-v2"
 
+    const val ROUTE_FEEDBACK_CHAT = API + "webhook-event"
+
+    const val ROUTE_SURVEY= "ROUTE_SURVEY"
+
 }

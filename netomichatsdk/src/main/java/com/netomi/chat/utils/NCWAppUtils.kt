@@ -8,10 +8,13 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.text.Html
+import android.text.method.LinkMovementMethod
 import android.view.inputmethod.InputMethodManager
 import android.webkit.MimeTypeMap
+import android.widget.TextView
 import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.netomi.chat.model.messages.Component
 import com.netomi.chat.utils.NCWAppConstant.TIME_AM_PM
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FILE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_IMAGE
@@ -27,6 +30,17 @@ import java.util.Locale
 
 
 object NCWAppUtils {
+
+    private val emailPattern = android.util.Patterns.EMAIL_ADDRESS
+    private val urlPattern = android.util.Patterns.WEB_URL
+
+    fun isValidEmail(input: String): Boolean {
+        return emailPattern.matcher(input).matches()
+    }
+
+    fun isValidUrl(input: String): Boolean {
+        return urlPattern.matcher(input).matches()
+    }
     fun hideKeyboard(context: Activity) {
         val inputManager: InputMethodManager =
             context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -55,6 +69,13 @@ object NCWAppUtils {
         } else {
             Html.fromHtml(input).toString().trim()
         }
+    }
+
+    fun setHtmlText(textView: TextView, input: String) {
+        val formattedText = Html.fromHtml(input, Html.FROM_HTML_MODE_LEGACY)
+        textView.text = formattedText.trim()
+
+        textView.movementMethod= LinkMovementMethod.getInstance()
     }
 
 
@@ -208,6 +229,27 @@ object NCWAppUtils {
         }
         return true
     }
+
+    fun isFormSizeValid(formComponent: Component, fileSend: File): Boolean {
+        val maxUploadSizeAllowedMB = formComponent?.config?.maxUploadSizeAllowed ?: 0 // Default to 0 if null, unit is MB
+        val previousFileInMB = formComponent?.fileUpload
+            ?.filter { it.fileSize != null } // Ensure fileSize is not null
+            ?.sumOf {
+                it.fileSize!!.toDouble() / (1024 * 1024) // Convert bytes to MB
+            }
+            ?: 0.0
+        val currentFileSizeMB = fileSend?.length()?.toDouble()?.div(1024 * 1024) ?: 0.0
+        val allSize = previousFileInMB + currentFileSizeMB
+
+        if (allSize > maxUploadSizeAllowedMB) {
+
+            return false
+        }
+        return true
+    }
+
+
+
 
 
 }

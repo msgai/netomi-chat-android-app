@@ -13,11 +13,14 @@ import com.netomi.chat.model.NCWSendMessageResponse
 import com.netomi.chat.model.chat_history.NCWGetChatHistoryPayload
 import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEndChatResponse
+import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
+import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackResponse
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.NCWWebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
+import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.NCWState
@@ -59,6 +62,13 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
 
     private val _NCW_endChatResponse=NCWSingleLiveEvent<NCWState<NCWEndChatResponse>>()
     val endChatResponse get()=_NCW_endChatResponse
+
+    private val _NCW_Survey_RESPONSE=NCWSingleLiveEvent<NCWState<NCWEndChatResponse>>()
+    val surveyResponse get()=_NCW_Survey_RESPONSE
+
+
+    private val _feedbackResponse=NCWSingleLiveEvent<NCWState<NCWFeedbackResponse>>()
+    val feedbackResponse get()=_feedbackResponse
 
 
    /* private var _getConversationId =
@@ -193,6 +203,30 @@ Log.e("DataaResposne","response"+response)
             }
         }
 
+    }
+
+    fun hitSubmitSurveyRequestAPI(message: SubmitSurveyRequest) {
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.hitSubmitSurveyRequestAPI(message)
+
+            withContext(Dispatchers.Main) {
+                Log.e("sendMessageAPI", "response " + response)
+                _NCW_Survey_RESPONSE.value = response
+            }
+        }
+
+    }
+
+    fun hitFeedbackAPI(message: NCWFeedbackRequest) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.hitFeedbackAPI(message)
+
+            withContext(Dispatchers.Main) {
+                Log.e("Feedback Response", "response " + response)
+                _feedbackResponse.value = response
+            }
+        }
 
     }
 

@@ -12,11 +12,14 @@ import com.netomi.chat.model.NCWSendMessageResponse
 import com.netomi.chat.model.chat_history.NCWGetChatHistoryPayload
 import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEndChatResponse
+import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
+import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackResponse
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.NCWWebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
+import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.utils.NCWRoutes
 import com.netomi.chat.utils.NCWState
 import com.netomi.chat.utils.NCWAppUtils.createRequestBody
@@ -239,6 +242,42 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
             val response = apiInterface.hitEndChatAPI(payload)
             if (response.isSuccessful && response.body() != null) {
                 NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_END_CHAT)
+            } else {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    NCWState.error(parseError(errorBody), code = response.code())
+                } else {
+                    NCWState.error(mapApiException(response.code()), code = response.code())
+                }
+            }
+        } catch (e: Exception) {
+            NCWState.error(e.message.toString(), code = 500)
+        }
+    }
+
+    /** Hit Feedback API*/
+    suspend fun hitFeedbackAPI(payload: NCWFeedbackRequest): NCWState<NCWFeedbackResponse> {
+        return try {
+            val response = apiInterface.hitFeedbackAPI(payload)
+            if (response.isSuccessful && response.body() != null) {
+                NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_FEEDBACK_CHAT)
+            } else {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    NCWState.error(parseError(errorBody), code = response.code())
+                } else {
+                    NCWState.error(mapApiException(response.code()), code = response.code())
+                }
+            }
+        } catch (e: Exception) {
+            NCWState.error(e.message.toString(), code = 500)
+        }
+    }
+    suspend fun hitSubmitSurveyRequestAPI(payload: SubmitSurveyRequest): NCWState<NCWEndChatResponse> {
+        return try {
+            val response = apiInterface.hitSubmitSurveyRequestAPI(payload)
+            if (response.isSuccessful && response.body() != null) {
+                NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_SURVEY)
             } else {
                 val errorBody = response.errorBody()
                 if (errorBody != null) {

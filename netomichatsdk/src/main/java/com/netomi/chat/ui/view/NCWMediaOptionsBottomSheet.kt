@@ -12,7 +12,8 @@ import com.netomi.chat.R
 class NCWMediaOptionsBottomSheet(
     private val onCameraClick: () -> Unit,
     private val onGalleryClick: () -> Unit,
-    private val onFileClick: () -> Unit
+    private val onFileClick: () -> Unit,
+    private val  supportedExtensions:List<String>
 ) : BottomSheetDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -38,19 +39,26 @@ class NCWMediaOptionsBottomSheet(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.findViewById<View>(R.id.rowCamera).setOnClickListener {
-            onCameraClick.invoke()
-            dismiss()
+        val imageVideoExtensions = listOf("jpg", "jpeg", "png", "mp4", "mov","mp3")
+        val fileExtensions = listOf("pdf", "doc", "docx", "txt")
+
+        val hasImageOrVideo = supportedExtensions.any { it in imageVideoExtensions }
+        val hasFile = supportedExtensions.any { it in fileExtensions }
+
+        fun setupView(viewId: Int, isVisible: Boolean, action: () -> Unit) {
+            view.findViewById<View>(viewId)?.apply {
+                visibility = if (isVisible) View.VISIBLE else View.GONE
+                setOnClickListener {
+                    action()
+                    dismiss()
+                }
+            }
         }
 
-        view.findViewById<View>(R.id.rowGallery).setOnClickListener {
-            onGalleryClick.invoke()
-            dismiss()
-        }
-
-        view.findViewById<View>(R.id.rowFile).setOnClickListener {
-            onFileClick.invoke()
-            dismiss()
-        }
+        setupView(R.id.rowCamera, hasImageOrVideo, onCameraClick)
+        setupView(R.id.viewCamera, hasImageOrVideo, onCameraClick)
+        setupView(R.id.rowGallery, hasImageOrVideo, onGalleryClick)
+        setupView(R.id.viewGallery, hasImageOrVideo, onGalleryClick)
+        setupView(R.id.rowFile, hasFile, onFileClick)
     }
 }

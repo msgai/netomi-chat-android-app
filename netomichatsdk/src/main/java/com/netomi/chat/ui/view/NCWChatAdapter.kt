@@ -1,10 +1,13 @@
 package com.netomi.chat.ui.view
 
+import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -16,28 +19,43 @@ import com.google.android.material.chip.ChipGroup
 import com.netomi.chat.R
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
+import com.netomi.chat.model.messages.Component
+import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWChatActionCallback
+import com.netomi.chat.utils.NCWFeedbackActionCallback
 import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWChatAdapter(
     private val messages: MutableList<NCWMessage>,
     private val themeData: NCWThemeResponse?,
-    private val actionCallback: NCWChatActionCallback
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private val actionCallback: NCWChatActionCallback,
+    private val feedbackActionCallBack:NCWFeedbackActionCallback,
+    private val callBack: (Component?) -> Unit,
+    private val formData: (String?, String?, ArrayList<NCWAttachmentList>) -> Unit,
+    private val callBackSurvey: (NCWMessage?) -> Unit,
 
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    // To map messageIDs to positions in the RecyclerView
+    private val messageMap = mutableMapOf<String, Int>()
     companion object {
         private const val VIEW_TYPE_REQUEST = 1
         private const val VIEW_TYPE_RESPONSE = 2
         private const val VIEW_TYPE_INDICATOR = 3
+        private const val VIEW_TYPE_FORM = 4
+        private const val VIEW_TYPE_EVENT = 5
+        private const val VIEW_TYPE_PILLS = 6
     }
 
     override fun getItemViewType(position: Int): Int {
         return when (messages[position].sender) {
             NCWAppConstant.TYPE_REQUEST -> VIEW_TYPE_REQUEST
             NCWAppConstant.TYPE_INDICATOR -> VIEW_TYPE_INDICATOR
+            NCWAppConstant.TYPE_FORM-> VIEW_TYPE_FORM
+            NCWAppConstant.TYPE_EVENT->VIEW_TYPE_EVENT
+            NCWAppConstant.TYPE_PILLS->VIEW_TYPE_PILLS
             else -> VIEW_TYPE_RESPONSE
         }
     }
@@ -46,12 +64,18 @@ class NCWChatAdapter(
         val view = when (viewType) {
             VIEW_TYPE_REQUEST -> inflater.inflate(R.layout.layout_request, parent, false)
             VIEW_TYPE_INDICATOR -> inflater.inflate(R.layout.layout_add_loader, parent, false)
+            VIEW_TYPE_FORM -> inflater.inflate(R.layout.layout_form, parent, false)
+            VIEW_TYPE_EVENT -> inflater.inflate(R.layout.layout_survey_event, parent, false)
+            VIEW_TYPE_PILLS -> inflater.inflate(R.layout.layout_pills, parent, false)
             else -> inflater.inflate(R.layout.layout_response, parent, false)
         }
         return when (viewType) {
             VIEW_TYPE_REQUEST -> RequestViewHolder(view, themeData,actionCallback)
             VIEW_TYPE_INDICATOR -> InitialViewHolder(view)
-            else -> ResponseViewHolder(view,themeData,actionCallback)
+            VIEW_TYPE_FORM -> FormViewHolder(view)
+            VIEW_TYPE_EVENT -> SurveyViewHolder(view)
+            VIEW_TYPE_PILLS->PillViewHolder(view)
+            else -> ResponseViewHolder(view,themeData,actionCallback,feedbackActionCallBack)
         }
     }
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -60,7 +84,9 @@ class NCWChatAdapter(
         when (holder) {
             is RequestViewHolder -> holder.bind(message)
             is ResponseViewHolder -> holder.bind(message,position)
-           // is InitialViewHolder -> holder.bind(message,position)
+            is FormViewHolder->holder.bind(message,callBack,formData)
+            is SurveyViewHolder->holder.bind(message,callBackSurvey)
+         is PillViewHolder -> holder.bind(message)
         }
     }
 
@@ -166,17 +192,145 @@ class NCWChatAdapter(
   }
 
 
+
+
+    class FormViewHolder(
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView) {
+
+        private val rootLayout: ConstraintLayout = itemView.findViewById(R.id.constRow)
+        private val tvFormTitle: TextView = itemView.findViewById(R.id.tvFormTitle)
+        private val recyclerViewForm: RecyclerView = itemView.findViewById(R.id.formRecyclerView)
+        private val tvFormDesc: TextView = itemView.findViewById(R.id.tvFormDesc)
+        private var formAdapter: NCWFormAdapter? = null
+
+        fun bind(
+            message: NCWMessage,
+            callBack: (Component?) -> Unit,
+            formData: (String?, String?,ArrayList<NCWAttachmentList>) -> Unit
+        ) {
+            NCWThemeUtils.setBotConfig(rootLayout)
+            NCWThemeUtils.setBotTextColor(tvFormTitle)
+            NCWThemeUtils.setTimeStampColor(tvFormTitle)
+            tvFormTitle.text= message.formSchema?.properties?.question ?: ""
+            if (message.formSchema?.properties?.description.isNullOrEmpty())
+                tvFormDesc.visibility=View.GONE
+            else
+            {
+                tvFormDesc.visibility=View.VISIBLE
+                tvFormDesc.text= message.formSchema?.properties?.description ?: ""
+            }
+
+            recyclerViewForm.layoutManager =
+                LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
+            formAdapter = message.formSchema?.schema?.let { schema ->
+                NCWFormAdapter(schema, message.formSchema!!,{ callBack ->
+                    // Handle the component callback
+                    if (callBack != null) {
+                        callBack(callBack)
+                        // Log.e("SelectedComponent", "iiit " + callBack.config)
+                    }
+                }, { payload, label,attachmentList ->
+                    // Handle the payload and label response here
+                    println("Payload: $payload")
+                    println("Label: $label")
+                    formData(payload,label,attachmentList)
+                })
+            }
+
+            recyclerViewForm.adapter = formAdapter
+
+         //   recyclerViewForm.isEnabled = message.formSchema?.formData.isNullOrEmpty()
+
+            /*if (!message.formSchema?.formData.isNullOrEmpty()) {
+                Log.e("recyclerViewForm.isEnabled", "recyclerViewForm.isEnabled Ifff")
+                recyclerViewForm.isEnabled = false
+                recyclerViewForm.isClickable = false
+            } else {
+                Log.e("recyclerViewForm.isEnabled", "recyclerViewForm.isEnabled Elseeee")
+                recyclerViewForm.isEnabled = true
+                recyclerViewForm.isClickable = true
+            }*/
+
+            if (message.formSchema?.formData.isNullOrEmpty()) {
+                Log.e("formSchema","Uuuduudd")
+                formAdapter?.isClickable =true
+            } else {
+                Log.e("formSchema ","Elllssseee")
+                formAdapter?.isClickable =false
+            }
+
+
+
+
+        }
+
+        class NonInteractiveLayoutManager(context: Context) : LinearLayoutManager(context) {
+            override fun canScrollVertically(): Boolean = false
+        }
+        fun updateFormAdapterData(components: List<Component>, formComponent: Component) {
+            val index = components.indexOfFirst { it.id == formComponent.id }
+            if (index != -1) {
+                Log.e("Data", "Updating item at position $index: $formComponent")
+                formAdapter?.updateItem(index, formComponent)
+            } else {
+                Log.e("UpdateFormAdapterData", "Component not found with id: ${formComponent.id}")
+            }
+        }
+
+
+    }
+
+    class SurveyViewHolder(
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView) {
+
+
+        private val constRowEvent: ConstraintLayout = itemView.findViewById(R.id.constRowEvent)
+        private val tvThank: TextView = itemView.findViewById(R.id.tvThank)
+        private val tvComplete: TextView = itemView.findViewById(R.id.tvComplete)
+        private val tvViewResponse: TextView = itemView.findViewById(R.id.tvViewResponse)
+        fun bind(message: NCWMessage, callBackSurvey: (NCWMessage?) -> Unit) {
+
+            NCWThemeUtils.setBotConfig(constRowEvent)
+            NCWThemeUtils.setBotTextColor(tvComplete)
+            NCWThemeUtils.setBotTextColor(tvThank)
+            NCWThemeUtils.setBotTextColor(tvViewResponse)
+            constRowEvent.setOnClickListener {
+                callBackSurvey(message)
+            }
+
+        }
+
+
+
+    }
+    class PillViewHolder(
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView) {
+
+        private val tvPills: TextView = itemView.findViewById(R.id.tvPills)
+        fun bind(message: NCWMessage) {
+            tvPills.text=message.message
+        }
+
+
+    }
+
     class InitialViewHolder(
         itemView: View,
     ) : RecyclerView.ViewHolder(itemView) {
-        private val LoaderContainer: ConstraintLayout = itemView.findViewById(R.id.constRow)
+
+
+
 
     }
 
     class ResponseViewHolder(
         itemView: View,
         val themeData: NCWThemeResponse?,
-        private val chatActionCallback:NCWChatActionCallback
+        private val chatActionCallback:NCWChatActionCallback,
+        private val feedbackActionCallBack: NCWFeedbackActionCallback
     ) : RecyclerView.ViewHolder(itemView) {
         private val messageText: TextView = itemView.findViewById(R.id.tvReceiverMessage)
         private val imageView: ImageView = itemView.findViewById(R.id.receiverImage)
@@ -192,6 +346,9 @@ class NCWChatAdapter(
         private val buttonRecyclerView: RecyclerView = itemView.findViewById(R.id.buttonRecyclerView)
         private val tvTime: TextView = itemView.findViewById(R.id.tvTime)
         private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
+        private val thumbUpImageButton: ImageView = itemView.findViewById(R.id.thumbUpButton)
+        private val thumbDownImageButton: ImageView = itemView.findViewById(R.id.thumbDownButton)
+        private val llFeedback: LinearLayout = itemView.findViewById(R.id.ll_feedback)
 
         fun bind(message: NCWMessage,position: Int) {
             // Hide all views initially to avoid redundant visibility changes
@@ -208,11 +365,29 @@ class NCWChatAdapter(
             NCWThemeUtils.setTimeStampColor(tvTime)
             imgBot.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.INVISIBLE
             tvTime.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.GONE
+            llFeedback.visibility=if(message.isSameTimeMessage)View.VISIBLE else View.GONE
 
+            if (message.isSameTimeMessage) {
+                Glide.with(itemView.context)
+                    .load(message.agentAvatar ?: R.drawable.ic_bot_profile)
+                    .placeholder(R.drawable.ic_bot_profile)
+                    .into(imgBot)
+            }
+
+            NCWThemeUtils.setBotConfig(thumbUpImageButton)
+            NCWThemeUtils.setBotConfig(thumbDownImageButton)
+            // Initialize Feedback UI based on state
+            if (message.isReviewEnabled) {
+                llFeedback.visibility = View.VISIBLE
+                updateFeedbackUI(message)
+            } else {
+                llFeedback.visibility = View.GONE
+            }
             when (message.type) {
                 MessageType.TEXT -> {
                     message.message?.let {
-                      messageText.text=NCWAppUtils.setHtmText(it)
+                      //messageText.text=NCWAppUtils.setHtmText(it)
+                        NCWAppUtils.setHtmlText(messageText,it)
                         messageText.visibility = View.VISIBLE
                         NCWThemeUtils.setBotConfig(messageText)
                     } ?: run {
@@ -306,6 +481,62 @@ class NCWChatAdapter(
             cardVideo.setOnClickListener {
                 chatActionCallback.onMediaClick(message)
             }
+            // Thumbs-up click listener
+           thumbUpImageButton.setOnClickListener {
+               if (message.feedbackValue != "POSITIVE") { // Prevent API call if already selected
+                   message.feedbackValue = "POSITIVE"
+                   updateFeedbackUI(message)
+                   feedbackActionCallBack.onThumbUpClick(message.requestID!!) // API call
+               }
+            }
+
+            // Thumbs-down click listener
+            thumbDownImageButton.setOnClickListener {
+                if (message.feedbackValue != "NEGATIVE") { // Prevent API call if already selected
+                    message.feedbackValue = "NEGATIVE"
+                    updateFeedbackUI(message)
+                    feedbackActionCallBack.onThumbDownClick(message.requestID!!) // API call
+                }
+            }
+        }
+
+        private fun updateFeedbackUI(message: NCWMessage) {
+            when (message.feedbackValue) {
+                "POSITIVE" -> {
+                    thumbUpImageButton.setImageResource(R.drawable.thumbs_up_selected)
+                    thumbDownImageButton.visibility = View.GONE
+                }
+                "NEGATIVE" -> {
+                    thumbDownImageButton.setImageResource(R.drawable.thumbs_down_selected)
+                    thumbUpImageButton.visibility = View.GONE
+                }
+                else -> {
+                    thumbUpImageButton.setImageResource(R.drawable.thumbs_up_unselected)
+                    thumbDownImageButton.setImageResource(R.drawable.thumbs_down_unselected)
+                    thumbUpImageButton.visibility = View.VISIBLE
+                    thumbDownImageButton.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
+    // Function to append text or add a new message
+    fun updateOrAppendMessage(newMessage: NCWMessage) {
+        val index = messages.indexOfFirst { it.requestID == newMessage.requestID && it.sender==newMessage.sender }
+        if (index != -1) {
+            // Message already exists; append text
+            messages[index].message += newMessage.message
+
+            // Update isReviewEnabled flag if it changes
+            if(!messages[index].isReviewEnabled) {
+                messages[index].isReviewEnabled = newMessage.isReviewEnabled
+            }
+
+            notifyItemChanged(index)
+        } else {
+            // Add new message to the list
+            messages.add(newMessage)
+            notifyItemInserted(messages.size - 1)
         }
     }
 

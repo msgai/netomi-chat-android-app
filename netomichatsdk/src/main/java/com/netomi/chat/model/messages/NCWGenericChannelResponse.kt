@@ -1,5 +1,8 @@
 package com.netomi.chat.model.messages
 
+import com.netomi.chat.survey.EventData
+import com.netomi.chat.survey.EventInfo
+
 data class NCWGenericChannelResponse(
     val type: String? = null,
     val botReferenceId: String? = null,
@@ -8,12 +11,15 @@ data class NCWGenericChannelResponse(
     val channel: String? = null,
     val requestId: String? = null,
     val requestPayload: NCWRequestPayload? = null,
-    val customFields: List<Any> = emptyList(),
+
     val botId: String? = null,
     val attachments: List<NCWAttachment>? = null,
     val customPayload: NCWCustomPayload? = null,
-    val triggerType: String? = null
+    val triggerType: String? = null,
+    val customFields: List<CustomField>? = null,
+    val eventObject: EventObject? = null
 )
+
 
 data class NCWRequestPayload(
     val conversationId: String? = null,
@@ -31,7 +37,7 @@ data class NCWAttachmentListRequest(
 
     var type: String? = null,
     var title: String? = null,
-    var timestamp: Int? = null,
+    var timestamp: Long? = null,
     var largeImageUrl: String? = null,
     var isReviewEnabled: Boolean? = null,
     var thumbnailUrl: String? = null,
@@ -50,7 +56,7 @@ data class NCWAttachmentContent(
     val text: String? = null,
     val description: String? = null,
     val timestamp: Long? = null,
-    val isReviewEnabled: Boolean? = null,
+    val isReviewEnabled: Boolean=false,
     val attachmentResponseType: String? = null,
     val intentId: String? = null,
     val responseId: Int? = null,
@@ -62,6 +68,7 @@ data class NCWAttachmentContent(
     val carouselImageAspectRatio: String? = null,
     val thumbnailUrl: String? = null,
     val title: String? = null,
+    val feedbackValue: String?=null,
     var buttons: ArrayList<NCWCarouselButton> = arrayListOf()
 
 )
@@ -96,17 +103,27 @@ data class NCWCarouselButton(
 )
 
 data class NCWCustomPayload(
-    val TRANSLATE_LANGUAGE: String? = null
+    val TRANSLATE_LANGUAGE: String? = null,
+    val CHUNK_INDEX: String?=null,
+    val CHUNK_STATUS:String?=null,
+    val PARTIAL_RESPONSE:String?=null,
+    val INPUT_REQUEST_TIME:String?=null,
+    val FINAL_CHUNK_TIME:String?=null,
+    val FIRST_CHUNK_TIME:String?=null
+)
+data class EventObject(
+    val triggerType: String,
+    val eventData: EventData,
+    val eventName: String,
+    val botReferenceId: String,
+    val botId: String,
+    val conversationId: String,
+    val requestId: String,
+    val channelId: String,
+    val isPublishToMQTT: Boolean,
+    val timestamp: Long,
+    val subType: String,
 )
 
 
-data class NCWButtons(
-
-    var type: String? = null,
-    var url: String? = null,
-    var title: String? = null,
-    var messengerExtensions: Boolean? = null
-
-
-)
 

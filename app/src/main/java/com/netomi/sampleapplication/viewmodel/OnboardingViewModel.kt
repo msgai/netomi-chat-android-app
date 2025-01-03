@@ -1,8 +1,23 @@
 package com.netomi.sampleapplication.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import com.netomi.chat.model.NCWGetChatHistoryResponse
+import com.netomi.chat.model.NCWMessage
+import com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent
+import com.netomi.chat.utils.NCWState
 import com.netomi.sampleapplication.data.repository.AppRepository
+import com.netomi.sampleapplication.model.Bot
+import com.netomi.sampleapplication.model.BotListingRequest
+import com.netomi.sampleapplication.model.BotListingResponse
+import com.netomi.sampleapplication.utils.State
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * ViewModel for managing chat messages in the NCWChat application
@@ -25,5 +40,28 @@ import com.netomi.sampleapplication.data.repository.AppRepository
 class OnboardingViewModel(application: Application) : AndroidViewModel(application) {
     private val onboardingRepository = AppRepository(application.applicationContext)
 
+    private val _botListing = SingleEvent<State<BotListingResponse>>()
+    val botListing get() = _botListing
+
+
+    private val _botList = MutableLiveData<Bot>()
+    val botList: LiveData<Bot> get() = _botList
+
+
+
+    fun getBotListing() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = onboardingRepository.getBotListing(_botListing)
+            withContext(Dispatchers.Main) {
+                Log.e("ConversationIdResponse", "response " + response)
+                _botListing.value = response // Use setValue on the Main thread
+            }
+        }
+    }
+
+    // Function to update the bot list
+    fun updateBotList(bots: Bot) {
+        _botList.value = bots
+    }
 
 }
