@@ -63,7 +63,7 @@ data class TextAreaInputField(
     val errorTextView: TextView
 )
 data class DateField(
-    val dateField: TextView,
+    val dateField: EditText,
     val errorTextView: TextView,
     val container: RelativeLayout
 )
@@ -142,6 +142,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 setPadding(16, 30, 16, 30)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                 layoutParams = defaultLayoutParams()
+                NCWThemeUtils.setBotTextColor(this)
 
             }
 
@@ -218,6 +219,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 layoutParams = defaultLayoutParams()
                 minLines = 4
                 isEnabled = isClickable
+                NCWThemeUtils.setBotTextColor(this)
             }
 
             val errorTextView = TextView(itemView.context).apply {
@@ -394,6 +396,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             val arrowIcon: ImageView = dropdownView.findViewById(R.id.arrow_icon)
             val itemsContainer: LinearLayout = dropdownView.findViewById(R.id.dropdown_items_container)
             var isDropdownOpen = false
+            NCWThemeUtils.setBotTextColor(selectedText)
             createDrawable(rootView)
 
             dropdownView.findViewById<RelativeLayout>(R.id.selected_view).setOnClickListener {
@@ -463,9 +466,13 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             }
 
             // Create the date input TextView
-            val textView = TextView(itemView.context).apply {
+            val textView = EditText(itemView.context).apply {
                 id = View.generateViewId()
-                text = FORM_DATE_FORMAT
+                hint = FORM_DATE_FORMAT
+                isClickable = false
+                isFocusable = false
+                isFocusableInTouchMode = false
+                isCursorVisible = false
                 setPadding(10, 0, 16, 0)
                 layoutParams = RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
@@ -488,7 +495,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                            // val showSelectedDate = "$dayOfMonth/${month + 1}/$year"
                             val errorMessage = validateDate(selectedDate, component)
                             if (errorMessage == null) {
-                                text = showSelectedDate
+                               setText(showSelectedDate)
                                 inputValuesSelected[adapterPosition].dateInput = selectedDate
                                 textViewError.visibility = View.GONE
                                 createDrawable(container)
@@ -496,7 +503,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                 textViewError.text = errorMessage
                                 textViewError.visibility = View.VISIBLE
                                 createErrorDrawable(container)
-                                text = FORM_DATE_FORMAT
+                                hint = FORM_DATE_FORMAT
                             }
                         },
                         calendar.get(Calendar.YEAR),
@@ -541,7 +548,8 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             if (adapterPosition in (formSchema.formData?.indices ?: emptyList())) {
                 val textInput = formSchema.formData?.get(adapterPosition)?.textInput
                 if (textInput != null) {
-                    textView.text = textInput.toString()
+                    textView.setText(textInput)
+                    //textView.text = textInput.toString()
                 }
             }
         }
@@ -734,7 +742,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                             Log.d("SelectedOption", "Selected file: $selectedOption")
                             component.fileUpload?.remove(selectedOption)
                             inputValuesSelected.getOrNull(adapterPosition)?.fileUpload?.remove(selectedOption)
-                            notifyDataSetChanged()
+                            //notifyDataSetChanged()
                         }
                     } else {
                         recyclerDoc.adapter!!.notifyDataSetChanged()
@@ -864,6 +872,8 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 ).apply {
                     setMargins(10, 30, 10, 30) // Add padding/margins as needed
                 }
+
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                 NCWThemeUtils.createRoundedDrawable(this)
             }
 
@@ -983,15 +993,17 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
             val successMessage = TextView(context).apply {
                 text = "Submitted"
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
                 setTextColor(ContextCompat.getColor(context, R.color.black))
                 gravity = Gravity.CENTER_VERTICAL
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 ).apply {
-                    setMargins(0, 0, 10, 0)
+                    setMargins(10, 0, 10, 0)
                 }
+                typeface = Typeface.DEFAULT_BOLD
+
             }
 
 
@@ -1109,6 +1121,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                         errorTextView.text = "This field is required"
                                         isValid = false
                                     } else {
+
                                         errorTextView.visibility = View.GONE
                                     }
                                 }
@@ -1121,7 +1134,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                 if (item.additionalSettings["Required"]?.value == true) {
                                     val editText = value.dateField
                                     val errorTextView = value.errorTextView
-                                    if (editText.text == FORM_DATE_FORMAT) {
+                                    if (editText.text.isNullOrEmpty()) {
                                         errorTextView.visibility = View.VISIBLE
                                         errorTextView.text = "This field is required"
                                         createErrorDrawable(value.container)
