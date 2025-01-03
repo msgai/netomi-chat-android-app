@@ -29,17 +29,20 @@ object NCWChatSdk {
      * @param context The application context for initialization.
      * @param botRefId The bot reference ID required to fetch the chat theme.
      */
-    fun initialize(context: Context, botRefId: String) {
-        this.botRefId = botRefId
+    fun initialize(context: Context, newBotRefId: String) {
+        if (botRefId == newBotRefId) return
+
+        botRefId = newBotRefId
         if (NCWAppUtils.isNetworkAvailable(context)) {
-            fetchAndStoreTheme(context, botRefId)
+            setThemeData()
+            fetchAndStoreTheme(context, newBotRefId)
             setConversationEmpty()
         } else {
             Log.e("NCWChatSdk", "No network available during initialization.")
         }
     }
 
-    fun setThemeData(){
+    private fun setThemeData(){
         NCWThemeUtils.setThemeData(null)
     }
 
@@ -49,7 +52,7 @@ object NCWChatSdk {
 
     /**
      * Launches the NCW chat activity.
-     *
+
      * @param context The context from which the activity is launched.
      *
      * This function ensures the theme data is fetched and available before launching the chat.
