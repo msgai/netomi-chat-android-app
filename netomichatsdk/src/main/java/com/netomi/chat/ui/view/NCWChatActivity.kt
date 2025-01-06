@@ -29,7 +29,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.appcompat.widget.ThemeUtils
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -82,7 +81,6 @@ import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.NCWChatActionCallback
-import com.netomi.chat.utils.DeviceInfo
 import com.netomi.chat.utils.DeviceInfoUtil
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWFilePath
@@ -893,7 +891,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 }
 
                 is NCWState.Success -> {
-                    messageAdapter.notifyDataSetChanged()
+                    //messageAdapter.notifyDataSetChanged()
                 }
 
                 is NCWState.Error -> {
@@ -1173,6 +1171,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         } else {
             type = NCWAppConstant.NORMAL
         }
+        Log.e("type","type "+type)
         val newMessages =
             response?.attachments?.mapNotNull {
                 mapAttachmentToMessage(
@@ -1192,6 +1191,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     "IN-PROGRESS"
                 )
             ) {
+
                 Log.e("Streaming Chunk", "Streaming Chunk")
                 for (i in newMessages.indices) {
                     updateStreamMessage(newMessages[i])
@@ -1293,6 +1293,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun updateStreamMessage(streamMessage: NCWMessage) {
+        //removeLoader()
         addStreamMessages(streamMessage)
     }
 
@@ -2033,7 +2034,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
 
             NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
-                messageAdapter.notifyDataSetChanged()
+             //   messageAdapter.notifyDataSetChanged()
             }
 
             NCWRoutes.ROUTE_SURVEY -> {
@@ -2254,13 +2255,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         constProgressBar.visibility = View.GONE
     }
 
-    override fun onThumbUpClick(requestId: String) {
+    override fun onThumbUpClick(requestId: String, position: Int) {
         Log.e("RequestId ThumbUp", requestId)
+        messageAdapter.notifyItemChanged(position)
         hitFeedbackAPI(requestId, "POSITIVE")
     }
 
-    override fun onThumbDownClick(requestId: String) {
+    override fun onThumbDownClick(requestId: String, position: Int) {
         Log.e("RequestId ThumbDown", requestId)
+        messageAdapter.notifyItemChanged(position)
         hitFeedbackAPI(requestId, "NEGATIVE")
     }
 }
