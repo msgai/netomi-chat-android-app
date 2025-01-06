@@ -51,7 +51,7 @@ class HomeFragment : Fragment() {
                 if(isButtonClickable) {
                     avoidDoubleClick()
                     val name = preferences.getString(SharePreferenceConstant.NAME)
-                    val email = preferences.getString(SharePreferenceConstant.NAME)
+                    val email = preferences.getString(SharePreferenceConstant.EMAIL)
                     NCWChatSdk.launch(activityContext,name,email)
                 }
             }
