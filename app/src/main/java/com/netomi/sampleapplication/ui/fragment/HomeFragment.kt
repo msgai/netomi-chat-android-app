@@ -14,7 +14,6 @@ import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.sampleapplication.R
-import com.netomi.sampleapplication.constant.SharePreferenceConstant
 import com.netomi.sampleapplication.model.Bot
 import com.netomi.sampleapplication.utils.AppSharedPreferences
 import com.netomi.sampleapplication.viewmodel.OnboardingViewModel
@@ -50,9 +49,7 @@ class HomeFragment : Fragment() {
             activity?.let { activityContext ->
                 if(isButtonClickable) {
                     avoidDoubleClick()
-                    val name = preferences.getString(SharePreferenceConstant.NAME)
-                    val email = preferences.getString(SharePreferenceConstant.EMAIL)
-                    NCWChatSdk.launch(activityContext,name,email)
+                    NCWChatSdk.launch(activityContext)
                 }
             }
         }

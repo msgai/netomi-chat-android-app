@@ -8,7 +8,6 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -25,11 +24,9 @@ import com.netomi.sampleapplication.model.BotListingResponse
 import com.netomi.sampleapplication.ui.fragment.ChangeAiAgentFragment
 import com.netomi.sampleapplication.ui.fragment.HomeFragment
 import com.netomi.sampleapplication.utils.AppSharedPreferences
-import com.netomi.sampleapplication.utils.HostRoutes
 import com.netomi.sampleapplication.utils.State
 import com.netomi.sampleapplication.utils.customView.DialogUtils
 import com.netomi.sampleapplication.viewmodel.OnboardingViewModel
-import okhttp3.Route
 
 class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
 
@@ -51,10 +48,11 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         botList = mutableListOf()
-        onboardingViewModel.getBotListing()
-        observeChatMessages()
-        initView()
 
+        initView()
+        val email = preferences.getString(SharePreferenceConstant.EMAIL)
+        onboardingViewModel.getBotListing(email)
+        observeChatMessages()
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, HomeFragment())
