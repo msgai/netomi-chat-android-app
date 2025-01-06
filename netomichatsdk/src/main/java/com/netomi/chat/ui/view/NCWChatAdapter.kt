@@ -67,6 +67,7 @@ class NCWChatAdapter(
             VIEW_TYPE_FORM -> inflater.inflate(R.layout.layout_form, parent, false)
             VIEW_TYPE_EVENT -> inflater.inflate(R.layout.layout_survey_event, parent, false)
             VIEW_TYPE_PILLS -> inflater.inflate(R.layout.layout_pills, parent, false)
+            VIEW_TYPE_RESPONSE->inflater.inflate(R.layout.layout_response, parent, false)
             else -> inflater.inflate(R.layout.layout_response, parent, false)
         }
         return when (viewType) {
@@ -75,7 +76,7 @@ class NCWChatAdapter(
             VIEW_TYPE_FORM -> FormViewHolder(view)
             VIEW_TYPE_EVENT -> SurveyViewHolder(view)
             VIEW_TYPE_PILLS->PillViewHolder(view)
-            else -> ResponseViewHolder(view,themeData,actionCallback,feedbackActionCallBack)
+            else -> ResponseViewHolder(view,actionCallback,feedbackActionCallBack)
         }
     }
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -86,7 +87,7 @@ class NCWChatAdapter(
             is ResponseViewHolder -> holder.bind(message,position)
             is FormViewHolder->holder.bind(message,callBack,formData)
             is SurveyViewHolder->holder.bind(message,callBackSurvey)
-         is PillViewHolder -> holder.bind(message)
+            is PillViewHolder -> holder.bind(message)
         }
     }
 
@@ -240,23 +241,9 @@ class NCWChatAdapter(
 
             recyclerViewForm.adapter = formAdapter
 
-         //   recyclerViewForm.isEnabled = message.formSchema?.formData.isNullOrEmpty()
-
-            /*if (!message.formSchema?.formData.isNullOrEmpty()) {
-                Log.e("recyclerViewForm.isEnabled", "recyclerViewForm.isEnabled Ifff")
-                recyclerViewForm.isEnabled = false
-                recyclerViewForm.isClickable = false
-            } else {
-                Log.e("recyclerViewForm.isEnabled", "recyclerViewForm.isEnabled Elseeee")
-                recyclerViewForm.isEnabled = true
-                recyclerViewForm.isClickable = true
-            }*/
-
             if (message.formSchema?.formData.isNullOrEmpty()) {
-                Log.e("formSchema","Uuuduudd")
                 formAdapter?.isClickable =true
             } else {
-                Log.e("formSchema ","Elllssseee")
                 formAdapter?.isClickable =false
             }
 
@@ -328,7 +315,6 @@ class NCWChatAdapter(
 
     class ResponseViewHolder(
         itemView: View,
-        val themeData: NCWThemeResponse?,
         private val chatActionCallback:NCWChatActionCallback,
         private val feedbackActionCallBack: NCWFeedbackActionCallback
     ) : RecyclerView.ViewHolder(itemView) {
@@ -352,6 +338,9 @@ class NCWChatAdapter(
 
         fun bind(message: NCWMessage,position: Int) {
             // Hide all views initially to avoid redundant visibility changes
+            llFeedback.visibility = View.GONE
+            thumbDownImageButton.visibility = View.GONE
+            thumbUpImageButton.visibility = View.GONE
             messageText.visibility = View.GONE
             imageView.visibility = View.GONE
             videoView.visibility = View.GONE
@@ -365,7 +354,7 @@ class NCWChatAdapter(
             NCWThemeUtils.setTimeStampColor(tvTime)
             imgBot.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.INVISIBLE
             tvTime.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.GONE
-            llFeedback.visibility=if(message.isSameTimeMessage)View.VISIBLE else View.GONE
+           // llFeedback.visibility=if(message.isSameTimeMessage)View.VISIBLE else View.GONE
 
             if (message.isSameTimeMessage) {
                 Glide.with(itemView.context)
@@ -377,10 +366,15 @@ class NCWChatAdapter(
             NCWThemeUtils.setBotConfig(thumbUpImageButton)
             NCWThemeUtils.setBotConfig(thumbDownImageButton)
             // Initialize Feedback UI based on state
+            Log.d("ResponseViewHolder", "Binding message at position: $position, isReviewEnabled: ${message.isReviewEnabled}")
+
+
             if (message.isReviewEnabled) {
+                Log.e("Datatata","ddds Inside"+message)
                 llFeedback.visibility = View.VISIBLE
                 updateFeedbackUI(message)
             } else {
+                Log.e("Datatata","ddds Elseee"+message)
                 llFeedback.visibility = View.GONE
             }
             when (message.type) {
@@ -485,8 +479,8 @@ class NCWChatAdapter(
            thumbUpImageButton.setOnClickListener {
                if (message.feedbackValue != "POSITIVE") { // Prevent API call if already selected
                    message.feedbackValue = "POSITIVE"
-                   updateFeedbackUI(message)
-                   feedbackActionCallBack.onThumbUpClick(message.requestID!!) // API call
+                  // updateFeedbackUI(message)
+                   feedbackActionCallBack.onThumbUpClick(message.requestID!!,position) // API call
                }
             }
 
@@ -494,8 +488,8 @@ class NCWChatAdapter(
             thumbDownImageButton.setOnClickListener {
                 if (message.feedbackValue != "NEGATIVE") { // Prevent API call if already selected
                     message.feedbackValue = "NEGATIVE"
-                    updateFeedbackUI(message)
-                    feedbackActionCallBack.onThumbDownClick(message.requestID!!) // API call
+                  //  updateFeedbackUI(message)
+                    feedbackActionCallBack.onThumbDownClick(message.requestID!!,position) // API call
                 }
             }
         }
@@ -504,11 +498,13 @@ class NCWChatAdapter(
             when (message.feedbackValue) {
                 "POSITIVE" -> {
                     thumbUpImageButton.setImageResource(R.drawable.thumbs_up_selected)
+                    thumbUpImageButton.visibility = View.VISIBLE
                     thumbDownImageButton.visibility = View.GONE
                 }
                 "NEGATIVE" -> {
                     thumbDownImageButton.setImageResource(R.drawable.thumbs_down_selected)
                     thumbUpImageButton.visibility = View.GONE
+                    thumbDownImageButton.visibility = View.VISIBLE
                 }
                 else -> {
                     thumbUpImageButton.setImageResource(R.drawable.thumbs_up_unselected)

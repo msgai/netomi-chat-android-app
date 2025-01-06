@@ -29,7 +29,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.appcompat.widget.ThemeUtils
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -82,7 +81,6 @@ import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.NCWChatActionCallback
-import com.netomi.chat.utils.DeviceInfo
 import com.netomi.chat.utils.DeviceInfoUtil
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWFilePath
@@ -893,7 +891,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 }
 
                 is NCWState.Success -> {
-                    messageAdapter.notifyDataSetChanged()
+                    //messageAdapter.notifyDataSetChanged()
                 }
 
                 is NCWState.Error -> {
@@ -1108,6 +1106,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         }
     }
+    var count=0
 
     private fun createAndShowSurveyBottomSheet(
         requestId: String,
@@ -1161,6 +1160,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun renderTheNormalMessage(response: NCWGenericChannelResponse?) {
+        count++
+        Log.e("response","renderTheNormalMessage ${count}"+response?.attachments)
         var type: String = ""
         if (response?.customPayload?.CHUNK_INDEX != null &&
             (
@@ -1173,6 +1174,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         } else {
             type = NCWAppConstant.NORMAL
         }
+        Log.e("type","type "+type)
         val newMessages =
             response?.attachments?.mapNotNull {
                 mapAttachmentToMessage(
@@ -1192,6 +1194,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     "IN-PROGRESS"
                 )
             ) {
+
                 Log.e("Streaming Chunk", "Streaming Chunk")
                 for (i in newMessages.indices) {
                     updateStreamMessage(newMessages[i])
@@ -1208,10 +1211,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     "SUCCESS"
                 )
             ) {
-                Log.e("Streaming Chunk", "Streaming Chunk Not")
+                Log.e("Streaming Chunk", "Streaming Chunk Not Normm")
                 updateMessageList(newMessages)
             } else {
-                Log.e("Streaming Chunk", "Streaming Chunk Not")
+                Log.e("Streaming Chunk", "Streaming Chunk Not count "+count)
                 updateMessageList(newMessages)
 
             }
@@ -1293,10 +1296,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun updateStreamMessage(streamMessage: NCWMessage) {
+        //removeLoader()
         addStreamMessages(streamMessage)
     }
 
     private fun updateMessageList(newMessages: List<NCWMessage>) {
+        Log.e("Datatta","Callleedd "+count)
         val typingIndicatorEnabled = themeData?.typingIndicator?.enabled ?: false
         if (!typingIndicatorEnabled) {
             addMessages(newMessages)
@@ -1328,6 +1333,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     // Helper function to add messages and scroll to the latest
     private fun addMessages(newMessages: List<NCWMessage>) {
+        Log.e("addMessages","v addMessages"+count)
         messageList.addAll(newMessages)
         messageAdapter.notifyDataSetChanged()
         chatRecyclerView.post {
@@ -1345,7 +1351,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun safelyRemoveLoader(newMessages: List<NCWMessage>) {
+        Log.e("addMessages","v safelyRemoveLoader"+count)
         if (!isLoaderActive) return // Prevent redundant calls
+        Log.e("addMessages","v safelyRemoveLoader no return"+count)
         removeLoader()
         messageList.addAll(newMessages)
         messageAdapter.notifyDataSetChanged()
@@ -2033,7 +2041,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
 
             NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
-                messageAdapter.notifyDataSetChanged()
+             //   messageAdapter.notifyDataSetChanged()
             }
 
             NCWRoutes.ROUTE_SURVEY -> {
@@ -2254,13 +2262,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         constProgressBar.visibility = View.GONE
     }
 
-    override fun onThumbUpClick(requestId: String) {
+    override fun onThumbUpClick(requestId: String, position: Int) {
         Log.e("RequestId ThumbUp", requestId)
+        messageAdapter.notifyItemChanged(position)
         hitFeedbackAPI(requestId, "POSITIVE")
     }
 
-    override fun onThumbDownClick(requestId: String) {
+    override fun onThumbDownClick(requestId: String, position: Int) {
         Log.e("RequestId ThumbDown", requestId)
+        messageAdapter.notifyItemChanged(position)
         hitFeedbackAPI(requestId, "NEGATIVE")
     }
 }
