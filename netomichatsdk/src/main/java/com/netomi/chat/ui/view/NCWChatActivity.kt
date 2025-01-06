@@ -1106,7 +1106,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         }
     }
-    var count=0
+
 
     private fun createAndShowSurveyBottomSheet(
         requestId: String,
@@ -1160,8 +1160,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun renderTheNormalMessage(response: NCWGenericChannelResponse?) {
-        count++
-        Log.e("response","renderTheNormalMessage ${count}"+response?.attachments)
         var type: String = ""
         if (response?.customPayload?.CHUNK_INDEX != null &&
             (
@@ -1211,10 +1209,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     "SUCCESS"
                 )
             ) {
-                Log.e("Streaming Chunk", "Streaming Chunk Not Normm")
+                Log.e("Streaming Chunk", "Streaming Chunk Not")
                 updateMessageList(newMessages)
             } else {
-                Log.e("Streaming Chunk", "Streaming Chunk Not count "+count)
+                Log.e("Streaming Chunk", "Streaming Chunk Not")
                 updateMessageList(newMessages)
 
             }
@@ -1301,7 +1299,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun updateMessageList(newMessages: List<NCWMessage>) {
-        Log.e("Datatta","Callleedd "+count)
         val typingIndicatorEnabled = themeData?.typingIndicator?.enabled ?: false
         if (!typingIndicatorEnabled) {
             addMessages(newMessages)
@@ -1333,7 +1330,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     // Helper function to add messages and scroll to the latest
     private fun addMessages(newMessages: List<NCWMessage>) {
-        Log.e("addMessages","v addMessages"+count)
         messageList.addAll(newMessages)
         messageAdapter.notifyDataSetChanged()
         chatRecyclerView.post {
@@ -1351,9 +1347,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun safelyRemoveLoader(newMessages: List<NCWMessage>) {
-        Log.e("addMessages","v safelyRemoveLoader"+count)
         if (!isLoaderActive) return // Prevent redundant calls
-        Log.e("addMessages","v safelyRemoveLoader no return"+count)
         removeLoader()
         messageList.addAll(newMessages)
         messageAdapter.notifyDataSetChanged()
