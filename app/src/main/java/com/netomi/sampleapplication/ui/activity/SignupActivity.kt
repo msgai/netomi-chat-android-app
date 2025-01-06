@@ -94,6 +94,7 @@ class SignupActivity : AppCompatActivity() {
         createButton.setOnClickListener {
             preferences.setBoolean(SharePreferenceConstant.LOGIN,true)
             preferences.setString(SharePreferenceConstant.NAME,nameEditText.text?.trim().toString())
+            preferences.setString(SharePreferenceConstant.EMAIL,emailEditText.text?.trim().toString())
             startActivity(Intent(this, HomeActivity::class.java))
             finishAffinity()
         }
