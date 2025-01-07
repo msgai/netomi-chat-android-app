@@ -9,6 +9,8 @@ import com.netomi.chat.data.network.NCWRetrofitClient
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.model.NCWSendMessageResponse
+import com.netomi.chat.model.auth.LoginResponse
+import com.netomi.chat.model.auth.LogoutResponse
 import com.netomi.chat.model.chat_history.NCWGetChatHistoryPayload
 import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEndChatResponse
@@ -278,6 +280,42 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
             val response = apiInterface.hitSubmitSurveyRequestAPI(payload)
             if (response.isSuccessful && response.body() != null) {
                 NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_SURVEY)
+            } else {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    NCWState.error(parseError(errorBody), code = response.code())
+                } else {
+                    NCWState.error(mapApiException(response.code()), code = response.code())
+                }
+            }
+        } catch (e: Exception) {
+            NCWState.error(e.message.toString(), code = 500)
+        }
+    }
+
+    suspend fun hitAuthenticateUserApi(jwtToken:String, botRefID:String,authEnabled:String): NCWState<LoginResponse> {
+        return try {
+            val response = apiInterface.hitAuthenticateUserApi(botRefId = botRefID, authToken = jwtToken, authEnabled = "true")
+            if (response.isSuccessful && response.body() != null) {
+                NCWState.success(data = response.body()!!, NCWRoutes.LOGIN)
+            } else {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    NCWState.error(parseError(errorBody), code = response.code())
+                } else {
+                    NCWState.error(mapApiException(response.code()), code = response.code())
+                }
+            }
+        } catch (e: Exception) {
+            NCWState.error(e.message.toString(), code = 500)
+        }
+    }
+
+    suspend fun hitLogoutApi(jwtToken:String, botRefID:String,authEnabled:String): NCWState<LogoutResponse> {
+        return try {
+            val response = apiInterface.hitLogoutAPI(botRefId = botRefID, authToken = jwtToken, authEnabled = "true")
+            if (response.isSuccessful && response.body() != null) {
+                NCWState.success(data = response.body()!!, NCWRoutes.LOGOUT)
             } else {
                 val errorBody = response.errorBody()
                 if (errorBody != null) {

@@ -21,4 +21,8 @@ object NCWRoutes {
 
     const val ROUTE_SURVEY= "ROUTE_SURVEY"
 
+    const val LOGIN= API+"login"
+
+    const val LOGOUT= API+"logout"
+
 }

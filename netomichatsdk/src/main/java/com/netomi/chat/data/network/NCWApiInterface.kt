@@ -3,6 +3,8 @@ package com.netomi.chat.data.network
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.model.NCWSendMessageResponse
+import com.netomi.chat.model.auth.LoginResponse
+import com.netomi.chat.model.auth.LogoutResponse
 import com.netomi.chat.model.chat_history.NCWGetChatHistoryPayload
 import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEndChatResponse
@@ -14,6 +16,8 @@ import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.survey.SubmitSurveyRequest
+import com.netomi.chat.utils.NCWRoutes.LOGIN
+import com.netomi.chat.utils.NCWRoutes.LOGOUT
 import com.netomi.chat.utils.NCWRoutes.ROUTE_END_CHAT
 import com.netomi.chat.utils.NCWRoutes.ROUTE_FEEDBACK_CHAT
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_CHAT
@@ -33,6 +37,7 @@ import retrofit2.http.Query
 import retrofit2.http.Url
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
+import retrofit2.http.Header
 
 /**
  * Retrofit API interface for defining network endpoints in the NCW SDK.
@@ -158,5 +163,24 @@ interface NCWApiInterface {
 
     @POST(ROUTE_END_CHAT)
     suspend fun hitSubmitSurveyRequestAPI(@Body payload: SubmitSurveyRequest?): Response<NCWEndChatResponse>
+
+    @POST(LOGIN)
+    suspend fun fetchJWT(
+        @Header(LOGIN) userDetails: String
+    ): Response<LoginResponse>
+
+    @POST(LOGIN)
+    suspend fun hitAuthenticateUserApi(
+        @Header("x-bot-ref-id") botRefId: String,
+        @Header("x-auth-enabled") authEnabled: String,
+        @Header("x-auth-token") authToken: String,
+    ): Response<LoginResponse>
+
+    @POST(LOGOUT)
+    suspend fun hitLogoutAPI(
+        @Header("x-bot-ref-id") botRefId: String,
+        @Header("x-auth-enabled") authEnabled: String,
+        @Header("x-auth-token") authToken: String,
+    ): Response<LogoutResponse>
 
 }

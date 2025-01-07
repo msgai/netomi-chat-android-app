@@ -7,6 +7,8 @@ import com.netomi.sampleapplication.data.network.AppApiInterface
 import com.netomi.sampleapplication.data.network.AppBaseService
 import com.netomi.sampleapplication.data.network.AppRetrofitClient
 import com.netomi.sampleapplication.model.BotListingResponse
+import com.netomi.sampleapplication.model.FetchJwtTokenResponse
+import com.netomi.sampleapplication.utils.HostRoutes
 import com.netomi.sampleapplication.utils.State
 import javax.net.ssl.SSLHandshakeException
 
@@ -32,6 +34,10 @@ class AppRepository(private val context: Context) : AppBaseService() {
 
     private val apiInterface =
         AppRetrofitClient.getInstance(context).create(AppApiInterface::class.java)
+
+    private val apiInterface1 =
+        AppRetrofitClient.getAuthInstance(context).create(AppApiInterface::class.java)
+
 
     // Fetch Bot List
     suspend fun <T> getBotListing(
@@ -60,6 +66,25 @@ class AppRepository(private val context: Context) : AppBaseService() {
         }
     }
 
+    suspend fun <T> getJwtToken(
+        liveData: MutableLiveData<State<T>>,
+        loadingType: State.LoadingType? = State.LoadingType.LOADER,
+        botRefID:String,
+
+    ): State<FetchJwtTokenResponse> {
+        liveData.postValue(State.loading(HostRoutes.FETCH_JWT_TOKEN, loadingType))
+        val response = apiInterface1.hitLogoutAPI(botRefId = botRefID, tokenExpiry = "1h", userDetails = "{\"name\":\"Revan Shasti\",\"externalId\":\"revan@gmail.com\"}")
+        return if (response.isSuccessful && response.body() != null) {
+            State.success(data = response.body()!!, NCWRoutes.ROUTE_GET_CHAT)
+        } else {
+            val errorBody = response.errorBody()
+            if (errorBody != null) {
+                State.error(parseError(errorBody), code = response.code())
+            } else {
+                State.error(mapApiException(response.code()), code = response.code())
+            }
+        }
+    }
 
 }
 
