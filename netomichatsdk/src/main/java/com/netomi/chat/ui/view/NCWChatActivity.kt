@@ -1201,6 +1201,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     )
         ) {
             type = NCWAppConstant.STREAMING
+            if (isLoaderActive)
+                removeStreamLoader()
         } else {
             type = NCWAppConstant.NORMAL
         }
@@ -1417,6 +1419,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
 
 
+    }
+    private fun removeStreamLoader() {
+        isLoaderActive = false
+
+        if (messageList.isNotEmpty() && messageList.last().sender == TYPE_INDICATOR) {
+            val lastIndex = messageList.lastIndex
+            messageList.removeAt(lastIndex)
+            messageAdapter.notifyItemRemoved(lastIndex)
+        }
     }
 
     private fun handleApiCallback(response: NCWState<Any>) {
