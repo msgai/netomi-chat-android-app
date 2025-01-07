@@ -38,8 +38,7 @@ class NCWChatAdapter(
     private val callBackSurvey: (NCWMessage?) -> Unit,
 
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    // To map messageIDs to positions in the RecyclerView
-    private val messageMap = mutableMapOf<String, Int>()
+
     companion object {
         private const val VIEW_TYPE_REQUEST = 1
         private const val VIEW_TYPE_RESPONSE = 2
@@ -233,8 +232,6 @@ class NCWChatAdapter(
                     }
                 }, { payload, label,attachmentList ->
                     // Handle the payload and label response here
-                    println("Payload: $payload")
-                    println("Label: $label")
                     formData(payload,label,attachmentList)
                 })
             }
@@ -252,9 +249,6 @@ class NCWChatAdapter(
 
         }
 
-        class NonInteractiveLayoutManager(context: Context) : LinearLayoutManager(context) {
-            override fun canScrollVertically(): Boolean = false
-        }
         fun updateFormAdapterData(components: List<Component>, formComponent: Component) {
             val index = components.indexOfFirst { it.id == formComponent.id }
             if (index != -1) {
@@ -328,7 +322,7 @@ class NCWChatAdapter(
         private val chipGroup: ChipGroup = itemView.findViewById(R.id.quickReplyChipGroup)
         private val cardViewCard: ConstraintLayout = itemView.findViewById(R.id.cardViewCard)
         private val cardTitle: TextView = itemView.findViewById(R.id.cardTitle)
-        private val cardText: TextView = itemView.findViewById(R.id.cardText)
+        private val cardMessage: TextView = itemView.findViewById(R.id.cardMessage)
         private val buttonRecyclerView: RecyclerView = itemView.findViewById(R.id.buttonRecyclerView)
         private val tvTime: TextView = itemView.findViewById(R.id.tvTime)
         private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
@@ -366,21 +360,15 @@ class NCWChatAdapter(
             NCWThemeUtils.setBotConfig(thumbUpImageButton)
             NCWThemeUtils.setBotConfig(thumbDownImageButton)
             // Initialize Feedback UI based on state
-            Log.d("ResponseViewHolder", "Binding message at position: $position, isReviewEnabled: ${message.isReviewEnabled}")
-
-
             if (message.isReviewEnabled) {
-                Log.e("Datatata","ddds Inside"+message)
                 llFeedback.visibility = View.VISIBLE
                 updateFeedbackUI(message)
             } else {
-                Log.e("Datatata","ddds Elseee"+message)
                 llFeedback.visibility = View.GONE
             }
             when (message.type) {
                 MessageType.TEXT -> {
                     message.message?.let {
-                      //messageText.text=NCWAppUtils.setHtmText(it)
                         NCWAppUtils.setHtmlText(messageText,it)
                         messageText.visibility = View.VISIBLE
                         NCWThemeUtils.setBotConfig(messageText)
@@ -425,8 +413,8 @@ class NCWChatAdapter(
                 MessageType.CARD -> {
                     cardViewCard.visibility = View.VISIBLE
                     NCWThemeUtils.setBotConfig(cardViewCard)
-                    cardTitle.text=message.message
-                    cardText.text=message.title
+                    cardTitle.text=message.title
+                    cardMessage.text=message.message
                     buttonRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
                     val carouselAdapter = NCWCarouselButtonAdapter(message.buttons){
                         chatActionCallback.carouselButtonAction(it)
