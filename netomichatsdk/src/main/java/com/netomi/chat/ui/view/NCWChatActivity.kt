@@ -2063,9 +2063,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 finish()
             }
 
-            NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
+           /* NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
                 //   messageAdapter.notifyDataSetChanged()
-            }
+            }*/
                 NCWRoutes.LOGIN -> {
                     val response = apiResponse as LoginResponse
                     Log.d(
@@ -2075,6 +2075,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     // Use conversationID as needed
                     conversationID = response.authenticatedConversationId
                     chatViewModel.getAWSMQTTCredentials(botRefId)
+                    getChatHistory()
                     conversationID?.let { NCWThemeUtils.setConversationID(it) }
                     Log.d(
                         "AuthConversationID",
