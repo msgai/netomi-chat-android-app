@@ -24,6 +24,7 @@ import com.netomi.sampleapplication.model.Bot
 import com.netomi.sampleapplication.model.BotListingResponse
 import com.netomi.sampleapplication.model.FetchJwtTokenResponse
 import com.netomi.sampleapplication.utils.AppSharedPreferences
+import com.netomi.sampleapplication.utils.State
 import com.netomi.sampleapplication.viewmodel.OnboardingViewModel
 
 class HomeFragment : Fragment() {

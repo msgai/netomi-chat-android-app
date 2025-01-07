@@ -188,7 +188,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var attachmentType: String? = TYPE_ATTACHMENT
 
 
-    var deviceInfo: List<NCWCustomAttribute>?=null
+    var deviceInfo: List<NCWCustomAttribute>? = null
 
 
     private var connectionStatus: String? = ""
@@ -229,10 +229,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         val jwtToken = NCWThemeUtils.getJwtToken()
         if (jwtToken != null) {
-            Log.e("API Hit","API Hit")
+            Log.e("API Hit", "API Hit")
             botRefId?.let { chatViewModel.hitAuthenticateUserApi(jwtToken, it) }
         } else {
-            Log.e("API NOT Hit","API NOT Hit")
+            Log.e("API NOT Hit", "API NOT Hit")
             conversationID = NCWThemeUtils.getConversationID()
             if (conversationID == null) {
                 loadInitialMessages()
@@ -302,9 +302,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             onConfirmClick = { isEndChat ->
                 if (isEndChat) {
                     NCWThemeUtils.setJwtToken(null)
-                    if(NCWThemeUtils.getJwtToken()!=null){
+                    if (NCWThemeUtils.getJwtToken() != null) {
                         hitLogoutAPI()
-                    }else {
+                    } else {
                         hitEndChatAPI()
                     }
                 } else {
@@ -318,7 +318,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun hitLogoutAPI() {
-        NCWThemeUtils.getJwtToken()?.let { botRefId?.let { it1 -> chatViewModel.hitLogoutApi(it, botRefID = it1) } }
+        NCWThemeUtils.getJwtToken()
+            ?.let { botRefId?.let { it1 -> chatViewModel.hitLogoutApi(it, botRefID = it1) } }
     }
 
     private fun hitEndChatAPI() {
@@ -596,11 +597,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
             }
         }
-       // it.chatWindowBackgroundColor
+        // it.chatWindowBackgroundColor
         themeData?.mobileConfig?.lightTheme?.chatWindowConfig?.let {
             chatRecyclerView.setBackgroundColor(Color.parseColor(it.chatWindowBackgroundColor))
         }
-
 
 
     }
@@ -625,7 +625,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         tvBrandName = findViewById(R.id.tvBrand)
         constProgressBar = findViewById(R.id.constLoader)
         progressBar = findViewById(R.id.progress_loader)
-        cardViewInputBox=  findViewById(R.id.cardView)
+        cardViewInputBox = findViewById(R.id.cardView)
 
         messageInputField.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -929,7 +929,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             handleApiCallback(it as NCWState<Any>)
         }
 
-        chatViewModel.logoutResponse.observe(this){
+        chatViewModel.logoutResponse.observe(this) {
             handleApiCallback(it as NCWState<Any>)
         }
 
@@ -938,9 +938,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             try {
                 Log.e("Jsonn", "Testtt " + jsonMessage)
                 val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
-                    if (response.triggerType == TYPE_EVENT) {
-                        val eventData = response.eventObject?.eventData
-                        renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
+                if (response.triggerType == TYPE_EVENT) {
+                    val eventData = response.eventObject?.eventData
+                    renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
 
 
                 }
@@ -1063,18 +1063,21 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             eventData?.eventType == TYPE_QUEUE_POSITION && eventData.subType == SUB_TYPE_WAIT -> {
                 "Queue Position: ${eventData.eventInfo.queuePosition}"
             }
+
             eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_JOIN -> {
                 agentName = eventData.eventInfo?.agentName
-                agentAvatar= eventData.eventInfo?.agentAvatar
-                ownerType= TYPE_AGENT
+                agentAvatar = eventData.eventInfo?.agentAvatar
+                ownerType = TYPE_AGENT
                 "$agentName has joined the chat"
 
             }
+
             eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_LEAVE -> {
-                agentAvatar=null
-                ownerType= TYPE_BOT
+                agentAvatar = null
+                ownerType = TYPE_BOT
                 "$agentName has left the chat"
             }
+
             else -> ""
         }
 
@@ -1123,7 +1126,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                         surveyField.submitSurveyInfo = submitSurveyInfo
 
-                    },{ text,label->
+                    }, { text, label ->
                         val timeStamp = System.currentTimeMillis()
                         val payload = createPayload(text, label, timeStamp)
                         addLoader()
@@ -1142,7 +1145,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         surveyField: SurveyField?,
         from: String,
         onSubmit: (SubmitSurveyRequest) -> Unit,
-        onSkipSurvey: (String,String) -> Unit,
+        onSkipSurvey: (String, String) -> Unit,
     ) {
         val bottomSheet = NCWSurveyBottomSheet(
             requestId,
@@ -1180,7 +1183,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     sender = TYPE_FORM,
                     timestamp = System.currentTimeMillis(),
                     formSchema = formSchemasModel,
-                    agentAvatar=agentAvatar
+                    agentAvatar = agentAvatar
                 )
                 addSingleMessage(newMessages)
             }
@@ -1301,7 +1304,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             requestID = requestId,
             feedbackValue = attach.feedbackValue,
             isReviewEnabled = attach.isReviewEnabled,
-            agentAvatar=agentAvatar
+            agentAvatar = agentAvatar
 
         )
     }
@@ -2061,37 +2064,39 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
 
             NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
-             //   messageAdapter.notifyDataSetChanged()
-            NCWRoutes.LOGIN -> {
-                val response = apiResponse as LoginResponse
-                Log.d(
-                    "AuthConversationID",
-                    "Fetched AuthConversationID: $response"
-                )
-                // Use conversationID as needed
-                conversationID = response.authenticatedConversationId
-                chatViewModel.getAWSMQTTCredentials(botRefId)
-                conversationID?.let { NCWThemeUtils.setConversationID(it) }
-                Log.d(
-                    "AuthConversationID",
-                    "Fetched AuthConversationID: $conversationID"
-                )
+                //   messageAdapter.notifyDataSetChanged()
+            }
+                NCWRoutes.LOGIN -> {
+                    val response = apiResponse as LoginResponse
+                    Log.d(
+                        "AuthConversationID",
+                        "Fetched AuthConversationID: $response"
+                    )
+                    // Use conversationID as needed
+                    conversationID = response.authenticatedConversationId
+                    chatViewModel.getAWSMQTTCredentials(botRefId)
+                    conversationID?.let { NCWThemeUtils.setConversationID(it) }
+                    Log.d(
+                        "AuthConversationID",
+                        "Fetched AuthConversationID: $conversationID"
+                    )
+                }
+
+                NCWRoutes.LOGOUT->{
+                    hitEndChatAPI()
+                }
+
+                NCWRoutes.ROUTE_SURVEY -> {
+                    // messageAdapter.notifyDataSetChanged()
+                }
+
+                else -> {
+                    Toast.makeText(this, "Else..", Toast.LENGTH_SHORT).show()
+                }
             }
 
-            NCWRoutes.LOGOUT->{
-                hitEndChatAPI()
-            }
-
-            NCWRoutes.ROUTE_SURVEY -> {
-                // messageAdapter.notifyDataSetChanged()
-            }
-
-            else -> {
-                Toast.makeText(this, "Else..", Toast.LENGTH_SHORT).show()
-            }
         }
 
-    }
 
 
     private fun parseHistoryItems(responses: ArrayList<NCWGenericChannelResponse>) {
