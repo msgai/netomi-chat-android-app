@@ -54,6 +54,7 @@
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/img_chat"
             android:layout_margin="40dp"
+            android:visibility="gone"
             android:background="@drawable/float_button_gradient"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
