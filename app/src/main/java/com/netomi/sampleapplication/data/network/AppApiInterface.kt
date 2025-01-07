@@ -12,6 +12,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 /**
  * Retrofit API interface for defining network endpoints in the NCW SDK.
@@ -25,7 +26,7 @@ import retrofit2.http.Path
 interface AppApiInterface {
 
     @GET(ROUTE_BOT_LISTING)
-    suspend fun getBotListing(): Response<BotListingResponse>
+    suspend fun getBotListing(@Query("username") username: String): Response<BotListingResponse>
 
     @POST(FETCH_JWT_TOKEN)
     suspend fun hitLogoutAPI(

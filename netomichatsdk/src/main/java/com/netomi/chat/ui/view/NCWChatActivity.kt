@@ -29,7 +29,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.appcompat.widget.ThemeUtils
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -83,7 +82,6 @@ import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.NCWChatActionCallback
-import com.netomi.chat.utils.DeviceInfo
 import com.netomi.chat.utils.DeviceInfoUtil
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWFilePath
@@ -912,7 +910,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 }
 
                 is NCWState.Success -> {
-                    messageAdapter.notifyDataSetChanged()
+                    //messageAdapter.notifyDataSetChanged()
                 }
 
                 is NCWState.Error -> {
@@ -1137,6 +1135,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         }
     }
+
 
     private fun createAndShowSurveyBottomSheet(
         requestId: String,
@@ -2061,6 +2060,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 finish()
             }
 
+            NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
+             //   messageAdapter.notifyDataSetChanged()
             NCWRoutes.LOGIN -> {
                 val response = apiResponse as LoginResponse
                 Log.d(
@@ -2299,13 +2300,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         constProgressBar.visibility = View.GONE
     }
 
-    override fun onThumbUpClick(requestId: String) {
+    override fun onThumbUpClick(requestId: String, position: Int) {
         Log.e("RequestId ThumbUp", requestId)
+        messageAdapter.notifyItemChanged(position)
         hitFeedbackAPI(requestId, "POSITIVE")
     }
 
-    override fun onThumbDownClick(requestId: String) {
+    override fun onThumbDownClick(requestId: String, position: Int) {
         Log.e("RequestId ThumbDown", requestId)
+        messageAdapter.notifyItemChanged(position)
         hitFeedbackAPI(requestId, "NEGATIVE")
     }
 }

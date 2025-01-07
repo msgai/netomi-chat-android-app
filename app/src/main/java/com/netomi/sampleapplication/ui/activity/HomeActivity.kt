@@ -1,15 +1,18 @@
 package com.netomi.sampleapplication.ui.activity
 
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
@@ -25,11 +28,9 @@ import com.netomi.sampleapplication.model.BotListingResponse
 import com.netomi.sampleapplication.ui.fragment.ChangeAiAgentFragment
 import com.netomi.sampleapplication.ui.fragment.HomeFragment
 import com.netomi.sampleapplication.utils.AppSharedPreferences
-import com.netomi.sampleapplication.utils.HostRoutes
 import com.netomi.sampleapplication.utils.State
 import com.netomi.sampleapplication.utils.customView.DialogUtils
 import com.netomi.sampleapplication.viewmodel.OnboardingViewModel
-import okhttp3.Route
 
 class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
 
@@ -51,10 +52,16 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         botList = mutableListOf()
-        onboardingViewModel.getBotListing()
-        observeChatMessages()
-        initView()
 
+        initView()
+        val email = preferences.getString(SharePreferenceConstant.EMAIL)
+        if (isNetworkAvailable())
+        onboardingViewModel.getBotListing(email)
+        else
+            Toast.makeText(this,
+                getString(R.string.please_check_your_network_and_try_again), Toast.LENGTH_SHORT).show()
+
+        observeChatMessages()
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, HomeFragment())
@@ -109,6 +116,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         }
     }
 
+
     private fun observeChatMessages() {
         onboardingViewModel.botListing.observe(this) { messages ->
             handleApiCallback(messages as State<Any>)
@@ -132,10 +140,12 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
 
             is State.Error -> {
                 showLoader(false)
+                Toast.makeText(this,response.message,Toast.LENGTH_SHORT).show()
             }
 
             else -> {
                 showLoader(false)
+                //Toast.makeText(this,response.message,Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -222,4 +232,17 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         startActivity(intent)
         finishAffinity()
     }
+
+
+    fun isNetworkAvailable(): Boolean {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        val network = connectivityManager.activeNetwork
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(network)
+        return networkCapabilities != null &&
+                (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+    }
+
 }

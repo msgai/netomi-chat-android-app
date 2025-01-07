@@ -6,13 +6,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.netomi.chat.model.NCWGetChatHistoryResponse
-import com.netomi.chat.model.NCWMessage
-import com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent
-import com.netomi.chat.utils.NCWState
 import com.netomi.sampleapplication.data.repository.AppRepository
 import com.netomi.sampleapplication.model.Bot
-import com.netomi.sampleapplication.model.BotListingRequest
 import com.netomi.sampleapplication.model.BotListingResponse
 import com.netomi.sampleapplication.model.FetchJwtTokenResponse
 import com.netomi.sampleapplication.utils.State
@@ -53,9 +48,9 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
 
 
 
-    fun getBotListing() {
+    fun getBotListing(email: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val response = onboardingRepository.getBotListing(_botListing)
+            val response = onboardingRepository.getBotListing(_botListing,email)
             withContext(Dispatchers.Main) {
                 Log.e("ConversationIdResponse", "response " + response)
                 _botListing.value = response // Use setValue on the Main thread

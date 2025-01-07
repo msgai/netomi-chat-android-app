@@ -77,6 +77,7 @@ class LoginActivity : AppCompatActivity() {
         loginButton.setOnClickListener {
             preferences.setBoolean(SharePreferenceConstant.LOGIN,true)
             preferences.setString(SharePreferenceConstant.NAME,"Guest User")
+            preferences.setString(SharePreferenceConstant.EMAIL,emailEditText.text?.trim().toString())
             startActivity(Intent(this, HomeActivity::class.java))
             finishAffinity()
         }

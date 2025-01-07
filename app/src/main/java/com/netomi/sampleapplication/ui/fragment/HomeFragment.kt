@@ -20,13 +20,10 @@ import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.utils.NCWState
 import com.netomi.sampleapplication.R
-import com.netomi.sampleapplication.constant.SharePreferenceConstant
 import com.netomi.sampleapplication.model.Bot
 import com.netomi.sampleapplication.model.BotListingResponse
 import com.netomi.sampleapplication.model.FetchJwtTokenResponse
 import com.netomi.sampleapplication.utils.AppSharedPreferences
-import com.netomi.sampleapplication.utils.HostRoutes
-import com.netomi.sampleapplication.utils.State
 import com.netomi.sampleapplication.viewmodel.OnboardingViewModel
 
 class HomeFragment : Fragment() {
@@ -101,6 +98,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateBot(bot: Bot) {
+        imgButton.visibility=View.VISIBLE
+        tvBotName.text=bot.botName
         tvBotName.text = bot.botName
         Glide.with(requireContext()).load(bot.logo).into(imgButton)
         imgButton.setBackgroundResource(R.drawable.float_button_gradient)
