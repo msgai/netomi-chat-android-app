@@ -56,6 +56,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateBot(bot: Bot) {
+        imgButton.visibility=View.VISIBLE
         tvBotName.text=bot.botName
         Glide.with(requireContext()).load(bot.logo).into(imgButton)
         imgButton.setBackgroundResource(R.drawable.float_button_gradient)

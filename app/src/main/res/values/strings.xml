@@ -26,4 +26,5 @@
     <string name="under_development">Under Development</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="please_check_your_network_and_try_again">Please check your network and try again.</string>
 </resources>

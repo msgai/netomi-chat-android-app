@@ -8,6 +8,7 @@ import com.netomi.sampleapplication.data.network.AppBaseService
 import com.netomi.sampleapplication.data.network.AppRetrofitClient
 import com.netomi.sampleapplication.model.BotListingResponse
 import com.netomi.sampleapplication.utils.State
+import javax.net.ssl.SSLHandshakeException
 
 /**
  * Repository responsible for managing chat-related data operations.
@@ -35,22 +36,30 @@ class AppRepository(private val context: Context) : AppBaseService() {
     // Fetch Bot List
     suspend fun <T> getBotListing(
         liveData: MutableLiveData<State<T>>,
-        email:String,
+        email: String,
         loadingType: State.LoadingType? = State.LoadingType.LOADER
     ): State<BotListingResponse> {
         liveData.postValue(State.loading(NCWRoutes.ROUTE_GET_CHAT, loadingType))
-        val response = apiInterface.getBotListing(email)
-        return if (response.isSuccessful && response.body() != null) {
-            State.success(data = response.body()!!, NCWRoutes.ROUTE_GET_CHAT)
-        } else {
-            val errorBody = response.errorBody()
-            if (errorBody != null) {
-                State.error(parseError(errorBody), code = response.code())
+
+        return try {
+            val response = apiInterface.getBotListing(email)
+            if (response.isSuccessful && response.body() != null) {
+                State.success(data = response.body()!!, NCWRoutes.ROUTE_GET_CHAT)
             } else {
-                State.error(mapApiException(response.code()), code = response.code())
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    State.error(parseError(errorBody), code = response.code())
+                } else {
+                    State.error(mapApiException(response.code()), code = response.code())
+                }
             }
+        } catch (e: SSLHandshakeException) {
+            State.error("SSL Handshake failed. Check the server certificate.", code = -1)
+        } catch (e: Exception) {
+            State.error("An unexpected error occurred: ${e.localizedMessage}", code = -1)
         }
     }
+
 
 }
 
