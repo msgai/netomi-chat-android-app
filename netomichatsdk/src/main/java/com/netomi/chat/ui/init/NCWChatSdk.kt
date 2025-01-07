@@ -58,7 +58,8 @@ object NCWChatSdk {
      * This function ensures the theme data is fetched and available before launching the chat.
      * If the theme is already cached, it directly starts the chat activity.
      */
-    fun launch(context: Context) {
+    fun launch(context: Context,jwtToken:String?=null) {
+        NCWThemeUtils.setJwtToken(jwtToken)
         if (!NCWAppUtils.isNetworkAvailable(context)) {
             NCWAppUtils.showToast(
                 context,

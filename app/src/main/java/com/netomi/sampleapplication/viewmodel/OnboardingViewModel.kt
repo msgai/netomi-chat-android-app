@@ -14,6 +14,7 @@ import com.netomi.sampleapplication.data.repository.AppRepository
 import com.netomi.sampleapplication.model.Bot
 import com.netomi.sampleapplication.model.BotListingRequest
 import com.netomi.sampleapplication.model.BotListingResponse
+import com.netomi.sampleapplication.model.FetchJwtTokenResponse
 import com.netomi.sampleapplication.utils.State
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,6 +44,9 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
     private val _botListing = SingleEvent<State<BotListingResponse>>()
     val botListing get() = _botListing
 
+    private val _jwtToken = SingleEvent<State<FetchJwtTokenResponse>>()
+    val jwtToken get() = _jwtToken
+
 
     private val _botList = MutableLiveData<Bot>()
     val botList: LiveData<Bot> get() = _botList
@@ -55,6 +59,16 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
             withContext(Dispatchers.Main) {
                 Log.e("ConversationIdResponse", "response " + response)
                 _botListing.value = response // Use setValue on the Main thread
+            }
+        }
+    }
+
+    fun fetchJwtToken(botRefId:String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = onboardingRepository.getJwtToken(_jwtToken, botRefID = botRefId)
+            withContext(Dispatchers.Main) {
+                Log.e("JwtTokenResponse", "response $response")
+                _jwtToken.value = response // Use setValue on the Main thread
             }
         }
     }

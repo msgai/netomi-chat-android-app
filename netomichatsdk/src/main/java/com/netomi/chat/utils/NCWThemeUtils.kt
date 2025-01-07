@@ -37,12 +37,20 @@ object NCWThemeUtils
     }
 
     private var conversationID : String? = null
+    private var jwtToken : String? = null
 
     fun setConversationID(id: String?) {
         conversationID = id
     }
     fun getConversationID():String?{
         return conversationID
+    }
+
+    fun setJwtToken(token: String?) {
+        jwtToken = token
+    }
+    fun getJwtToken():String?{
+        return jwtToken
     }
 
     fun configureHeader(

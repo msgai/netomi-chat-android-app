@@ -47,6 +47,7 @@ import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.NCWSendMessageResponse
+import com.netomi.chat.model.auth.LoginResponse
 import com.netomi.chat.model.awsmqtt.NCWAwsCredentials
 import com.netomi.chat.model.chat_history.NCWGetChatHistoryPayload
 import com.netomi.chat.model.chat_history.NCWHistoryRequestBody
@@ -227,13 +228,21 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         Log.d("DeviceInfo", "Device Info: $deviceInfo")
 
-        if (NCWThemeUtils.getConversationID() == null) {
-            loadInitialMessages()
-            chatViewModel.getConversationId(botRefId)
+
+        val jwtToken = NCWThemeUtils.getJwtToken()
+        if (jwtToken != null) {
+            Log.e("API Hit","API Hit")
+            botRefId?.let { chatViewModel.hitAuthenticateUserApi(jwtToken, it) }
         } else {
+            Log.e("API NOT Hit","API NOT Hit")
             conversationID = NCWThemeUtils.getConversationID()
-            chatViewModel.getAWSMQTTCredentials(botRefId)
-            getChatHistory()
+            if (conversationID == null) {
+                loadInitialMessages()
+                chatViewModel.getConversationId(botRefId)
+            } else {
+                chatViewModel.getAWSMQTTCredentials(botRefId)
+                getChatHistory()
+            }
         }
         sendMessageIcon.setOnClickListener {
 
@@ -294,14 +303,24 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         val bottomSheet = NCWEndChatBottomSheet(
             onConfirmClick = { isEndChat ->
                 if (isEndChat) {
-                    hitEndChatAPI()
+                    NCWThemeUtils.setJwtToken(null)
+                    if(NCWThemeUtils.getJwtToken()!=null){
+                        hitLogoutAPI()
+                    }else {
+                        hitEndChatAPI()
+                    }
                 } else {
+                    NCWThemeUtils.setJwtToken(null)
                     finish()
                 }
             }
         )
         bottomSheet.show(supportFragmentManager, "EndChatBottomSheet")
 
+    }
+
+    private fun hitLogoutAPI() {
+        NCWThemeUtils.getJwtToken()?.let { botRefId?.let { it1 -> chatViewModel.hitLogoutApi(it, botRefID = it1) } }
     }
 
     private fun hitEndChatAPI() {
@@ -904,6 +923,16 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                 }
             }
+
+
+        }
+
+        chatViewModel.loginResponse.observe(this) {
+            handleApiCallback(it as NCWState<Any>)
+        }
+
+        chatViewModel.logoutResponse.observe(this){
+            handleApiCallback(it as NCWState<Any>)
         }
 
 
@@ -2032,8 +2061,24 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 finish()
             }
 
-            NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
-                messageAdapter.notifyDataSetChanged()
+            NCWRoutes.LOGIN -> {
+                val response = apiResponse as LoginResponse
+                Log.d(
+                    "AuthConversationID",
+                    "Fetched AuthConversationID: $response"
+                )
+                // Use conversationID as needed
+                conversationID = response.authenticatedConversationId
+                chatViewModel.getAWSMQTTCredentials(botRefId)
+                conversationID?.let { NCWThemeUtils.setConversationID(it) }
+                Log.d(
+                    "AuthConversationID",
+                    "Fetched AuthConversationID: $conversationID"
+                )
+            }
+
+            NCWRoutes.LOGOUT->{
+                hitEndChatAPI()
             }
 
             NCWRoutes.ROUTE_SURVEY -> {

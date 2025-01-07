@@ -10,6 +10,8 @@ import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.NCWSendMessageResponse
+import com.netomi.chat.model.auth.LoginResponse
+import com.netomi.chat.model.auth.LogoutResponse
 import com.netomi.chat.model.chat_history.NCWGetChatHistoryPayload
 import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEndChatResponse
@@ -69,6 +71,12 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
 
     private val _feedbackResponse=NCWSingleLiveEvent<NCWState<NCWFeedbackResponse>>()
     val feedbackResponse get()=_feedbackResponse
+
+    private val _loginResponse=NCWSingleLiveEvent<NCWState<LoginResponse>>()
+    val loginResponse get()= _loginResponse
+
+    private val _logoutResponse=NCWSingleLiveEvent<NCWState<LogoutResponse>>()
+    val logoutResponse get()= _logoutResponse
 
 
    /* private var _getConversationId =
@@ -225,6 +233,30 @@ Log.e("DataaResposne","response"+response)
             withContext(Dispatchers.Main) {
                 Log.e("Feedback Response", "response " + response)
                 _feedbackResponse.value = response
+            }
+        }
+
+    }
+
+    fun hitAuthenticateUserApi(jwtToken:String, botRefID:String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.hitAuthenticateUserApi(jwtToken = jwtToken,botRefID = botRefID,authEnabled = "true")
+
+            withContext(Dispatchers.Main) {
+                Log.e("Auth Response", "response " + response)
+                _loginResponse.value = response
+            }
+        }
+
+    }
+
+    fun hitLogoutApi(jwtToken:String, botRefID:String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.hitLogoutApi(jwtToken = jwtToken,botRefID = botRefID,authEnabled = "true")
+
+            withContext(Dispatchers.Main) {
+                Log.e("Auth Response", "response " + response)
+                _logoutResponse.value = response
             }
         }
 

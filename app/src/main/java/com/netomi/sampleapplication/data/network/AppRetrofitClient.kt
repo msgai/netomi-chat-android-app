@@ -38,7 +38,8 @@ import java.util.concurrent.TimeUnit
  */
 object AppRetrofitClient {
 
-    private val BASE_URL = "https://hd-web-us.netomi.com/"
+    private const val BASE_URL = "https://hd-web-us.netomi.com/"
+    private const val BASE_URL_NEW = "https://chatapps-qa.netomi.com/"
 
 
 
@@ -73,6 +74,14 @@ object AppRetrofitClient {
     fun getInstance(context: Context): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
+            .client(getOkHttpClient(context))
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    fun getAuthInstance(context: Context): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL_NEW)
             .client(getOkHttpClient(context))
             .addConverterFactory(GsonConverterFactory.create())
             .build()
