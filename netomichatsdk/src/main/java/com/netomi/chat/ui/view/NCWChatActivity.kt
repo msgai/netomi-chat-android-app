@@ -301,7 +301,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         val bottomSheet = NCWEndChatBottomSheet(
             onConfirmClick = { isEndChat ->
                 if (isEndChat) {
-                    NCWThemeUtils.setJwtToken(null)
                     if (NCWThemeUtils.getJwtToken() != null) {
                         hitLogoutAPI()
                     } else {
