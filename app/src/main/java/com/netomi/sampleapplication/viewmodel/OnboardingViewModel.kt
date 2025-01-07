@@ -58,9 +58,9 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun fetchJwtToken(botRefId:String) {
+    fun fetchJwtToken(botRefId:String,userDetails:String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val response = onboardingRepository.getJwtToken(_jwtToken, botRefID = botRefId)
+            val response = onboardingRepository.getJwtToken(_jwtToken, botRefID = botRefId, userDetails = userDetails)
             withContext(Dispatchers.Main) {
                 Log.e("JwtTokenResponse", "response $response")
                 _jwtToken.value = response // Use setValue on the Main thread

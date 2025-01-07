@@ -70,10 +70,11 @@ class AppRepository(private val context: Context) : AppBaseService() {
         liveData: MutableLiveData<State<T>>,
         loadingType: State.LoadingType? = State.LoadingType.LOADER,
         botRefID:String,
+        userDetails:String
 
     ): State<FetchJwtTokenResponse> {
         liveData.postValue(State.loading(HostRoutes.FETCH_JWT_TOKEN, loadingType))
-        val response = apiInterface1.hitLogoutAPI(botRefId = botRefID, tokenExpiry = "1h", userDetails = "{\"name\":\"Revan Shasti\",\"externalId\":\"revan@gmail.com\"}")
+        val response = apiInterface1.hitLogoutAPI(botRefId = botRefID, tokenExpiry = "1h", userDetails = userDetails)
         return if (response.isSuccessful && response.body() != null) {
             State.success(data = response.body()!!, NCWRoutes.ROUTE_GET_CHAT)
         } else {

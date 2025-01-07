@@ -16,16 +16,19 @@ import androidx.appcompat.widget.AppCompatImageButton
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
+import com.google.gson.Gson
 import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.utils.NCWState
 import com.netomi.sampleapplication.R
+import com.netomi.sampleapplication.constant.SharePreferenceConstant
 import com.netomi.sampleapplication.model.Bot
 import com.netomi.sampleapplication.model.BotListingResponse
 import com.netomi.sampleapplication.model.FetchJwtTokenResponse
 import com.netomi.sampleapplication.utils.AppSharedPreferences
 import com.netomi.sampleapplication.utils.State
 import com.netomi.sampleapplication.viewmodel.OnboardingViewModel
+import org.json.JSONObject
 
 class HomeFragment : Fragment() {
 
@@ -86,7 +89,6 @@ class HomeFragment : Fragment() {
             }
 
             is State.Error -> {
-                //Toast.makeText(requireContext(), "Error..", Toast.LENGTH_SHORT).show()
                 showLoader(false)
             }
 
@@ -104,7 +106,15 @@ class HomeFragment : Fragment() {
         tvBotName.text = bot.botName
         Glide.with(requireContext()).load(bot.logo).into(imgButton)
         imgButton.setBackgroundResource(R.drawable.float_button_gradient)
-        bot.botRefId.let { onboardingViewModel.fetchJwtToken(bot.botRefId) }
+        val name= preferences.getString(SharePreferenceConstant.NAME)
+        val email=preferences.getString(SharePreferenceConstant.EMAIL)
+
+        val jsonMap = mapOf(
+            "name" to name,
+            "externalId" to email
+        )
+        val jsonString = Gson().toJson(jsonMap)
+        bot.botRefId.let { onboardingViewModel.fetchJwtToken(bot.botRefId,jsonString) }
         try {
             NCWChatSdk.setEnvironment(bot.env)
             bot.botRefId.let { NCWChatSdk.initialize(requireContext(), it) }
