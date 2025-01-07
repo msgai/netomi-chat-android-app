@@ -34,25 +34,6 @@ class AppRepository(private val context: Context) : AppBaseService() {
         AppRetrofitClient.getInstance(context).create(AppApiInterface::class.java)
 
     // Fetch Bot List
- /*   suspend fun <T> getBotListing(
-        liveData: MutableLiveData<State<T>>,
-        email:String,
-        loadingType: State.LoadingType? = State.LoadingType.LOADER
-    ): State<BotListingResponse> {
-        liveData.postValue(State.loading(NCWRoutes.ROUTE_GET_CHAT, loadingType))
-        val response = apiInterface.getBotListing(email)
-        return if (response.isSuccessful && response.body() != null) {
-            State.success(data = response.body()!!, NCWRoutes.ROUTE_GET_CHAT)
-        } else {
-            val errorBody = response.errorBody()
-            if (errorBody != null) {
-                State.error(parseError(errorBody), code = response.code())
-            } else {
-                State.error(mapApiException(response.code()), code = response.code())
-            }
-        }
-    }*/
-
     suspend fun <T> getBotListing(
         liveData: MutableLiveData<State<T>>,
         email: String,
