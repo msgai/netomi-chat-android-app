@@ -218,6 +218,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         applyTheme(themeData)
         observeChatMessages()
+        Log.e("OtherConfig","" +NCWChatSdk.getUpdatedOtherConfiguration())
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         val device = DeviceInfoUtil.getDeviceInfo(this)
