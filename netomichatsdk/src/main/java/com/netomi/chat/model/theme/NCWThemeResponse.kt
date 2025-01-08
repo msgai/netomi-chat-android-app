@@ -6,7 +6,7 @@ data class NCWThemeResponse(
     val agentDeskForm: NCWAgentDeskForm,
     val aiAgentName: String,
     val borderRadius: String,
-    val botImage: String,
+    val botImage: String? = null,
     val botResponseBubbleColor: String,
     val calloutBubble: List<NCWCalloutBubble>,
     val chatHistory: NCWChatHistory,

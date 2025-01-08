@@ -95,14 +95,18 @@ object NCWThemeUtils
         messageInputField: EditText,
         attachmentIcon: ImageView,
         sendMessageIcon: ImageView,
-        cardViewInputBox: CardView
+        cardViewInputBox: CardView,
+        tvBrandName: TextView
     ) {
         footerContainer.visibility = if (themeData?.mobileConfig?.lightTheme?.footerConfig?.isFooterHidden == true) View.GONE else View.VISIBLE
 
         themeData?.mobileConfig?.lightTheme?.footerConfig?.let { footerConfig ->
             // Set background color
             footerConfig.backgroundColor?.let { color ->
-                parseColor(color).let { footerContainer.setBackgroundColor(it) }
+                parseColor(color).let {
+                    footerContainer.setBackgroundColor(it)
+                    tvBrandName.setBackgroundColor(it)
+                }
             }
 
             // Set icon styles and tints
