@@ -197,7 +197,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var agentAvatar: String? = null
 
 
-    var ownerType: String? = "BOT"
+    private var ownerType: String? = "BOT"
+
+    private var isHistoryDisableInput: Boolean = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
@@ -959,6 +962,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                             }
 
                             CustomFieldName.DISABLE_INPUT_FIELD -> {
+
                                 if (customField.values?.get(0) == "true") {
                                     setUIState(false)
                                 } else {
@@ -1014,7 +1018,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     connectionHeader.setBackgroundColor(Color.GREEN)
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
-                    setUIState(true)
+                    setUIState(isHistoryDisableInput)
                     // Hide header after 2 seconds when connected
                     connectionHeader.postDelayed({
                         connectionHeader.visibility = View.GONE
@@ -2184,9 +2188,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                             }
 
                             CustomFieldName.DISABLE_INPUT_FIELD -> {
-                                val isEnabled = customField.values?.getOrNull(0) != "true"
-                                messageInputField.isEnabled = isEnabled
-                                attachmentIcon.isEnabled = isEnabled
+                                if (customField.values?.get(0) == "true") {
+                                    setUIState(false)
+                                    isHistoryDisableInput=false
+                                } else {
+                                    setUIState(true)
+                                    isHistoryDisableInput=true
+                                }
+
                             }
 
                             CustomFieldName.DISABLE_CHAT_INPUT -> {
