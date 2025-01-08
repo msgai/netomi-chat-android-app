@@ -115,6 +115,7 @@ import com.netomi.chat.utils.NCWAppConstant.TYPE_SHOW_SURVEY
 import com.netomi.chat.utils.NCWAppConstant.TYPE_SUBMITTED_SURVEY
 import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
 import com.netomi.chat.utils.NCWAppUtils
+import com.netomi.chat.utils.NCWAppUtils.hideKeyboard
 import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
 import com.netomi.chat.utils.NCWAppUtils.isFormSizeValid
 import com.netomi.chat.utils.NCWFeedbackActionCallback
@@ -188,7 +189,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var attachmentType: String? = TYPE_ATTACHMENT
 
 
-    var deviceInfo: List<NCWCustomAttribute>? = null
+    private var deviceInfo: List<NCWCustomAttribute>? = null
 
 
     private var connectionStatus: String? = ""
@@ -225,10 +226,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         val device = DeviceInfoUtil.getDeviceInfo(this)
         deviceInfo = device.toNCWCustomAttributes()
-
-
-        Log.d("DeviceInfo", "Device Info: $deviceInfo")
-
 
         val jwtToken = NCWThemeUtils.getJwtToken()
         if (jwtToken != null) {
@@ -681,23 +678,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
         )
     }
-
-
-    // Initialize the ActivityResultLauncher
-    private val filePickerLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val data: Intent? = result.data
-                val fileUri: Uri? = data?.data
-                val mimeType = contentResolver.getType(result.data?.data!!)
-                fileSend = fileUri?.let { NCWImageUtils.getFileFromUri(this, it) }
-                fileSend?.let {
-                    getPreSignedUrl(mimeType, it.name)
-
-                }
-            }
-        }
-
     override fun onQuickReply(option: NCWQuickReplyOption?, position: Int) {
 
         if (connectionStatus == NCWConnectionStatus.CONNECTED.toString()) {
@@ -709,22 +689,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     override fun onMediaClick(message: NCWMessage) {
-        /*val intent = Intent(this, FullScreenMediaActivity::class.java).apply {
-            val mediaUrl = when (message.type) {
-                MessageType.VIDEO -> message.thumbnailUrl
-                MessageType.IMAGE -> message.largeImageUrl
-                MessageType.FILE -> message.fileUrl
-                else -> null
-            }
-            putExtra(MEDIA_TYPE, message.type.name)
 
-            if (mediaUrl != null) {
-                putExtra(ARG_MEDIA_URL, mediaUrl)
-            } else {
-                putExtra(ARG_FILE_URI, message.message) // Pass file URI directly
-            }
-        }
-        startActivity(intent)*/
+        hideKeyboard(this)
 
         val mediaUrl = when (message.type) {
             MessageType.VIDEO -> message.thumbnailUrl
@@ -855,17 +821,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
 
     }
-
-
-    /*    private fun applyConfig() {
-     ncwSdkConfig?.let {
-         val sendButtonStyle= it.sendButtonStyle
-         sendButton.setBackgroundColor(sendButtonStyle.backgroundColor)
-         sendButton.setTextColor(sendButtonStyle.textColor)
-         sendButton.textSize = sendButtonStyle.fontSize
-     }
-    }*/
-
     /**
      * Observes LiveData from the ViewModel for various chat-related events.
      * This function handles different chat message states, including new messages,
@@ -1171,15 +1126,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     customField.values[0],
                     object : TypeToken<List<FormSchema>>() {}.type
                 )
-
-                Log.e("ForrrrSizeee", "formSchemas " + formSchemas.size)
-
-                /*    formSchemas.forEach { schema ->
-                        Log.e("FormSchema", schema.properties.question)
-                        schema.schema.forEach { component ->
-                            Log.e("Component", component.componentName)
-                        }
-                    }*/
                 val formSchemasModel = formSchemas[0]
 
                 val newMessages = NCWMessage(
