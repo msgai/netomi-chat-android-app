@@ -301,11 +301,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         val bottomSheet = NCWEndChatBottomSheet(
             onConfirmClick = { isEndChat ->
                 if (isEndChat) {
-                    if (NCWThemeUtils.getJwtToken() != null) {
+                  /*  if (NCWThemeUtils.getJwtToken() != null) {
                         hitLogoutAPI()
                     } else {
                         hitEndChatAPI()
-                    }
+                    }*/
+                    hitEndChatAPI()
                 } else {
                     NCWThemeUtils.setJwtToken(null)
                     finish()
@@ -327,13 +328,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             return
         }
         showProgressBar()
+        Log.e("ConversationID End", conversationID.toString())
         chatViewModel.hitEndChatAPI(
             NCWEndChatRequest(
                 botRefId = botRefId!!, com.netomi.chat.model.endchat.NCWRequestBody(
                     botReferenceId = botRefId!!,
                     channelId = "NETOMI_WEB_WIDGET",
                     conversationId = conversationID ?: "",
-                    NCWEventData = NCWEventData(
+                    eventData = NCWEventData(
                         eventType = "WIDGET_EVENT",
                         subType = "CHAT_END"
                     ),
@@ -344,7 +346,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     triggerType = "EVENT"
 
                 )
-            )
+            ),
+
         )
     }
 
@@ -2082,6 +2085,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                         "AuthConversationID",
                         "Fetched AuthConversationID: $response"
                     )
+                    Log.e("ConversationID LOGIN", response.authenticatedConversationId)
                     // Use conversationID as needed
                     conversationID = response.authenticatedConversationId
                     chatViewModel.getAWSMQTTCredentials(botRefId)
@@ -2270,6 +2274,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun getChatHistory() {
+        Log.e("ConversationID Fetch", conversationID.toString())
         val payload = conversationID?.let {
             botRefId?.let { it1 ->
                 NCWGetChatHistoryPayload(

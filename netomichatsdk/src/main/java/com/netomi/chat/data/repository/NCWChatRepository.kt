@@ -241,7 +241,7 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
     // Hit API to get AWS MQTT Credentials
     suspend fun hitEndChatAPI(payload: NCWEndChatRequest): NCWState<NCWEndChatResponse> {
         return try {
-            val response = apiInterface.hitEndChatAPI(payload)
+            val response = apiInterface.hitEndChatAPI(payload = payload)
             if (response.isSuccessful && response.body() != null) {
                 NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_END_CHAT)
             } else {

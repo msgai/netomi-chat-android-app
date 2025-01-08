@@ -156,7 +156,9 @@ interface NCWApiInterface {
     ): Response<ResponseBody>*/
 
     @POST(ROUTE_END_CHAT)
-    suspend fun hitEndChatAPI(@Body payload: NCWEndChatRequest?): Response<NCWEndChatResponse>
+    suspend fun hitEndChatAPI(
+        @Body payload: NCWEndChatRequest?
+    ): Response<NCWEndChatResponse>
 
     @POST(ROUTE_FEEDBACK_CHAT)
     suspend fun hitFeedbackAPI(@Body payload: NCWFeedbackRequest?): Response<NCWFeedbackResponse>

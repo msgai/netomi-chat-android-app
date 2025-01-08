@@ -203,8 +203,7 @@ Log.e("DataaResposne","response"+response)
     fun hitEndChatAPI(message: NCWEndChatRequest) {
 
         viewModelScope.launch(Dispatchers.IO) {
-            val response = chatRepository.hitEndChatAPI(message)
-
+            val response = chatRepository.hitEndChatAPI(payload = message)
             withContext(Dispatchers.Main) {
                 Log.e("sendMessageAPI", "response " + response)
                 _NCW_endChatResponse.value = response
