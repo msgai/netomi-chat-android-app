@@ -87,6 +87,7 @@ class NCWChatAdapter(
             is FormViewHolder->holder.bind(message,callBack,formData)
             is SurveyViewHolder->holder.bind(message,callBackSurvey)
             is PillViewHolder -> holder.bind(message)
+            is InitialViewHolder -> holder.bind(message)
         }
     }
 
@@ -302,9 +303,13 @@ class NCWChatAdapter(
         itemView: View,
     ) : RecyclerView.ViewHolder(itemView) {
 
-
-
-
+        private val imgBot: ImageView = itemView.findViewById(R.id.img_bot)
+        fun bind(message: NCWMessage) {
+            Glide.with(itemView.context)
+                .load(message.agentAvatar ?: R.drawable.ic_bot_profile)
+                .placeholder(R.drawable.ic_bot_profile)
+                .into(imgBot)
+        }
     }
 
     class ResponseViewHolder(

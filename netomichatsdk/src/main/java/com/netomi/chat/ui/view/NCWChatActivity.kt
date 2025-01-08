@@ -208,7 +208,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         initViews()
         // Load theme and config
         themeData = NCWThemeUtils.getThemeData()
-
+        agentAvatar= themeData?.mobileConfig?.lightTheme?.botConfig?.botImage
         NCWChatSdk.getUpdateHeaderConfiguration()
         NCWChatSdk.getUpdatedFooterConfiguration()
         NCWChatSdk.getUpdatedBotConfiguration()
@@ -524,7 +524,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     sender = TYPE_INITIAL,
                     type = MessageType.TEXT,
                     message = header,
-                    timestamp = System.currentTimeMillis()
+                    timestamp = System.currentTimeMillis(),
+                    agentAvatar = agentAvatar
                 )
             )
         }
@@ -543,7 +544,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 NCWMessage(
                     sender = TYPE_INITIAL,
                     timestamp = System.currentTimeMillis(),
-                    quickReply = NCWQuickReply(options = ArrayList(options))
+                    quickReply = NCWQuickReply(options = ArrayList(options)),
+                    agentAvatar = agentAvatar
                 )
             )
         }
@@ -574,7 +576,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             messageInputField,
             attachmentIcon,
             sendMessageIcon,
-            cardViewInputBox
+            cardViewInputBox,
+            tvBrandName
         )
 
         // Set attachment icon visibility
@@ -1356,7 +1359,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             NCWMessage(
                 sender = TYPE_INDICATOR,
                 type = MessageType.TEXT,
-                timestamp = loaderAddedTime
+                timestamp = loaderAddedTime,
+                agentAvatar = agentAvatar
             )
         )
 
