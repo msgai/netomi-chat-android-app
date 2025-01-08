@@ -4,7 +4,7 @@ data class NCWRequestBody(
     val botReferenceId: String,
     val channelId: String,
     val conversationId: String,
-    val NCWEventData: NCWEventData,
+    val eventData: NCWEventData,
     val eventName: String,
     val isPublishToMQTT: Boolean,
     val requestType: String,
