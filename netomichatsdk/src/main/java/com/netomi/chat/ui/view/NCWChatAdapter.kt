@@ -472,7 +472,7 @@ class NCWChatAdapter(
                if (message.feedbackValue != "POSITIVE") { // Prevent API call if already selected
                    message.feedbackValue = "POSITIVE"
                   // updateFeedbackUI(message)
-                   feedbackActionCallBack.onThumbUpClick(message.requestID!!,position,message.attachmentIndex) // API call
+                   message.requestID?.let { it1 -> feedbackActionCallBack.onThumbUpClick(it1,position,message.attachmentIndex) } // API call
                }
             }
 
@@ -481,7 +481,7 @@ class NCWChatAdapter(
                 if (message.feedbackValue != "NEGATIVE") { // Prevent API call if already selected
                     message.feedbackValue = "NEGATIVE"
                   //  updateFeedbackUI(message)
-                    feedbackActionCallBack.onThumbDownClick(message.requestID!!,position,message.attachmentIndex) // API call
+                    message.requestID?.let { it1 -> feedbackActionCallBack.onThumbDownClick(it1,position,message.attachmentIndex) } // API call
                 }
             }
         }

@@ -2179,7 +2179,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 } ?: emptyList()*/
 
                 val newMessages = response.attachments?.mapIndexedNotNull { index, attachment ->
-                    mapAttachmentToMessage(attachment, response.requestId!!, NCWAppConstant.NORMAL,index)
+                    response.requestId?.let {
+                        mapAttachmentToMessage(attachment,
+                            it, NCWAppConstant.NORMAL,index)
+                    }
                 } ?: emptyList()
 
 
