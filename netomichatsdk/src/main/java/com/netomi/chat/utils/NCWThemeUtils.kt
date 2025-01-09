@@ -20,6 +20,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import com.bumptech.glide.Glide
+import com.netomi.chat.R
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.ui.init.NCWChatSdk
 
@@ -61,7 +62,8 @@ object NCWThemeUtils
         window: Window,
         rootLayout: View,
         context: Context,
-        progressBar: ProgressBar
+        progressBar: ProgressBar,
+        logoIcon: ImageView
     ) {
         themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
             // Apply gradient or background color
@@ -86,6 +88,15 @@ object NCWThemeUtils
             val progressBarColor= headerConfig.backgroundColor?.let { parseColor(it) }
             progressBar.indeterminateDrawable.colorFilter =
                 progressBarColor?.let { PorterDuffColorFilter(it, PorterDuff.Mode.SRC_IN) }
+
+            headerConfig.logoImage?.takeIf { it.isNotEmpty() }?.let { logoUrl ->
+                Glide.with(context)
+                    .load(logoUrl)
+                    .placeholder(R.drawable.ic_support)
+                    .into(logoIcon)
+            }
+
+
         }
     }
 

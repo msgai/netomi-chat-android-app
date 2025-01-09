@@ -142,9 +142,9 @@
             android:padding="5dp"
             android:src="@drawable/ic_menu_bottom"
             android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/cardView"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/cardView" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardView"
@@ -163,6 +163,7 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
+                android:padding="8dp"
                 android:layout_height="wrap_content">
 
                 <androidx.appcompat.widget.AppCompatEditText
@@ -172,7 +173,7 @@
                     android:background="@android:color/transparent"
                     android:hint="Ask a question..."
                     android:inputType="textMultiLine"
-                    android:padding="10dp"
+                    android:textSize="14sp"
                     android:scrollbars="vertical"
                     android:textColor="@android:color/black"
                     android:textColorHint="@android:color/darker_gray"
@@ -185,7 +186,6 @@
                     android:id="@+id/ivAttachment"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="5dp"
                     android:src="@drawable/ic_attachment"
                     android:visibility="visible"
                     app:layout_constraintBottom_toBottomOf="parent"

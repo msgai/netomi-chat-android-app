@@ -568,7 +568,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             window,
             rootLayout,
             this,
-            progressBar
+            progressBar,
+            logoIcon
+
         )
         NCWThemeUtils.configureFooter(
             footerContainer,
