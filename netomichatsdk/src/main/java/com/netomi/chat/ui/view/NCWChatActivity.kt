@@ -353,7 +353,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
 
-    private fun hitFeedbackAPI(requestId: String, feedbackValue: String) {
+    private fun hitFeedbackAPI(requestId: String, feedbackValue: String, attachmentIndex: Int) {
         if (!NCWAppUtils.isNetworkAvailable(this)) {
             NCWAppUtils.showToast(this, "Please check your network and try again.")
             return
@@ -367,7 +367,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     conversationId = conversationID!!,
                     eventData = com.netomi.chat.model.feedback.feedbackrequest.NCWEventData(
                         eventInfo = NCWEventInfo(
-                            attachmentIndex = 0,
+                            attachmentIndex = attachmentIndex,
                             feedbackValue = feedbackValue,
                             requestId = requestId
                         ),
@@ -1165,14 +1165,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             type = NCWAppConstant.NORMAL
         }
         val newMessages =
-            response?.attachments?.mapNotNull {
+            response?.attachments?.mapIndexedNotNull { index, attachment ->
                 mapAttachmentToMessage(
-                    it,
+                    attachment,
                     response.requestId!!,
-                    type
+                    type,
+                    index
                 )
-            }
-                ?: emptyList()
+            } ?: emptyList()
 
         if (newMessages.isNotEmpty()) {
             newMessages.forEachIndexed { index, message ->
@@ -1235,7 +1235,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private fun mapAttachmentToMessage(
         attachment: NCWAttachment,
         requestId: String,
-        type: String
+        type: String,
+        index: Int
     ): NCWMessage? {
         val attach = attachment.attachment ?: return null
         val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
@@ -1264,8 +1265,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             requestID = requestId,
             feedbackValue = attach.feedbackValue,
             isReviewEnabled = attach.isReviewEnabled,
-            agentAvatar = agentAvatar
-
+            agentAvatar = agentAvatar,
+           attachmentIndex = index
         )
     }
 
@@ -2173,9 +2174,18 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 }
                 // else {
                 // Existing logic for attachments
-                val newMessages = response.attachments?.mapNotNull {
+               /* val newMessages = response.attachments?.mapNotNull {
                     mapAttachmentToMessage(it, response.requestId!!, NCWAppConstant.NORMAL)
+                } ?: emptyList()*/
+
+                val newMessages = response.attachments?.mapIndexedNotNull { index, attachment ->
+                    response.requestId?.let {
+                        mapAttachmentToMessage(attachment,
+                            it, NCWAppConstant.NORMAL,index)
+                    }
                 } ?: emptyList()
+
+
 
                 if (newMessages.isNotEmpty()) {
                     newMessages.forEachIndexed { idx, message ->
@@ -2204,6 +2214,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                                     fileUrl = if (it == MessageType.FILE) attachmentListRequest.fileURL else null,
                                     fileSize = attachmentListRequest.fileSize,
                                     title = attachmentListRequest.title
+
                                 )
                                 messageList.add(newMessage)
                             }
@@ -2283,15 +2294,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         constProgressBar.visibility = View.GONE
     }
 
-    override fun onThumbUpClick(requestId: String, position: Int) {
+    override fun onThumbUpClick(requestId: String, position: Int, attachmentIndex: Int) {
         Log.e("RequestId ThumbUp", requestId)
         messageAdapter.notifyItemChanged(position)
-        hitFeedbackAPI(requestId, "POSITIVE")
+        hitFeedbackAPI(requestId, "POSITIVE",attachmentIndex)
     }
 
-    override fun onThumbDownClick(requestId: String, position: Int) {
+    override fun onThumbDownClick(requestId: String, position: Int, attachmentIndex: Int) {
         Log.e("RequestId ThumbDown", requestId)
         messageAdapter.notifyItemChanged(position)
-        hitFeedbackAPI(requestId, "NEGATIVE")
+        hitFeedbackAPI(requestId, "NEGATIVE",attachmentIndex)
     }
 }

@@ -11,7 +11,6 @@ data class NCWGenericChannelResponse(
     val channel: String? = null,
     val requestId: String? = null,
     val requestPayload: NCWRequestPayload? = null,
-
     val botId: String? = null,
     val attachments: List<NCWAttachment>? = null,
     val customPayload: NCWCustomPayload? = null,

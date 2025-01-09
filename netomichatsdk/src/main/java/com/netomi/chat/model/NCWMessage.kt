@@ -35,8 +35,8 @@ data class NCWMessage(
     var feedbackValue: String?=null,
     var isReviewEnabled: Boolean = false,
     val surveyField: SurveyField? = null,
-    var agentAvatar:String?=null
-
+    var agentAvatar:String?=null,
+    var attachmentIndex:Int=0
 
     )
 
