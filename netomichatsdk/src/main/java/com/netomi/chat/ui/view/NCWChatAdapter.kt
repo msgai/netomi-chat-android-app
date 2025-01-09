@@ -317,7 +317,9 @@ class NCWChatAdapter(
         private val feedbackActionCallBack: NCWFeedbackActionCallback
     ) : RecyclerView.ViewHolder(itemView) {
         private val messageText: TextView = itemView.findViewById(R.id.tvReceiverMessage)
+
         private val imageView: ImageView = itemView.findViewById(R.id.receiverImage)
+        private val constReceiverMessage: ConstraintLayout = itemView.findViewById(R.id.constReceiverMessage)
         private val videoView: ImageView = itemView.findViewById(R.id.receiverVideo)
         private val imgBot: ImageView = itemView.findViewById(R.id.img_bot)
         private val carouselRecyclerView: RecyclerView = itemView.findViewById(R.id.carouselRecyclerView)
@@ -333,10 +335,14 @@ class NCWChatAdapter(
         private val thumbUpImageButton: ImageView = itemView.findViewById(R.id.thumbUpButton)
         private val thumbDownImageButton: ImageView = itemView.findViewById(R.id.thumbDownButton)
         private val llFeedback: LinearLayout = itemView.findViewById(R.id.ll_feedback)
+        private val sourceRecyclerView: RecyclerView = itemView.findViewById(R.id.sourceRecyclerView)
+
 
         fun bind(message: NCWMessage,position: Int) {
             // Hide all views initially to avoid redundant visibility changes
             llFeedback.visibility = View.GONE
+            sourceRecyclerView.visibility = View.GONE
+            constReceiverMessage.visibility = View.GONE
             thumbDownImageButton.visibility = View.GONE
             thumbUpImageButton.visibility = View.GONE
             messageText.visibility = View.GONE
@@ -374,10 +380,24 @@ class NCWChatAdapter(
                 MessageType.TEXT -> {
                     message.message?.let {
                         NCWAppUtils.setHtmlText(messageText,it)
+                        constReceiverMessage.visibility = View.VISIBLE
                         messageText.visibility = View.VISIBLE
-                        NCWThemeUtils.setBotConfig(messageText)
+                            //NCWThemeUtils.setBotConfig(messageText)
+                        NCWThemeUtils.setBotConfig(constReceiverMessage)
+
+                        if (sourceRecyclerView.adapter == null) {
+                            sourceRecyclerView.layoutManager =
+                                LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
+                        }
+                        val chipAdapter = NCWSourceLinksAdapter(emptyList()) { selectedOption ->
+                          //  chatActionCallback.onQuickReply(selectedOption, position)
+                        }
+                        sourceRecyclerView.adapter = chipAdapter
+                        sourceRecyclerView.visibility = View.VISIBLE
+
                     } ?: run {
                         messageText.visibility = View.GONE
+                        constReceiverMessage.visibility = View.GONE
                         tvTime.visibility = View.GONE
                         imgBot.visibility= View.INVISIBLE
                     }

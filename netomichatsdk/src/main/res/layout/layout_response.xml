@@ -31,22 +31,47 @@
         app:layout_constraintStart_toEndOf="@id/img_bot"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/constReceiverMessage"
+        android:maxWidth="300dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        app:layout_constraintStart_toEndOf="@id/img_bot"
+        app:layout_constraintTop_toBottomOf="@id/img_bot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
     <!-- Receiver Message -->
     <TextView
         android:id="@+id/tvReceiverMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="5dp"
-        android:background="@drawable/bg_receiver_message"
+
+
         android:maxWidth="300dp"
         android:padding="10dp"
         android:textColor="@android:color/black"
         android:textSize="16sp"
         android:visibility="gone"
-        app:layout_constraintStart_toEndOf="@id/img_bot"
-        app:layout_constraintTop_toBottomOf="@id/tvTime" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
 
+       />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/sourceRecyclerView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="17dp"
+            android:layout_marginTop="10dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvReceiverMessage" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
     <!-- Image Message -->
     <androidx.cardview.widget.CardView
         android:id="@+id/receiverImageCard"
@@ -57,7 +82,7 @@
         android:visibility="gone"
         app:cardCornerRadius="10dp"
         app:layout_constraintStart_toEndOf="@id/img_bot"
-        app:layout_constraintTop_toBottomOf="@id/tvReceiverMessage">
+        app:layout_constraintTop_toBottomOf="@id/constReceiverMessage">
 
         <ImageView
             android:id="@+id/receiverImage"
