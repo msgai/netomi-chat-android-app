@@ -26,6 +26,7 @@ import com.netomi.sampleapplication.model.Bot
 import com.netomi.sampleapplication.model.BotListingResponse
 import com.netomi.sampleapplication.model.FetchJwtTokenResponse
 import com.netomi.sampleapplication.utils.AppSharedPreferences
+import com.netomi.sampleapplication.utils.NetworkUtils
 import com.netomi.sampleapplication.utils.State
 import com.netomi.sampleapplication.viewmodel.OnboardingViewModel
 import org.json.JSONObject
@@ -114,7 +115,12 @@ class HomeFragment : Fragment() {
             "externalId" to email
         )
         val jsonString = Gson().toJson(jsonMap)
-        bot.botRefId.let { onboardingViewModel.fetchJwtToken(bot.botRefId,jsonString) }
+        if (NetworkUtils.isNetworkAvailable(requireActivity()))
+            bot.botRefId.let { onboardingViewModel.fetchJwtToken(bot.botRefId,jsonString) }
+        else
+            Toast.makeText(requireContext(),
+                getString(R.string.please_check_your_network_and_try_again), Toast.LENGTH_SHORT).show()
+
         try {
             NCWChatSdk.setEnvironment(bot.env)
             bot.botRefId.let { NCWChatSdk.initialize(requireContext(), it) }
