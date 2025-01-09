@@ -20,7 +20,9 @@ data class RequestBody(
 data class EventData(
     val eventType: String = "SURVEY",
     val subType: String = "SUBMIT",
-    val eventInfo: EventInfo
+    val eventInfo: EventInfo,
+    var authenticatedConversationId:String?=null,
+
 )
 
 data class EventInfo(
@@ -33,8 +35,6 @@ data class EventInfo(
     val agentId: String?=null,
     val agentName: String?=null,
     val agentAvatar: String?=null
-
-
 )
 
 data class SubmitSurveyInfo(
@@ -45,5 +45,10 @@ data class SubmitSurveyInfo(
     val additionalFeedback: String?,
     val triggerType: String?
 
+)
+
+data class NCWSignInUserDetails(
+    val name:String?=null,
+    val email:String?=null
 )
 

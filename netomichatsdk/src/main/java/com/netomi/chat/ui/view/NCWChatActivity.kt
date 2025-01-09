@@ -29,15 +29,18 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.amazonaws.mobileconnectors.iot.AWSIotMqttManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.netomi.chat.R
+import com.netomi.chat.awsiot.NCWAwsIotManager
 import com.netomi.chat.awsiot.NCWConnectionStatus
 import com.netomi.chat.model.CarouselButtonType
 import com.netomi.chat.model.CustomFieldName
@@ -56,6 +59,7 @@ import com.netomi.chat.model.feedback.feedbackrequest.NCWEventInfo
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.Component
+import com.netomi.chat.model.messages.EventObject
 import com.netomi.chat.model.messages.FileUploadData
 import com.netomi.chat.model.messages.FormSchema
 import com.netomi.chat.model.messages.NCWAdditionalAttributes
@@ -91,10 +95,12 @@ import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
 import com.netomi.chat.utils.NCWAppConstant.DATE_FORMAT
 import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
+import com.netomi.chat.utils.NCWAppConstant.OAUTH
 import com.netomi.chat.utils.NCWAppConstant.SESSION
 import com.netomi.chat.utils.NCWAppConstant.SIZE_LIMIT
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_JOIN
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_LEAVE
+import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_OAUTH
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_WAIT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_AGENT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_AGENT_EVENT
@@ -173,6 +179,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var ncwSdkConfig: NCWHeaderConfig? = null
     private var themeData: NCWThemeResponse? = null
     private lateinit var cardViewInputBox: CardView
+    private lateinit var customTabsIntent: CustomTabsIntent
+    private lateinit var topic: String
 
 
     private var conversationID: String? = null
@@ -202,13 +210,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private var isHistoryDisableInput: Boolean = true
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
         initViews()
         // Load theme and config
         themeData = NCWThemeUtils.getThemeData()
-        agentAvatar= themeData?.mobileConfig?.lightTheme?.botConfig?.botImage
+        agentAvatar = themeData?.mobileConfig?.lightTheme?.botConfig?.botImage
         NCWChatSdk.getUpdateHeaderConfiguration()
         NCWChatSdk.getUpdatedFooterConfiguration()
         NCWChatSdk.getUpdatedBotConfiguration()
@@ -222,7 +231,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         applyTheme(themeData)
         observeChatMessages()
-        Log.e("OtherConfig","" +NCWChatSdk.getUpdatedOtherConfiguration())
+        Log.e("OtherConfig", "" + NCWChatSdk.getUpdatedOtherConfiguration())
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         val device = DeviceInfoUtil.getDeviceInfo(this)
@@ -302,11 +311,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         val bottomSheet = NCWEndChatBottomSheet(
             onConfirmClick = { isEndChat ->
                 if (isEndChat) {
-                  /*  if (NCWThemeUtils.getJwtToken() != null) {
-                        hitLogoutAPI()
-                    } else {
-                        hitEndChatAPI()
-                    }*/
+                    /*  if (NCWThemeUtils.getJwtToken() != null) {
+                          hitLogoutAPI()
+                      } else {
+                          hitEndChatAPI()
+                      }*/
                     hitEndChatAPI()
                 } else {
                     NCWThemeUtils.setJwtToken(null)
@@ -349,7 +358,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 )
             ),
 
-        )
+            )
     }
 
 
@@ -641,7 +650,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
         }
         setUIState(false)
-
+        customTabsIntent = CustomTabsIntent.Builder()
+            .setToolbarColor(Color.parseColor(NCWChatSdk.getUpdateHeaderConfiguration().backgroundColor)) // Set the toolbar color (optional)
+            .build()
     }
 
     /**
@@ -687,6 +698,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
         )
     }
+
     override fun onQuickReply(option: NCWQuickReplyOption?, position: Int) {
 
         if (connectionStatus == NCWConnectionStatus.CONNECTED.toString()) {
@@ -773,18 +785,28 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         handleFileSelection(selectedMediaUri, type)
     }
 
+    private fun launchCustomChromeTab(url: String) {
+        customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        customTabsIntent.launchUrl(this, Uri.parse(url))
+    }
 
     override fun carouselButtonAction(it: NCWCarouselButton?) {
         Log.e("NCWCarouselButton", "NCWCarouselButton " + it)
 
         when (CarouselButtonType.fromValue(it?.type)) {
             CarouselButtonType.WEB -> {
-                try {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it?.url))
-                    startActivity(intent) // Directly start the activity
-                } catch (e: Exception) {
-                    Log.e("OpenURL", "Failed to open URL: ${it?.url}", e)
-                    NCWAppUtils.showToast(this, "Unable to open the link")
+                if (it?.title.equals("Sign In", ignoreCase = false)) {
+                    launchCustomChromeTab(it?.url.toString())
+                } else {
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it?.url))
+                        startActivity(intent) // Directly start the activity
+                    } catch (e: Exception) {
+                        Log.e("OpenURL", "Failed to open URL: ${it?.url}", e)
+                        NCWAppUtils.showToast(this, "Unable to open the link")
+                    }
+                    Log.e("WEB", it?.title.toString())
                 }
             }
 
@@ -830,6 +852,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
 
     }
+
     /**
      * Observes LiveData from the ViewModel for various chat-related events.
      * This function handles different chat message states, including new messages,
@@ -904,13 +927,16 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             try {
                 Log.e("Jsonn", "Testtt " + jsonMessage)
                 val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
+
                 if (response.triggerType == TYPE_EVENT) {
                     val eventData = response.eventObject?.eventData
                     renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
-
-
                 }
 
+                val data = response.eventObject?.eventData
+                if (data?.eventType == OAUTH && data.subType == SUB_TYPE_OAUTH) {
+                    refreshChat(response.eventObject.eventData)
+                }
 
                 if (response.customFields?.isNotEmpty() == true) {
                     for (customField in response.customFields) {
@@ -959,7 +985,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
 
         ncwAwsCredentialsViewModel.credentials.observe(this) {
-            val topic = "$CHAT_WIDGET/$botRefId/$conversationID"
+            topic = "$CHAT_WIDGET/$botRefId/$conversationID"
             Log.e("Topic", "Topic Name " + topic)
             ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)
         }
@@ -1025,6 +1051,16 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     }
 
+    private fun refreshChat(eventData: EventData) {
+        val oldTopic = topic
+        Log.e("OAUTH", eventData.authenticatedConversationId.toString())
+        conversationID = eventData.authenticatedConversationId
+        NCWThemeUtils.setConversationID(conversationID)
+        topic = "$CHAT_WIDGET/$botRefId/${eventData.authenticatedConversationId}"
+        NCWAwsIotManager.switchTopic(oldTopic, topic, chatViewModel)
+        getChatHistory()
+    }
+
     private fun renderPillsMessage(eventData: EventData?, timestamp: Long) {
         val messagePill = when {
             eventData?.eventType == TYPE_QUEUE_POSITION && eventData.subType == SUB_TYPE_WAIT -> {
@@ -1043,6 +1079,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 agentAvatar = null
                 ownerType = TYPE_BOT
                 "$agentName has left the chat"
+            }
+
+            eventData?.eventType == OAUTH && eventData.subType == SUB_TYPE_OAUTH -> {
+                "Successfully Signed In!"
             }
 
             else -> ""
@@ -1380,6 +1420,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
 
     }
+
     private fun removeStreamLoader() {
         isLoaderActive = false
 
@@ -1571,7 +1612,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 it
             )
         }
-        cameraLauncherMain.launch(photoUri)
+        photoUri?.let { cameraLauncherMain.launch(it) }
     }
 
 
@@ -1664,10 +1705,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         // Validate file type
         val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
-        Log.e("deftt","asasassa " +supportedExtensions)
+        Log.e("deftt", "asasassa " + supportedExtensions)
         val fileExtension =
             file?.extension?.lowercase()?.let { if (!it.startsWith(".")) ".$it" else it }
-        Log.e("deftt","fileExtension " +fileExtension)
+        Log.e("deftt", "fileExtension " + fileExtension)
         if (fileExtension !in supportedExtensions) {
             NCWAppUtils.showToast(
                 this,
@@ -2034,42 +2075,41 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 finish()
             }
 
-           /* NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
-                //   messageAdapter.notifyDataSetChanged()
-            }*/
-                NCWRoutes.LOGIN -> {
-                    val response = apiResponse as LoginResponse
-                    Log.d(
-                        "AuthConversationID",
-                        "Fetched AuthConversationID: $response"
-                    )
-                    Log.e("ConversationID LOGIN", response.authenticatedConversationId)
-                    // Use conversationID as needed
-                    conversationID = response.authenticatedConversationId
-                    chatViewModel.getAWSMQTTCredentials(botRefId)
-                    getChatHistory()
-                    conversationID?.let { NCWThemeUtils.setConversationID(it) }
-                    Log.d(
-                        "AuthConversationID",
-                        "Fetched AuthConversationID: $conversationID"
-                    )
-                }
-
-                NCWRoutes.LOGOUT->{
-                    hitEndChatAPI()
-                }
-
-                NCWRoutes.ROUTE_SURVEY -> {
-                    // messageAdapter.notifyDataSetChanged()
-                }
-
-                else -> {
-                    Toast.makeText(this, "Else..", Toast.LENGTH_SHORT).show()
-                }
+            /* NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
+                 //   messageAdapter.notifyDataSetChanged()
+             }*/
+            NCWRoutes.LOGIN -> {
+                val response = apiResponse as LoginResponse
+                Log.d(
+                    "AuthConversationID",
+                    "Fetched AuthConversationID: $response"
+                )
+                Log.e("ConversationID LOGIN", response.authenticatedConversationId)
+                // Use conversationID as needed
+                conversationID = response.authenticatedConversationId
+                chatViewModel.getAWSMQTTCredentials(botRefId)
+                getChatHistory()
+                conversationID?.let { NCWThemeUtils.setConversationID(it) }
+                Log.d(
+                    "AuthConversationID",
+                    "Fetched AuthConversationID: $conversationID"
+                )
             }
 
+            NCWRoutes.LOGOUT -> {
+                hitEndChatAPI()
+            }
+
+            NCWRoutes.ROUTE_SURVEY -> {
+                // messageAdapter.notifyDataSetChanged()
+            }
+
+            else -> {
+                Toast.makeText(this, "Else..", Toast.LENGTH_SHORT).show()
+            }
         }
 
+    }
 
 
     private fun parseHistoryItems(responses: ArrayList<NCWGenericChannelResponse>) {
@@ -2078,7 +2118,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         responses.forEachIndexed { index, response ->
             if (response.triggerType == TYPE_EVENT) {
                 val eventData = response.eventObject?.eventData
-                renderPillsMessage(eventData,response.timestamp ?: System.currentTimeMillis())
+                renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
 
 
             }
@@ -2148,10 +2188,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                             CustomFieldName.DISABLE_INPUT_FIELD -> {
                                 if (customField.values?.get(0) == "true") {
                                     setUIState(false)
-                                    isHistoryDisableInput=false
+                                    isHistoryDisableInput = false
                                 } else {
                                     setUIState(true)
-                                    isHistoryDisableInput=true
+                                    isHistoryDisableInput = true
                                 }
 
                             }

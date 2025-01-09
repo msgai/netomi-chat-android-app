@@ -2,6 +2,7 @@ package com.netomi.chat.model.messages
 
 import com.netomi.chat.survey.EventData
 import com.netomi.chat.survey.EventInfo
+import com.netomi.chat.survey.NCWSignInUserDetails
 
 data class NCWGenericChannelResponse(
     val type: String? = null,

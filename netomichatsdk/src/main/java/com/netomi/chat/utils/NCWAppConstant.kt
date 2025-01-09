@@ -28,6 +28,9 @@ object NCWAppConstant {
     const val SUB_TYPE_LEAVE="LEAVE"
     const val TYPE_AGENT_EVENT="AGENT_EVENT"
     const val TYPE_QUEUE_POSITION="QUEUE_POSITION"
+    const val OAUTH="OAUTH"
+    const val SUB_TYPE_OAUTH="SIGN_IN"
+
 
 
 
