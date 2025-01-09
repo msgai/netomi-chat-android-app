@@ -1,6 +1,5 @@
 package com.netomi.chat.ui.view
 
-import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
@@ -473,7 +472,7 @@ class NCWChatAdapter(
                if (message.feedbackValue != "POSITIVE") { // Prevent API call if already selected
                    message.feedbackValue = "POSITIVE"
                   // updateFeedbackUI(message)
-                   feedbackActionCallBack.onThumbUpClick(message.requestID!!,position) // API call
+                   feedbackActionCallBack.onThumbUpClick(message.requestID!!,position,message.attachmentIndex) // API call
                }
             }
 
@@ -482,7 +481,7 @@ class NCWChatAdapter(
                 if (message.feedbackValue != "NEGATIVE") { // Prevent API call if already selected
                     message.feedbackValue = "NEGATIVE"
                   //  updateFeedbackUI(message)
-                    feedbackActionCallBack.onThumbDownClick(message.requestID!!,position) // API call
+                    feedbackActionCallBack.onThumbDownClick(message.requestID!!,position,message.attachmentIndex) // API call
                 }
             }
         }
