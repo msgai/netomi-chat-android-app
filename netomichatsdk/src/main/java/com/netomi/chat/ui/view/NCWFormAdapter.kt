@@ -420,6 +420,8 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
             val options = component.optionList?.map { it.value } ?: emptyList()
             itemsContainer.removeAllViews()
+            Log.e("CheckkkkBoxx","ssss " +component)
+            if (component.subType=="radio")
             options.forEach { option ->
                 val optionView = TextView(itemView.context).apply {
                     text = option
@@ -439,6 +441,37 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 }
                 itemsContainer.addView(optionView)
             }
+            else if (component.subType == "checkbox") {
+                val selectedItems = mutableSetOf<String>() // Maintain selected items in a set
+
+                options.forEach { option ->
+                    val optionView = CheckBox(itemView.context).apply {
+                        text = option
+                        textSize = 14f
+                        setPadding(15, 16, 10, 16)
+                        NCWThemeUtils.setBotTextColor(this)
+                        setOnCheckedChangeListener { _, isChecked ->
+                            if (isChecked) {
+                                selectedItems.add(option)
+                            } else {
+                                selectedItems.remove(option)
+                            }
+                            selectedText.text = when (selectedItems.size) {
+                                0 -> "Select"
+                                else -> "${selectedItems.size} items selected"
+                            }
+                            inputValues[component.id] = DropdownField(selectedItems.joinToString(", "), errorTextView)
+                            inputValuesSelected[adapterPosition].dropdownSelection = selectedItems.joinToString(", ")
+
+                            if (errorTextView.visibility == View.VISIBLE) {
+                                errorTextView.visibility = View.GONE
+                            }
+                        }
+                    }
+                    itemsContainer.addView(optionView)
+                }
+            }
+
 
 
 
@@ -450,7 +483,19 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
           dropdownView.isEnabled=isClickable
             if (adapterPosition in (formSchema.formData?.indices ?: emptyList())) {
               val selectedDropDown=formSchema.formData?.get(adapterPosition)?.selectedRadio
-              selectedText.text=selectedDropDown
+                if (component.subType == "checkbox")
+                {
+                    val selectedCount = selectedDropDown?.split(",")?.filter { it.isNotBlank() }?.size ?: 0
+                    if (selectedCount > 0) {
+                        selectedText.text = "$selectedCount items selected"
+                    } else {
+                        selectedText.text = ""
+                    }
+
+                }
+                    else {
+                    selectedText.text = selectedDropDown
+                }
           }
 
         }
