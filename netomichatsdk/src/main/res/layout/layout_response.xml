@@ -37,7 +37,7 @@
         android:layout_marginStart="5dp"
         android:layout_marginTop="5dp"
         app:layout_constraintStart_toEndOf="@id/img_bot"
-        app:layout_constraintTop_toBottomOf="@id/img_bot"
+        app:layout_constraintTop_toBottomOf="@id/tvTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
@@ -46,8 +46,6 @@
         android:id="@+id/tvReceiverMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
-
         android:maxWidth="300dp"
         android:padding="10dp"
         android:textColor="@android:color/black"
@@ -59,19 +57,67 @@
        />
 
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/sourceRecyclerView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="17dp"
-            android:layout_marginTop="10dp"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvReceiverMessage" />
-
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constSource"
+        android:visibility="gone"
+        android:padding="5dp"
+        android:maxWidth="300dp"
+        android:layout_marginStart="30dp"
+        android:layout_width="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/constReceiverMessage"
+        android:layout_height="wrap_content">
+
+
+        <TextView
+            android:id="@+id/tvSourceCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:layout_marginStart="5dp"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:text="Sources"
+            android:visibility="visible"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+
+            />
+
+        <ImageView
+            android:id="@+id/imgSourceDropDown"
+            app:layout_constraintBottom_toBottomOf="@+id/tvSourceCount"
+            app:layout_constraintTop_toTopOf="@+id/tvSourceCount"
+            android:layout_width="20dp"
+            android:layout_marginEnd="5dp"
+            android:src="@drawable/ic_arrow_dropdown"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_height="20dp" />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/sourceRecyclerView"
+            android:layout_width="300dp"
+            android:layout_marginTop="5dp"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvSourceCount"
+
+            />
+
+        <Space
+            app:layout_constraintTop_toBottomOf="@+id/sourceRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="9dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
     <!-- Image Message -->
     <androidx.cardview.widget.CardView
         android:id="@+id/receiverImageCard"
@@ -82,7 +128,7 @@
         android:visibility="gone"
         app:cardCornerRadius="10dp"
         app:layout_constraintStart_toEndOf="@id/img_bot"
-        app:layout_constraintTop_toBottomOf="@id/constReceiverMessage">
+        app:layout_constraintTop_toBottomOf="@id/constSource">
 
         <ImageView
             android:id="@+id/receiverImage"

@@ -68,8 +68,14 @@ data class NCWAttachmentContent(
     val thumbnailUrl: String? = null,
     val title: String? = null,
     val feedbackValue: String?=null,
-    var buttons: ArrayList<NCWCarouselButton> = arrayListOf()
+    var buttons: ArrayList<NCWCarouselButton> = arrayListOf(),
+    val multipleSourceDetails: ArrayList<MultipleSourceDetail> = arrayListOf(),
 
+)
+
+data class MultipleSourceDetail(
+    val text: String?=null,
+    val index: Int=1
 )
 
 data class NCWQuickReply(

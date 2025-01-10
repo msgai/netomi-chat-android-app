@@ -58,6 +58,7 @@ import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.Component
 import com.netomi.chat.model.messages.FileUploadData
 import com.netomi.chat.model.messages.FormSchema
+import com.netomi.chat.model.messages.MultipleSourceDetail
 import com.netomi.chat.model.messages.NCWAdditionalAttributes
 import com.netomi.chat.model.messages.NCWAttachment
 import com.netomi.chat.model.messages.NCWAttachmentList
@@ -751,6 +752,21 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
     }
 
+    override fun onSourceClicked(multipleSourceDetail: MultipleSourceDetail) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(multipleSourceDetail.text))
+            startActivity(intent)
+        } catch (e: Exception) {
+            NCWAppUtils.showToast(this, "Unable to open the link")
+        }
+    }
+
+    override fun onScrollToPosition(isScrollToPosition: Boolean) {
+        chatRecyclerView.post {
+            chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
+        }
+    }
+
     private fun retryAttachmentMessage(message: NCWMessage) {
         message.isRetry = false
         messageList.add(message)
@@ -1241,12 +1257,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         val attach = attachment.attachment ?: return null
         val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
 
-        if (type == NCWAppConstant.NORMAL) {
+        if (type == NCWAppConstant.NORMAL && messageType!=MessageType.MULTISOURCE) {
             if (attach.text.isNullOrEmpty() &&
                 attach.elements.isNullOrEmpty() &&
                 attach.thumbnailUrl.isNullOrEmpty() &&
                 attach.largeImageUrl.isNullOrEmpty() &&
-                attach.quickReply == null
+                attach.quickReply == null && attach.multipleSourceDetails.isEmpty()
             ) {
                 return null
             }
@@ -1266,7 +1282,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             feedbackValue = attach.feedbackValue,
             isReviewEnabled = attach.isReviewEnabled,
             agentAvatar = agentAvatar,
-           attachmentIndex = index
+            attachmentIndex = index,
+            multipleSourceDetails= if (messageType == MessageType.MULTISOURCE) attach.multipleSourceDetails else arrayListOf()
         )
     }
 

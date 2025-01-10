@@ -5,22 +5,51 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:padding="5dp"
+    android:layout_marginStart="5dp"
+    android:layout_marginEnd="12dp"
     android:layout_marginTop="5dp"
     android:background="@drawable/bg_receiver_message"
     android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/btnCoursel"
-        android:layout_width="0dp"
 
+    <TextView
+        android:id="@+id/tvIndex"
+        android:layout_width="wrap_content"
         android:layout_marginStart="5dp"
         android:layout_height="wrap_content"
         android:padding="5dp"
         android:textColor="@android:color/black"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="Action"
+        android:text="1"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+
+        />
+    <ImageView
+        android:id="@+id/imgSource"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="5dp"
+        android:src="@drawable/ic_bot_profile"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tvIndex"
+
+        />
+
+    <TextView
+        android:id="@+id/tvSourceLink"
+        android:layout_width="0dp"
+android:maxLines="1"
+        android:ellipsize="end"
+        android:layout_marginStart="5dp"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:layout_marginEnd="15dp"
+        android:textColor="@android:color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imgSource"
         app:layout_constraintEnd_toStartOf="@+id/imgArrow"
        />
 
