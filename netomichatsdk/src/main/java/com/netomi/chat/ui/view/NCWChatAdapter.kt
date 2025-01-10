@@ -407,7 +407,7 @@ class NCWChatAdapter(
                     sourceRecyclerView.visibility = View.VISIBLE
                     NCWThemeUtils.setBotConfig(constSource)
                     NCWThemeUtils.setBotTextColor(tvSourceCount)
-                    tvSourceCount.text = "Sources(${message.multipleSourceDetails.size})"
+                    tvSourceCount.text = "Sources (${message.multipleSourceDetails.size})"
                     var isDropdownOpen = false
                     val adapter = NCWSourceLinksAdapter(
                         message.multipleSourceDetails,
