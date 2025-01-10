@@ -28,6 +28,7 @@ import com.netomi.sampleapplication.model.BotListingResponse
 import com.netomi.sampleapplication.ui.fragment.ChangeAiAgentFragment
 import com.netomi.sampleapplication.ui.fragment.HomeFragment
 import com.netomi.sampleapplication.utils.AppSharedPreferences
+import com.netomi.sampleapplication.utils.NetworkUtils
 import com.netomi.sampleapplication.utils.State
 import com.netomi.sampleapplication.utils.customView.DialogUtils
 import com.netomi.sampleapplication.viewmodel.OnboardingViewModel
@@ -55,7 +56,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
 
         initView()
         val email = preferences.getString(SharePreferenceConstant.EMAIL)
-        if (isNetworkAvailable())
+        if (NetworkUtils.isNetworkAvailable(this))
         onboardingViewModel.getBotListing(email)
         else
             Toast.makeText(this,
@@ -234,15 +235,6 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
     }
 
 
-    fun isNetworkAvailable(): Boolean {
-        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-        val network = connectivityManager.activeNetwork
-        val networkCapabilities = connectivityManager.getNetworkCapabilities(network)
-        return networkCapabilities != null &&
-                (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
-    }
 
 }
