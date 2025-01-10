@@ -84,7 +84,9 @@ class HomeFragment : Fragment() {
 
             is State.Success -> {
                 val res = response.data as FetchJwtTokenResponse
+                if (res.token.isNotEmpty())
                 token = res.token
+
                 showLoader(false)
 
             }

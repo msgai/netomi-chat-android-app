@@ -5,11 +5,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.marginBottom
+import androidx.core.view.marginTop
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -317,7 +320,9 @@ class NCWChatAdapter(
         private val feedbackActionCallBack: NCWFeedbackActionCallback
     ) : RecyclerView.ViewHolder(itemView) {
         private val messageText: TextView = itemView.findViewById(R.id.tvReceiverMessage)
+
         private val imageView: ImageView = itemView.findViewById(R.id.receiverImage)
+        private val constReceiverMessage: ConstraintLayout = itemView.findViewById(R.id.constReceiverMessage)
         private val videoView: ImageView = itemView.findViewById(R.id.receiverVideo)
         private val imgBot: ImageView = itemView.findViewById(R.id.img_bot)
         private val carouselRecyclerView: RecyclerView = itemView.findViewById(R.id.carouselRecyclerView)
@@ -333,10 +338,17 @@ class NCWChatAdapter(
         private val thumbUpImageButton: ImageView = itemView.findViewById(R.id.thumbUpButton)
         private val thumbDownImageButton: ImageView = itemView.findViewById(R.id.thumbDownButton)
         private val llFeedback: LinearLayout = itemView.findViewById(R.id.ll_feedback)
+        private val sourceRecyclerView: RecyclerView = itemView.findViewById(R.id.sourceRecyclerView)
+        private val constSource: ConstraintLayout = itemView.findViewById(R.id.constSource)
+        private val tvSourceCount: TextView = itemView.findViewById(R.id.tvSourceCount)
+        private val imgSourceDropDown: ImageView = itemView.findViewById(R.id.imgSourceDropDown)
 
         fun bind(message: NCWMessage,position: Int) {
             // Hide all views initially to avoid redundant visibility changes
             llFeedback.visibility = View.GONE
+            constSource.visibility = View.GONE
+            sourceRecyclerView.visibility = View.GONE
+            constReceiverMessage.visibility = View.GONE
             thumbDownImageButton.visibility = View.GONE
             thumbUpImageButton.visibility = View.GONE
             messageText.visibility = View.GONE
@@ -374,15 +386,83 @@ class NCWChatAdapter(
                 MessageType.TEXT -> {
                     message.message?.let {
                         NCWAppUtils.setHtmlText(messageText,it)
+                        constReceiverMessage.visibility = View.VISIBLE
                         messageText.visibility = View.VISIBLE
-                        NCWThemeUtils.setBotConfig(messageText)
+                            NCWThemeUtils.setBotTextColor(messageText)
+                        NCWThemeUtils.setBotConfig(constReceiverMessage)
+
+
+
                     } ?: run {
                         messageText.visibility = View.GONE
+                        constReceiverMessage.visibility = View.GONE
                         tvTime.visibility = View.GONE
                         imgBot.visibility= View.INVISIBLE
                     }
 
                 }
+                MessageType.MULTISOURCE -> {
+                    imgBot.visibility = if (message.attachmentIndex == 0) View.VISIBLE else View.GONE
+                    constSource.visibility = View.VISIBLE
+                    sourceRecyclerView.visibility = View.VISIBLE
+                    NCWThemeUtils.setBotConfig(constSource)
+                    NCWThemeUtils.setBotTextColor(tvSourceCount)
+                    tvSourceCount.text = "Sources(${message.multipleSourceDetails.size})"
+                    var isDropdownOpen = false
+                    val adapter = NCWSourceLinksAdapter(
+                        message.multipleSourceDetails,
+                        message.agentAvatar
+                    ) { selectedOption ->
+                        if (selectedOption != null) {
+                            chatActionCallback.onSourceClicked(selectedOption)
+                        }
+                    }
+                    sourceRecyclerView.adapter = adapter
+                    sourceRecyclerView.layoutManager = LinearLayoutManager(itemView.context)
+
+                    sourceRecyclerView.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                        override fun onGlobalLayout() {
+                            sourceRecyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                            val firstItemView = sourceRecyclerView.layoutManager?.findViewByPosition(0)
+                            firstItemView?.let {
+                                val singleItemHeight = it.measuredHeight +
+                                        (it.marginTop + it.marginBottom)
+
+                                if (singleItemHeight > 0) {
+                                    sourceRecyclerView.layoutParams.height = singleItemHeight
+                                    sourceRecyclerView.requestLayout()
+                                }
+                            }
+                        }
+                    })
+
+                    imgSourceDropDown.setOnClickListener {
+                        isDropdownOpen = !isDropdownOpen
+
+                        if (isDropdownOpen) {
+                            imgSourceDropDown.setImageResource(R.drawable.ic_arrow_dropup)
+                            sourceRecyclerView.layoutParams.height = RecyclerView.LayoutParams.WRAP_CONTENT
+                            chatActionCallback.onScrollToPosition(true)
+                        } else {
+                            imgSourceDropDown.setImageResource(R.drawable.ic_arrow_dropdown)
+
+                            val firstItemView = sourceRecyclerView.layoutManager?.findViewByPosition(0)
+                            firstItemView?.let {
+                                val singleItemHeight = it.measuredHeight +
+                                        (it.marginTop + it.marginBottom)
+
+                                if (singleItemHeight > 0) {
+                                    sourceRecyclerView.layoutParams.height = singleItemHeight
+                                    sourceRecyclerView.requestLayout()
+                                }
+                            }
+                        }
+                        sourceRecyclerView.requestLayout()
+                    }
+                }
+
+
+
 
                 MessageType.IMAGE -> {
                     Glide.with(itemView.context).load(message.largeImageUrl).placeholder(R.drawable.ic_place_holder).into(imageView)
@@ -419,6 +499,8 @@ class NCWChatAdapter(
                     NCWThemeUtils.setBotConfig(cardViewCard)
                     cardTitle.text=message.title
                     cardMessage.text=message.message
+                    NCWThemeUtils.setBotTextColor(cardTitle)
+                    NCWThemeUtils.setTimeStampColor(cardMessage)
                     buttonRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
                     val carouselAdapter = NCWCarouselButtonAdapter(message.buttons){
                         chatActionCallback.carouselButtonAction(it)
@@ -512,9 +594,17 @@ class NCWChatAdapter(
     fun updateOrAppendMessage(newMessage: NCWMessage) {
         val index = messages.indexOfFirst { it.requestID == newMessage.requestID && it.sender==newMessage.sender }
         if (index != -1) {
-            // Message already exists; append text
-            messages[index].message += newMessage.message
 
+            if (newMessage.type==MessageType.TEXT) {
+                // Message already exists; append text
+                messages[index].message += newMessage.message
+            }
+            else if (newMessage.type==MessageType.MULTISOURCE){
+                //messages[index]=newMessage
+                messages.add(newMessage)
+                notifyItemInserted(messages.size - 1)
+                return
+            }
             // Update isReviewEnabled flag if it changes
             if(!messages[index].isReviewEnabled) {
                 messages[index].isReviewEnabled = newMessage.isReviewEnabled
