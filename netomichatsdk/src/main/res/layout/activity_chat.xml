@@ -171,7 +171,7 @@
                     android:background="@android:color/transparent"
                     android:hint="Ask a question..."
                     android:inputType="textMultiLine"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:paddingVertical="5dp"
                     android:scrollbars="vertical"
                     android:textColor="@android:color/black"
