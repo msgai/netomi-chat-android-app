@@ -22,7 +22,7 @@ android:layout_marginTop="7dp"
             android:layout_height="wrap_content"
             android:text="@string/select"
             android:textSize="14sp"
-            android:textColor="@color/light_gray"
+            android:textColor="@color/hint_color"
             android:layout_centerVertical="true"
             android:layout_alignParentStart="true" />
 
