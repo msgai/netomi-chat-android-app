@@ -335,7 +335,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
         private fun createCheckboxGroup(component: Component) {
             addRadioLabel(component)
-
+            addSpaceToContainer(5)
             // Retrieve previously selected checkboxes if available
             val checkBoxSelected = formSchema.formData?.get(adapterPosition)?.textInput
             val previouslySelectedCheckboxes = checkBoxSelected?.split(",")?.map { it.trim() } ?: emptyList()
@@ -352,7 +352,14 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             component.optionList?.forEach { option ->
                 val checkBox = CheckBox(itemView.context).apply {
                     text = option.value
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        setMargins(0, 5, 0, 0)
+                    }
                     NCWThemeUtils.setTitleColor(this)
+                    setPadding(0, 0, 0, 0)
                     setOnCheckedChangeListener { _, isChecked ->
                         val selectedCheckboxes = inputValuesSelected[adapterPosition].selectedCheckboxes.toMutableList()
                         if (isChecked) {
@@ -396,7 +403,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             val arrowIcon: ImageView = dropdownView.findViewById(R.id.arrow_icon)
             val itemsContainer: LinearLayout = dropdownView.findViewById(R.id.dropdown_items_container)
             var isDropdownOpen = false
-            NCWThemeUtils.setBotTextColor(selectedText)
+
             createDrawable(rootView)
 
             dropdownView.findViewById<RelativeLayout>(R.id.selected_view).setOnClickListener {
@@ -430,6 +437,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                     NCWThemeUtils.setBotTextColor(this)
                     setOnClickListener {
                         selectedText.text = option
+                        NCWThemeUtils.setBotTextColor(selectedText)
                         isDropdownOpen = false
                         itemsContainer.visibility = View.GONE
                         arrowIcon.setImageResource(R.drawable.ic_arrow_dropdown)
@@ -844,6 +852,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
         }
 
         private fun addLabel(component: Component) {
+            addSpaceToContainer(5)
             val textView = TextView(itemView.context).apply {
                 val label = component.labels?.firstOrNull() ?: "Label"
                 val isRequired = component.additionalSettings["Required"]?.value == true
@@ -869,6 +878,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             formContainer.addView(textView)
         }
         private fun addRadioLabel(component: Component) {
+            addSpaceToContainer(5)
             val textView = TextView(itemView.context).apply {
                 val label = component.groupLabel ?: "Label"
                 val isRequired = component.additionalSettings["Required"]?.value == true
@@ -900,12 +910,26 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply { setMargins(0, 15, 0, 0) }
 
+        private fun addSpaceToContainer(heightDp: Int) {
+            val spaceView = View(itemView.context).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    dpToPx(heightDp)
+                )
+            }
+            formContainer.addView(spaceView)
+        }
+        private fun dpToPx(dp: Int): Int {
+            val density = itemView.context.resources.displayMetrics.density
+            return (dp * density).toInt()
+        }
+
         private fun addSubmitButtonDynamically(
             parentLayout: LinearLayout,
             context: Context,
             formSchecma: FormSchema
         ) {
-
+        addSpaceToContainer(5)
             val btnSubmit = TextView(context).apply {
                 text = "Submit"
                 id = View.generateViewId()
@@ -915,7 +939,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 ).apply {
-                    setMargins(10, 30, 10, 30) // Add padding/margins as needed
+                    setMargins(0, 30, 0, 30) // Add padding/margins as needed
                 }
 
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
@@ -1282,6 +1306,8 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
         view.background=drawable
 
     }
+
+
 
 
 
