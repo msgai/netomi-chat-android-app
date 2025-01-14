@@ -22,6 +22,7 @@ import androidx.core.widget.ImageViewCompat
 import com.bumptech.glide.Glide
 import com.netomi.chat.R
 import com.netomi.chat.model.theme.NCWThemeResponse
+import com.netomi.chat.survey.NCWSignInUserDetails
 import com.netomi.chat.ui.init.NCWChatSdk
 
 object NCWThemeUtils
@@ -39,6 +40,7 @@ object NCWThemeUtils
 
     private var conversationID : String? = null
     private var jwtToken : String? = null
+    var userDetails: NCWSignInUserDetails? = null
 
     fun setConversationID(id: String?) {
         conversationID = id
@@ -53,6 +55,15 @@ object NCWThemeUtils
     fun getJwtToken():String?{
         return jwtToken
     }
+    fun setSignInUserDetails(signInUserDetails: NCWSignInUserDetails?) {
+        userDetails = signInUserDetails
+    }
+
+    fun getSignInUserDetails():NCWSignInUserDetails? {
+       return userDetails
+    }
+
+
 
     fun configureHeader(
         headerContainer: ConstraintLayout,

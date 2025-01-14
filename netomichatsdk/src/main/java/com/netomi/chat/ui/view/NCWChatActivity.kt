@@ -79,6 +79,7 @@ import com.netomi.chat.model.mqtt.NCWCredentials
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
+import com.netomi.chat.model.theme.NCWOauth
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
 import com.netomi.chat.survey.EventData
@@ -95,6 +96,7 @@ import com.netomi.chat.utils.NCWAppConstant.ARG_MEDIA_URL
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
 import com.netomi.chat.utils.NCWAppConstant.DATE_FORMAT
+import com.netomi.chat.utils.NCWAppConstant.LOGOUT
 import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
 import com.netomi.chat.utils.NCWAppConstant.OAUTH
 import com.netomi.chat.utils.NCWAppConstant.SESSION
@@ -428,6 +430,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             onYesClick = {
                 if (from == SESSION)
                     finish()
+                else if (from == LOGOUT){
+                    NCWThemeUtils.setSignInUserDetails(null)
+                    hitEndChatAPI()
+                }
             },
         )
     }
@@ -453,6 +459,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             return
         }
 
+        if (checkForLogoutAction(messageContent)) return
+
         if (messageContent.isNotEmpty()) {
             val timeStamp = System.currentTimeMillis()
             val payload = createPayload(messageContent, messageContent, timeStamp)
@@ -464,6 +472,21 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
         idleTimeoutManager.checkForTimeout()
     }
+    private fun checkForLogoutAction(content: String?): Boolean {
+        themeData?.OAUTH2?.logoutActionKeys?.let { logoutActionKeys ->
+            if (logoutActionKeys.any { key -> content?.contains(key, ignoreCase = true) == true }) {
+                handleSessionTimeout(
+                    "Logout",
+                    "You have been logged out.",
+                    "OK",
+                    LOGOUT
+                )
+                return true
+            }
+        }
+        return false
+    }
+
 
     private fun checkForInitialMessage() {
         messageList.removeIf { it.sender == TYPE_INITIAL }
@@ -498,7 +521,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     ): NCWWebhookPayload {
         val messageId = UUID.randomUUID().toString()
 
-        val attributes = NCWAdditionalAttributes(
+       val attributes = NCWAdditionalAttributes(
             CUSTOM_ATTRIBUTES = deviceInfo
         )
         return NCWWebhookPayload(
@@ -514,7 +537,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                 ),
                 attachmentList = attachmentList,
-                additionalAttributes = attributes
+                additionalAttributes = attributes,
+                userDetails = NCWThemeUtils.getSignInUserDetails()
 
             )
         )
@@ -854,6 +878,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
      * @param option The selected quick reply option.
      */
     private fun onQuickReplyClicked(option: NCWQuickReplyOption?) {
+
+        val content = option?.metadata
+        if (checkForLogoutAction(content)) return
+
         option?.label?.takeIf { it.isNotEmpty() }?.let { label ->
             val timeStamp = System.currentTimeMillis()
             val payload = option.metadata?.let {
@@ -1072,6 +1100,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         Log.e("OAUTH", eventData.authenticatedConversationId.toString())
         conversationID = eventData.authenticatedConversationId
         NCWThemeUtils.setConversationID(conversationID)
+        eventData.userdetails?.let { NCWThemeUtils.setSignInUserDetails(it) }
+
         topic = "$CHAT_WIDGET/$botRefId/${eventData.authenticatedConversationId}"
         NCWAwsIotManager.switchTopic(oldTopic, topic, chatViewModel)
         getChatHistory()

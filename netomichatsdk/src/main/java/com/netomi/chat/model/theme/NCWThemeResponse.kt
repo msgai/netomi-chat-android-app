@@ -50,5 +50,6 @@ data class NCWThemeResponse(
     val timeDelayBetweenMessageBubbles: Int,
     val title: String,
     val typingIndicator: NCWTypingIndicator,
-    val whitelisting: NCWWhitelisting
+    val whitelisting: NCWWhitelisting,
+    val OAUTH2: NCWOauth
 )
