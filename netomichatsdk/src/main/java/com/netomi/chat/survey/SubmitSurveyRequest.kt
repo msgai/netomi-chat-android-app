@@ -22,7 +22,7 @@ data class EventData(
     val subType: String = "SUBMIT",
     val eventInfo: EventInfo,
     var authenticatedConversationId:String?=null,
-
+    var userdetails:NCWSignInUserDetails?=null
 )
 
 data class EventInfo(

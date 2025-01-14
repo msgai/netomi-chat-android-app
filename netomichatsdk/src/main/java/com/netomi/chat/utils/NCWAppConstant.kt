@@ -37,6 +37,8 @@ object NCWAppConstant {
     const val SESSION="session"
     const val SIZE_LIMIT="limit"
 
+    const val LOGOUT="logout"
+
 
     const val TYPE_FORM="FORM"
 
