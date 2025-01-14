@@ -57,8 +57,7 @@ class NCWFullScreenMediaActivity : AppCompatActivity() {
         val mediaType = intent.getStringExtra(NCWAppConstant.MEDIA_TYPE)
         val mediaUrl = intent.getStringExtra(NCWAppConstant.ARG_MEDIA_URL)
         val fileUri = intent.getStringExtra(NCWAppConstant.ARG_FILE_URI)
-Log.e("mediaType ","mediaType "+mediaType)
-        Log.e("mediaUrl ","mediaUrl "+mediaUrl)
+
 
         // Handle media display
         when {
@@ -87,8 +86,8 @@ Log.e("mediaType ","mediaType "+mediaType)
     private fun handleMedia(mediaUrl: String, mediaType: String?) {
         progressBar.visibility = View.VISIBLE
         when (mediaType) {
-           MessageType.IMAGE.name -> showImage(mediaUrl)
-           MessageType.VIDEO.name -> showVideo(mediaUrl)
+            MessageType.IMAGE.name -> showImage(mediaUrl)
+            MessageType.VIDEO.name -> showVideo(mediaUrl)
             MessageType.FILE.name -> showFileInWebView(mediaUrl)
             else -> showUnsupportedMediaType()
         }
@@ -97,7 +96,6 @@ Log.e("mediaType ","mediaType "+mediaType)
     private fun handleMediaFileUri(fileUri: String, mediaType: String?) {
         progressBar.visibility = View.VISIBLE
         val uri = Uri.parse(fileUri)
-        Log.e("WebView","sssxxc"+fileUri)
         when (mediaType) {
             MessageType.IMAGE.name -> showImageURI(fileUri)
             MessageType.VIDEO.name -> showVideo(uri.toString())
@@ -134,7 +132,6 @@ Log.e("mediaType ","mediaType "+mediaType)
     }
 
     private fun showImage(imageUrl: String) {
-        Log.e("ShowImage","aasas" +imageUrl)
         webView.apply {
             visibility = View.VISIBLE
             loadHtmlContent("<img src=\"$imageUrl\" style=\"width:100%;height:auto;\" />")
