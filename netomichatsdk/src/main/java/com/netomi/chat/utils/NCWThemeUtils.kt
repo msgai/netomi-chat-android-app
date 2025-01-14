@@ -111,6 +111,17 @@ object NCWThemeUtils
         }
     }
 
+    fun setLogoIcon(logoIcon: ImageView,context: Context){
+        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+            headerConfig.logoImage?.takeIf { it.isNotEmpty() }?.let { logoUrl ->
+                Glide.with(context)
+                    .load(logoUrl)
+                    .placeholder(R.drawable.ic_support)
+                    .into(logoIcon)
+            }
+        }
+        }
+
     fun configureFooter(
         footerContainer: ConstraintLayout,
         ivMenuOption: ImageView,
