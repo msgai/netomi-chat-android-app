@@ -199,6 +199,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
             formSchema.formData?.getOrNull(adapterPosition)?.textInput?.let { textInput ->
                 editText.setText(textInput)
+                editText.setTextColor(ContextCompat.getColor(itemView.context, R.color.hint_color))
             }
 
             editText.isEnabled = isClickable
@@ -282,6 +283,8 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             // Restore previous input value if available
             formSchema.formData?.get(adapterPosition)?.textAreaInput?.let {
                 editText.setText(it)
+                editText.setTextColor(ContextCompat.getColor(itemView.context, R.color.hint_color))
+
             }
             editText.isEnabled = isClickable
         }
@@ -500,10 +503,12 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                         selectedText.text = ""
                     }
 
+
                 }
                     else {
                     selectedText.text = selectedDropDown
                 }
+                selectedText.setTextColor(ContextCompat.getColor(itemView.context, R.color.hint_color))
           }
 
         }
@@ -602,6 +607,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 val textInput = formSchema.formData?.get(adapterPosition)?.textInput
                 if (textInput != null) {
                     textView.setText(textInput)
+                    textView.setTextColor(ContextCompat.getColor(itemView.context, R.color.hint_color))
                     //textView.text = textInput.toString()
                 }
             }
