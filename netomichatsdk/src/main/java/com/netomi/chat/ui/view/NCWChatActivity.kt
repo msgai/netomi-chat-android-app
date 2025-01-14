@@ -79,6 +79,7 @@ import com.netomi.chat.model.mqtt.NCWCredentials
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
+import com.netomi.chat.model.theme.NCWOauth
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
 import com.netomi.chat.survey.EventData
@@ -498,9 +499,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     ): NCWWebhookPayload {
         val messageId = UUID.randomUUID().toString()
 
-        val attributes = NCWAdditionalAttributes(
+     /*   val attributes = NCWAdditionalAttributes(
             CUSTOM_ATTRIBUTES = deviceInfo
-        )
+        )*/
         return NCWWebhookPayload(
             botRefId = botRefId,
             requestBody = NCWRequestBody(
@@ -514,7 +515,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                 ),
                 attachmentList = attachmentList,
-                additionalAttributes = attributes
+               // additionalAttributes = attributes
 
             )
         )
