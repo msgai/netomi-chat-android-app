@@ -118,14 +118,14 @@ class HomeFragment : Fragment() {
         )
         val jsonString = Gson().toJson(jsonMap)
         if (NetworkUtils.isNetworkAvailable(requireActivity()))
-            bot.botRefId.let { onboardingViewModel.fetchJwtToken("58fc3fcd-ad00-4ec1-b38d-000aa0e8b837",jsonString) }
+            bot.botRefId.let { onboardingViewModel.fetchJwtToken(bot.botRefId,jsonString) }
         else
             Toast.makeText(requireContext(),
                 getString(R.string.please_check_your_network_and_try_again), Toast.LENGTH_SHORT).show()
 
         try {
-            NCWChatSdk.setEnvironment("qa")
-            bot.botRefId.let { NCWChatSdk.initialize(requireContext(),"58fc3fcd-ad00-4ec1-b38d-000aa0e8b837") }
+            NCWChatSdk.setEnvironment(bot.env)
+            bot.botRefId.let { NCWChatSdk.initialize(requireContext(), it) }
         } catch (e: Exception) {
             e.printStackTrace()
         }
