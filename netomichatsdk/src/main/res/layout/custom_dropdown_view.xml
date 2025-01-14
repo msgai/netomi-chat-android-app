@@ -16,12 +16,13 @@ android:layout_marginTop="7dp"
         android:padding="10dp"
         >
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/selected_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/select"
             android:textSize="14sp"
+            android:textColor="@color/light_gray"
             android:layout_centerVertical="true"
             android:layout_alignParentStart="true" />
 

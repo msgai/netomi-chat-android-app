@@ -200,7 +200,8 @@ class NCWChatAdapter(
     class FormViewHolder(
         itemView: View,
     ) : RecyclerView.ViewHolder(itemView) {
-
+        private val imgBot: ImageView = itemView.findViewById(R.id.img_bot)
+        private val tvTime: TextView = itemView.findViewById(R.id.tvTime)
         private val rootLayout: ConstraintLayout = itemView.findViewById(R.id.constRow)
         private val tvFormTitle: TextView = itemView.findViewById(R.id.tvFormTitle)
         private val recyclerViewForm: RecyclerView = itemView.findViewById(R.id.formRecyclerView)
@@ -212,6 +213,13 @@ class NCWChatAdapter(
             callBack: (Component?) -> Unit,
             formData: (String?, String?,ArrayList<NCWAttachmentList>) -> Unit
         ) {
+            tvTime.text=NCWAppUtils.formatTimestampToTime(message.timestamp)
+            NCWThemeUtils.setTimeStampColor(tvTime)
+            Glide.with(itemView.context)
+                .load(message.agentAvatar ?: R.drawable.ic_bot_profile)
+                .placeholder(R.drawable.ic_bot_profile)
+                .into(imgBot)
+
             NCWThemeUtils.setBotConfig(rootLayout)
             NCWThemeUtils.setBotTextColor(tvFormTitle)
             NCWThemeUtils.setTimeStampColor(tvFormTitle)
@@ -269,13 +277,19 @@ class NCWChatAdapter(
         itemView: View,
     ) : RecyclerView.ViewHolder(itemView) {
 
-
+        private val imgBot: ImageView = itemView.findViewById(R.id.img_bot)
+        private val tvTime: TextView = itemView.findViewById(R.id.tvTime)
         private val constRowEvent: ConstraintLayout = itemView.findViewById(R.id.constRowEvent)
         private val tvThank: TextView = itemView.findViewById(R.id.tvThank)
         private val tvComplete: TextView = itemView.findViewById(R.id.tvComplete)
         private val tvViewResponse: TextView = itemView.findViewById(R.id.tvViewResponse)
         fun bind(message: NCWMessage, callBackSurvey: (NCWMessage?) -> Unit) {
-
+            tvTime.text=NCWAppUtils.formatTimestampToTime(message.timestamp)
+            NCWThemeUtils.setTimeStampColor(tvTime)
+            Glide.with(itemView.context)
+                .load(message.agentAvatar ?: R.drawable.ic_bot_profile)
+                .placeholder(R.drawable.ic_bot_profile)
+                .into(imgBot)
             NCWThemeUtils.setBotConfig(constRowEvent)
             NCWThemeUtils.setBotTextColor(tvComplete)
             NCWThemeUtils.setBotTextColor(tvThank)

@@ -403,7 +403,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             val arrowIcon: ImageView = dropdownView.findViewById(R.id.arrow_icon)
             val itemsContainer: LinearLayout = dropdownView.findViewById(R.id.dropdown_items_container)
             var isDropdownOpen = false
-            NCWThemeUtils.setBotTextColor(selectedText)
+
             createDrawable(rootView)
 
             dropdownView.findViewById<RelativeLayout>(R.id.selected_view).setOnClickListener {
@@ -437,6 +437,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                     NCWThemeUtils.setBotTextColor(this)
                     setOnClickListener {
                         selectedText.text = option
+                        NCWThemeUtils.setBotTextColor(selectedText)
                         isDropdownOpen = false
                         itemsContainer.visibility = View.GONE
                         arrowIcon.setImageResource(R.drawable.ic_arrow_dropdown)
