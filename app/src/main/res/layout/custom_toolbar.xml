@@ -54,14 +54,14 @@ app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/toolbar_menu_icon"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/tv_welcome"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/proxima_nova_regular"
-                android:text="Welcome nkjnjjjnjj"
+                android:text="Welcome"
                 android:textColor="@color/gray_black"
                 android:textFontWeight="400"
                 android:textSize="16sp" />
