@@ -15,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.netomi.chat.R
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.utils.NCWAppConstant
+import com.netomi.chat.utils.NCWAppConstant.TYPE_IMAGE
+import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
 import com.netomi.chat.utils.NCWAppUtils
 
 class NCWFullScreenMediaActivity : AppCompatActivity() {
@@ -55,6 +57,8 @@ class NCWFullScreenMediaActivity : AppCompatActivity() {
         val mediaType = intent.getStringExtra(NCWAppConstant.MEDIA_TYPE)
         val mediaUrl = intent.getStringExtra(NCWAppConstant.ARG_MEDIA_URL)
         val fileUri = intent.getStringExtra(NCWAppConstant.ARG_FILE_URI)
+Log.e("mediaType ","mediaType "+mediaType)
+        Log.e("mediaUrl ","mediaUrl "+mediaUrl)
 
         // Handle media display
         when {
@@ -83,8 +87,8 @@ class NCWFullScreenMediaActivity : AppCompatActivity() {
     private fun handleMedia(mediaUrl: String, mediaType: String?) {
         progressBar.visibility = View.VISIBLE
         when (mediaType) {
-            MessageType.IMAGE.name -> showImage(mediaUrl)
-            MessageType.VIDEO.name -> showVideo(mediaUrl)
+           MessageType.IMAGE.name -> showImage(mediaUrl)
+           MessageType.VIDEO.name -> showVideo(mediaUrl)
             MessageType.FILE.name -> showFileInWebView(mediaUrl)
             else -> showUnsupportedMediaType()
         }
@@ -130,6 +134,7 @@ class NCWFullScreenMediaActivity : AppCompatActivity() {
     }
 
     private fun showImage(imageUrl: String) {
+        Log.e("ShowImage","aasas" +imageUrl)
         webView.apply {
             visibility = View.VISIBLE
             loadHtmlContent("<img src=\"$imageUrl\" style=\"width:100%;height:auto;\" />")
