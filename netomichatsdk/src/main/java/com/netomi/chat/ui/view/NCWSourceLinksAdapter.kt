@@ -36,11 +36,7 @@ class NCWSourceLinksAdapter(
         holder.tvSourceLint.text = item.text
         holder.tvIndex.text = "${item.index}."
 
-
-        Glide.with(holder.itemView.context)
-            .load(imgBot ?: R.drawable.ic_bot_profile)
-            .placeholder(R.drawable.ic_bot_profile)
-            .into(holder.imgSource)
+        NCWThemeUtils.setLogoIcon(holder.imgSource,holder.itemView.context)
         NCWThemeUtils.setBotTextColor(holder.tvIndex)
         NCWThemeUtils.setQuickReply(holder.constRow,holder.tvSourceLint)
         holder.constRow.setOnClickListener {

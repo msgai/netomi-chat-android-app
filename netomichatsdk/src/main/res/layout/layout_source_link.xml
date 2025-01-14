@@ -30,7 +30,7 @@
         android:layout_width="18dp"
         android:layout_height="18dp"
         android:layout_marginStart="5dp"
-        android:src="@drawable/ic_bot_profile"
+        android:src="@drawable/ic_support"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@+id/tvIndex"

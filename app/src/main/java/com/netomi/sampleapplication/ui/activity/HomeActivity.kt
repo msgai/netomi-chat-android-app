@@ -49,6 +49,8 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
     private lateinit var progressOverlay: FrameLayout
     private var name:String=""
 
+    private lateinit var usernameProfile: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
@@ -70,6 +72,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
             llParent.visibility = View.VISIBLE
             tvTitle.visibility = View.GONE
             usernameTextView.text = name
+            usernameProfile.text = name
             tvWelcome.text = "Welcome"
         }
 
@@ -84,6 +87,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
 
         name = preferences.getString(SharePreferenceConstant.NAME)
         usernameTextView.text = name
+        usernameProfile.text = name
 
 
         // Handle logout action
@@ -166,6 +170,8 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         tvTitle = findViewById(R.id.tv_ai)
         tvWelcome = findViewById(R.id.tv_welcome)
         progressOverlay = findViewById(R.id.progress_overlay)
+        val headerView = navView.getHeaderView(0)
+        usernameProfile= headerView.findViewById(R.id.userName)
         window.statusBarColor = ContextCompat.getColor(this, R.color.status_bar)
     }
 
@@ -179,6 +185,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
                 llParent.visibility = View.VISIBLE
                 tvTitle.visibility = View.GONE
                 usernameTextView.text = name
+                usernameProfile.text = name
                 tvWelcome.text = "Welcome"
                 drawerLayout.closeDrawers()
             }
