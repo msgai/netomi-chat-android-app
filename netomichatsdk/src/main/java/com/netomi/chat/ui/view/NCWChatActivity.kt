@@ -1724,13 +1724,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
 // Check if the file extension is supported (case insensitive and without the dot)
         if (!supportedExtensions.contains(fileExtension)) {
-            NCWAppUtils.showToast(
-                this,
-                "Unsupported file type selected. Supported types: ${
-                    supportedExtensions.joinToString(
-                        ", "
-                    )
-                }"
+            handleSessionTimeout(
+                getString(R.string.unsupported_file),
+                "The selected file type is not supported. Please choose a supported file types such as: ${formComponent?.config?.attachmentTypes}.",
+                getString(R.string.okay),
+                SIZE_LIMIT
             )
             return false
         }
@@ -1757,14 +1755,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             file?.extension?.lowercase()?.let { if (!it.startsWith(".")) ".$it" else it }
         Log.e("deftt", "fileExtension " + fileExtension)
         if (fileExtension !in supportedExtensions) {
-            NCWAppUtils.showToast(
-                this,
-                "Unsupported file type selected. Supported types: ${
-                    supportedExtensions.joinToString(
-                        ", "
-                    )
-                }"
+            handleSessionTimeout(
+                getString(R.string.unsupported_file),
+                "The selected file type is not supported. Please choose a supported file types such as: ${supportedExtensions}.",
+                getString(R.string.okay),
+                SIZE_LIMIT
             )
+
             return false
         }
         // Validate file size
