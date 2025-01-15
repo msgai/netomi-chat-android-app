@@ -7,14 +7,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.netomi.chat.R
 import com.netomi.chat.model.messages.MultipleSourceDetail
+import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWSourceLinksAdapter(
     private val items: ArrayList<MultipleSourceDetail>,
-     val imgBot: String?,
     private val multipleSourceDetail: (MultipleSourceDetail?) -> Unit
 ) : RecyclerView.Adapter<NCWSourceLinksAdapter.ViewHolder>() {
 
@@ -33,9 +32,9 @@ class NCWSourceLinksAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
-        holder.tvSourceLint.text = item.text
-        holder.tvIndex.text = "${item.index}."
 
+        holder.tvSourceLint.text = NCWAppUtils.getDomainOutOfURL(item.text)
+        holder.tvIndex.text = if ((item.index) == 0) "" else "${item.index}."
         NCWThemeUtils.setLogoIcon(holder.imgSource,holder.itemView.context)
         NCWThemeUtils.setBotTextColor(holder.tvIndex)
         NCWThemeUtils.setQuickReply(holder.constRow,holder.tvSourceLint)

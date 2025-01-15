@@ -24,6 +24,8 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
+import java.net.MalformedURLException
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -248,8 +250,34 @@ object NCWAppUtils {
         return true
     }
 
+    fun getDomainOutOfURL(url: String?): String? {
+        if (url.isNullOrBlank()) return null
 
+        return try {
+            val urlObj = URL(url)
+            var domain = urlObj.host.removePrefix("www.")
+            val lastDotIndex = domain.lastIndexOf(".")
+            if (lastDotIndex > 0) {
+                domain = domain.substring(0, lastDotIndex)
+            }
 
+            val path = urlObj.path
 
+            val pageName = when {
+                path.isNotEmpty() -> {
+                    // Split by "/" and take the last part, then remove any trailing slashes
+                    val pathSegments = path.trim('/').split("/")
+                    val lastSegment = pathSegments.lastOrNull()
+
+                    // Further process if there is a query or fragment
+                    lastSegment?.split("?")?.firstOrNull()?.split("#")?.firstOrNull().orEmpty()
+                }
+                else -> ""
+            }
+            if (pageName.isNotEmpty()) "$domain-$pageName" else domain
+        } catch (e: MalformedURLException) {
+            null
+        }
+    }
 
 }

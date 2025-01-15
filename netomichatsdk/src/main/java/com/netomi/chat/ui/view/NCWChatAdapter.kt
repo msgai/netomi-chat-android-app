@@ -424,8 +424,7 @@ class NCWChatAdapter(
                     tvSourceCount.text = "Sources (${message.multipleSourceDetails.size})"
                     var isDropdownOpen = false
                     val adapter = NCWSourceLinksAdapter(
-                        message.multipleSourceDetails,
-                        message.agentAvatar
+                        message.multipleSourceDetails
                     ) { selectedOption ->
                         if (selectedOption != null) {
                             chatActionCallback.onSourceClicked(selectedOption)
