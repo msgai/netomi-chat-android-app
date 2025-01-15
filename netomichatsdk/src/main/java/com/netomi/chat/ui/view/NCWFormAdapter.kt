@@ -11,7 +11,6 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
-import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -58,10 +57,6 @@ data class InputField(
     val editText: EditText,
     val errorTextView: TextView
 )
-data class TextAreaInputField(
-    val editText: EditText,
-    val errorTextView: TextView
-)
 data class DateField(
     val dateField: EditText,
     val errorTextView: TextView,
@@ -94,8 +89,6 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
         if (position in items.indices) {
             items[position] = component
             notifyItemChanged(position)
-        } else {
-            Log.e("Adapter", "Invalid position: $position")
         }
     }
 
@@ -155,47 +148,61 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
             formContainer.addView(editText)
             formContainer.addView(errorTextView)
-
-            if (component.additionalSettings["Required"]?.value == true) {
                 inputValues[component.id] = InputField(editText, errorTextView)
-            }
 
             val isValidationEnabled = component.dropDownSelections["Validation"]?.value == true
-            if (isValidationEnabled) {
-                val validations = component.validations.orEmpty()
-                editText.addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) {
-                        val inputText = s.toString()
+
+            fun updateErrorView(
+                errorText: String? = null,
+                showError: Boolean = false,
+                editText: EditText
+            ) {
+                if (showError) {
+                    errorTextView.text = errorText
+                    errorTextView.visibility = View.VISIBLE
+                    createErrorDrawable(editText)
+                } else {
+                    errorTextView.text = ""
+                    errorTextView.visibility = View.GONE
+                    createDrawable(editText)
+                }
+            }
+
+            editText.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    val inputText = s?.toString().orEmpty()
+                    if (isValidationEnabled) {
+                        val validations = component.validations.orEmpty()
                         if (inputText.isNotEmpty()) {
                             val errorMessage = inputFieldValidation(inputText, validations)
-
                             if (errorMessage != null) {
-                                errorTextView.text = errorMessage
-                                createErrorDrawable(editText)
-                                errorTextView.visibility = View.VISIBLE
+                                updateErrorView(errorMessage, true, editText)
                             } else {
-                                errorTextView.visibility = View.GONE
-                                createDrawable(editText)
+                                updateErrorView(editText = editText)
                                 inputValuesSelected[adapterPosition].textInput = inputText
                             }
+                        } else if (component.additionalSettings["Required"]?.value == true) {
+                            updateErrorView(
+                                itemView.context.getString(R.string.field_required),
+                                true,
+                                editText
+                            )
+                        }
+                        else{
+                            updateErrorView(editText = editText)
+                        }
+                    } else {
+                        inputValuesSelected[adapterPosition].textInput = inputText
+                        if (errorTextView.visibility == View.VISIBLE) {
+                            errorTextView.visibility = View.GONE
                         }
                     }
+                }
 
-                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-                })
-            } else {
-                editText.addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) {
-                        inputValuesSelected[adapterPosition].textInput = s.toString()
-                        if (errorTextView.visibility==View.VISIBLE)
-                        errorTextView.visibility = View.GONE
-                    }
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            })
 
-                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-                })
-            }
 
             formSchema.formData?.getOrNull(adapterPosition)?.textInput?.let { textInput ->
                 editText.setText(textInput)
@@ -232,53 +239,63 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
             formContainer.addView(editText)
             formContainer.addView(errorTextView)
+            inputValues[component.id] =InputField(editText, errorTextView)
+            val isValidationEnabled = component.dropDownSelections["Validation"]?.value == true
+            val validations = if (isValidationEnabled) component.validations.orEmpty() else emptyList()
 
-            // Store the input field in the map
-            inputValues[component.id] = if (component.additionalSettings["Required"]?.value == true) {
-                TextAreaInputField(editText, errorTextView)
-            } else {
-                editText
+            fun updateErrorView(
+                errorText: String? = null,
+                showError: Boolean = false,
+                editText: EditText
+            ) {
+                if (showError) {
+                    errorTextView.text = errorText
+                    errorTextView.visibility = View.VISIBLE
+                    createErrorDrawable(editText)
+                } else {
+                    errorTextView.text = ""
+                    errorTextView.visibility = View.GONE
+                    createDrawable(editText)
+                }
             }
 
-            // Check if validation is enabled
-            val isValidationEnabled = component.dropDownSelections["Validation"]?.value == true
-            if (isValidationEnabled) {
-                val validations = component.validations.orEmpty()
-                editText.addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) {
-                        val inputText = s.toString()
+            editText.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    val inputText = s?.toString().orEmpty()
+
+                    if (isValidationEnabled) {
                         if (inputText.isNotEmpty()) {
                             val errorMessage = inputFieldValidation(inputText, validations)
-
                             if (errorMessage != null) {
-                                errorTextView.text = errorMessage
-                                createErrorDrawable(editText)
-                                errorTextView.visibility = View.VISIBLE
+                                updateErrorView(errorMessage, true, editText)
                             } else {
-                                errorTextView.visibility = View.GONE
-                                createDrawable(editText)
+                                updateErrorView(editText = editText)
                                 inputValuesSelected[adapterPosition].textAreaInput = inputText
                             }
+                        } else if (component.additionalSettings["Required"]?.value == true) {
+                            if (errorTextView.text.isEmpty()) {
+                                updateErrorView(
+                                    itemView.context.getString(R.string.field_required),
+                                    true,
+                                    editText
+                                )
+                            }
+                        }
+                        else{
+                            updateErrorView(editText = editText)
+                        }
+                    } else {
+                        inputValuesSelected[adapterPosition].textAreaInput = inputText
+                        if (errorTextView.visibility == View.VISIBLE) {
+                            errorTextView.visibility = View.GONE
                         }
                     }
+                }
 
-                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-                })
-            }
-             else {
-                // Handle simple text change without validation
-                editText.addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) {
-                        inputValuesSelected[adapterPosition].textAreaInput = s.toString()
-                        if (errorTextView.visibility==View.VISIBLE)
-                            errorTextView.visibility = View.GONE
-                    }
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            })
 
-                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-                })
-            }
 
             // Restore previous input value if available
             formSchema.formData?.get(adapterPosition)?.textAreaInput?.let {
@@ -430,7 +447,6 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
             val options = component.optionList?.map { it.value } ?: emptyList()
             itemsContainer.removeAllViews()
-            Log.e("CheckkkkBoxx","ssss " +component)
             if (component.subType=="radio")
             options.forEach { option ->
                 val optionView = TextView(itemView.context).apply {
@@ -500,13 +516,15 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                     if (selectedCount > 0) {
                         selectedText.text = "$selectedCount items selected"
                     } else {
-                        selectedText.text = ""
+                        selectedText.text = itemView.context.getString(R.string.select)
                     }
 
 
                 }
                     else {
-                    selectedText.text = selectedDropDown
+                    if (!selectedDropDown.isNullOrEmpty()) {
+                        selectedText.text = selectedDropDown
+                    }
                 }
                 selectedText.setTextColor(ContextCompat.getColor(itemView.context, R.color.hint_color))
           }
@@ -552,16 +570,17 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                             val showSelectedDate = "${month + 1}/$dayOfMonth/$year"
                            // val showSelectedDate = "$dayOfMonth/${month + 1}/$year"
                             val errorMessage = validateDate(selectedDate, component)
+                            setText(showSelectedDate)
                             if (errorMessage == null) {
-                               setText(showSelectedDate)
+
                                 inputValuesSelected[adapterPosition].dateInput = selectedDate
                                 textViewError.visibility = View.GONE
+                                textViewError.text=""
                                 createDrawable(container)
                             } else {
                                 textViewError.text = errorMessage
                                 textViewError.visibility = View.VISIBLE
                                 createErrorDrawable(container)
-                                hint = FORM_DATE_FORMAT
                             }
                         },
                         calendar.get(Calendar.YEAR),
@@ -775,13 +794,14 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             NCWThemeUtils.setUserConfigTextColor(uploadDocTitle)
             NCWThemeUtils.setUserConfigTextColor(uploadText)
             NCWThemeUtils.setTimeStampColor(formatHint)
-
-            formatHint.text = "Format: ${component.config?.attachmentTypes?.joinToString(", ") ?: ""}"
-
-            Log.d("FileUpload", "Before files: ${component.fileUpload}")
+if (component.config?.isShowAttachmentTypesEnabled == true) {
+    formatHint.visibility = View.VISIBLE
+    formatHint.text = "Format: ${component.config?.attachmentTypes?.joinToString(", ") ?: ""}"
+}else {
+    formatHint.visibility = View.GONE
+}
             try {
                 if (!component.fileUpload.isNullOrEmpty()) {
-                    Log.d("FileUpload", "All files: ${component.fileUpload}")
                     recyclerDoc.visibility = View.VISIBLE
 
                     // Update the input values for the adapter position
@@ -798,10 +818,8 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                             false
                         )
                         recyclerDoc.adapter = NCWFormFilesAdapter(component.fileUpload!!,isClickable) { selectedOption ->
-                            Log.d("SelectedOption", "Selected file: $selectedOption")
                             component.fileUpload?.remove(selectedOption)
                             inputValuesSelected.getOrNull(adapterPosition)?.fileUpload?.remove(selectedOption)
-                            //notifyDataSetChanged()
                         }
                     } else {
                         recyclerDoc.adapter!!.notifyDataSetChanged()
@@ -812,7 +830,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
 
             } catch (ex: Exception) {
-                Log.e("Exception", "Error inflating file input: ${ex.message}", ex)
+               ex.printStackTrace()
             }
 
             formSchema.formData?.get(adapterPosition)?.fileUpload?.let {
@@ -973,14 +991,12 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
 
             btnSubmit.setOnClickListener {
-                Log.e("CheckList", "InputValues Size: ${inputValues.size}")
                 if (validateInputs(inputValues)) {
                     // Create the payload and label response
                     val messagePayload = createPayload(inputValuesSelected)
                     val labelResponse = createLabelResponse(inputValuesSelected)
                   val attachePayload=createNCWAttachmentList(inputValuesSelected,formSchema.properties.intentId)
-
-                  val attachmentList = arrayListOf(attachePayload)
+                    val attachmentList = arrayListOf(attachePayload)
                     formData(messagePayload, labelResponse,attachmentList)
                     btnSubmit.visibility=View.GONE
                     showFormSubmittedView(parentLayout, btnSubmit.context)
@@ -993,9 +1009,6 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
 
                }
-                else{
-                    Log.e("IsValidte","I am falseee")
-                }
 
 
             }
@@ -1200,6 +1213,13 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                         errorTextView.visibility = View.GONE
                                     }
                                 }
+                                if (value.errorTextView.text.toString().isNotEmpty()){
+
+                                    isValid = false
+                                    value.errorTextView.visibility = View.VISIBLE
+                                }
+
+
                             }
                         }
                     }
@@ -1217,6 +1237,10 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                     } else {
                                         errorTextView.visibility = View.GONE
                                     }
+                                }
+                                if (value.errorTextView.text.toString().isNotEmpty()){
+                                    isValid = false
+                                    value.errorTextView.visibility = View.VISIBLE
                                 }
                             }
                         }
