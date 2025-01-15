@@ -59,7 +59,7 @@ object NCWChatSdk {
      * If the theme is already cached, it directly starts the chat activity.
      */
     fun launch(context: Context,jwtToken:String?=null) {
-       // NCWThemeUtils.setJwtToken(jwtToken)
+        NCWThemeUtils.setJwtToken(jwtToken)
         if (!NCWAppUtils.isNetworkAvailable(context)) {
             NCWAppUtils.showToast(
                 context,
