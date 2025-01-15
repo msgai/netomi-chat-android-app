@@ -69,11 +69,8 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, HomeFragment())
                 .commit()
-            llParent.visibility = View.VISIBLE
-            tvTitle.visibility = View.GONE
-            usernameTextView.text = name
-            usernameProfile.text = name
-            tvWelcome.text = "Welcome"
+
+            updateUIForFragment(HomeFragment())
         }
 
 
@@ -118,6 +115,13 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
             // Close the drawer after an item is selected
             drawerLayout.closeDrawers()
             true
+        }
+
+        supportFragmentManager.addOnBackStackChangedListener {
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+            currentFragment?.let {
+                updateUIForFragment(it)
+            }
         }
     }
 
@@ -180,27 +184,34 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         if (currentFragment != null && currentFragment::class == fragment::class) {
             return
         }
-        when (fragment) {
+
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
+
+        updateUIForFragment(fragment)
+    }
+
+
+    private fun updateUIForFragment(fragmentClass: Fragment) {
+        when (fragmentClass) {
             is HomeFragment -> {
                 llParent.visibility = View.VISIBLE
                 tvTitle.visibility = View.GONE
                 usernameTextView.text = name
                 usernameProfile.text = name
                 tvWelcome.text = "Welcome"
-                drawerLayout.closeDrawers()
+
             }
-            is ChangeAiAgentFragment -> {
+            is ChangeAiAgentFragment  -> {
                 llParent.visibility = View.GONE
                 tvTitle.visibility = View.VISIBLE
-                drawerLayout.closeDrawers() //
             }
-            else ->   tvTitle.visibility = View.VISIBLE
+            else -> {
+                tvTitle.visibility = View.VISIBLE
+            }
         }
-
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .addToBackStack(null)
-            .commit()
     }
 
     /**
