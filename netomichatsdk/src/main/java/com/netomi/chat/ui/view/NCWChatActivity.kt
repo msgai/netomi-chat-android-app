@@ -36,7 +36,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.amazonaws.mobileconnectors.iot.AWSIotMqttManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.netomi.chat.R
@@ -59,7 +58,6 @@ import com.netomi.chat.model.feedback.feedbackrequest.NCWEventInfo
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.Component
-import com.netomi.chat.model.messages.EventObject
 import com.netomi.chat.model.messages.FileUploadData
 import com.netomi.chat.model.messages.FormSchema
 import com.netomi.chat.model.messages.MultipleSourceDetail
@@ -79,7 +77,6 @@ import com.netomi.chat.model.mqtt.NCWCredentials
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
-import com.netomi.chat.model.theme.NCWOauth
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
 import com.netomi.chat.survey.EventData
@@ -134,6 +131,7 @@ import com.netomi.chat.utils.NCWSingleAlertDialog
 import com.netomi.chat.utils.NCWState
 import com.netomi.chat.utils.NCWThemeUtils
 import com.netomi.chat.utils.toNCWCustomAttributes
+import com.netomi.chat.utils.toNCWUserDetailAttribute
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -200,7 +198,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var attachmentType: String? = TYPE_ATTACHMENT
 
 
-    private var deviceInfo: List<NCWCustomAttribute>? = null
+    private var deviceInfo: ArrayList<NCWCustomAttribute>? = null
 
 
     private var connectionStatus: String? = ""
@@ -520,6 +518,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         attachmentList: ArrayList<NCWAttachmentList>? = null
     ): NCWWebhookPayload {
         val messageId = UUID.randomUUID().toString()
+
+        if (NCWThemeUtils.getSignInUserDetails()!=null){
+           val userInfo = NCWThemeUtils.getSignInUserDetails()?.toNCWUserDetailAttribute()
+            if (userInfo != null) {
+                deviceInfo?.addAll(userInfo)
+            }
+        }
 
        val attributes = NCWAdditionalAttributes(
             CUSTOM_ATTRIBUTES = deviceInfo

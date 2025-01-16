@@ -49,6 +49,8 @@ data class SubmitSurveyInfo(
 
 data class NCWSignInUserDetails(
     val name:String?=null,
-    val email:String?=null
+    val email:String?=null,
+    val userId:String?=null
+
 )
 
