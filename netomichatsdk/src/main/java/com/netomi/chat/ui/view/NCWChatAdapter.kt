@@ -449,6 +449,9 @@ class NCWChatAdapter(
                         }
                     })
 
+                    imgSourceDropDown.visibility = if (message.multipleSourceDetails.size > 1) View.VISIBLE else View.GONE
+
+
                     imgSourceDropDown.setOnClickListener {
                         isDropdownOpen = !isDropdownOpen
 
