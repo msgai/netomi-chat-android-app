@@ -731,11 +731,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     override fun onQuickReply(option: NCWQuickReplyOption?, position: Int) {
 
-        if (connectionStatus == NCWConnectionStatus.CONNECTED.toString()) {
+       // if (connectionStatus == NCWConnectionStatus.CONNECTED.toString()) {
 
             messageList[position].isQuickReplyVisible = false
             onQuickReplyClicked(option)
-        }
+       // }
 
     }
 
