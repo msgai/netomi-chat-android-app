@@ -395,18 +395,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         )
     }
 
-
-     override fun onPause() {
-        super.onPause()
-    }
-
-    override fun onStop() {
-        super.onStop()
-
-    }
-
-
-
     override fun onResume() {
         super.onResume()
         // Check for timeout whenever the activity is resumed
