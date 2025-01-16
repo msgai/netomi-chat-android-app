@@ -34,6 +34,7 @@ import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
@@ -393,6 +394,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             )
         )
     }
+
+
+     override fun onPause() {
+        super.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+    }
+
 
 
     override fun onResume() {
@@ -971,8 +983,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             handleApiCallback(it as NCWState<Any>)
         }
 
-
-        chatViewModel.awsMessage.observe(this) { jsonMessage ->
+        chatViewModel.awsMessage.observeForever(awsMessageObserver)
+       /* chatViewModel.awsMessage.observe(this) { jsonMessage ->
             try {
                 Log.e("Jsonn", "Testtt " + jsonMessage)
                 val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
@@ -1031,7 +1043,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             } catch (e: Exception) {
                 Log.e("ParsingError", "Failed to parse JSON: ${e.localizedMessage}")
             }
-        }
+        }*/
 
         ncwAwsCredentialsViewModel.credentials.observe(this) {
             topic = "$CHAT_WIDGET/$botRefId/$conversationID"
@@ -1042,6 +1054,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         ncwAwsCredentialsViewModel.connectionStatus.observe(this) { status ->
             connectionStatus = status
+            Log.e("Connection","sss "+connectionStatus)
             when (status) {
 
                 NCWConnectionStatus.CONNECTING.toString() -> {
@@ -1100,6 +1113,73 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     }
 
+    private val awsMessageObserver = Observer<String> { jsonMessage ->
+        try {
+
+            val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
+
+            if (response.triggerType == TYPE_EVENT) {
+                val eventData = response.eventObject?.eventData
+                renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
+            }
+
+            val data = response.eventObject?.eventData
+            if (data?.eventType == OAUTH && data.subType == SUB_TYPE_OAUTH) {
+                refreshChat(response.eventObject.eventData)
+            }
+
+            if (response.customFields?.isNotEmpty() == true) {
+                for (customField in response.customFields) {
+                    when (CustomFieldName.fromValue(customField.name)) {
+                        CustomFieldName.FORM_SCHEMA -> {
+                            removeLoader()
+                            renderTheFormMessage(response)
+                        }
+
+                        CustomFieldName.SURVEY_SCHEMA -> {
+                            renderTheSurveyMessage(response)
+
+                        }
+
+                        CustomFieldName.DISABLE_INPUT_FIELD -> {
+
+                            if (customField.values?.get(0) == "true") {
+                                setUIState(false)
+                            } else {
+                                setUIState(true)
+                            }
+
+                        }
+
+                        CustomFieldName.DISABLE_CHAT_INPUT -> {
+
+                        }
+
+                        CustomFieldName.END_CHAT -> {
+
+                        }
+
+                        else -> {
+
+                        }
+                    }
+                }
+            } else {
+            }
+            renderTheNormalMessage(response)
+
+
+        } catch (e: Exception) {
+            Log.e("ParsingError", "Failed to parse JSON: ${e.localizedMessage}")
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.e("onDestroy","Remove Observer")
+        // Remove the observer to prevent memory leaks
+        chatViewModel.awsMessage.removeObserver(awsMessageObserver)
+    }
     private fun refreshChat(eventData: EventData) {
         val oldTopic = topic
         Log.e("OAUTH", eventData.authenticatedConversationId.toString())

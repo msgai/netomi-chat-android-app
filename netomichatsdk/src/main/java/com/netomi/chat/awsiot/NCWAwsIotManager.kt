@@ -115,6 +115,12 @@ object NCWAwsIotManager {
         mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS0) { topic, data ->
             val message = String(data, Charsets.UTF_8)
             Log.d("IoT", "Message received on topic [$topic]: $message")
+           /* if (chatViewModel.awsMessage.hasActiveObservers()) {
+                Log.d("IoT", "Active observers found for awsMessage")
+            } else {
+                Log.d("IoT", "No active observers for awsMessage")
+            }*/
+
             chatViewModel.awsMessage.postValue(message)
         }
     }
