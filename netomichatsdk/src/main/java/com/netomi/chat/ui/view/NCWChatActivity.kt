@@ -1475,7 +1475,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun removeStreamLoader() {
         isLoaderActive = false
-
+        hideKeyboard(this)
         if (messageList.isNotEmpty() && messageList.last().sender == TYPE_INDICATOR) {
             val lastIndex = messageList.lastIndex
             messageList.removeAt(lastIndex)
