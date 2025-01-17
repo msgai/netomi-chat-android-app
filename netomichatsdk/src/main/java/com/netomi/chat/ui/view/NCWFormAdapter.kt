@@ -11,6 +11,7 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -173,6 +174,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                     val inputText = s?.toString().orEmpty()
                     if (isValidationEnabled) {
                         val validations = component.validations.orEmpty()
+                        Log.e("ssss","asasdssd"+validations)
                         if (inputText.isNotEmpty()) {
                             val errorMessage = inputFieldValidation(inputText, validations)
                             if (errorMessage != null) {
@@ -182,6 +184,8 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                 inputValuesSelected[adapterPosition].textInput = inputText
                             }
                         } else if (component.additionalSettings["Required"]?.value == true) {
+
+                            Log.e("ssss","else if")
                             updateErrorView(
                                 itemView.context.getString(R.string.field_required),
                                 true,
@@ -195,7 +199,9 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                         inputValuesSelected[adapterPosition].textInput = inputText
                         if (errorTextView.visibility == View.VISIBLE) {
                             errorTextView.visibility = View.GONE
+                            updateErrorView(editText = editText)
                         }
+
                     }
                 }
 
@@ -288,6 +294,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                         inputValuesSelected[adapterPosition].textAreaInput = inputText
                         if (errorTextView.visibility == View.VISIBLE) {
                             errorTextView.visibility = View.GONE
+                            updateErrorView(editText = editText)
                         }
                     }
                 }
@@ -487,6 +494,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                 0 -> "Select"
                                 else -> "${selectedItems.size} items selected"
                             }
+                            NCWThemeUtils.setBotTextColor(selectedText)
                             inputValues[component.id] = DropdownField(selectedItems.joinToString(", "), errorTextView)
                             inputValuesSelected[adapterPosition].dropdownSelection = selectedItems.joinToString(", ")
 
