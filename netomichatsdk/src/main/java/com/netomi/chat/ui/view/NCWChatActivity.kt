@@ -102,6 +102,7 @@ import com.netomi.chat.utils.NCWAppConstant.SIZE_LIMIT
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_JOIN
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_LEAVE
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_OAUTH
+import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_TRANSFER
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_WAIT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_AGENT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_AGENT_EVENT
@@ -211,6 +212,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var ownerType: String? = "BOT"
 
     private var isHistoryDisableInput: Boolean = true
+    private var isDisableInput: Boolean = true
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -1129,9 +1131,18 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                         }
 
-                        CustomFieldName.DISABLE_INPUT_FIELD -> {
+                        CustomFieldName.DISABLE_INPUT_FIELD, CustomFieldName.DISABLE_CHAT_INPUT -> {
+                            val isDisabled = customField.values?.get(0) == "true"
+                            setUIState(!isDisabled)
+                            if (CustomFieldName.fromValue(customField.name) == CustomFieldName.DISABLE_INPUT_FIELD) {
+                                isDisableInput = !isDisabled
+                            }
+                        }
+
+                       /* CustomFieldName.DISABLE_INPUT_FIELD -> {
 
                             if (customField.values?.get(0) == "true") {
+                                isDisableInput=false
                                 setUIState(false)
                             } else {
                                 setUIState(true)
@@ -1140,8 +1151,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                         }
 
                         CustomFieldName.DISABLE_CHAT_INPUT -> {
-
-                        }
+                            if (customField.values?.get(0) == "true") {
+                                setUIState(false)
+                            } else {
+                                setUIState(true)
+                            }
+                        }*/
 
                         CustomFieldName.END_CHAT -> {
 
@@ -1193,7 +1208,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 "$agentName has joined the chat"
 
             }
-
             eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_LEAVE -> {
                 agentAvatar = null
                 ownerType = TYPE_BOT
@@ -1207,12 +1221,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             else -> ""
         }
 
+        Log.e("Testtttt","ddd "+messagePill )
+
         if (messagePill.isNotEmpty()) {
-            val message = NCWMessage(
-                sender = TYPE_PILLS,
-                timestamp = timestamp,
-                message = messagePill
-            )
+            val message = createPillsMessage(messagePill,timestamp)
             messageList.add(message)
             messageAdapter.notifyDataSetChanged()
             chatRecyclerView.post {
@@ -1220,6 +1232,31 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
 
         }
+
+        if (eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_TRANSFER) {
+            val newAgentName = eventData.eventInfo?.agentName
+            val newAgentAvatar = eventData.eventInfo?.agentAvatar
+            val message = createPillsMessage("$agentName has transferred the chat to $newAgentName",timestamp)
+            messageList.add(message)
+            agentName = newAgentName
+            agentAvatar = newAgentAvatar
+            ownerType = TYPE_AGENT
+            val joinMessage = createPillsMessage("$agentName has joined the chat",timestamp)
+            messageList.add(joinMessage)
+            messageAdapter.notifyDataSetChanged()
+            chatRecyclerView.post {
+                chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
+            }
+        }
+
+    }
+
+    private fun createPillsMessage(message: String, timestamp: Long): NCWMessage {
+        return NCWMessage(
+            sender = TYPE_PILLS,
+            timestamp = timestamp,
+            message = message
+        )
     }
 
     private fun renderTheSurveyMessage(response: NCWGenericChannelResponse?) {
@@ -2094,6 +2131,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             NCWRoutes.ROUTE_SEND_CHAT -> {
                 val sendMessageResponse = apiResponse as NCWSendMessageResponse
                 hideProgressBar()
+
+                if (!isDisableInput){
+                    isDisableInput=true
+                    setUIState(true)
+                }
             }
 
             NCWRoutes.ROUTE_GET_CHAT -> {
@@ -2305,11 +2347,20 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
 
                             }
+                            CustomFieldName.DISABLE_INPUT_FIELD, CustomFieldName.DISABLE_CHAT_INPUT -> {
+                                val isDisabled = customField.values?.get(0) == "true"
+                                setUIState(!isDisabled)
+                                isHistoryDisableInput = !isDisabled
+                                if (CustomFieldName.fromValue(customField.name)==CustomFieldName.DISABLE_INPUT_FIELD) {
+                                    isDisableInput = !isDisabled
+                                }
+                            }
 
-                            CustomFieldName.DISABLE_INPUT_FIELD -> {
+                          /*  CustomFieldName.DISABLE_INPUT_FIELD -> {
                                 if (customField.values?.get(0) == "true") {
                                     setUIState(false)
                                     isHistoryDisableInput = false
+                                    isDisableInput=false
                                 } else {
                                     setUIState(true)
                                     isHistoryDisableInput = true
@@ -2318,8 +2369,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                             }
 
                             CustomFieldName.DISABLE_CHAT_INPUT -> {
-                                // Handle DISABLE_CHAT_INPUT
-                            }
+                                if (customField.values?.get(0) == "true") {
+                                    setUIState(false)
+                                    isHistoryDisableInput = false
+                                } else {
+                                    setUIState(true)
+                                    isHistoryDisableInput = true
+                                }
+                            }*/
 
                             CustomFieldName.END_CHAT -> {
                                 // Handle END_CHAT
