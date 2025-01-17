@@ -1112,17 +1112,16 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             if (response.triggerType == TYPE_EVENT) {
                 val eventData = response.eventObject?.eventData
                 renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
-                Log.e("Addjdjdjd","eventData  if"+eventData)
+
                 if (eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPING){
                     if (!checkLoaderRunning())
                     {
-                        Log.e("Addjdjdjd","asassa if")
                         addLoader()
                         messageAdapter.notifyDataSetChanged()
                         onScrollToPosition(true)
                     }
-                }
 
+                }
             }
 
             val data = response.eventObject?.eventData
@@ -1484,7 +1483,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     // Overloaded helper function for a single message
     private fun updateMessageList(newMessage: NCWMessage) {
         addSingleMessage(newMessage)
-        addLoader()
+        if (ownerType== TYPE_BOT)
+            addLoader()
     }
 
     private fun addSingleMessage(newMessage: NCWMessage) {
@@ -1596,6 +1596,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun checkLoaderRunning(): Boolean {
         return messageList.isNotEmpty() && messageList.last().sender == TYPE_INDICATOR
+    }
+    private fun updateLoaderTime() {
+        loaderAddedTime = System.currentTimeMillis()
+
     }
 
     private fun removeStreamLoader() {
