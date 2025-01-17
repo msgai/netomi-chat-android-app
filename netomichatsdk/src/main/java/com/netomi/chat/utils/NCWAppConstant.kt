@@ -31,6 +31,7 @@ object NCWAppConstant {
     const val OAUTH="OAUTH"
     const val SUB_TYPE_OAUTH="SIGN_IN"
     const val SUB_TYPE_TRANSFER="TRANSFER_AND_JOIN"
+    const val SUB_TYPING="TYPING"
 
 
 
