@@ -104,6 +104,7 @@ import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_LEAVE
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_OAUTH
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_TRANSFER
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_WAIT
+import com.netomi.chat.utils.NCWAppConstant.SUB_TYPING
 import com.netomi.chat.utils.NCWAppConstant.TYPE_AGENT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_AGENT_EVENT
 import com.netomi.chat.utils.NCWAppConstant.TYPE_ATTACHMENT
@@ -1111,6 +1112,16 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             if (response.triggerType == TYPE_EVENT) {
                 val eventData = response.eventObject?.eventData
                 renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
+
+                if (eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPING){
+                    if (!checkLoaderRunning())
+                    {
+                        addLoader()
+                        messageAdapter.notifyDataSetChanged()
+                        onScrollToPosition(true)
+                    }
+
+                }
             }
 
             val data = response.eventObject?.eventData
@@ -1472,7 +1483,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     // Overloaded helper function for a single message
     private fun updateMessageList(newMessage: NCWMessage) {
         addSingleMessage(newMessage)
-        addLoader()
+        if (ownerType== TYPE_BOT)
+            addLoader()
     }
 
     private fun addSingleMessage(newMessage: NCWMessage) {
@@ -1579,6 +1591,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }, it)
         }
 
+
+    }
+
+    private fun checkLoaderRunning(): Boolean {
+        return messageList.isNotEmpty() && messageList.last().sender == TYPE_INDICATOR
+    }
+    private fun updateLoaderTime() {
+        loaderAddedTime = System.currentTimeMillis()
 
     }
 
