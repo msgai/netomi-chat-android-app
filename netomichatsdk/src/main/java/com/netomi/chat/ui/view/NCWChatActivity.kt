@@ -1303,6 +1303,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     agentAvatar = agentAvatar
                 )
                 addSingleMessage(newMessages)
+
             }
 
         }
@@ -1440,7 +1441,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private fun addSingleMessage(newMessage: NCWMessage) {
         messageList.add(newMessage)
         messageAdapter.notifyDataSetChanged()
-        chatRecyclerView.scrollToPosition(messageList.size)
+        //chatRecyclerView.scrollToPosition(messageList.size)
+        chatRecyclerView.post {
+            chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
+        }
 
     }
 
