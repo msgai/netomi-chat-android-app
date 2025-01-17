@@ -30,6 +30,7 @@ object NCWAppConstant {
     const val TYPE_QUEUE_POSITION="QUEUE_POSITION"
     const val OAUTH="OAUTH"
     const val SUB_TYPE_OAUTH="SIGN_IN"
+    const val SUB_TYPE_TRANSFER="TRANSFER_AND_JOIN"
 
 
 
