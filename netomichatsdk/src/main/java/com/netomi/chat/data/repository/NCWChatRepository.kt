@@ -21,6 +21,7 @@ import com.netomi.chat.model.messages.NCWWebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
+import com.netomi.chat.model.survey_rule.SurveyRuleResponse
 import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.utils.NCWRoutes
 import com.netomi.chat.utils.NCWState
@@ -262,7 +263,7 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
         return try {
             val response = apiInterface.hitFeedbackAPI(payload)
             if (response.isSuccessful && response.body() != null) {
-                NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_FEEDBACK_CHAT)
+                NCWState.success(data = response.body()!!, NCWRoutes.WEBHOOK_EVENT)
             } else {
                 val errorBody = response.errorBody()
                 if (errorBody != null) {
@@ -316,6 +317,26 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
             val response = apiInterface.hitLogoutAPI(botRefId = botRefID, authToken = jwtToken, authEnabled = "true")
             if (response.isSuccessful && response.body() != null) {
                 NCWState.success(data = response.body()!!, NCWRoutes.LOGOUT)
+            } else {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    NCWState.error(parseError(errorBody), code = response.code())
+                } else {
+                    NCWState.error(mapApiException(response.code()), code = response.code())
+                }
+            }
+        } catch (e: Exception) {
+            NCWState.error(e.message.toString(), code = 500)
+        }
+    }
+
+
+
+    suspend fun getSurveyRule(botRefID:String): NCWState<SurveyRuleResponse> {
+        return try {
+            val response = apiInterface.getSurveyRule(botRefID)
+            if (response.isSuccessful && response.body() != null) {
+                NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_GET_SURVEY_RULE)
             } else {
                 val errorBody = response.errorBody()
                 if (errorBody != null) {
