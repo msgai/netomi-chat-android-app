@@ -14,17 +14,20 @@ import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.NCWWebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
+import com.netomi.chat.model.survey_rule.SurveyRuleResponse
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.utils.NCWRoutes.LOGIN
 import com.netomi.chat.utils.NCWRoutes.LOGOUT
 import com.netomi.chat.utils.NCWRoutes.ROUTE_END_CHAT
-import com.netomi.chat.utils.NCWRoutes.ROUTE_FEEDBACK_CHAT
+
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_CHAT
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_CONVERSATION_ID
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_MQTT_CREDENTIALS
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_PRESIGNED_URL
+import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_SURVEY_RULE
 import com.netomi.chat.utils.NCWRoutes.ROUTE_SEND_CHAT
+import com.netomi.chat.utils.NCWRoutes.ROUTE_WEBHOOK_EVENT
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -120,6 +123,8 @@ interface NCWApiInterface {
     @GET(ROUTE_GET_MQTT_CREDENTIALS)
     suspend fun getAWSMQTTCredentials(@Query("botRef") botRef: String?): Response<MQTTCredentialsResponse>
 
+
+
     @POST(ROUTE_GET_PRESIGNED_URL)
     suspend fun getPreSignedUrl(@Body payload: NCWSignedUrlPayload?): Response<NCWGetPreSignedUrl>
 
@@ -160,7 +165,7 @@ interface NCWApiInterface {
         @Body payload: NCWEndChatRequest?
     ): Response<NCWEndChatResponse>
 
-    @POST(ROUTE_FEEDBACK_CHAT)
+    @POST(ROUTE_WEBHOOK_EVENT)
     suspend fun hitFeedbackAPI(@Body payload: NCWFeedbackRequest?): Response<NCWFeedbackResponse>
 
     @POST(ROUTE_END_CHAT)
@@ -184,5 +189,9 @@ interface NCWApiInterface {
         @Header("x-auth-enabled") authEnabled: String,
         @Header("x-auth-token") authToken: String,
     ): Response<LogoutResponse>
+
+    @GET(ROUTE_GET_SURVEY_RULE)
+    suspend fun getSurveyRule( @Header("x-bot-ref-id") botRefId: String): Response<SurveyRuleResponse>
+
 
 }

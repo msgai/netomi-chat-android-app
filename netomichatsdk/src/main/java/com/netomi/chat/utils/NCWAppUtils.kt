@@ -280,4 +280,11 @@ object NCWAppUtils {
         }
     }
 
+     fun parseIdleTimeFromExpression(expression: String): Long {
+        // Extract the idleTime value from the expression using regex
+        val regex = Regex("idleTime == (\\d+)")
+        val matchResult = regex.find(expression)
+        return matchResult?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+    }
+
 }

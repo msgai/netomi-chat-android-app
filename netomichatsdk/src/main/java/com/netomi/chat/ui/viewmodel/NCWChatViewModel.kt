@@ -22,6 +22,7 @@ import com.netomi.chat.model.messages.NCWWebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
+import com.netomi.chat.model.survey_rule.SurveyRuleResponse
 import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWBaseResponse
@@ -77,6 +78,9 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
 
     private val _logoutResponse=NCWSingleLiveEvent<NCWState<LogoutResponse>>()
     val logoutResponse get()= _logoutResponse
+
+    private val _surveyRuleResponse=NCWSingleLiveEvent<NCWState<SurveyRuleResponse>>()
+    val surveyRuleResponse get()= _surveyRuleResponse
 
 
    /* private var _getConversationId =
@@ -260,5 +264,20 @@ Log.e("DataaResposne","response"+response)
         }
 
     }
+
+    fun getSurveyRule(botRefID:String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.getSurveyRule(botRefID)
+
+            withContext(Dispatchers.Main) {
+                _surveyRuleResponse.value = response
+            }
+        }
+
+    }
+
+
+
+
 
 }

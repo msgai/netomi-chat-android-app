@@ -78,6 +78,8 @@ import com.netomi.chat.model.mqtt.NCWCredentials
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
+import com.netomi.chat.model.survey_rule.SurveyRule
+import com.netomi.chat.model.survey_rule.SurveyRuleResponse
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
 import com.netomi.chat.survey.EventData
@@ -92,13 +94,20 @@ import com.netomi.chat.utils.NCWFilePath
 import com.netomi.chat.utils.NCWImageUtils
 import com.netomi.chat.utils.NCWAppConstant.ARG_MEDIA_URL
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
+import com.netomi.chat.utils.NCWAppConstant.CHANNEL_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
 import com.netomi.chat.utils.NCWAppConstant.DATE_FORMAT
+import com.netomi.chat.utils.NCWAppConstant.EVENT_WIDGET
+import com.netomi.chat.utils.NCWAppConstant.INFO_EVENT
 import com.netomi.chat.utils.NCWAppConstant.LOGOUT
 import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
+import com.netomi.chat.utils.NCWAppConstant.NETOMI
 import com.netomi.chat.utils.NCWAppConstant.OAUTH
+import com.netomi.chat.utils.NCWAppConstant.RULE_EVENT_CHAT_END
+import com.netomi.chat.utils.NCWAppConstant.RULE_EVENT_IDLE_USER
 import com.netomi.chat.utils.NCWAppConstant.SESSION
 import com.netomi.chat.utils.NCWAppConstant.SIZE_LIMIT
+import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_IDLE_USER
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_JOIN
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_LEAVE
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_OAUTH
@@ -215,11 +224,16 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var isHistoryDisableInput: Boolean = true
     private var isDisableInput: Boolean = true
 
+    private  var mSurveyRule: List<SurveyRule> ?= null
+    private  var isSurveyRule: Boolean= false
 
+    private var idleTimeInMillis: Long = 0L
+    private val handler = Handler(Looper.getMainLooper())
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
         initViews()
+            // resetIdleTimer()
         // Load theme and config
         themeData = NCWThemeUtils.getThemeData()
         agentAvatar = themeData?.mobileConfig?.lightTheme?.botConfig?.botImage
@@ -230,7 +244,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         NCWChatSdk.getUpdatedChatWindowConfiguration()
         NCWChatSdk.getUpdatedBubbleConfiguration()
         NCWChatSdk.getUpdatedOtherConfiguration()
-
+       
+        
         // Set up message adapter and recycler view
         setupMessageList()
 
@@ -303,6 +318,49 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 backClicked()
             }
         })
+
+        botRefId?.let { chatViewModel.getSurveyRule(it) }
+    }
+
+
+    private val idleRunnable = Runnable {
+        if (idleTimeInMillis > 0) {
+            hitIdealTimeOutEvent()
+        }
+    }
+
+    private fun hitIdealTimeOutEvent() {
+        val idleTime=idleTimeInMillis/1000
+
+        chatViewModel.hitFeedbackAPI(
+            NCWFeedbackRequest(
+                botRefId!!, com.netomi.chat.model.feedback.feedbackresponse.NCWRequestBody(
+                    botReferenceId = botRefId!!,
+                    channelId = CHANNEL_ID,
+                    conversationId = conversationID!!,
+                    eventData = com.netomi.chat.model.feedback.feedbackrequest.NCWEventData(
+                        eventInfo = NCWEventInfo(
+                            idleTime = idleTime
+                        ),
+                        eventType = EVENT_WIDGET,
+                        subType = SUB_TYPE_IDLE_USER
+                    ),
+                    eventName = INFO_EVENT,
+                    isPublishToMQTT = false,
+                    requestType = NETOMI,
+                    timestamp = System.currentTimeMillis(),
+                    triggerType = TYPE_EVENT
+                )
+            )
+        )
+    }
+
+
+    private fun resetIdleTimer() {
+        handler.removeCallbacks(idleRunnable)
+        if (idleTimeInMillis > 0) {
+            handler.postDelayed(idleRunnable, idleTimeInMillis)
+        }
     }
 
     private fun showMedia() {
@@ -969,6 +1027,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         chatViewModel.loginResponse.observe(this) {
             handleApiCallback(it as NCWState<Any>)
         }
+        chatViewModel.surveyRuleResponse.observe(this) {
+            handleApiCallback(it as NCWState<Any>)
+        }
 
         chatViewModel.logoutResponse.observe(this) {
             handleApiCallback(it as NCWState<Any>)
@@ -1190,9 +1251,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     override fun onDestroy() {
         super.onDestroy()
+        handler.removeCallbacks(idleRunnable)
         Log.e("onDestroy","Remove Observer")
         // Remove the observer to prevent memory leaks
         chatViewModel.awsMessage.removeObserver(awsMessageObserver)
+
     }
     private fun refreshChat(eventData: EventData) {
         val oldTopic = topic
@@ -2156,6 +2219,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     isDisableInput=true
                     setUIState(true)
                 }
+
+                if (idleTimeInMillis>0)
+                    resetIdleTimer()
             }
 
             NCWRoutes.ROUTE_GET_CHAT -> {
@@ -2254,13 +2320,20 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
             NCWRoutes.ROUTE_END_CHAT -> {
                 hideProgressBar()
+                if (mSurveyRule != null) {
+                    if (mSurveyRule?.any { key -> key.conversationTriggerType == RULE_EVENT_CHAT_END } == true) {
+                        isSurveyRule=true
+                        return
+                    }
+                }
                 NCWThemeUtils.setConversationID(null)
                 finish()
             }
 
-            /* NCWRoutes.ROUTE_FEEDBACK_CHAT -> {
-                 //   messageAdapter.notifyDataSetChanged()
-             }*/
+             NCWRoutes.WEBHOOK_EVENT -> {
+                 if (idleTimeInMillis>0)
+                     resetIdleTimer()
+             }
             NCWRoutes.LOGIN -> {
                 val response = apiResponse as LoginResponse
                 Log.d(
@@ -2284,7 +2357,27 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
 
             NCWRoutes.ROUTE_SURVEY -> {
-                // messageAdapter.notifyDataSetChanged()
+                if (isSurveyRule){
+                    finish()
+                }
+            }
+
+            NCWRoutes.ROUTE_GET_SURVEY_RULE -> {
+                val surveyRule = apiResponse as SurveyRuleResponse
+                 mSurveyRule=surveyRule.payload
+
+                if (mSurveyRule != null) {
+                    val matchedRule = mSurveyRule?.firstOrNull { key ->
+                        key.conversationTriggerType == RULE_EVENT_IDLE_USER
+                    }
+
+                    if (matchedRule != null) {
+                        idleTimeInMillis = NCWAppUtils.parseIdleTimeFromExpression(matchedRule.expression) * 1000
+                        resetIdleTimer()
+                    }
+                }
+
+
             }
 
             else -> {

@@ -32,7 +32,13 @@ object NCWAppConstant {
     const val SUB_TYPE_OAUTH="SIGN_IN"
     const val SUB_TYPE_TRANSFER="TRANSFER_AND_JOIN"
     const val SUB_TYPING="TYPING"
-
+    const val RULE_EVENT_CHAT_END="WIDGET_EVENT_CHAT_END"
+    const val RULE_EVENT_IDLE_USER="WIDGET_EVENT_IDLE_USER"
+    const val CHANNEL_ID="NETOMI_WEB_WIDGET"
+    const val SUB_TYPE_IDLE_USER="IDLE_USER"
+    const val INFO_EVENT="INFO"
+    const val NETOMI="NETOMI"
+    const val EVENT_WIDGET="WIDGET_EVENT"
 
 
 

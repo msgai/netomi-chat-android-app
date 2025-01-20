@@ -17,12 +17,22 @@ object NCWRoutes {
 
     const val ROUTE_BOT_JSON_CONFIG =API + "webhook-history-v2"
 
-    const val ROUTE_FEEDBACK_CHAT = API + "webhook-event"
+
 
     const val ROUTE_SURVEY= "ROUTE_SURVEY"
 
     const val LOGIN= API+"login"
 
     const val LOGOUT= API+"logout"
+
+    const val ROUTE_GET_SURVEY_RULE = API + "survey_rule"
+
+    const val ROUTE_WEBHOOK_EVENT= API + "webhook-event"
+
+    const val WEBHOOK_EVENT="webhook-event"
+
+
+
+
 
 }
