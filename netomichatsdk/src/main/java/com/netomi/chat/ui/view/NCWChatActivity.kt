@@ -286,7 +286,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
 
         ivMenuOption.setOnClickListener {
-            Toast.makeText(this, R.string.under_development, Toast.LENGTH_SHORT).show()
+            setUpQuickReplyOption()
         }
         ivMenu.setOnClickListener {
             Toast.makeText(this, R.string.under_development, Toast.LENGTH_SHORT).show()
@@ -320,6 +320,24 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         })
 
         botRefId?.let { chatViewModel.getSurveyRule(it) }
+
+
+    }
+
+    private fun setUpQuickReplyOption() {
+        val bottomSheet = themeData?.let {
+            NCWQuickMenuBottomSheet(it.quickMenuOptions){ options->
+                val timeStamp = System.currentTimeMillis()
+                checkForInitialMessage()
+                val payload = createPayload(options.label, options.text, timeStamp)
+                chatViewModel.sendMessage(options.label, timeStamp)
+                if (payload != null) {
+                    chatViewModel.sendMessageAPI(payload)
+                }
+                messageInputField.text.clear()
+            }
+        }
+        bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
     }
 
 
@@ -2612,6 +2630,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         Log.e("Topic","Topic Name "+topic)
         ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)*/
 
+
+/*if (themeData?.proactiveTriggerType !=null)
+{
+    val timeStamp = System.currentTimeMillis()
+    val payload = createPayload(themeData?.proactiveTriggerType!!, themeData?.proactiveTriggerType , timeStamp)
+    chatViewModel.sendMessageAPI(payload)
+
+}*/
     }
 
     private fun showProgressBar() {
