@@ -26,5 +26,7 @@
     <string name="view_response">View response</string>
     <string name="unsupported_file">Unsupported File Format</string>
     <string name="field_required">This field is required</string>
+    <string name="quick_menu">Quick Menu</string>
+    <string name="quick_reply">Quick Reply</string>
 
 </resources>

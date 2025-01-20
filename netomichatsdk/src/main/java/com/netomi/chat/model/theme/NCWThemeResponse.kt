@@ -34,7 +34,7 @@ data class NCWThemeResponse(
     val multilingual: NCWMultilingual,
     val nbaConfig_: NCWNbaConfig,
     val persistentSurveyConfig: NCWPersistentSurveyConfig,
-    val proactiveTriggerType: String,
+    val proactiveTriggerType: String?=null,
     val quickMenuOptions: List<NCWQuickMenuOption>,
     val realTimeChatService: NCWRealTimeChatService,
     val restartChat: NCWRestartChat,
