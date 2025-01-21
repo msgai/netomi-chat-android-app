@@ -89,6 +89,7 @@ import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.NCWChatActionCallback
 import com.netomi.chat.utils.DeviceInfoUtil
+import com.netomi.chat.utils.MessageSoundPlayer
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWFilePath
 import com.netomi.chat.utils.NCWImageUtils
@@ -229,6 +230,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private var idleTimeInMillis: Long = 0L
     private val handler = Handler(Looper.getMainLooper())
+
+    var messageSoundPlayer:MessageSoundPlayer?=null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
@@ -287,6 +290,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         ivMenuOption.setOnClickListener {
             setUpQuickReplyOption()
+
         }
         ivMenu.setOnClickListener {
           //  Toast.makeText(this, R.string.under_development, Toast.LENGTH_SHORT).show()
@@ -333,7 +337,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 val payload = createPayload(options.label, options.text, timeStamp)
                 chatViewModel.sendMessage(options.label, timeStamp)
                 if (payload != null) {
-                    chatViewModel.sendMessageAPI(payload)
+                    sendMessageToBot(payload)
                 }
                 messageInputField.text.clear()
             }
@@ -553,11 +557,19 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             checkForInitialMessage()
             checkForPreviousQuickReply()
             chatViewModel.sendMessage(messageContent, timeStamp)
-            chatViewModel.sendMessageAPI(payload)
-            messageInputField.text.clear()
+            sendMessageToBot(payload)
         }
         idleTimeoutManager.checkForTimeout()
     }
+
+    private fun sendMessageToBot(payload: NCWWebhookPayload) {
+        playUserSound()
+        chatViewModel.sendMessageAPI(payload)
+        messageInputField.text.clear()
+
+    }
+
+
     private fun checkForLogoutAction(content: String?): Boolean {
         themeData?.OAUTH2?.logoutActionKeys?.let { logoutActionKeys ->
             if (logoutActionKeys.any { key -> content?.contains(key, ignoreCase = true) == true }) {
@@ -771,6 +783,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         customTabsIntent = CustomTabsIntent.Builder()
             .setToolbarColor(Color.parseColor(NCWChatSdk.getUpdateHeaderConfiguration().backgroundColor)) // Set the toolbar color (optional)
             .build()
+
+        messageSoundPlayer = MessageSoundPlayer(this)
     }
 
     /**
@@ -793,6 +807,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             if (createPayload != null) {
                 chatViewModel.sendMessageAPI(createPayload)
                 addLoader()
+                playUserSound()
             }
 
         }, {
@@ -814,6 +829,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             onSubmit = {},
             onSkipSurvey = { _, _ ->
             }
+
         )
     }
 
@@ -908,7 +924,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             timeStamp,
             message.attachmentList
         )
-        chatViewModel.sendMessageAPI(payload)
+        sendMessageToBot(payload)
     }
 
     private fun handleMediaMessage(message: NCWMessage) {
@@ -982,7 +998,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
             chatViewModel.sendMessage(label, timeStamp)
             if (payload != null) {
-                chatViewModel.sendMessageAPI(payload)
+                sendMessageToBot(payload)
             }
             messageInputField.text.clear()
         }
@@ -1195,7 +1211,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         try {
 
             val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
-
+            playBotSound()
             if (response.triggerType == TYPE_EVENT) {
                 val eventData = response.eventObject?.eventData
                 renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
@@ -1278,6 +1294,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(idleRunnable)
+        messageSoundPlayer?.release()
         Log.e("onDestroy","Remove Observer")
         // Remove the observer to prevent memory leaks
         chatViewModel.awsMessage.removeObserver(awsMessageObserver)
@@ -1391,9 +1408,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                     }, { text, label ->
                         val timeStamp = System.currentTimeMillis()
+                        if (isSurveyRule){
+                            finish()
+                            return@createAndShowSurveyBottomSheet
+                        }
                         val payload = createPayload(text, label, timeStamp)
                         addLoader()
-                        chatViewModel.sendMessageAPI(payload)
+                        sendMessageToBot(payload)
                     }
                 )
 
@@ -2308,7 +2329,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                         timeStamp,
                         attachmentList
                     )
-                    chatViewModel.sendMessageAPI(payload)
+                    sendMessageToBot(payload)
+
                 } else {
                     hideProgressBar()
 
@@ -2669,5 +2691,16 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         Log.e("RequestId ThumbDown", requestId)
         messageAdapter.notifyItemChanged(position)
         hitFeedbackAPI(requestId, "NEGATIVE",attachmentIndex)
+    }
+
+
+
+    private fun playUserSound(){
+        Log.e("PlayUserSound","playUserSound")
+        messageSoundPlayer?.playUserSound()
+    }
+    private fun playBotSound(){
+        Log.e("PlayUserSound","Bottttttttttttttt")
+        messageSoundPlayer?.playBotSound()
     }
 }
