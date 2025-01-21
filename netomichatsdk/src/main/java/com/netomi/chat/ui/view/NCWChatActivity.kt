@@ -974,7 +974,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         val content = option?.metadata
         if (checkForLogoutAction(content)) return
-
         option?.label?.takeIf { it.isNotEmpty() }?.let { label ->
             val timeStamp = System.currentTimeMillis()
             val payload = option.metadata?.let {
@@ -2580,7 +2579,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     } ?: run {
                     val newMessage = NCWMessage(
                         id = System.currentTimeMillis().toString(),
-                        message = response.requestPayload?.messagePayload?.text,
+                        message = response.requestPayload?.messagePayload?.label,
                         timestamp = response.timestamp ?: System.currentTimeMillis(),
                         type = MessageType.TEXT,
                         sender = TYPE_REQUEST,
