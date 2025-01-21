@@ -17,6 +17,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
@@ -133,6 +134,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 createDrawable(this)
                 isSingleLine=true
                 maxLines=1
+                imeOptions = EditorInfo.IME_ACTION_DONE
                 setPadding(16, 30, 16, 30)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                 layoutParams = defaultLayoutParams()
