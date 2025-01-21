@@ -60,11 +60,12 @@
         <TextView
             android:id="@+id/tvHeading"
             android:layout_width="0dp"
-            android:layout_marginStart="5dp"
+            android:layout_marginStart="4dp"
             android:layout_height="wrap_content"
-
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="Carousel Heading"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
           app:layout_constraintTop_toTopOf="parent"
@@ -78,11 +79,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:maxLines="3"
+            android:ellipsize="end"
             android:text="This is a detail description for the carousel item."
-            android:textSize="14sp"
+            android:textSize="13sp"
             android:textColor="@android:color/darker_gray"
             app:layout_constraintTop_toBottomOf="@id/tvHeading"
             app:layout_constraintStart_toStartOf="@+id/tvHeading"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="3dp"
             app:layout_constraintEnd_toEndOf="parent" />
 
 
