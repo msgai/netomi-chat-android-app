@@ -28,5 +28,10 @@
     <string name="field_required">This field is required</string>
     <string name="quick_menu">Quick Menu</string>
     <string name="quick_reply">Quick Reply</string>
+    <string name="setting">Settings</string>
+    <string name="restart">Restart</string>
+    <string name="sound">Sound</string>
+    <string name="download_transcript">Download transcript</string>
+    <string name="language_en">Language - EN</string>
 
 </resources>

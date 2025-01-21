@@ -289,7 +289,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             setUpQuickReplyOption()
         }
         ivMenu.setOnClickListener {
-            Toast.makeText(this, R.string.under_development, Toast.LENGTH_SHORT).show()
+          //  Toast.makeText(this, R.string.under_development, Toast.LENGTH_SHORT).show()
+            setUpSettingOption()
         }
 
         closeIcon.setOnClickListener {
@@ -335,6 +336,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     chatViewModel.sendMessageAPI(payload)
                 }
                 messageInputField.text.clear()
+            }
+        }
+        bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
+    }
+
+    private fun setUpSettingOption() {
+        val bottomSheet = themeData?.let {
+            NCWSettingBottomSheet(it){
             }
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
