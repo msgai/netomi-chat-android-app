@@ -17,8 +17,7 @@ import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWSettingBottomSheet(
-    private val quickMenuOptions: NCWThemeResponse,
-    private val onSound: (Boolean) -> Unit,
+    private val themeData: NCWThemeResponse
 ) : BottomSheetDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -50,8 +49,12 @@ class NCWSettingBottomSheet(
         val switchSound = view.findViewById<SwitchCompat>(R.id.toggle_sound)
 
         NCWThemeUtils.setTitleColor(tvTitle)
-        switchSound.setOnCheckedChangeListener { _, isChecked ->
-           // Toast.makeText(context, "Sound is ${if (isChecked) "On" else "Off"}", Toast.LENGTH_SHORT).show()
+        switchSound.isChecked=themeData.sound.defaultSound
+
+        switchSound.setOnCheckedChangeListener { button, isChecked ->
+            if (button.isPressed){
+                themeData.sound.defaultSound=isChecked
+            }
         }
 
         view.findViewById<View>(R.id.icon_language_arrow)?.setOnClickListener {

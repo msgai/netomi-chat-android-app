@@ -2,7 +2,7 @@ package com.netomi.chat.model.theme
 
 data class NCWSound(
     val bot: NCWBot,
-    val defaultSound: Boolean,
+    var defaultSound: Boolean=false,
     val status: String,
     val user: NCWUser
 )
