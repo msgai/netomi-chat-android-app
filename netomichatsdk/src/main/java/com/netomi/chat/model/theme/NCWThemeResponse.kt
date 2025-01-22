@@ -51,5 +51,8 @@ data class NCWThemeResponse(
     val title: String,
     val typingIndicator: NCWTypingIndicator,
     val whitelisting: NCWWhitelisting,
-    val OAUTH2: NCWOauth
+    val OAUTH2: NCWOauth,
+    var proActiveGreetings: ArrayList<String> = arrayListOf(),
+    var isProActiveGreetings:Boolean=false,
+
 )
