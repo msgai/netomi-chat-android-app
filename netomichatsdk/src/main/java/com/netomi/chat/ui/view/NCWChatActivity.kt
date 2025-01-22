@@ -349,8 +349,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun setUpSettingOption() {
         val bottomSheet = themeData?.let {
-            NCWSettingBottomSheet(it){
-            }
+            NCWSettingBottomSheet(it)
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
     }
@@ -2743,11 +2742,16 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
 
     private fun playUserSound(){
-        Log.e("PlayUserSound","playUserSound")
+        Log.e("PlayUserSound","playUserSound"+themeData?.sound?.defaultSound)
+        if (themeData?.sound?.defaultSound == true)
+        {
         messageSoundPlayer?.playUserSound()
+        }
     }
     private fun playBotSound(){
-        Log.e("PlayUserSound","Bottttttttttttttt")
-        messageSoundPlayer?.playBotSound()
+        Log.e("PlayUserSound","Bottttttttttttttt" +themeData?.sound?.defaultSound)
+        if (themeData?.sound?.defaultSound == true) {
+            messageSoundPlayer?.playBotSound()
+        }
     }
 }
