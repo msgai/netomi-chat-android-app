@@ -199,6 +199,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
 
     private var conversationID: String? = null
+    private var externalId: String? = null
     private var botRefId: String? = null
     private lateinit var idleTimeoutManager: NCWIdleTimeoutManager
     private var fileSend: File? = null
@@ -233,7 +234,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private val handler = Handler(Looper.getMainLooper())
     private val messageChunksMap = mutableMapOf<String, MutableList<NCWMessage>>()
 
-    var messageSoundPlayer:MessageSoundPlayer?=null
+    private var messageSoundPlayer:MessageSoundPlayer?=null
+    private var onRestart: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
@@ -256,7 +259,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         applyTheme(themeData)
         observeChatMessages()
-        Log.e("OtherConfig", "" + NCWChatSdk.getUpdatedOtherConfiguration())
+
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         val device = DeviceInfoUtil.getDeviceInfo(this)
@@ -264,14 +267,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         val jwtToken = NCWThemeUtils.getJwtToken()
         if (jwtToken != null) {
-            Log.e("API Hit", "API Hit")
             botRefId?.let { chatViewModel.hitAuthenticateUserApi(jwtToken, it) }
         } else {
-            Log.e("API NOT Hit", "API NOT Hit")
             conversationID = NCWThemeUtils.getConversationID()
             if (conversationID == null) {
                 loadInitialMessages()
-                chatViewModel.getConversationId(botRefId)
+
+                chatViewModel.getConversationId(botRefId,externalId)
             } else {
                 chatViewModel.getAWSMQTTCredentials(botRefId)
                 getChatHistory()
@@ -349,7 +351,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun setUpSettingOption() {
         val bottomSheet = themeData?.let {
-            NCWSettingBottomSheet(it)
+            NCWSettingBottomSheet(it){
+                onRestart=true
+                NCWAwsIotManager.unsubscribeRestart(topic)
+                hitEndChatAPI()
+            }
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
     }
@@ -657,39 +663,43 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
      * they first open the chat.
      */
     private fun loadInitialMessages() {
-        // Add the initial bot message
-        themeData?.initialFlows?.header?.let { header ->
-            messageList.add(
-                NCWMessage(
-                    sender = TYPE_INITIAL,
-                    type = MessageType.TEXT,
-                    message = header,
-                    timestamp = System.currentTimeMillis(),
-                    agentAvatar = agentAvatar
+        Log.e("Checjkk","saasassa "+checkProactiveMessageAvailable())
+        if (!checkProactiveMessageAvailable()) {
+            Log.e("Checjkk","saasassa ")
+            // Add the initial bot message
+            themeData?.initialFlows?.header?.let { header ->
+                messageList.add(
+                    NCWMessage(
+                        sender = TYPE_INITIAL,
+                        type = MessageType.TEXT,
+                        message = header,
+                        timestamp = System.currentTimeMillis(),
+                        agentAvatar = agentAvatar
+                    )
                 )
-            )
-        }
-
-        // Add quick reply options if available
-        val flows = themeData?.initialFlows?.flows.orEmpty()
-        if (flows.isNotEmpty()) {
-            val options = flows.map { initialData ->
-                NCWQuickReplyOption().apply {
-                    label = initialData.label
-                    metadata = initialData.name
-                }
             }
 
-            messageList.add(
-                NCWMessage(
-                    sender = TYPE_INITIAL,
-                    timestamp = System.currentTimeMillis(),
-                    quickReply = NCWQuickReply(options = ArrayList(options)),
-                    agentAvatar = agentAvatar
+            // Add quick reply options if available
+            val flows = themeData?.initialFlows?.flows.orEmpty()
+            if (flows.isNotEmpty()) {
+                val options = flows.map { initialData ->
+                    NCWQuickReplyOption().apply {
+                        label = initialData.label
+                        metadata = initialData.name
+                    }
+                }
+
+                messageList.add(
+                    NCWMessage(
+                        sender = TYPE_INITIAL,
+                        timestamp = System.currentTimeMillis(),
+                        quickReply = NCWQuickReply(options = ArrayList(options)),
+                        agentAvatar = agentAvatar
+                    )
                 )
-            )
+            }
+            messageAdapter.notifyDataSetChanged()
         }
-        messageAdapter.notifyDataSetChanged()
     }
 
     /**
@@ -797,12 +807,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             if (it != null) {
                 attachmentType = TYPE_FORM_ATTACHMENT
                 formComponent = it
-                Log.e("FtetteCompooe", "sS $formComponent")
                 showMedia()
             }
         }, { payload, label, attachmentList ->
-            println("Payload: $payload")
-            println("Label: $label")
             val timeStamp = System.currentTimeMillis()
             val createPayload = payload?.let { createPayload(it, label, timeStamp, attachmentList) }
             if (createPayload != null) {
@@ -942,7 +949,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     override fun carouselButtonAction(it: NCWCarouselButton?) {
-        Log.e("NCWCarouselButton", "NCWCarouselButton " + it)
 
         when (CarouselButtonType.fromValue(it?.type)) {
             CarouselButtonType.WEB -> {
@@ -1079,66 +1085,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
 
         chatViewModel.awsMessage.observeForever(awsMessageObserver)
-       /* chatViewModel.awsMessage.observe(this) { jsonMessage ->
-            try {
-                Log.e("Jsonn", "Testtt " + jsonMessage)
-                val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
-
-                if (response.triggerType == TYPE_EVENT) {
-                    val eventData = response.eventObject?.eventData
-                    renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
-                }
-
-                val data = response.eventObject?.eventData
-                if (data?.eventType == OAUTH && data.subType == SUB_TYPE_OAUTH) {
-                    refreshChat(response.eventObject.eventData)
-                }
-
-                if (response.customFields?.isNotEmpty() == true) {
-                    for (customField in response.customFields) {
-                        when (CustomFieldName.fromValue(customField.name)) {
-                            CustomFieldName.FORM_SCHEMA -> {
-                                removeLoader()
-                                renderTheFormMessage(response)
-                            }
-
-                            CustomFieldName.SURVEY_SCHEMA -> {
-                                renderTheSurveyMessage(response)
-
-                            }
-
-                            CustomFieldName.DISABLE_INPUT_FIELD -> {
-
-                                if (customField.values?.get(0) == "true") {
-                                    setUIState(false)
-                                } else {
-                                    setUIState(true)
-                                }
-
-                            }
-
-                            CustomFieldName.DISABLE_CHAT_INPUT -> {
-
-                            }
-
-                            CustomFieldName.END_CHAT -> {
-
-                            }
-
-                            else -> {
-
-                            }
-                        }
-                    }
-                } else {
-                }
-                renderTheNormalMessage(response)
-
-
-            } catch (e: Exception) {
-                Log.e("ParsingError", "Failed to parse JSON: ${e.localizedMessage}")
-            }
-        }*/
 
         ncwAwsCredentialsViewModel.credentials.observe(this) {
             topic = "$CHAT_WIDGET/$botRefId/$conversationID"
@@ -1166,7 +1112,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
                     setUIState(isHistoryDisableInput)
-                    checkForProactiveMessage()
+                    if(NCWThemeUtils.getConversationID()==null || themeData?.isProActiveGreetings == false) {
+                        sendProactiveMessage()
+                    }
                     // Hide header after 2 seconds when connected
                     connectionHeader.postDelayed({
                         connectionHeader.visibility = View.GONE
@@ -1211,7 +1159,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     }
 
-    private fun checkForProactiveMessage() {
+    private fun sendProactiveMessage() {
 
         if (themeData?.isProActiveGreetings == false) {
             themeData?.isProActiveGreetings=true
@@ -1223,6 +1171,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 chatViewModel.sendMessageAPI(payload)
             }
         }
+    }
+
+    private fun checkProactiveMessageAvailable(): Boolean {
+        return themeData?.proActiveGreetings?.isNotEmpty() ?: false
     }
 
     private val awsMessageObserver = Observer<String> { jsonMessage ->
@@ -1271,24 +1223,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                             }
                         }
 
-                       /* CustomFieldName.DISABLE_INPUT_FIELD -> {
-
-                            if (customField.values?.get(0) == "true") {
-                                isDisableInput=false
-                                setUIState(false)
-                            } else {
-                                setUIState(true)
-                            }
-
-                        }
-
-                        CustomFieldName.DISABLE_CHAT_INPUT -> {
-                            if (customField.values?.get(0) == "true") {
-                                setUIState(false)
-                            } else {
-                                setUIState(true)
-                            }
-                        }*/
 
                         CustomFieldName.END_CHAT -> {
 
@@ -1313,7 +1247,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         super.onDestroy()
         handler.removeCallbacks(idleRunnable)
         messageSoundPlayer?.release()
-        Log.e("onDestroy","Remove Observer")
         // Remove the observer to prevent memory leaks
         chatViewModel.awsMessage.removeObserver(awsMessageObserver)
 
@@ -1355,8 +1288,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
             else -> ""
         }
-
-        Log.e("Testtttt","ddd "+messagePill )
 
         if (messagePill.isNotEmpty()) {
             val message = createPillsMessage(messagePill,timestamp)
@@ -1784,7 +1715,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
 
             is NCWState.Error -> {
-                //  Toast.makeText(this, "Error..", Toast.LENGTH_SHORT).show()
                 hideProgressBar()
             }
 
@@ -2418,6 +2348,16 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
             NCWRoutes.ROUTE_END_CHAT -> {
                 hideProgressBar()
+                if (onRestart) {
+
+                    messageList.clear()
+                    messageAdapter.notifyDataSetChanged()
+                    loadInitialMessages()
+                    themeData?.isProActiveGreetings=false
+                    chatViewModel.getConversationId(botRefId,externalId,onRestart)
+                    onRestart=false
+                    return
+                }
                 if (mSurveyRule != null) {
                     if (mSurveyRule?.any { key -> key.conversationTriggerType == RULE_EVENT_CHAT_END } == true) {
                         isSurveyRule=true
@@ -2441,9 +2381,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 Log.e("ConversationID LOGIN", response.authenticatedConversationId)
                 // Use conversationID as needed
                 conversationID = response.authenticatedConversationId
+                externalId= response.externalId
+
                 chatViewModel.getAWSMQTTCredentials(botRefId)
-                getChatHistory()
                 conversationID?.let { NCWThemeUtils.setConversationID(it) }
+                getChatHistory()
+
                 Log.d(
                     "AuthConversationID",
                     "Fetched AuthConversationID: $conversationID"
@@ -2742,14 +2685,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
 
     private fun playUserSound(){
-        Log.e("PlayUserSound","playUserSound"+themeData?.sound?.defaultSound)
         if (themeData?.sound?.defaultSound == true)
         {
         messageSoundPlayer?.playUserSound()
         }
     }
     private fun playBotSound(){
-        Log.e("PlayUserSound","Bottttttttttttttt" +themeData?.sound?.defaultSound)
+
         if (themeData?.sound?.defaultSound == true) {
             messageSoundPlayer?.playBotSound()
         }

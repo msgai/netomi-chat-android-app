@@ -2,14 +2,14 @@ package com.netomi.chat.ui.view
 
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.Switch
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
@@ -17,11 +17,15 @@ import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWSettingBottomSheet(
-    private val themeData: NCWThemeResponse
+    private val themeData: NCWThemeResponse,
+    private val onRestartClick: () -> Unit,
 ) : BottomSheetDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
+
+        dialog.setCancelable(false)
+        dialog.setCanceledOnTouchOutside(false)
 
         // Apply the rounded background
         dialog.setOnShowListener {
@@ -47,6 +51,7 @@ class NCWSettingBottomSheet(
         val ivClose = view.findViewById<ImageView>(R.id.ivClose)
         val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
         val switchSound = view.findViewById<SwitchCompat>(R.id.toggle_sound)
+        val constRestart = view.findViewById<ConstraintLayout>(R.id.constRestart)
 
         NCWThemeUtils.setTitleColor(tvTitle)
         switchSound.isChecked=themeData.sound.defaultSound
@@ -62,6 +67,11 @@ class NCWSettingBottomSheet(
         }
 
         ivClose.setOnClickListener {
+            dismiss()
+        }
+
+        constRestart.setOnClickListener {
+            onRestartClick()
             dismiss()
         }
     }
