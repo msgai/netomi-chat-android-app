@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.google.android.material.chip.ChipGroup
 import com.netomi.chat.R
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
@@ -342,7 +341,6 @@ class NCWChatAdapter(
         private val carouselRecyclerView: RecyclerView = itemView.findViewById(R.id.carouselRecyclerView)
         private val chipRecyclerViewGroup: RecyclerView = itemView.findViewById(R.id.quickReplyRecyclerView)
         private val receiverImageCard: CardView = itemView.findViewById(R.id.receiverImageCard)
-        private val chipGroup: ChipGroup = itemView.findViewById(R.id.quickReplyChipGroup)
         private val cardViewCard: ConstraintLayout = itemView.findViewById(R.id.cardViewCard)
         private val cardTitle: TextView = itemView.findViewById(R.id.cardTitle)
         private val cardMessage: TextView = itemView.findViewById(R.id.cardMessage)
@@ -370,7 +368,6 @@ class NCWChatAdapter(
             videoView.visibility = View.GONE
             carouselRecyclerView.visibility = View.GONE
             receiverImageCard.visibility = View.GONE
-            chipGroup.visibility = View.GONE
             cardViewCard.visibility = View.GONE
             cardVideo.visibility = View.GONE
             chipRecyclerViewGroup.visibility = View.GONE

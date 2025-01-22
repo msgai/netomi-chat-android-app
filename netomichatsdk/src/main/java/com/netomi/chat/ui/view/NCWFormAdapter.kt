@@ -17,6 +17,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
@@ -133,6 +134,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 createDrawable(this)
                 isSingleLine=true
                 maxLines=1
+                imeOptions = EditorInfo.IME_ACTION_DONE
                 setPadding(16, 30, 16, 30)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                 layoutParams = defaultLayoutParams()
@@ -305,7 +307,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
 
             // Restore previous input value if available
-            formSchema.formData?.get(adapterPosition)?.textAreaInput?.let {
+            formSchema.formData?.getOrNull(adapterPosition)?.textAreaInput?.let {
                 editText.setText(it)
                 editText.setTextColor(ContextCompat.getColor(itemView.context, R.color.hint_color))
 
@@ -351,7 +353,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 inputValues[component.id] = RadioField(radioGroup, errorTextView)
             }
             if (adapterPosition in (formSchema.formData?.indices ?: emptyList())) {
-                val radioSelected = formSchema.formData?.get(adapterPosition)?.selectedRadio
+                val radioSelected = formSchema.formData?.getOrNull(adapterPosition)?.selectedRadio
                 radioGroup.children.forEach { view ->
                     if (view is RadioButton) {
                         view.isChecked = view.text == radioSelected
@@ -364,7 +366,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             addRadioLabel(component)
             addSpaceToContainer(5)
             // Retrieve previously selected checkboxes if available
-            val checkBoxSelected = formSchema.formData?.get(adapterPosition)?.textInput
+            val checkBoxSelected = formSchema.formData?.getOrNull(adapterPosition)?.textInput
             val previouslySelectedCheckboxes = checkBoxSelected?.split(",")?.map { it.trim() } ?: emptyList()
 
             val errorTextView = TextView(itemView.context).apply {
@@ -517,7 +519,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
           dropdownView.isEnabled=isClickable
             if (adapterPosition in (formSchema.formData?.indices ?: emptyList())) {
-              val selectedDropDown=formSchema.formData?.get(adapterPosition)?.selectedRadio
+              val selectedDropDown=formSchema.formData?.getOrNull(adapterPosition)?.selectedRadio
                 if (component.subType == "checkbox")
                 {
                     val selectedCount = selectedDropDown?.split(",")?.filter { it.isNotBlank() }?.size ?: 0
@@ -631,7 +633,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             inputValues[component.id] = DateField(textView, textViewError,container)
 
             if (adapterPosition in (formSchema.formData?.indices ?: emptyList())) {
-                val textInput = formSchema.formData?.get(adapterPosition)?.textInput
+                val textInput = formSchema.formData?.getOrNull(adapterPosition)?.textInput
                 if (textInput != null) {
                     textView.setText(textInput)
                     textView.setTextColor(ContextCompat.getColor(itemView.context, R.color.hint_color))
@@ -841,7 +843,7 @@ if (component.config?.isShowAttachmentTypesEnabled == true) {
                ex.printStackTrace()
             }
 
-            formSchema.formData?.get(adapterPosition)?.fileUpload?.let {
+            formSchema.formData?.getOrNull(adapterPosition)?.fileUpload?.let {
                 recyclerDoc.visibility = View.VISIBLE
                 if (recyclerDoc.adapter == null) {
                     recyclerDoc.layoutManager = LinearLayoutManager(
@@ -849,12 +851,12 @@ if (component.config?.isShowAttachmentTypesEnabled == true) {
                         LinearLayoutManager.VERTICAL,
                         false
                     )
-                    val formDataList=formSchema.formData?.get(adapterPosition)?.fileUpload
+                    val formDataList=formSchema.formData?.getOrNull(adapterPosition)?.fileUpload
 
                     if (!formDataList.isNullOrEmpty() && formDataList.size>0) {
                         if (formDataList[0].fileUrl!=null && formDataList[0].fileUrl?.isNotEmpty() == true) {
                             recyclerDoc.adapter = NCWFormFilesAdapter(
-                                formSchema.formData?.get(adapterPosition)?.fileUpload!!,
+                                formSchema.formData?.getOrNull(adapterPosition)?.fileUpload!!,
                                 isClickable
                             ) {
 

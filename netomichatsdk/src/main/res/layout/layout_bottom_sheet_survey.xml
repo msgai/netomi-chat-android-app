@@ -202,6 +202,8 @@
                 android:gravity="top"
                 android:hint="@string/start_typing"
                 android:maxLength="200"
+                android:scrollbars="vertical"
+                android:isScrollContainer="true"
                 android:maxLines="5"
                 android:padding="8dp"
                 android:textSize="12sp"

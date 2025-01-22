@@ -9,5 +9,6 @@
     <color name="hint_color">#808080</color>
     <color name="error_color">#ec3023</color>
     <color name="light_gray">#D4D4D4</color>
+    <color name="view_line_color">#0F000000</color>
 
 </resources>
