@@ -80,6 +80,9 @@ object NCWAppConstant {
     const val TYPE_SHOW_SURVEY="showSurvey"
     const val NORMAL="normal"
     const val STREAMING="streaming"
+    const val PROACTIVE_GREETING="PROACTIVE_GREETING"
+
+
 
 
     object RatingType {

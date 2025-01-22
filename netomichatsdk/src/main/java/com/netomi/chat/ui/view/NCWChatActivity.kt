@@ -104,6 +104,7 @@ import com.netomi.chat.utils.NCWAppConstant.LOGOUT
 import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
 import com.netomi.chat.utils.NCWAppConstant.NETOMI
 import com.netomi.chat.utils.NCWAppConstant.OAUTH
+import com.netomi.chat.utils.NCWAppConstant.PROACTIVE_GREETING
 import com.netomi.chat.utils.NCWAppConstant.RULE_EVENT_CHAT_END
 import com.netomi.chat.utils.NCWAppConstant.RULE_EVENT_IDLE_USER
 import com.netomi.chat.utils.NCWAppConstant.SESSION
@@ -639,8 +640,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     text = messageContent,
                     label = label,
                     messageId = messageId,
-                    timestamp = timeStamp
-
+                    timestamp = timeStamp,
+                    hideMessage=if (label== PROACTIVE_GREETING)true else null
                 ),
                 attachmentList = attachmentList,
                 additionalAttributes = attributes,
@@ -1166,10 +1167,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
                     setUIState(isHistoryDisableInput)
+                    checkForProactiveMessage()
                     // Hide header after 2 seconds when connected
                     connectionHeader.postDelayed({
                         connectionHeader.visibility = View.GONE
                     }, 2000)
+
+
                 }
 
                 NCWConnectionStatus.CONNECTION_LOST.toString() -> {
@@ -1206,6 +1210,20 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             handleApiCallback(messages as NCWState<Any>)
         }
 
+    }
+
+    private fun checkForProactiveMessage() {
+
+        if (themeData?.isProActiveGreetings == false) {
+            themeData?.isProActiveGreetings=true
+            themeData?.proActiveGreetings?.takeIf { it.isNotEmpty() }?.let { greetings ->
+                val timeStamp = System.currentTimeMillis()
+                val text = greetings[0]
+                val label = PROACTIVE_GREETING
+                val payload = createPayload(text, label, timeStamp)
+                chatViewModel.sendMessageAPI(payload)
+            }
+        }
     }
 
     private val awsMessageObserver = Observer<String> { jsonMessage ->
@@ -2632,14 +2650,16 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                             }
                         }
                     } ?: run {
-                    val newMessage = NCWMessage(
-                        id = System.currentTimeMillis().toString(),
-                        message = response.requestPayload?.messagePayload?.label,
-                        timestamp = response.timestamp ?: System.currentTimeMillis(),
-                        type = MessageType.TEXT,
-                        sender = TYPE_REQUEST,
-                    )
-                    messageList.add(newMessage)
+                    if (response.requestPayload?.messagePayload?.hideMessage != true) {
+                        val newMessage = NCWMessage(
+                            id = System.currentTimeMillis().toString(),
+                            message = response.requestPayload?.messagePayload?.label,
+                            timestamp = response.timestamp ?: System.currentTimeMillis(),
+                            type = MessageType.TEXT,
+                            sender = TYPE_REQUEST,
+                        )
+                        messageList.add(newMessage)
+                    }
                 }
             }
         }
@@ -2694,13 +2714,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)*/
 
 
-/*if (themeData?.proactiveTriggerType !=null)
-{
-    val timeStamp = System.currentTimeMillis()
-    val payload = createPayload(themeData?.proactiveTriggerType!!, themeData?.proactiveTriggerType , timeStamp)
-    chatViewModel.sendMessageAPI(payload)
 
-}*/
     }
 
     private fun showProgressBar() {
