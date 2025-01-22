@@ -610,7 +610,7 @@ class NCWChatAdapter(
 
             if (newMessage.type==MessageType.TEXT) {
                 // Message already exists; append text
-                messages[index].message += newMessage.message
+                messages[index].message = newMessage.message
             }
             else if (newMessage.type==MessageType.MULTISOURCE){
                 //messages[index]=newMessage

@@ -230,6 +230,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private var idleTimeInMillis: Long = 0L
     private val handler = Handler(Looper.getMainLooper())
+    private val messageChunksMap = mutableMapOf<String, MutableList<NCWMessage>>()
 
     var messageSoundPlayer:MessageSoundPlayer?=null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -1503,7 +1504,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             ) {
                 Log.e("Streaming Chunk", "Streaming Chunk")
                 for (i in newMessages.indices) {
-                    updateStreamMessage(newMessages[i])
+                    updateStreamMessage(
+                        newMessages[i],
+                        chunkIndex = customPayload.CHUNK_INDEX.toInt(),
+                        chunkStatus = customPayload.CHUNK_STATUS ?: ""
+                    )
                 }
             } else if (customPayload?.CHUNK_INDEX != null && customPayload.CHUNK_INDEX.toInt() > 0 && (customPayload.CHUNK_STATUS.equals(
                     "SUCCESS"
@@ -1511,7 +1516,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             ) {
                 Log.e("Streaming Chunk", "Streaming Chunk")
                 for (i in newMessages.indices) {
-                    updateStreamMessage(newMessages[i])
+                    updateStreamMessage(
+                        newMessages[i],
+                        chunkIndex = customPayload.CHUNK_INDEX.toInt(),
+                        chunkStatus = customPayload.CHUNK_STATUS ?: ""
+                    )
                 }
             } else if (customPayload?.CHUNK_INDEX != null && customPayload.CHUNK_INDEX.toInt() == 0 && customPayload.CHUNK_STATUS.equals(
                     "SUCCESS"
@@ -1607,8 +1616,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     }
 
-    private fun updateStreamMessage(streamMessage: NCWMessage) {
-        addStreamMessages(streamMessage)
+    private fun updateStreamMessage(
+        streamMessage: NCWMessage,
+        chunkIndex: Int,
+        chunkStatus: String
+    ) {
+        addStreamMessages(streamMessage, chunkIndex = chunkIndex, chunkStatus = chunkStatus)
     }
 
     private fun updateMessageList(newMessages: List<NCWMessage>) {
@@ -1651,12 +1664,32 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     }
 
-    // Helper function to add messages and scroll to the latest
-    private fun addStreamMessages(newMessages: NCWMessage) {
-        messageAdapter.updateOrAppendMessage(newMessages)
-        chatRecyclerView.post {
-            chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
+
+    private fun addStreamMessages(newMessages: NCWMessage, chunkIndex: Int, chunkStatus: String) {
+        val messageId = newMessages.requestID ?: return
+        if (chunkIndex != -1) {
+            val chunkList = messageChunksMap.getOrPut(messageId) { mutableListOf() }
+            chunkList.add(newMessages) // Add chunk
+            chunkList.sortBy { it.customPayload?.CHUNK_INDEX }
+            val fullMessage = mergeChunks(chunkList)
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                messageAdapter.updateOrAppendMessage(fullMessage)
+            }, 300)
+        } else {
+            messageAdapter.updateOrAppendMessage(newMessages)
         }
+
+       /* chatRecyclerView.post {
+            chatRecyclerView.post(messageList.size - 1)
+        }*/
+
+    }
+
+    private fun mergeChunks(chunkList: List<NCWMessage>): NCWMessage {
+        val mergedText = chunkList.joinToString("") { it.message ?: "" }
+        val firstChunk = chunkList.first()
+        return firstChunk.copy(message = mergedText)
     }
 
     private fun safelyRemoveLoader(newMessages: List<NCWMessage>) {
