@@ -1,5 +1,6 @@
 package com.netomi.chat.data.network
 
+import com.netomi.chat.model.GetConversationPayload
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.model.NCWSendMessageResponse
@@ -107,8 +108,12 @@ interface NCWApiInterface {
      * @param botRef A string representing the bot Reference ID we will get this from AI Studio
      * @return A `Response` object wrapping a Object of `GetConversationIdResponse` objects.
      */
-    @GET(ROUTE_GET_CONVERSATION_ID)
+   /* @GET(ROUTE_GET_CONVERSATION_ID)
     suspend fun getConversationId(@Query("botRef") botRef: String?): Response<NCWGetConversationIdResponse>
+*/
+    @POST(ROUTE_GET_CONVERSATION_ID)
+    suspend fun getConversationId(@Header("restart") restart: Boolean?=null,@Body payload: GetConversationPayload?): Response<NCWGetConversationIdResponse>
+
 
 
     /**

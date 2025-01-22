@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import com.netomi.chat.data.network.NCWApiInterface
 import com.netomi.chat.data.network.NCWBaseService
 import com.netomi.chat.data.network.NCWRetrofitClient
+import com.netomi.chat.model.GetConversationPayload
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.model.NCWSendMessageResponse
@@ -99,11 +100,12 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
 
     // API to get ConversationId
     suspend fun getConversationId(
-        botRef: String?,
+        payload: GetConversationPayload,
+        onRestart: Boolean?,
     ): NCWState<NCWGetConversationIdResponse> {
         return try {
             //    liveData.value = State.loading(Routes.ROUTE_GET_CONVERSATION_ID, loadingType)
-            val response = apiInterface.getConversationId(botRef)
+            val response = apiInterface.getConversationId(onRestart,payload)
             if (response.isSuccessful && response.body() != null) {
                 NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_GET_CONVERSATION_ID)
             } else {

@@ -6,7 +6,7 @@ object NCWRoutes {
     const val ROUTE_GET_CHAT =API + "webhook-history-v2"
     const val ROUTE_SEND_CHAT = API + "webhook-message"
 
-    const val ROUTE_GET_CONVERSATION_ID = API + "conversationId"
+    const val ROUTE_GET_CONVERSATION_ID = API + "getConversationId"
     const val ROUTE_GET_MQTT_CREDENTIALS = API + "mqtt"
 
     const val ROUTE_GET_PRESIGNED_URL = API + "upload"

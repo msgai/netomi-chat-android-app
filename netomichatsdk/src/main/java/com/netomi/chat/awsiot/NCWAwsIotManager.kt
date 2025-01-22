@@ -125,6 +125,10 @@ object NCWAwsIotManager {
         }
     }
 
+
+     fun unsubscribeRestart(topic: String) {
+         unsubscribeToTopic(topic)
+    }
     /**
      * Subscribes to a topic to receive messages.
      * @param topic Topic to subscribe to.

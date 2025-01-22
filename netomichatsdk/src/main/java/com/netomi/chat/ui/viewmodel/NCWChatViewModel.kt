@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.netomi.chat.data.repository.NCWChatRepository
+import com.netomi.chat.model.GetConversationPayload
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.model.MessageType
@@ -148,10 +149,10 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
 
     }
 
-    fun getConversationId(botRef: String?) {
-        Log.e("ConversationIdResponse", "botRef " + botRef)
+    fun getConversationId(botRef: String?, externalId: String?, onRestart: Boolean?=false) {
         viewModelScope.launch(Dispatchers.IO) {
-            val response = chatRepository.getConversationId(botRef)
+            val  payload=GetConversationPayload(botRefId=botRef,externalId=externalId)
+            val response = chatRepository.getConversationId(payload,onRestart)
 
             withContext(Dispatchers.Main) {
                 Log.e("ConversationIdResponse", "response " + response)
