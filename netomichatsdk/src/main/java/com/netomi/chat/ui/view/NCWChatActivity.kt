@@ -1958,9 +1958,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
         // Validate file size
         if (!file?.let { formComponent?.let { it1 -> isFormSizeValid(it1, it) } }!!) {
-            val maxUploadSizeAllowedMB = formComponent?.config?.maxUploadSizeAllowed ?: 0
-            val messageIssue =
-                getString(R.string.upload_file_max_size, maxUploadSizeAllowedMB ?: "N/A")
+            val maxUploadSizeAllowedMB = formComponent?.config?.maxUploadSizeAllowed?.let {
+                "$it MB"
+            } ?: "N/A"
+            val messageIssue = getString(R.string.upload_file_max_size, maxUploadSizeAllowedMB)
 
             showLimitExceedPopup(messageIssue)
             return false
@@ -1991,6 +1992,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         // Validate file size
         if (!isFileSizeValid(this, file?.length(), themeData?.fileSharing?.fileSize)) {
             val maxSize = themeData?.fileSharing?.fileSize?.let(NCWAppUtils::formatFileSize)
+
             val messageIssue = getString(R.string.upload_file_max_size, maxSize ?: "N/A")
             showLimitExceedPopup(messageIssue)
             return false
