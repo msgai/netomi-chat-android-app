@@ -236,12 +236,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private var messageSoundPlayer:MessageSoundPlayer?=null
     private var onRestart: Boolean = false
+    private var isIdle: Boolean = false
+    private var isHistoryChatAvialbale: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
         initViews()
-            // resetIdleTimer()
+
         // Load theme and config
         themeData = NCWThemeUtils.getThemeData()
         agentAvatar = themeData?.mobileConfig?.lightTheme?.botConfig?.botImage
@@ -297,7 +299,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         }
         ivMenu.setOnClickListener {
-          //  Toast.makeText(this, R.string.under_development, Toast.LENGTH_SHORT).show()
             setUpSettingOption()
         }
 
@@ -369,7 +370,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun hitIdealTimeOutEvent() {
         val idleTime=idleTimeInMillis/1000
-
+        isIdle=true
         chatViewModel.hitFeedbackAPI(
             NCWFeedbackRequest(
                 botRefId!!, com.netomi.chat.model.feedback.feedbackresponse.NCWRequestBody(
@@ -439,7 +440,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             return
         }
         showProgressBar()
-        Log.e("ConversationID End", conversationID.toString())
         chatViewModel.hitEndChatAPI(
             NCWEndChatRequest(
                 botRefId = botRefId!!, com.netomi.chat.model.endchat.NCWRequestBody(
@@ -663,9 +663,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
      * they first open the chat.
      */
     private fun loadInitialMessages() {
-        Log.e("Checjkk","saasassa "+checkProactiveMessageAvailable())
         if (!checkProactiveMessageAvailable()) {
-            Log.e("Checjkk","saasassa ")
             // Add the initial bot message
             themeData?.initialFlows?.header?.let { header ->
                 messageList.add(
@@ -1112,9 +1110,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
                     setUIState(isHistoryDisableInput)
-                    if(NCWThemeUtils.getConversationID()==null || themeData?.isProActiveGreetings == false) {
-                        sendProactiveMessage()
+                    if (NCWThemeUtils.getConversationID() == null || themeData?.isProActiveGreetings == false) {
+
+                        if (!isHistoryChatAvialbale) {
+                            sendProactiveMessage()
+                        }
                     }
+
                     // Hide header after 2 seconds when connected
                     connectionHeader.postDelayed({
                         connectionHeader.visibility = View.GONE
@@ -1361,7 +1363,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                             finish()
                             return@createAndShowSurveyBottomSheet
                         }
-                        val payload = createPayload(text, label, timeStamp)
+                        val isSkipValue = !isIdle
+
+                        val textSkip = "event://;SKIP_EVENT;resumeWorkflow::value=${isSkipValue}^$^requestId::value=${response.requestId}"
+                        val payload = createPayload(textSkip, label, timeStamp)
                         addLoader()
                         sendMessageToBot(payload)
                     }
@@ -2249,15 +2254,21 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     setUIState(true)
                 }
 
-                if (idleTimeInMillis>0)
+                if (idleTimeInMillis>0) {
                     resetIdleTimer()
+                    isIdle=false
+                }
+
             }
 
             NCWRoutes.ROUTE_GET_CHAT -> {
                 val response = apiResponse as NCWGetChatHistoryResponse
+                Log.e("ROUTE_GET_MQTT_CREDENTIALS","ROUTE_GET_CHAT")
                 if (response != null && response.responses.size > 0) {
+                    isHistoryChatAvialbale=true
                     parseHistoryItems(response.responses)
                 } else {
+                    isHistoryChatAvialbale=false
                     loadInitialMessages()
                 }
                 hideProgressBar()
@@ -2367,6 +2378,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     }
                 }
                 NCWThemeUtils.setConversationID(null)
+                themeData?.isProActiveGreetings=false
                 finish()
             }
 
@@ -2401,6 +2413,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
             NCWRoutes.ROUTE_SURVEY -> {
                 if (isSurveyRule){
+                    NCWThemeUtils.setConversationID(null)
+                    themeData?.isProActiveGreetings=false
                     finish()
                 }
             }
