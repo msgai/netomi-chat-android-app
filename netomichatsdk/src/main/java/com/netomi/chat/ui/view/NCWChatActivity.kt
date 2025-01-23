@@ -138,6 +138,7 @@ import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.hideKeyboard
 import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
 import com.netomi.chat.utils.NCWAppUtils.isFormSizeValid
+import com.netomi.chat.utils.NCWDialogUtils
 import com.netomi.chat.utils.NCWFeedbackActionCallback
 import com.netomi.chat.utils.NCWParsingUtils.parsePayloadToFormData
 import com.netomi.chat.utils.NCWRoutes
@@ -353,12 +354,21 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private fun setUpSettingOption() {
         val bottomSheet = themeData?.let {
             NCWSettingBottomSheet(it){
-                onRestart=true
-                NCWAwsIotManager.unsubscribeRestart(topic)
-                hitEndChatAPI()
+                showRestartPopUp()
+
             }
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
+    }
+    private fun showRestartPopUp(){
+
+        NCWDialogUtils.showCustomDialog(this, getString(R.string.restart_chat),getString(R.string.confirm_restart_chat)){
+            onRestart=true
+            if (topic != null) {
+                NCWAwsIotManager.unsubscribeRestart(topic)
+            }
+            hitEndChatAPI()
+        }
     }
 
 
