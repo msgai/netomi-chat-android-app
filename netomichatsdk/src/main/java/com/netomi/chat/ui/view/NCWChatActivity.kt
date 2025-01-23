@@ -364,7 +364,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         NCWDialogUtils.showCustomDialog(this, getString(R.string.restart_chat),getString(R.string.confirm_restart_chat)){
             onRestart=true
-            NCWAwsIotManager.unsubscribeRestart(topic)
+            if (topic != null) {
+                NCWAwsIotManager.unsubscribeRestart(topic)
+            }
             hitEndChatAPI()
         }
     }
