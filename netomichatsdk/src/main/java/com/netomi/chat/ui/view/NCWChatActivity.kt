@@ -57,6 +57,7 @@ import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEventData
 import com.netomi.chat.model.feedback.feedbackrequest.NCWEventInfo
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
+import com.netomi.chat.model.media_payload.MultiFileSend
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.Component
 import com.netomi.chat.model.messages.FileUploadData
@@ -2072,14 +2073,64 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     // Gallery selection
     private fun openGallery() {
-        val galleryIntent =
-            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
+
+        if (attachmentType == TYPE_ATTACHMENT) {
+            val galleryIntent =
+                Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
+                    type = "image/* video/*"
+                }
+            galleryLauncher.launch(galleryIntent)
+        } else {
+            val galleryIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
                 type = "image/* video/*"
             }
-        galleryLauncher.launch(galleryIntent)
+            galleryMultipleLauncher.launch(galleryIntent)
+        }
     }
 
-    // File selection (PDF, DOC, etc.)
+    var mMultipleFile: ArrayList<MultiFileSend> = arrayListOf()
+        private val galleryMultipleLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                    val clipData = result.data?.clipData
+                    if (clipData != null) {
+                        for (i in 0 until clipData.itemCount) {
+                            val uri = clipData.getItemAt(i).uri
+                            val mimeType = contentResolver.getType(uri)
+                            val fileSend =   NCWFilePath().getPath(this, uri)?.let { File(it) }
+
+                            val mObj= fileSend?.let { MultiFileSend(mimeType!!,uri, it) }
+                            if (mObj != null) {
+                                mMultipleFile.add(mObj)
+                            }
+                        //    handleFileSelection(uri, mimeType, isGallery = true)
+                        }
+
+                        mMultipleFile.forEach { fileSend->
+                            // rammmmmmmmmmmmmmmmmmm
+                            getPreSignedUrl(fileSend.mimeType, fileSend.file.name)
+                        }
+
+
+                    } else {
+                        // Handle single selected file
+                        result.data?.data?.let { uri ->
+                            val mimeType = contentResolver.getType(uri)
+                         //   handleFileSelection(uri, mimeType, isGallery = true)
+                        }
+                    }
+                }
+            }
+
+
+
+
+
+
+
+        // File selection (PDF, DOC, etc.)
     private fun openFile() {
 
         if (attachmentType == TYPE_ATTACHMENT) {
