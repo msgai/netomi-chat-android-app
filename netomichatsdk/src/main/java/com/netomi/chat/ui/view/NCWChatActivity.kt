@@ -57,7 +57,7 @@ import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEventData
 import com.netomi.chat.model.feedback.feedbackrequest.NCWEventInfo
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
-import com.netomi.chat.model.media_payload.MultiFileSend
+import com.netomi.chat.model.media_payload.MultiFileModel
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.Component
 import com.netomi.chat.model.messages.FileUploadData
@@ -240,6 +240,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var onRestart: Boolean = false
     private var isIdle: Boolean = false
     private var isHistoryChatAvialbale: Boolean = false
+    private var isMultipleFile: Boolean = false
+    var mMultipleFile: ArrayList<MultiFileModel> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -2081,16 +2083,18 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 }
             galleryLauncher.launch(galleryIntent)
         } else {
-            val galleryIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+Log.e("Dataaaa","Gallerryuu")
+            val galleryIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                type = "image/* video/*"
+                type = "*/*"
+                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
             }
             galleryMultipleLauncher.launch(galleryIntent)
         }
     }
 
-    var mMultipleFile: ArrayList<MultiFileSend> = arrayListOf()
+
         private val galleryMultipleLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK && result.data != null) {
@@ -2101,23 +2105,32 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                             val mimeType = contentResolver.getType(uri)
                             val fileSend =   NCWFilePath().getPath(this, uri)?.let { File(it) }
 
-                            val mObj= fileSend?.let { MultiFileSend(mimeType!!,uri, it) }
+                            val mObj= fileSend?.let { MultiFileModel(mimeType!!,uri, it,fileSend.name) }
                             if (mObj != null) {
                                 mMultipleFile.add(mObj)
                             }
                         //    handleFileSelection(uri, mimeType, isGallery = true)
                         }
+                        Log.e("SIXEEEE","Check Size "+mMultipleFile.size)
+                        var count=0
+                        isMultipleFile=true
 
-                        mMultipleFile.forEach { fileSend->
+                        chatViewModel.uploadFilesSequentially(mMultipleFile)
+
+                      /*  mMultipleFile.forEach { fileModel->
                             // rammmmmmmmmmmmmmmmmmm
-                            getPreSignedUrl(fileSend.mimeType, fileSend.file.name)
-                        }
+                            count++
+                            fileSend=fileModel.file
+                            Log.e("SIXEEEE","Itemmm Val ${count}"+fileSend)
+                            getPreSignedUrl(fileModel.mimeType, fileModel.file.name)
+                        }*/
 
 
                     } else {
                         // Handle single selected file
                         result.data?.data?.let { uri ->
                             val mimeType = contentResolver.getType(uri)
+                            Log.e("mMultipleFile","mimeType "+mimeType)
                          //   handleFileSelection(uri, mimeType, isGallery = true)
                         }
                     }
@@ -2337,7 +2350,20 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
             NCWRoutes.ROUTE_GET_PRESIGNED_URL -> {
                 val response = apiResponse as NCWGetPreSignedUrl
-                chatViewModel.uploadFile(fileSend, response)
+                if (isMultipleFile && mMultipleFile.isNotEmpty() && fileSend != null) {
+                    mMultipleFile.forEach { file ->
+                        Log.d("FileProcessing", "Checking file: $file with fileSend: $fileSend")
+                        Log.e("SIXEEEE","hecking file")
+                        if (file.file== fileSend) {
+                            Log.e("SIXEEEE","Match Found")
+                            Log.d("FileProcessing", "Match found. Uploading file: $file")
+                            chatViewModel.uploadFile(file.file, response)
+                        }
+                    }
+                }
+                else {
+                    chatViewModel.uploadFile(fileSend, response)
+                }
             }
 
             NCWRoutes.ROUTE_UPLOAD_MEDIA -> {
@@ -2387,6 +2413,30 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                 } else {
                     hideProgressBar()
+                   /* if (isMultipleFile && mMultipleFile.isNotEmpty() && fileSend != null) {
+                        mMultipleFile.forEach { file ->
+                            Log.d("FileProcessing", "Checking file: $file with fileSend: $fileSend")
+                            if (file.fileName== response.title) {
+                                Log.d("FileProcessing", "Match found. Uploading file: $file")
+                                mMultipleFile.remove(file)
+
+                            }
+                        }
+
+                    }*/
+
+                  /*  if (isMultipleFile && mMultipleFile.isNotEmpty() && fileSend != null) {
+                        mMultipleFile.removeAll { file ->
+                            Log.d("FileProcessing", "Checking file: $file with fileSend: $fileSend")
+                            val isMatch = file.fileName == response.title
+                            if (isMatch) {
+                                Log.d("FileProcessing", "Match found. Removing file: $file")
+                            }
+                            isMatch
+                        }
+                    }*/
+                    Log.e("mMultipleFile","mMultipleFile.sexeeee "+mMultipleFile.size)
+
 
 
                     val position = messageList.indexOfLast { it.sender == TYPE_FORM }
