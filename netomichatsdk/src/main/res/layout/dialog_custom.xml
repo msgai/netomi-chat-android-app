@@ -28,35 +28,41 @@
         android:textSize="14sp"
         android:textColor="@android:color/darker_gray"
         android:gravity="center"
-        android:paddingBottom="16dp"/>
+        android:paddingBottom="10dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
 
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="10dp">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/yesButton"
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/btnCancel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:padding="12dp"
+            android:gravity="center"
+            android:textStyle="bold"
             android:textAllCaps="false"
-            android:text="Yes"
+            android:text="@string/cancel"
             android:textColor="#000000"/>
 
         <Space
             android:layout_width="16dp"
             android:layout_height="wrap_content"/>
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/noButton"
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/btnConfirm"
             android:layout_width="0dp"
+            android:gravity="center"
+            android:padding="12dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:textStyle="bold"
             android:textAllCaps="false"
             android:textColor="#000000"
-            android:text="No"/>
+            android:text="@string/confirm"/>
     </LinearLayout>
 </LinearLayout>

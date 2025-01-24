@@ -33,5 +33,9 @@
     <string name="sound">Sound</string>
     <string name="download_transcript">Download transcript</string>
     <string name="language_en">Language - EN</string>
+    <string name="restart_chat">Restart Chat</string>
+    <string name="confirm_restart_chat"> Are you sure you want to restart the chat? All current conversation history will be cleared.</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
 
 </resources>
