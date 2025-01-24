@@ -1594,6 +1594,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun updateMessageList(newMessages: List<NCWMessage>) {
         if (NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled == true) {
+            removeStreamLoader()
             CoroutineScope(Dispatchers.Main).launch {
                 for (message in newMessages) {
                     if (message.type == MessageType.TEXT) {
