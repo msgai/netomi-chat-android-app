@@ -604,28 +604,48 @@ class NCWChatAdapter(
     }
 
     // Function to append text or add a new message
-    fun updateOrAppendMessage(newMessage: NCWMessage) {
-        val index = messages.indexOfFirst { it.requestID == newMessage.requestID && it.sender==newMessage.sender }
+    fun updateOrAppendMessage(newMessage: NCWMessage,customStreamType:Boolean) {
+        val index = if (customStreamType) {
+            messages.indexOfFirst {
+                it.requestID == newMessage.requestID &&
+                        it.sender == newMessage.sender &&
+                        it.id == newMessage.id
+            }
+        } else {
+            messages.indexOfFirst {
+                it.requestID == newMessage.requestID &&
+                        it.sender == newMessage.sender
+            }
+        }
         if (index != -1) {
+            val existingMessage = messages[index]
+            when (newMessage.type) {
+                MessageType.TEXT -> {
+                    existingMessage.message = if (customStreamType) {
+                        existingMessage.message + newMessage.message
+                    } else {
+                        newMessage.message
+                    }
+                }
+                MessageType.MULTISOURCE -> {
+                    messages.add(newMessage)
+                    notifyItemInserted(messages.size - 1)
+                    return
+                }
 
-            if (newMessage.type==MessageType.TEXT) {
-                // Message already exists; append text
-                messages[index].message = newMessage.message
-            }
-            else if (newMessage.type==MessageType.MULTISOURCE){
-                //messages[index]=newMessage
-                messages.add(newMessage)
-                notifyItemInserted(messages.size - 1)
-                return
-            }
-            // Update isReviewEnabled flag if it changes
-            if(!messages[index].isReviewEnabled) {
-                messages[index].isReviewEnabled = newMessage.isReviewEnabled
+                MessageType.IMAGE -> {}
+                MessageType.VIDEO -> {}
+                MessageType.CAROUSEL -> {}
+                MessageType.CARD -> {}
+                MessageType.FILE -> {}
+                MessageType.MESSAGEINFO -> {}
             }
 
+            if (!existingMessage.isReviewEnabled) {
+                existingMessage.isReviewEnabled = newMessage.isReviewEnabled
+            }
             notifyItemChanged(index)
         } else {
-            // Add new message to the list
             messages.add(newMessage)
             notifyItemInserted(messages.size - 1)
         }

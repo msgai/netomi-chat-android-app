@@ -146,6 +146,10 @@ import com.netomi.chat.utils.NCWState
 import com.netomi.chat.utils.NCWThemeUtils
 import com.netomi.chat.utils.toNCWCustomAttributes
 import com.netomi.chat.utils.toNCWUserDetailAttribute
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -227,21 +231,21 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var isHistoryDisableInput: Boolean = true
     private var isDisableInput: Boolean = true
 
-    private  var mSurveyRule: List<SurveyRule> ?= null
-    private  var isSurveyRule: Boolean= false
+    private var mSurveyRule: List<SurveyRule>? = null
+    private var isSurveyRule: Boolean = false
 
     private var idleTimeInMillis: Long = 0L
     private val handler = Handler(Looper.getMainLooper())
     private val messageChunksMap = mutableMapOf<String, MutableList<NCWMessage>>()
 
-    private var messageSoundPlayer:MessageSoundPlayer?=null
+    private var messageSoundPlayer: MessageSoundPlayer? = null
     private var onRestart: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
         initViews()
-            // resetIdleTimer()
+        // resetIdleTimer()
         // Load theme and config
         themeData = NCWThemeUtils.getThemeData()
         agentAvatar = themeData?.mobileConfig?.lightTheme?.botConfig?.botImage
@@ -252,8 +256,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         NCWChatSdk.getUpdatedChatWindowConfiguration()
         NCWChatSdk.getUpdatedBubbleConfiguration()
         NCWChatSdk.getUpdatedOtherConfiguration()
-       
-        
+
+
         // Set up message adapter and recycler view
         setupMessageList()
 
@@ -263,7 +267,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         val device = DeviceInfoUtil.getDeviceInfo(this)
-        deviceInfo = device.toNCWCustomAttributes()
+        //deviceInfo = device.toNCWCustomAttributes()
 
         val jwtToken = NCWThemeUtils.getJwtToken()
         if (jwtToken != null) {
@@ -273,7 +277,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             if (conversationID == null) {
                 loadInitialMessages()
 
-                chatViewModel.getConversationId(botRefId,externalId)
+                chatViewModel.getConversationId(botRefId, externalId)
             } else {
                 chatViewModel.getAWSMQTTCredentials(botRefId)
                 getChatHistory()
@@ -297,7 +301,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         }
         ivMenu.setOnClickListener {
-          //  Toast.makeText(this, R.string.under_development, Toast.LENGTH_SHORT).show()
+            //  Toast.makeText(this, R.string.under_development, Toast.LENGTH_SHORT).show()
             setUpSettingOption()
         }
 
@@ -335,7 +339,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun setUpQuickReplyOption() {
         val bottomSheet = themeData?.let {
-            NCWQuickMenuBottomSheet(it.quickMenuOptions){ options->
+            NCWQuickMenuBottomSheet(it.quickMenuOptions) { options ->
                 val timeStamp = System.currentTimeMillis()
                 checkForInitialMessage()
                 val payload = createPayload(options.label, options.text, timeStamp)
@@ -351,8 +355,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun setUpSettingOption() {
         val bottomSheet = themeData?.let {
-            NCWSettingBottomSheet(it){
-                onRestart=true
+            NCWSettingBottomSheet(it) {
+                onRestart = true
                 NCWAwsIotManager.unsubscribeRestart(topic)
                 hitEndChatAPI()
             }
@@ -368,7 +372,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun hitIdealTimeOutEvent() {
-        val idleTime=idleTimeInMillis/1000
+        val idleTime = idleTimeInMillis / 1000
 
         chatViewModel.hitFeedbackAPI(
             NCWFeedbackRequest(
@@ -527,7 +531,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             onYesClick = {
                 if (from == SESSION)
                     finish()
-                else if (from == LOGOUT){
+                else if (from == LOGOUT) {
                     NCWThemeUtils.setSignInUserDetails(null)
                     hitEndChatAPI()
                 }
@@ -626,14 +630,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     ): NCWWebhookPayload {
         val messageId = UUID.randomUUID().toString()
 
-        if (NCWThemeUtils.getSignInUserDetails()!=null){
-           val userInfo = NCWThemeUtils.getSignInUserDetails()?.toNCWUserDetailAttribute()
+        if (NCWThemeUtils.getSignInUserDetails() != null) {
+            val userInfo = NCWThemeUtils.getSignInUserDetails()?.toNCWUserDetailAttribute()
             if (userInfo != null) {
                 deviceInfo?.addAll(userInfo)
             }
         }
 
-       val attributes = NCWAdditionalAttributes(
+        val attributes = NCWAdditionalAttributes(
             CUSTOM_ATTRIBUTES = deviceInfo
         )
         return NCWWebhookPayload(
@@ -646,7 +650,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     label = label,
                     messageId = messageId,
                     timestamp = timeStamp,
-                    hideMessage=if (label== PROACTIVE_GREETING)true else null
+                    hideMessage = if (label == PROACTIVE_GREETING) true else null
                 ),
                 attachmentList = attachmentList,
                 additionalAttributes = attributes,
@@ -663,9 +667,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
      * they first open the chat.
      */
     private fun loadInitialMessages() {
-        Log.e("Checjkk","saasassa "+checkProactiveMessageAvailable())
+        Log.e("Checjkk", "saasassa " + checkProactiveMessageAvailable())
         if (!checkProactiveMessageAvailable()) {
-            Log.e("Checjkk","saasassa ")
+            Log.e("Checjkk", "saasassa ")
             // Add the initial bot message
             themeData?.initialFlows?.header?.let { header ->
                 messageList.add(
@@ -843,11 +847,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     override fun onQuickReply(option: NCWQuickReplyOption?, position: Int) {
 
-       // if (connectionStatus == NCWConnectionStatus.CONNECTED.toString()) {
+        // if (connectionStatus == NCWConnectionStatus.CONNECTED.toString()) {
 
-            messageList[position].isQuickReplyVisible = false
-            onQuickReplyClicked(option)
-       // }
+        messageList[position].isQuickReplyVisible = false
+        onQuickReplyClicked(option)
+        // }
 
     }
 
@@ -1095,7 +1099,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         ncwAwsCredentialsViewModel.connectionStatus.observe(this) { status ->
             connectionStatus = status
-            Log.e("Connection","sss "+connectionStatus)
+            Log.e("Connection", "sss " + connectionStatus)
             when (status) {
 
                 NCWConnectionStatus.CONNECTING.toString() -> {
@@ -1112,7 +1116,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
                     setUIState(isHistoryDisableInput)
-                    if(NCWThemeUtils.getConversationID()==null || themeData?.isProActiveGreetings == false) {
+                    if (NCWThemeUtils.getConversationID() == null || themeData?.isProActiveGreetings == false) {
                         sendProactiveMessage()
                     }
                     // Hide header after 2 seconds when connected
@@ -1162,7 +1166,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private fun sendProactiveMessage() {
 
         if (themeData?.isProActiveGreetings == false) {
-            themeData?.isProActiveGreetings=true
+            themeData?.isProActiveGreetings = true
             themeData?.proActiveGreetings?.takeIf { it.isNotEmpty() }?.let { greetings ->
                 val timeStamp = System.currentTimeMillis()
                 val text = greetings[0]
@@ -1186,9 +1190,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 val eventData = response.eventObject?.eventData
                 renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
 
-                if (eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPING){
-                    if (!checkLoaderRunning())
-                    {
+                if (eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPING) {
+                    if (!checkLoaderRunning()) {
                         addLoader()
                         messageAdapter.notifyDataSetChanged()
                         onScrollToPosition(true)
@@ -1251,6 +1254,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         chatViewModel.awsMessage.removeObserver(awsMessageObserver)
 
     }
+
     private fun refreshChat(eventData: EventData) {
         val oldTopic = topic
         Log.e("OAUTH", eventData.authenticatedConversationId.toString())
@@ -1276,6 +1280,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 "$agentName has joined the chat"
 
             }
+
             eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_LEAVE -> {
                 agentAvatar = null
                 ownerType = TYPE_BOT
@@ -1290,7 +1295,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
 
         if (messagePill.isNotEmpty()) {
-            val message = createPillsMessage(messagePill,timestamp)
+            val message = createPillsMessage(messagePill, timestamp)
             messageList.add(message)
             messageAdapter.notifyDataSetChanged()
             chatRecyclerView.post {
@@ -1302,12 +1307,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         if (eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_TRANSFER) {
             val newAgentName = eventData.eventInfo?.agentName
             val newAgentAvatar = eventData.eventInfo?.agentAvatar
-            val message = createPillsMessage("$agentName has transferred the chat to $newAgentName",timestamp)
+            val message = createPillsMessage(
+                "$agentName has transferred the chat to $newAgentName",
+                timestamp
+            )
             messageList.add(message)
             agentName = newAgentName
             agentAvatar = newAgentAvatar
             ownerType = TYPE_AGENT
-            val joinMessage = createPillsMessage("$agentName has joined the chat",timestamp)
+            val joinMessage = createPillsMessage("$agentName has joined the chat", timestamp)
             messageList.add(joinMessage)
             messageAdapter.notifyDataSetChanged()
             chatRecyclerView.post {
@@ -1357,7 +1365,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                     }, { text, label ->
                         val timeStamp = System.currentTimeMillis()
-                        if (isSurveyRule){
+                        if (isSurveyRule) {
                             finish()
                             return@createAndShowSurveyBottomSheet
                         }
@@ -1516,7 +1524,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         val attach = attachment.attachment ?: return null
         val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
 
-        if (type == NCWAppConstant.NORMAL && messageType!=MessageType.MULTISOURCE) {
+        if (type == NCWAppConstant.NORMAL && messageType != MessageType.MULTISOURCE) {
             if (attach.text.isNullOrEmpty() &&
                 attach.elements.isNullOrEmpty() &&
                 attach.thumbnailUrl.isNullOrEmpty() &&
@@ -1542,7 +1550,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             isReviewEnabled = attach.isReviewEnabled,
             agentAvatar = agentAvatar,
             attachmentIndex = index,
-            multipleSourceDetails= if (messageType == MessageType.MULTISOURCE) attach.multipleSourceDetails else arrayListOf()
+            id = attachment.attachment.id,
+            multipleSourceDetails = if (messageType == MessageType.MULTISOURCE) attach.multipleSourceDetails else arrayListOf()
         )
     }
 
@@ -1550,7 +1559,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     // Overloaded helper function for a single message
     private fun updateMessageList(newMessage: NCWMessage) {
         addSingleMessage(newMessage)
-        if (ownerType== TYPE_BOT)
+        if (ownerType == TYPE_BOT)
             addLoader()
     }
 
@@ -1573,33 +1582,75 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun updateMessageList(newMessages: List<NCWMessage>) {
-        val typingIndicatorEnabled = themeData?.typingIndicator?.enabled ?: false
-        if (!typingIndicatorEnabled) {
-            addMessages(newMessages)
-            return
-        }
-
-        val currentTime = System.currentTimeMillis()
-        val elapsedTime = currentTime - loaderAddedTime
-
-        // Ensure loader remains visible for at least minTime
-        val minTime = themeData?.typingIndicator?.minTime ?: 1000L
-        if (isLoaderActive && elapsedTime < minTime) {
-            Log.e("CallActive", "Waiting for minTime: $minTime")
-            Handler(Looper.getMainLooper()).postDelayed({
-                if (isLoaderActive) { // Double-check if loader is still active
-                    safelyRemoveLoader(newMessages)
-                    Log.e("CallActive", "Removed after minTime")
+        if (NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled == true) {
+            CoroutineScope(Dispatchers.Main).launch {
+                for (message in newMessages) {
+                    if (message.type == MessageType.TEXT) {
+                        message.message?.let { fullMessage ->
+                            val chunks = splitIntoChunks(fullMessage, NCWThemeUtils.getThemeData()?.streamOnChatWidget?.chunkSize?:8)
+                            for (chunk in chunks) {
+                                val chunkMessage = message.copy(message = chunk)
+                                messageAdapter.updateOrAppendMessage(chunkMessage,true)
+                                delay(300)
+                            }
+                        }
+                    } else {
+                        messageList.addAll(listOf(message))
+                        messageAdapter.notifyDataSetChanged()
+                        delay(100)
+                    }
                 }
-            }, minTime - elapsedTime)
-        } else if (isLoaderActive) { // Ensure loader is active before removing
-            Log.e("CallActive", "Removed loader immediately")
-            safelyRemoveLoader(newMessages)
+            }
         } else {
-            Log.e("CallActive", "Loader already removed, updating messages only")
-            addMessages(newMessages)
+            val typingIndicatorEnabled = themeData?.typingIndicator?.enabled ?: false
+            if (!typingIndicatorEnabled) {
+                addMessages(newMessages)
+                return
+            }
+
+            val currentTime = System.currentTimeMillis()
+            val elapsedTime = currentTime - loaderAddedTime
+
+            // Ensure loader remains visible for at least minTime
+            val minTime = themeData?.typingIndicator?.minTime ?: 1000L
+            if (isLoaderActive && elapsedTime < minTime) {
+                Log.e("CallActive", "Waiting for minTime: $minTime")
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (isLoaderActive) { // Double-check if loader is still active
+                        safelyRemoveLoader(newMessages)
+                        Log.e("CallActive", "Removed after minTime")
+                    }
+                }, minTime - elapsedTime)
+            } else if (isLoaderActive) { // Ensure loader is active before removing
+                Log.e("CallActive", "Removed loader immediately")
+                safelyRemoveLoader(newMessages)
+            } else {
+                Log.e("CallActive", "Loader already removed, updating messages only")
+                addMessages(newMessages)
+            }
         }
 
+    }
+
+    // Helper function to split a message into chunks of 8 words
+    private fun splitIntoChunks(text: String, wordsPerChunk: Int): List<String> {
+        val words = text.split(" ")
+        val chunks = mutableListOf<String>()
+        val chunkBuilder = StringBuilder()
+        var wordCount = 0
+
+        for ((index, word) in words.withIndex()) {
+            chunkBuilder.append(word).append(" ")
+            wordCount++
+
+            // When chunk is full or it's the last word, add it to chunks
+            if (wordCount == wordsPerChunk || index == words.size - 1) {
+                chunks.add(chunkBuilder.toString().trim())
+                chunkBuilder.clear()
+                wordCount = 0
+            }
+        }
+        return chunks
     }
 
     // Helper function to add messages and scroll to the latest
@@ -1622,15 +1673,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             val fullMessage = mergeChunks(chunkList)
 
             Handler(Looper.getMainLooper()).postDelayed({
-                messageAdapter.updateOrAppendMessage(fullMessage)
+                messageAdapter.updateOrAppendMessage(fullMessage,false)
             }, 300)
         } else {
-            messageAdapter.updateOrAppendMessage(newMessages)
+            messageAdapter.updateOrAppendMessage(newMessages,false)
         }
 
-       /* chatRecyclerView.post {
-            chatRecyclerView.post(messageList.size - 1)
-        }*/
+        /* chatRecyclerView.post {
+             chatRecyclerView.post(messageList.size - 1)
+         }*/
 
     }
 
@@ -1688,6 +1739,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private fun checkLoaderRunning(): Boolean {
         return messageList.isNotEmpty() && messageList.last().sender == TYPE_INDICATOR
     }
+
     private fun updateLoaderTime() {
         loaderAddedTime = System.currentTimeMillis()
 
@@ -2244,12 +2296,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 val sendMessageResponse = apiResponse as NCWSendMessageResponse
                 hideProgressBar()
 
-                if (!isDisableInput){
-                    isDisableInput=true
+                if (!isDisableInput) {
+                    isDisableInput = true
                     setUIState(true)
                 }
 
-                if (idleTimeInMillis>0)
+                if (idleTimeInMillis > 0)
                     resetIdleTimer()
             }
 
@@ -2355,14 +2407,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     messageList.clear()
                     messageAdapter.notifyDataSetChanged()
                     loadInitialMessages()
-                    themeData?.isProActiveGreetings=false
-                    chatViewModel.getConversationId(botRefId,externalId,onRestart)
-                    onRestart=false
+                    themeData?.isProActiveGreetings = false
+                    chatViewModel.getConversationId(botRefId, externalId, onRestart)
+                    onRestart = false
                     return
                 }
                 if (mSurveyRule != null) {
                     if (mSurveyRule?.any { key -> key.conversationTriggerType == RULE_EVENT_CHAT_END } == true) {
-                        isSurveyRule=true
+                        isSurveyRule = true
                         return
                     }
                 }
@@ -2370,10 +2422,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 finish()
             }
 
-             NCWRoutes.WEBHOOK_EVENT -> {
-                 if (idleTimeInMillis>0)
-                     resetIdleTimer()
-             }
+            NCWRoutes.WEBHOOK_EVENT -> {
+                if (idleTimeInMillis > 0)
+                    resetIdleTimer()
+            }
+
             NCWRoutes.LOGIN -> {
                 val response = apiResponse as LoginResponse
                 Log.d(
@@ -2383,7 +2436,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 Log.e("ConversationID LOGIN", response.authenticatedConversationId)
                 // Use conversationID as needed
                 conversationID = response.authenticatedConversationId
-                externalId= response.externalId
+                externalId = response.externalId
 
                 chatViewModel.getAWSMQTTCredentials(botRefId)
                 conversationID?.let { NCWThemeUtils.setConversationID(it) }
@@ -2400,14 +2453,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
 
             NCWRoutes.ROUTE_SURVEY -> {
-                if (isSurveyRule){
+                if (isSurveyRule) {
                     finish()
                 }
             }
 
             NCWRoutes.ROUTE_GET_SURVEY_RULE -> {
                 val surveyRule = apiResponse as SurveyRuleResponse
-                 mSurveyRule=surveyRule.payload
+                mSurveyRule = surveyRule.payload
 
                 if (mSurveyRule != null) {
                     val matchedRule = mSurveyRule?.firstOrNull { key ->
@@ -2415,7 +2468,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     }
 
                     if (matchedRule != null) {
-                        idleTimeInMillis = NCWAppUtils.parseIdleTimeFromExpression(matchedRule.expression) * 1000
+                        idleTimeInMillis =
+                            NCWAppUtils.parseIdleTimeFromExpression(matchedRule.expression) * 1000
                         resetIdleTimer()
                     }
                 }
@@ -2503,36 +2557,37 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
 
                             }
+
                             CustomFieldName.DISABLE_INPUT_FIELD, CustomFieldName.DISABLE_CHAT_INPUT -> {
                                 val isDisabled = customField.values?.get(0) == "true"
                                 setUIState(!isDisabled)
                                 isHistoryDisableInput = !isDisabled
-                                if (CustomFieldName.fromValue(customField.name)==CustomFieldName.DISABLE_INPUT_FIELD) {
+                                if (CustomFieldName.fromValue(customField.name) == CustomFieldName.DISABLE_INPUT_FIELD) {
                                     isDisableInput = !isDisabled
                                 }
                             }
 
-                          /*  CustomFieldName.DISABLE_INPUT_FIELD -> {
-                                if (customField.values?.get(0) == "true") {
-                                    setUIState(false)
-                                    isHistoryDisableInput = false
-                                    isDisableInput=false
-                                } else {
-                                    setUIState(true)
-                                    isHistoryDisableInput = true
-                                }
+                            /*  CustomFieldName.DISABLE_INPUT_FIELD -> {
+                                  if (customField.values?.get(0) == "true") {
+                                      setUIState(false)
+                                      isHistoryDisableInput = false
+                                      isDisableInput=false
+                                  } else {
+                                      setUIState(true)
+                                      isHistoryDisableInput = true
+                                  }
 
-                            }
+                              }
 
-                            CustomFieldName.DISABLE_CHAT_INPUT -> {
-                                if (customField.values?.get(0) == "true") {
-                                    setUIState(false)
-                                    isHistoryDisableInput = false
-                                } else {
-                                    setUIState(true)
-                                    isHistoryDisableInput = true
-                                }
-                            }*/
+                              CustomFieldName.DISABLE_CHAT_INPUT -> {
+                                  if (customField.values?.get(0) == "true") {
+                                      setUIState(false)
+                                      isHistoryDisableInput = false
+                                  } else {
+                                      setUIState(true)
+                                      isHistoryDisableInput = true
+                                  }
+                              }*/
 
                             CustomFieldName.END_CHAT -> {
                                 // Handle END_CHAT
@@ -2548,14 +2603,16 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 }
                 // else {
                 // Existing logic for attachments
-               /* val newMessages = response.attachments?.mapNotNull {
-                    mapAttachmentToMessage(it, response.requestId!!, NCWAppConstant.NORMAL)
-                } ?: emptyList()*/
+                /* val newMessages = response.attachments?.mapNotNull {
+                     mapAttachmentToMessage(it, response.requestId!!, NCWAppConstant.NORMAL)
+                 } ?: emptyList()*/
 
                 val newMessages = response.attachments?.mapIndexedNotNull { index, attachment ->
                     response.requestId?.let {
-                        mapAttachmentToMessage(attachment,
-                            it, NCWAppConstant.NORMAL,index)
+                        mapAttachmentToMessage(
+                            attachment,
+                            it, NCWAppConstant.NORMAL, index
+                        )
                     }
                 } ?: emptyList()
 
@@ -2658,7 +2715,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)*/
 
 
-
     }
 
     private fun showProgressBar() {
@@ -2675,24 +2731,23 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     override fun onThumbUpClick(requestId: String, position: Int, attachmentIndex: Int) {
         Log.e("RequestId ThumbUp", requestId)
         messageAdapter.notifyItemChanged(position)
-        hitFeedbackAPI(requestId, "POSITIVE",attachmentIndex)
+        hitFeedbackAPI(requestId, "POSITIVE", attachmentIndex)
     }
 
     override fun onThumbDownClick(requestId: String, position: Int, attachmentIndex: Int) {
         Log.e("RequestId ThumbDown", requestId)
         messageAdapter.notifyItemChanged(position)
-        hitFeedbackAPI(requestId, "NEGATIVE",attachmentIndex)
+        hitFeedbackAPI(requestId, "NEGATIVE", attachmentIndex)
     }
 
 
-
-    private fun playUserSound(){
-        if (themeData?.sound?.defaultSound == true)
-        {
-        messageSoundPlayer?.playUserSound()
+    private fun playUserSound() {
+        if (themeData?.sound?.defaultSound == true) {
+            messageSoundPlayer?.playUserSound()
         }
     }
-    private fun playBotSound(){
+
+    private fun playBotSound() {
 
         if (themeData?.sound?.defaultSound == true) {
             messageSoundPlayer?.playBotSound()

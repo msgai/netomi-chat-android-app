@@ -54,5 +54,6 @@ data class NCWThemeResponse(
     val OAUTH2: NCWOauth,
     var proActiveGreetings: ArrayList<String> = arrayListOf(),
     var isProActiveGreetings:Boolean=false,
+    var streamOnChatWidget:NCWStreamOnChatWidget
 
 )
