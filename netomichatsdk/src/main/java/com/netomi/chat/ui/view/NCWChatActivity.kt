@@ -2111,10 +2111,7 @@ Log.e("Dataaaa","Gallerryuu")
                             }
                         //    handleFileSelection(uri, mimeType, isGallery = true)
                         }
-                        Log.e("SIXEEEE","Check Size "+mMultipleFile.size)
-                        var count=0
                         isMultipleFile=true
-
                         chatViewModel.uploadFilesSequentially(mMultipleFile)
 
                       /*  mMultipleFile.forEach { fileModel->
@@ -2130,8 +2127,9 @@ Log.e("Dataaaa","Gallerryuu")
                         // Handle single selected file
                         result.data?.data?.let { uri ->
                             val mimeType = contentResolver.getType(uri)
+                            isMultipleFile=false
                             Log.e("mMultipleFile","mimeType "+mimeType)
-                         //   handleFileSelection(uri, mimeType, isGallery = true)
+                           handleFileSelection(uri, mimeType, isGallery = true)
                         }
                     }
                 }
