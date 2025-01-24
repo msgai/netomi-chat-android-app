@@ -60,6 +60,7 @@ data class NCWAttachmentContent(
     val attachmentResponseType: String? = null,
     val intentId: String? = null,
     val responseId: Int? = null,
+    val id:String?=null,
     val nodeName: String? = null,
     val isVariationsEnabled: Boolean? = null,
     val largeImageUrl: String? = null,

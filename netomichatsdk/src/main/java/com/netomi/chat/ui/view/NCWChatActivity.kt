@@ -147,6 +147,10 @@ import com.netomi.chat.utils.NCWState
 import com.netomi.chat.utils.NCWThemeUtils
 import com.netomi.chat.utils.toNCWCustomAttributes
 import com.netomi.chat.utils.toNCWUserDetailAttribute
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -228,14 +232,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var isHistoryDisableInput: Boolean = true
     private var isDisableInput: Boolean = true
 
-    private  var mSurveyRule: List<SurveyRule> ?= null
-    private  var isSurveyRule: Boolean= false
+    private var mSurveyRule: List<SurveyRule>? = null
+    private var isSurveyRule: Boolean = false
 
     private var idleTimeInMillis: Long = 0L
     private val handler = Handler(Looper.getMainLooper())
     private val messageChunksMap = mutableMapOf<String, MutableList<NCWMessage>>()
 
-    private var messageSoundPlayer:MessageSoundPlayer?=null
+    private var messageSoundPlayer: MessageSoundPlayer? = null
     private var onRestart: Boolean = false
     private var isIdle: Boolean = false
     private var isHistoryChatAvialbale: Boolean = false
@@ -1557,7 +1561,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             isReviewEnabled = attach.isReviewEnabled,
             agentAvatar = agentAvatar,
             attachmentIndex = index,
-            multipleSourceDetails= if (messageType == MessageType.MULTISOURCE) attach.multipleSourceDetails else arrayListOf()
+            id = attachment.attachment.id,
+            multipleSourceDetails = if (messageType == MessageType.MULTISOURCE) attach.multipleSourceDetails else arrayListOf()
         )
     }
 
@@ -1588,33 +1593,75 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun updateMessageList(newMessages: List<NCWMessage>) {
-        val typingIndicatorEnabled = themeData?.typingIndicator?.enabled ?: false
-        if (!typingIndicatorEnabled) {
-            addMessages(newMessages)
-            return
-        }
-
-        val currentTime = System.currentTimeMillis()
-        val elapsedTime = currentTime - loaderAddedTime
-
-        // Ensure loader remains visible for at least minTime
-        val minTime = themeData?.typingIndicator?.minTime ?: 1000L
-        if (isLoaderActive && elapsedTime < minTime) {
-            Log.e("CallActive", "Waiting for minTime: $minTime")
-            Handler(Looper.getMainLooper()).postDelayed({
-                if (isLoaderActive) { // Double-check if loader is still active
-                    safelyRemoveLoader(newMessages)
-                    Log.e("CallActive", "Removed after minTime")
+        if (NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled == true) {
+            CoroutineScope(Dispatchers.Main).launch {
+                for (message in newMessages) {
+                    if (message.type == MessageType.TEXT) {
+                        message.message?.let { fullMessage ->
+                            val chunks = splitIntoChunks(fullMessage, NCWThemeUtils.getThemeData()?.streamOnChatWidget?.chunkSize?:8)
+                            for (chunk in chunks) {
+                                val chunkMessage = message.copy(message = chunk)
+                                messageAdapter.updateOrAppendMessage(chunkMessage,true)
+                                delay(300)
+                            }
+                        }
+                    } else {
+                        messageList.addAll(listOf(message))
+                        messageAdapter.notifyDataSetChanged()
+                        delay(100)
+                    }
                 }
-            }, minTime - elapsedTime)
-        } else if (isLoaderActive) { // Ensure loader is active before removing
-            Log.e("CallActive", "Removed loader immediately")
-            safelyRemoveLoader(newMessages)
+            }
         } else {
-            Log.e("CallActive", "Loader already removed, updating messages only")
-            addMessages(newMessages)
+            val typingIndicatorEnabled = themeData?.typingIndicator?.enabled ?: false
+            if (!typingIndicatorEnabled) {
+                addMessages(newMessages)
+                return
+            }
+
+            val currentTime = System.currentTimeMillis()
+            val elapsedTime = currentTime - loaderAddedTime
+
+            // Ensure loader remains visible for at least minTime
+            val minTime = themeData?.typingIndicator?.minTime ?: 1000L
+            if (isLoaderActive && elapsedTime < minTime) {
+                Log.e("CallActive", "Waiting for minTime: $minTime")
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (isLoaderActive) { // Double-check if loader is still active
+                        safelyRemoveLoader(newMessages)
+                        Log.e("CallActive", "Removed after minTime")
+                    }
+                }, minTime - elapsedTime)
+            } else if (isLoaderActive) { // Ensure loader is active before removing
+                Log.e("CallActive", "Removed loader immediately")
+                safelyRemoveLoader(newMessages)
+            } else {
+                Log.e("CallActive", "Loader already removed, updating messages only")
+                addMessages(newMessages)
+            }
         }
 
+    }
+
+    // Helper function to split a message into chunks of 8 words
+    private fun splitIntoChunks(text: String, wordsPerChunk: Int): List<String> {
+        val words = text.split(" ")
+        val chunks = mutableListOf<String>()
+        val chunkBuilder = StringBuilder()
+        var wordCount = 0
+
+        for ((index, word) in words.withIndex()) {
+            chunkBuilder.append(word).append(" ")
+            wordCount++
+
+            // When chunk is full or it's the last word, add it to chunks
+            if (wordCount == wordsPerChunk || index == words.size - 1) {
+                chunks.add(chunkBuilder.toString().trim())
+                chunkBuilder.clear()
+                wordCount = 0
+            }
+        }
+        return chunks
     }
 
     // Helper function to add messages and scroll to the latest
@@ -1637,15 +1684,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             val fullMessage = mergeChunks(chunkList)
 
             Handler(Looper.getMainLooper()).postDelayed({
-                messageAdapter.updateOrAppendMessage(fullMessage)
+                messageAdapter.updateOrAppendMessage(fullMessage,false)
             }, 300)
         } else {
-            messageAdapter.updateOrAppendMessage(newMessages)
+            messageAdapter.updateOrAppendMessage(newMessages,false)
         }
 
-       /* chatRecyclerView.post {
-            chatRecyclerView.post(messageList.size - 1)
-        }*/
+        /* chatRecyclerView.post {
+             chatRecyclerView.post(messageList.size - 1)
+         }*/
 
     }
 
@@ -1703,6 +1750,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private fun checkLoaderRunning(): Boolean {
         return messageList.isNotEmpty() && messageList.last().sender == TYPE_INDICATOR
     }
+
     private fun updateLoaderTime() {
         loaderAddedTime = System.currentTimeMillis()
 
@@ -2578,8 +2626,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                 val newMessages = response.attachments?.mapIndexedNotNull { index, attachment ->
                     response.requestId?.let {
-                        mapAttachmentToMessage(attachment,
-                            it, NCWAppConstant.NORMAL,index)
+                        mapAttachmentToMessage(
+                            attachment,
+                            it, NCWAppConstant.NORMAL, index
+                        )
                     }
                 } ?: emptyList()
 
