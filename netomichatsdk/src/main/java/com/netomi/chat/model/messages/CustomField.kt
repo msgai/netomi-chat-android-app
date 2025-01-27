@@ -65,6 +65,9 @@ data class FileUploadData(
     var fileUrl:String?=null,
     var title: String? = null,
     var fileSize: Long? = null,
+    var isRetry :Boolean=false,
+    var isCancelled :Boolean=false,
+
 )
 
 

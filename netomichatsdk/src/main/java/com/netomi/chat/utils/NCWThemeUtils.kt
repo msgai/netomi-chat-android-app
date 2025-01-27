@@ -645,4 +645,20 @@ object NCWThemeUtils
         view.background = backgroundDrawable
     }
 
+    fun createStrokeDrawable(view: View) {
+        themeData?.mobileConfig?.lightTheme?.otherConfig?.let { otherConfig ->
+            // val parsedColor = Color.parseColor(headerConfig.backgroundColor)
+            val parsedColor = Color.parseColor(otherConfig.backgroundColor)
+            val backgroundDrawable = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 16f
+                setStroke(2, parsedColor)
+            }
+            view.background = backgroundDrawable
+            if (view is TextView)
+         setTitleColor(view)
+
+        }
+    }
+
 }

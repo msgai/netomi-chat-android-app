@@ -106,6 +106,13 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
 
     private var _getUploadedMediaUrl= NCWSingleLiveEvent<NCWState<NCWGetMediaUploadUrl>>()
     val getUploadedMediaUrl get()= _getUploadedMediaUrl
+
+
+    private var _multiFileUrl= NCWSingleLiveEvent<NCWState<NCWGetMediaUploadUrl>>()
+    val multiFileUrl get()= _multiFileUrl
+
+    private val _errorFile = NCWSingleLiveEvent<NCWSignedUrlPayload>()
+    val errorFile get() = _errorFile
     init {
         loadChatHistory()
     }
@@ -210,32 +217,38 @@ Log.e("DataaResposne","response"+response)
         if (fileList.isNotEmpty()) {
             val currentFile = fileList.first()
 
-            // Prepare payload for signed URL
             val mediaUpload = NCWSignedUrlPayload(
                 fileType = currentFile.mimeType,
                 uploadKeyPrefix = currentFile.fileName
             )
 
             try {
-                // Step 1: Get pre-signed URL
                 val response = chatRepository.getPreSignedUrl(mediaUpload)
 
                 if (response is NCWState.Success) {
                     val responseData = response.data as NCWGetPreSignedUrl
 
-                    // Step 2: Upload file
                     val uploadResponse = chatRepository.uploadFile(currentFile.file, responseData)
+                    if (response is NCWState.SendMessageError<*, *>){
 
-                    if (uploadResponse != null) {
-                        // Successfully uploaded, remove the file from the list
                         fileList.removeAt(0)
+                        val payload = response.payload
+                        if (payload is NCWSignedUrlPayload) {
+                            withContext(Dispatchers.Main) {
+                                errorFile.value = payload
 
-                        // Optionally update UI on the main thread
-                        withContext(Dispatchers.Main) {
-                            _getUploadedMediaUrl.value = uploadResponse
+                            }
+                            processNextFile(fileList)
                         }
+                    }
 
-                        // Process the next file in the list
+                    else if (uploadResponse != null) {
+                        fileList.removeAt(0)
+                        Log.e("Counettee","sasaasas "+uploadResponse)
+                        withContext(Dispatchers.Main) {
+                           _getUploadedMediaUrl.value = uploadResponse
+                           // _multiFileUrl.value = uploadResponse
+                        }
                         processNextFile(fileList)
                     } else {
                         Log.e("FileProcessing", "File upload failed for: ${currentFile.fileName}")

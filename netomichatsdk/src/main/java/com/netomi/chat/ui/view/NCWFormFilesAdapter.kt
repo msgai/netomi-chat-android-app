@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
@@ -21,7 +22,8 @@ import com.netomi.chat.utils.NCWThemeUtils
 class NCWFormFilesAdapter(
     private val items: List<FileUploadData>,
     val isClickable: Boolean,
-    private val onDelete: (FileUploadData?) -> Unit
+    private val onDelete: (FileUploadData?) -> Unit,
+    private val onRetry: (FileUploadData?) -> Unit,
 ) : RecyclerView.Adapter<NCWFormFilesAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -30,7 +32,9 @@ class NCWFormFilesAdapter(
         val tvDocName: TextView = itemView.findViewById(R.id.tvDocName)
         val tvDocType: TextView = itemView.findViewById(R.id.tvDocType)
         val icDelete: ImageView = itemView.findViewById(R.id.icDelete)
-
+        val progressBar: ProgressBar = itemView.findViewById(R.id.progress_loader)
+        val constRetry: ConstraintLayout = itemView.findViewById(R.id.constRetry)
+        val txtCancel: TextView = itemView.findViewById(R.id.txtCancel)
 
 
     }
@@ -47,8 +51,31 @@ class NCWFormFilesAdapter(
         // NCWThemeUtils.setUserConfig(holder.requestDocCard)
         NCWThemeUtils.setUserConfigTextColor(holder.tvDocName)
         NCWThemeUtils.setTimeStampColor(holder.tvDocType)
+        if (item.fileUrl!=null){
 
-        holder.icDelete.visibility = if (isClickable) View.VISIBLE else View.GONE
+            holder.icDelete.visibility=View.VISIBLE
+            holder.progressBar.visibility=View.GONE
+            holder.txtCancel.visibility=View.GONE
+        }
+        else
+        {
+            holder.icDelete.visibility=View.GONE
+            holder.progressBar.visibility=View.VISIBLE
+            holder.txtCancel.visibility=View.VISIBLE
+        }
+        if (item.isRetry){
+            holder.constRetry.visibility=View.VISIBLE
+            holder.progressBar.visibility=View.GONE
+        }
+        else
+        {
+            holder.constRetry.visibility=View.GONE
+        }
+        NCWThemeUtils.createStrokeDrawable(holder.txtCancel)
+        // holder.icDelete.visibility = if (isClickable) View.VISIBLE else View.GONE
+       /* if (isClickable)
+            holder.icDelete.visibility=View.GONE*/
+
         item.title?.let {
             holder.tvDocName.text = it
         } ?: run {
@@ -74,7 +101,17 @@ class NCWFormFilesAdapter(
 
 
         holder.icDelete.setOnClickListener {
+            onDelete(item)
+            notifyItemChanged(position)
+        }
+        holder.constRetry.setOnClickListener {
+            onRetry(item)
+        }
 
+
+        holder.txtCancel.setOnClickListener {
+          Log.e("Clcikkk","saasasas")
+        //   item.isCancelled=true
             onDelete(item)
             notifyItemChanged(position)
         }

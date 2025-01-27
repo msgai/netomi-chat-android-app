@@ -37,5 +37,8 @@
     <string name="confirm_restart_chat"> Are you sure you want to restart the chat? All current conversation history will be cleared.</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
+    <string name="connection_error">Connection error.</string>
+    <string name="retry"><u>Retry</u></string>
+
 
 </resources>

@@ -149,21 +149,7 @@ interface NCWApiInterface {
         @Part("Content-Type") contentType: RequestBody?,
         @Part file: MultipartBody.Part
     ): Response<ResponseBody>
-    /*@Multipart
-    @POST
-    suspend fun uploadFile(
-        @Url url: String,
-        @Part("key") key: RequestBody?,
-        @Part("bucket") bucket: RequestBody?,
-        @Part("X-Amz-Algorithm") amzAlgorithm: RequestBody?,
-        @Part("X-Amz-Credential") amzCredential: RequestBody?,
-        @Part("X-Amz-Date") amzDate: RequestBody?,
-        @Part("Policy") policy: RequestBody?,
-        @Part("X-Amz-Signature") amzSignature: RequestBody?,
-        @Part("acl") acl: RequestBody?,
-        @Part("Content-Type") contentType: RequestBody?,
-        @Part file: MultipartBody.Part
-    ): Response<ResponseBody>*/
+
 
     @POST(ROUTE_END_CHAT)
     suspend fun hitEndChatAPI(
