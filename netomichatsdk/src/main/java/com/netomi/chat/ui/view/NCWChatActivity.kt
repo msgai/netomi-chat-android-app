@@ -57,6 +57,7 @@ import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEventData
 import com.netomi.chat.model.feedback.feedbackrequest.NCWEventInfo
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
+import com.netomi.chat.model.media_payload.MultiFileModel
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.Component
 import com.netomi.chat.model.messages.FileUploadData
@@ -243,6 +244,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var onRestart: Boolean = false
     private var isIdle: Boolean = false
     private var isHistoryChatAvialbale: Boolean = false
+    private var isMultipleFile: Boolean = false
+    var mMultipleFile: ArrayList<MultiFileModel> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -819,6 +822,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             if (it != null) {
                 attachmentType = TYPE_FORM_ATTACHMENT
                 formComponent = it
+                mMultipleFile.clear()
                 showMedia()
             }
         }, { payload, label, attachmentList ->
@@ -834,6 +838,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             if (it != null) {
                 showSubmittedSurvey(it)
             }
+        },{component, fileUploadData ->
+
         })
 
 // Set the layout manager and adapter for the RecyclerView
@@ -1049,6 +1055,30 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         chatViewModel.sendMessages.observe(this) { message ->
             updateMessageList(message)
         }
+        chatViewModel.errorFile.observe(this) { errorFile ->
+            val position = messageList.indexOfLast { it.sender == TYPE_FORM }
+            val item = messageList[position]
+            item.formSchema?.schema?.forEach { targetComponent ->
+                if (targetComponent.id == formComponent?.id) {
+                    if (targetComponent.fileUpload?.size!! > 0) {
+                        Log.e("targetComponent","targetComponent "+targetComponent.fileUpload)
+                        targetComponent.fileUpload?.forEach { updateFile ->
+                            if (updateFile.title==errorFile.uploadKeyPrefix) {
+                                updateFile.isRetry =true
+                            }
+                        }
+                    }
+                    val updatedSchema = item.formSchema?.schema ?: emptyList()
+                    val viewHolder = chatRecyclerView.findViewHolderForAdapterPosition(position)
+                    if (viewHolder is NCWChatAdapter.FormViewHolder) {
+                        formComponent?.let { viewHolder.updateFormAdapterData(updatedSchema, it) }
+                    } else {
+                        messageAdapter.notifyItemChanged(position)
+                    }
+                }
+            }
+        }
+
 
         chatViewModel.getChatHistory.observe(this) { messages ->
             handleApiCallback(messages as NCWState<Any>)
@@ -1930,12 +1960,20 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     if (!validateFile(fileSend)) return@registerForActivityResult
 
                     addMediaMessage(fileSend, uri, MessageType.VIDEO)
+                    fileSend?.let { getPreSignedUrl(type, it.name) }
                 } else {
                     if (!validateFormAttachment(fileSend)) return@registerForActivityResult
+
+                    val mObj= fileSend?.let { MultiFileModel(type?:"", it,it.name) }
+                    if (mObj != null) {
+                        mMultipleFile.add(mObj)
+                    }
+                    updateFormSchema()
+                    chatViewModel.uploadFilesSequentially(mMultipleFile)
+
+                }
                 }
 
-                fileSend?.let { getPreSignedUrl(type, it.name) }
-            }
         }
     }
 
@@ -1970,15 +2008,26 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     photoUri?.let { uri ->
                         addMediaMessage(fileSend, uri, MessageType.IMAGE)
                     }
+                    fileSend?.let { getPreSignedUrl(fileType, it.name) }
                 }
 
                 else -> {
                     if (!validateFormAttachment(fileSend)) return@registerForActivityResult
-                }
-            }
 
-            fileSend?.let { getPreSignedUrl(fileType, it.name) }
-        }
+
+
+                    // handleFileSelection(uri, mimeType, isGallery = true)
+                    val mObj= fileSend?.let { MultiFileModel(fileType?:"", it,it.name) }
+                    if (mObj != null) {
+                        mMultipleFile.add(mObj)
+                    }
+                    updateFormSchema()
+                    chatViewModel.uploadFilesSequentially(mMultipleFile)
+
+                }
+                }
+
+            }
 
 
     private fun showLimitExceedPopup(messageIssue: String) {
@@ -2121,14 +2170,140 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     // Gallery selection
     private fun openGallery() {
-        val galleryIntent =
-            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
-                type = "image/* video/*"
+
+        if (attachmentType == TYPE_ATTACHMENT) {
+            val galleryIntent =
+                Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
+                    type = "image/* video/*"
+                }
+            galleryLauncher.launch(galleryIntent)
+        } else {
+Log.e("Dataaaa","Gallerryuu")
+            val galleryIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                type = "*/*"
+                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
             }
-        galleryLauncher.launch(galleryIntent)
+            galleryMultipleLauncher.launch(galleryIntent)
+        }
     }
 
-    // File selection (PDF, DOC, etc.)
+
+        private val galleryMultipleLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                    val clipData = result.data?.clipData
+                    if (clipData != null) {
+                        for (i in 0 until clipData.itemCount) {
+                            val uri = clipData.getItemAt(i).uri
+                            val mimeType = contentResolver.getType(uri)
+                            val fileSend =   NCWFilePath().getPath(this, uri)?.let { File(it) }
+
+                            val mObj= fileSend?.let { MultiFileModel(mimeType!!, it,fileSend.name) }
+                            if (mObj != null) {
+                                mMultipleFile.add(mObj)
+                            }
+
+                        }
+                        updateFormSchema()
+                       chatViewModel.uploadFilesSequentially(mMultipleFile)
+
+
+                    } else {
+                        // Handle single selected file
+                        result.data?.data?.let { uri ->
+                            val mimeType = contentResolver.getType(uri)
+                            val fileSend =   NCWFilePath().getPath(this, uri)?.let { File(it) }
+
+                            Log.e("Fileelle","asasasasas "+fileSend)
+
+                            isMultipleFile=true
+                            Log.e("mMultipleFile","mimeType "+mimeType)
+                          // handleFileSelection(uri, mimeType, isGallery = true)
+                            val mObj= fileSend?.let { MultiFileModel(mimeType!!, it,fileSend.name) }
+                            if (mObj != null) {
+                                mMultipleFile.add(mObj)
+                            }
+                        }
+                        updateFormSchema()
+                        chatViewModel.uploadFilesSequentially(mMultipleFile)
+                    }
+                }
+            }
+
+
+    private val fileMultipleLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                val clipData = result.data?.clipData
+                if (clipData != null) {
+                    for (i in 0 until clipData.itemCount) {
+                        val uri = clipData.getItemAt(i).uri
+                        val mimeType = contentResolver.getType(uri)
+                       // val fileSend =   NCWFilePath().getPath(this, uri)?.let { File(it) }
+                        val fileSend =  NCWImageUtils.getFileFromUri(this, uri)
+                        val mObj= fileSend?.let { MultiFileModel(mimeType!!, it,fileSend.name) }
+                        if (mObj != null) {
+                            mMultipleFile.add(mObj)
+                        }
+
+                    }
+                    updateFormSchema()
+                    chatViewModel.uploadFilesSequentially(mMultipleFile)
+
+
+                } else {
+                    // Handle single selected file
+                    result.data?.data?.let { uri ->
+                        val mimeType = contentResolver.getType(uri)
+                        val fileSend =  NCWImageUtils.getFileFromUri(this, uri)
+                        Log.e("Fileelle","asasasasas "+fileSend)
+
+                        isMultipleFile=true
+                        Log.e("mMultipleFile","mimeType "+mimeType)
+                        // handleFileSelection(uri, mimeType, isGallery = true)
+                        val mObj= fileSend?.let { MultiFileModel(mimeType!!, it,fileSend.name) }
+                        if (mObj != null) {
+                            mMultipleFile.add(mObj)
+                        }
+                    }
+                    updateFormSchema()
+                    chatViewModel.uploadFilesSequentially(mMultipleFile)
+                }
+            }
+        }
+
+    private fun updateFormSchema() {
+        isMultipleFile = true
+        mMultipleFile.forEach { files ->
+            val position = messageList.indexOfLast { it.sender == TYPE_FORM }
+            val item = messageList.getOrNull(position) ?: return@forEach
+
+            item.formSchema?.schema?.forEach { targetComponent ->
+                if (targetComponent.id == formComponent?.id) {
+                    targetComponent.fileUpload = targetComponent.fileUpload ?: ArrayList()
+                    val fileUpload = FileUploadData(
+                        null,
+                        null,
+                        files.fileName,
+                        files.file.length()
+                    )
+                    targetComponent.fileUpload?.add(fileUpload)
+                }
+            }
+
+            val updatedSchema = item.formSchema?.schema ?: emptyList()
+            val viewHolder = chatRecyclerView.findViewHolderForAdapterPosition(position)
+            if (viewHolder is NCWChatAdapter.FormViewHolder) {
+                formComponent?.let { viewHolder.updateFormAdapterData(updatedSchema, it) }
+            } else {
+                messageAdapter.notifyItemChanged(position)
+            }
+        }
+    }
+
+        // File selection (PDF, DOC, etc.)
     private fun openFile() {
 
         if (attachmentType == TYPE_ATTACHMENT) {
@@ -2182,8 +2357,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         val fileIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
             type = "*/*"
             addCategory(Intent.CATEGORY_OPENABLE)
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         }
-        fileLauncher.launch(fileIntent)
+        fileMultipleLauncher.launch(fileIntent)
+       // galleryMultipleLauncher.launch(fileIntent)
     }
 
     // Handle the result of the gallery selection
@@ -2335,6 +2512,20 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
             NCWRoutes.ROUTE_GET_PRESIGNED_URL -> {
                 val response = apiResponse as NCWGetPreSignedUrl
+               /* if (isMultipleFile && mMultipleFile.isNotEmpty() && fileSend != null) {
+                    mMultipleFile.forEach { file ->
+                        Log.d("FileProcessing", "Checking file: $file with fileSend: $fileSend")
+                        Log.e("SIXEEEE","hecking file")
+                        if (file.file== fileSend) {
+                            Log.e("SIXEEEE","Match Found")
+                            Log.d("FileProcessing", "Match found. Uploading file: $file")
+                            chatViewModel.uploadFile(file.file, response)
+                        }
+                    }
+                }
+                else {
+                    chatViewModel.uploadFile(fileSend, response)
+                }*/
                 chatViewModel.uploadFile(fileSend, response)
             }
 
@@ -2383,28 +2574,62 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     )
                     sendMessageToBot(payload)
 
-                } else {
-                    hideProgressBar()
+                }
 
+                else {
+                    hideProgressBar()
+Log.e("Getttttttttt","MultiMediiaaa"+response)
+                    Log.e("mMultipleFile", "mMultipleFile.sexeeee " + mMultipleFile.size)
+                   NCWAppUtils.showToast(this,mediaType.toString())
 
                     val position = messageList.indexOfLast { it.sender == TYPE_FORM }
                     val item = messageList[position]
-                    item.formSchema?.schema?.forEach { targetComponent ->
-                        if (targetComponent.id == formComponent?.id) {
-                            targetComponent.fileUpload = targetComponent.fileUpload ?: ArrayList()
-                            val fileUpload = FileUploadData(
-                                mediaType,
-                                response.url,
-                                response.title,
-                                response.fileSize
-                            )
-                            targetComponent.fileUpload?.add(fileUpload)
-                            Log.e(
-                                "Debug",
-                                "schema[0] fileUpload size: ${targetComponent.fileUpload}"
-                            )
+
+                    if (isMultipleFile) {
+                        item.formSchema?.schema?.forEach { targetComponent ->
+                            if (targetComponent.id == formComponent?.id) {
+                                if (targetComponent.fileUpload?.size!! > 0) {
+              Log.e("targetComponent","targetComponent "+targetComponent.fileUpload)
+                                    targetComponent.fileUpload?.forEach { updateFile ->
+                                        if (updateFile.title==response.title) {
+                                            Log.e("Match Condition","saassa "+response.title)
+                                            updateFile.fileUrl = response.url
+                                            updateFile.mediaType = mediaType
+                                            updateFile.isRetry=false
+                                        }
+                                    }
+                                }
+                                val updatedSchema = item.formSchema?.schema ?: emptyList()
+                                val viewHolder = chatRecyclerView.findViewHolderForAdapterPosition(position)
+                                if (viewHolder is NCWChatAdapter.FormViewHolder) {
+                                    formComponent?.let { viewHolder.updateFormAdapterData(updatedSchema, it) }
+                                } else {
+                                    messageAdapter.notifyItemChanged(position)
+                                }
+
+
+                            }
                         }
-                    }
+
+                    } else
+                    {
+                        item.formSchema?.schema?.forEach { targetComponent ->
+                            if (targetComponent.id == formComponent?.id) {
+                                targetComponent.fileUpload =
+                                    targetComponent.fileUpload ?: ArrayList()
+                                val fileUpload = FileUploadData(
+                                    mediaType,
+                                    response.url,
+                                    response.title,
+                                    response.fileSize
+                                )
+                                targetComponent.fileUpload?.add(fileUpload)
+                                Log.e(
+                                    "Debug",
+                                    "schema[0] fileUpload size: ${targetComponent.fileUpload}"
+                                )
+                            }
+                        }
                     val updatedSchema = item.formSchema?.schema ?: emptyList()
                     val viewHolder = chatRecyclerView.findViewHolderForAdapterPosition(position)
                     if (viewHolder is NCWChatAdapter.FormViewHolder) {
@@ -2415,6 +2640,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
 
                 }
+            }
             }
 
 
@@ -2488,7 +2714,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     }
 
                     if (matchedRule != null) {
-                        idleTimeInMillis = NCWAppUtils.parseIdleTimeFromExpression(matchedRule.expression) * 1000
+                        // need to changeeeeeeeeeee
+                       // idleTimeInMillis = NCWAppUtils.parseIdleTimeFromExpression(matchedRule.expression) * 1000
                         resetIdleTimer()
                     }
                 }

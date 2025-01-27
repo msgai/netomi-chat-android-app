@@ -79,7 +79,7 @@ data class DropdownField(
 
 
 
-class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: FormSchema, private val callBack: (Component?) -> Unit, private val formData: (String?, String?, ArrayList<NCWAttachmentList>) -> Unit) : RecyclerView.Adapter<NCWFormAdapter.FormViewHolder>() {
+class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: FormSchema, private val callBack: (Component?) -> Unit, private val formData: (String?, String?, ArrayList<NCWAttachmentList>) -> Unit, private val onRetry: (Component?,FileUploadData) -> Unit) : RecyclerView.Adapter<NCWFormAdapter.FormViewHolder>() {
 
 
     private val inputValues = mutableMapOf<String, Any?>()
@@ -827,10 +827,14 @@ if (component.config?.isShowAttachmentTypesEnabled == true) {
                             LinearLayoutManager.VERTICAL,
                             false
                         )
-                        recyclerDoc.adapter = NCWFormFilesAdapter(component.fileUpload!!,isClickable) { selectedOption ->
+                        recyclerDoc.adapter = NCWFormFilesAdapter(component.fileUpload!!,isClickable, { selectedOption ->
                             component.fileUpload?.remove(selectedOption)
                             inputValuesSelected.getOrNull(adapterPosition)?.fileUpload?.remove(selectedOption)
-                        }
+                        },{ retry ->
+                            if (retry != null) {
+                                onRetry(component,retry)
+                            }
+                        })
                     } else {
                         recyclerDoc.adapter!!.notifyDataSetChanged()
                     }
@@ -858,9 +862,7 @@ if (component.config?.isShowAttachmentTypesEnabled == true) {
                             recyclerDoc.adapter = NCWFormFilesAdapter(
                                 formSchema.formData?.getOrNull(adapterPosition)?.fileUpload!!,
                                 isClickable
-                            ) {
-
-                            }
+                            , {},{})
                         }
                         else{
                             recyclerDoc.visibility = View.GONE

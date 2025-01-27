@@ -21,6 +21,7 @@ import com.netomi.chat.R
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.messages.Component
+import com.netomi.chat.model.messages.FileUploadData
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.utils.NCWAppConstant
@@ -37,6 +38,7 @@ class NCWChatAdapter(
     private val callBack: (Component?) -> Unit,
     private val formData: (String?, String?, ArrayList<NCWAttachmentList>) -> Unit,
     private val callBackSurvey: (NCWMessage?) -> Unit,
+    private val onRetryFormData: (Component?, FileUploadData) -> Unit
 
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -85,7 +87,7 @@ class NCWChatAdapter(
         when (holder) {
             is RequestViewHolder -> holder.bind(message)
             is ResponseViewHolder -> holder.bind(message,position)
-            is FormViewHolder->holder.bind(message,callBack,formData)
+            is FormViewHolder->holder.bind(message,callBack,formData,onRetryFormData)
             is SurveyViewHolder->holder.bind(message,callBackSurvey)
             is PillViewHolder -> holder.bind(message)
             is InitialViewHolder -> holder.bind(message)
@@ -210,7 +212,8 @@ class NCWChatAdapter(
         fun bind(
             message: NCWMessage,
             callBack: (Component?) -> Unit,
-            formData: (String?, String?,ArrayList<NCWAttachmentList>) -> Unit
+            formData: (String?, String?, ArrayList<NCWAttachmentList>) -> Unit,
+            onRetryFormData: (Component?,FileUploadData) -> Unit,
         ) {
             tvTime.text=NCWAppUtils.formatTimestampToTime(message.timestamp)
             NCWThemeUtils.setTimeStampColor(tvTime)
@@ -243,6 +246,9 @@ class NCWChatAdapter(
                 }, { payload, label,attachmentList ->
                     // Handle the payload and label response here
                     formData(payload,label,attachmentList)
+                },{ component, fileUploadData ->
+
+                    onRetryFormData(component,fileUploadData)
                 })
             }
 
