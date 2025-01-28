@@ -9,7 +9,7 @@ class MessageSoundPlayer(private val context: Context) {
     private var mediaPlayerBot: MediaPlayer? = null
 
     init {
-        mediaPlayerUser = MediaPlayer.create(context, R.raw.user_sound)
+        mediaPlayerUser = MediaPlayer.create(context, R.raw.request_sound)
         mediaPlayerBot = MediaPlayer.create(context, R.raw.bot_sound)
     }
 

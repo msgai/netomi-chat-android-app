@@ -203,7 +203,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private lateinit var customTabsIntent: CustomTabsIntent
     private lateinit var topic: String
 
-
     private var conversationID: String? = null
     private var externalId: String? = null
     private var botRefId: String? = null
@@ -245,7 +244,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private var isIdle: Boolean = false
     private var isHistoryChatAvialbale: Boolean = false
     private var isMultipleFile: Boolean = false
-    var mMultipleFile: ArrayList<MultiFileModel> = arrayListOf()
+    private var mMultipleFile: ArrayList<MultiFileModel> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -262,8 +261,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         NCWChatSdk.getUpdatedChatWindowConfiguration()
         NCWChatSdk.getUpdatedBubbleConfiguration()
         NCWChatSdk.getUpdatedOtherConfiguration()
-       
-        
+
+
         // Set up message adapter and recycler view
         setupMessageList()
 
@@ -283,7 +282,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             if (conversationID == null) {
                 loadInitialMessages()
 
-                chatViewModel.getConversationId(botRefId,externalId)
+                chatViewModel.getConversationId(botRefId, externalId)
             } else {
                 chatViewModel.getAWSMQTTCredentials(botRefId)
                 getChatHistory()
@@ -320,9 +319,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 idleTimeoutMillis = it,
                 onTimeout = {
                     handleSessionTimeout(
-                        "Session Timeout",
-                        "Your session has expired due to inactivity.",
-                        "OK",
+                        getString(R.string.session_timeout),
+                        getString(R.string.your_session_has_expired_due_to_inactivity),
+                        getString(R.string.ok),
                         SESSION
                     )
                 }
@@ -344,7 +343,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun setUpQuickReplyOption() {
         val bottomSheet = themeData?.let {
-            NCWQuickMenuBottomSheet(it.quickMenuOptions){ options->
+            NCWQuickMenuBottomSheet(it.quickMenuOptions) { options ->
                 val timeStamp = System.currentTimeMillis()
                 checkForInitialMessage()
                 val payload = createPayload(options.label, options.text, timeStamp)
@@ -360,17 +359,23 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun setUpSettingOption() {
         val bottomSheet = themeData?.let {
-            NCWSettingBottomSheet(it){
+            NCWSettingBottomSheet(it) {
                 showRestartPopUp()
 
             }
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
     }
-    private fun showRestartPopUp(){
 
-        NCWDialogUtils.showCustomDialog(this, getString(R.string.restart_chat),getString(R.string.confirm_restart_chat)){
-            onRestart=true
+    private fun showRestartPopUp() {
+
+        NCWDialogUtils.showCustomDialog(
+            this,
+            getString(R.string.restart_chat),
+            getString(R.string.confirm_restart_chat),
+                    getString(R.string.restart_chat)
+        ) {
+            onRestart = true
             if (topic != null) {
                 NCWAwsIotManager.unsubscribeRestart(topic)
             }
@@ -386,8 +391,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun hitIdealTimeOutEvent() {
-        val idleTime=idleTimeInMillis/1000
-        isIdle=true
+        val idleTime = idleTimeInMillis / 1000
+        isIdle = true
         chatViewModel.hitFeedbackAPI(
             NCWFeedbackRequest(
                 botRefId!!, com.netomi.chat.model.feedback.feedbackresponse.NCWRequestBody(
@@ -453,7 +458,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun hitEndChatAPI() {
         if (!NCWAppUtils.isNetworkAvailable(this)) {
-            NCWAppUtils.showToast(this, "Please check your network and try again.")
+            NCWAppUtils.showToast(this, getString(R.string.please_check_your_network_and_try_again))
             return
         }
         showProgressBar()
@@ -482,7 +487,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun hitFeedbackAPI(requestId: String, feedbackValue: String, attachmentIndex: Int) {
         if (!NCWAppUtils.isNetworkAvailable(this)) {
-            NCWAppUtils.showToast(this, "Please check your network and try again.")
+            NCWAppUtils.showToast(this, getString(R.string.please_check_your_network_and_try_again))
             return
         }
         //showProgressBar()
@@ -544,7 +549,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             onYesClick = {
                 if (from == SESSION)
                     finish()
-                else if (from == LOGOUT){
+                else if (from == LOGOUT) {
                     NCWThemeUtils.setSignInUserDetails(null)
                     hitEndChatAPI()
                 }
@@ -569,7 +574,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
      */
     private fun sendMessage(messageContent: String) {
         if (!NCWAppUtils.isNetworkAvailable(this)) {
-            NCWAppUtils.showToast(this, "Please check your network and try again.")
+            NCWAppUtils.showToast(this, getString(R.string.please_check_your_network_and_try_again))
             return
         }
 
@@ -598,9 +603,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         themeData?.OAUTH2?.logoutActionKeys?.let { logoutActionKeys ->
             if (logoutActionKeys.any { key -> content?.contains(key, ignoreCase = true) == true }) {
                 handleSessionTimeout(
-                    "Logout",
-                    "You have been logged out.",
-                    "OK",
+                    getString(R.string.logout),
+                    getString(R.string.you_have_been_logged_out),
+                    getString(R.string.ok),
                     LOGOUT
                 )
                 return true
@@ -643,14 +648,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     ): NCWWebhookPayload {
         val messageId = UUID.randomUUID().toString()
 
-        if (NCWThemeUtils.getSignInUserDetails()!=null){
-           val userInfo = NCWThemeUtils.getSignInUserDetails()?.toNCWUserDetailAttribute()
+        if (NCWThemeUtils.getSignInUserDetails() != null) {
+            val userInfo = NCWThemeUtils.getSignInUserDetails()?.toNCWUserDetailAttribute()
             if (userInfo != null) {
                 deviceInfo?.addAll(userInfo)
             }
         }
 
-       val attributes = NCWAdditionalAttributes(
+        val attributes = NCWAdditionalAttributes(
             CUSTOM_ATTRIBUTES = deviceInfo
         )
         return NCWWebhookPayload(
@@ -663,7 +668,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     label = label,
                     messageId = messageId,
                     timestamp = timeStamp,
-                    hideMessage=if (label== PROACTIVE_GREETING)true else null
+                    hideMessage = if (label == PROACTIVE_GREETING) true else null
                 ),
                 attachmentList = attachmentList,
                 additionalAttributes = attributes,
@@ -838,7 +843,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             if (it != null) {
                 showSubmittedSurvey(it)
             }
-        },{component, fileUploadData ->
+        }, { component, fileUploadData ->
+            val singleFile: ArrayList<MultiFileModel> = arrayListOf()
+            val mObj =
+                fileUploadData.file?.let { MultiFileModel(fileUploadData.mimeType!!, it, it.name) }
+            if (mObj != null) {
+                singleFile.add(mObj)
+            }
+            chatViewModel.uploadFilesSequentially(singleFile)
 
         })
 
@@ -861,11 +873,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     override fun onQuickReply(option: NCWQuickReplyOption?, position: Int) {
 
-       // if (connectionStatus == NCWConnectionStatus.CONNECTED.toString()) {
+        // if (connectionStatus == NCWConnectionStatus.CONNECTED.toString()) {
 
-            messageList[position].isQuickReplyVisible = false
-            onQuickReplyClicked(option)
-       // }
+        messageList[position].isQuickReplyVisible = false
+        onQuickReplyClicked(option)
+        // }
 
     }
 
@@ -1055,16 +1067,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         chatViewModel.sendMessages.observe(this) { message ->
             updateMessageList(message)
         }
+
         chatViewModel.errorFile.observe(this) { errorFile ->
             val position = messageList.indexOfLast { it.sender == TYPE_FORM }
             val item = messageList[position]
             item.formSchema?.schema?.forEach { targetComponent ->
                 if (targetComponent.id == formComponent?.id) {
                     if (targetComponent.fileUpload?.size!! > 0) {
-                        Log.e("targetComponent","targetComponent "+targetComponent.fileUpload)
+                        Log.e("targetComponent", "targetComponent " + targetComponent.fileUpload)
                         targetComponent.fileUpload?.forEach { updateFile ->
-                            if (updateFile.title==errorFile.uploadKeyPrefix) {
-                                updateFile.isRetry =true
+                            if (updateFile.title == errorFile?.uploadKeyPrefix) {
+                                updateFile.isRetry = true
                             }
                         }
                     }
@@ -1137,7 +1150,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         ncwAwsCredentialsViewModel.connectionStatus.observe(this) { status ->
             connectionStatus = status
-            Log.e("Connection","sss "+connectionStatus)
+            Log.e("Connection", "sss " + connectionStatus)
             when (status) {
 
                 NCWConnectionStatus.CONNECTING.toString() -> {
@@ -1208,7 +1221,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private fun sendProactiveMessage() {
 
         if (themeData?.isProActiveGreetings == false) {
-            themeData?.isProActiveGreetings=true
+            themeData?.isProActiveGreetings = true
             themeData?.proActiveGreetings?.takeIf { it.isNotEmpty() }?.let { greetings ->
                 val timeStamp = System.currentTimeMillis()
                 val text = greetings[0]
@@ -1232,9 +1245,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 val eventData = response.eventObject?.eventData
                 renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
 
-                if (eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPING){
-                    if (!checkLoaderRunning())
-                    {
+                if (eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPING) {
+                    if (!checkLoaderRunning()) {
                         addLoader()
                         messageAdapter.notifyDataSetChanged()
                         onScrollToPosition(true)
@@ -1297,6 +1309,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         chatViewModel.awsMessage.removeObserver(awsMessageObserver)
 
     }
+
     private fun refreshChat(eventData: EventData) {
         val oldTopic = topic
         Log.e("OAUTH", eventData.authenticatedConversationId.toString())
@@ -1322,6 +1335,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 "$agentName has joined the chat"
 
             }
+
             eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_LEAVE -> {
                 agentAvatar = null
                 ownerType = TYPE_BOT
@@ -1336,7 +1350,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
 
         if (messagePill.isNotEmpty()) {
-            val message = createPillsMessage(messagePill,timestamp)
+            val message = createPillsMessage(messagePill, timestamp)
             messageList.add(message)
             messageAdapter.notifyDataSetChanged()
             chatRecyclerView.post {
@@ -1348,12 +1362,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         if (eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_TRANSFER) {
             val newAgentName = eventData.eventInfo?.agentName
             val newAgentAvatar = eventData.eventInfo?.agentAvatar
-            val message = createPillsMessage("$agentName has transferred the chat to $newAgentName",timestamp)
+            val message = createPillsMessage(
+                "$agentName has transferred the chat to $newAgentName",
+                timestamp
+            )
             messageList.add(message)
             agentName = newAgentName
             agentAvatar = newAgentAvatar
             ownerType = TYPE_AGENT
-            val joinMessage = createPillsMessage("$agentName has joined the chat",timestamp)
+            val joinMessage = createPillsMessage("$agentName has joined the chat", timestamp)
             messageList.add(joinMessage)
             messageAdapter.notifyDataSetChanged()
             chatRecyclerView.post {
@@ -1403,13 +1420,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                     }, { text, label ->
                         val timeStamp = System.currentTimeMillis()
-                        if (isSurveyRule){
+                        if (isSurveyRule) {
                             finish()
                             return@createAndShowSurveyBottomSheet
                         }
                         val isSkipValue = !isIdle
 
-                        val textSkip = "event://;SKIP_EVENT;resumeWorkflow::value=${isSkipValue}^$^requestId::value=${response.requestId}"
+                        val textSkip =
+                            "event://;SKIP_EVENT;resumeWorkflow::value=${isSkipValue}^$^requestId::value=${response.requestId}"
                         val payload = createPayload(textSkip, label, timeStamp)
                         addLoader()
                         sendMessageToBot(payload)
@@ -1565,7 +1583,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         val attach = attachment.attachment ?: return null
         val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
 
-        if (type == NCWAppConstant.NORMAL && messageType!=MessageType.MULTISOURCE) {
+        if (type == NCWAppConstant.NORMAL && messageType != MessageType.MULTISOURCE) {
             if (attach.text.isNullOrEmpty() &&
                 attach.elements.isNullOrEmpty() &&
                 attach.thumbnailUrl.isNullOrEmpty() &&
@@ -1600,7 +1618,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     // Overloaded helper function for a single message
     private fun updateMessageList(newMessage: NCWMessage) {
         addSingleMessage(newMessage)
-        if (ownerType== TYPE_BOT)
+        if (ownerType == TYPE_BOT)
             addLoader()
     }
 
@@ -1629,10 +1647,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 for (message in newMessages) {
                     if (message.type == MessageType.TEXT) {
                         message.message?.let { fullMessage ->
-                            val chunks = splitIntoChunks(fullMessage, NCWThemeUtils.getThemeData()?.streamOnChatWidget?.chunkSize?:8)
+                            val chunks = splitIntoChunks(
+                                fullMessage,
+                                NCWThemeUtils.getThemeData()?.streamOnChatWidget?.chunkSize ?: 8
+                            )
                             for (chunk in chunks) {
                                 val chunkMessage = message.copy(message = chunk)
-                                messageAdapter.updateOrAppendMessage(chunkMessage,true)
+                                messageAdapter.updateOrAppendMessage(chunkMessage, true)
                                 delay(300)
                             }
                         }
@@ -1715,10 +1736,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             val fullMessage = mergeChunks(chunkList)
 
             Handler(Looper.getMainLooper()).postDelayed({
-                messageAdapter.updateOrAppendMessage(fullMessage,false)
+                messageAdapter.updateOrAppendMessage(fullMessage, false)
             }, 300)
         } else {
-            messageAdapter.updateOrAppendMessage(newMessages,false)
+            messageAdapter.updateOrAppendMessage(newMessages, false)
         }
 
         /* chatRecyclerView.post {
@@ -1964,7 +1985,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 } else {
                     if (!validateFormAttachment(fileSend)) return@registerForActivityResult
 
-                    val mObj= fileSend?.let { MultiFileModel(type?:"", it,it.name) }
+                    val mObj = fileSend?.let { MultiFileModel(type ?: "", it, it.name) }
                     if (mObj != null) {
                         mMultipleFile.add(mObj)
                     }
@@ -1972,7 +1993,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     chatViewModel.uploadFilesSequentially(mMultipleFile)
 
                 }
-                }
+            }
 
         }
     }
@@ -2015,9 +2036,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     if (!validateFormAttachment(fileSend)) return@registerForActivityResult
 
 
-
                     // handleFileSelection(uri, mimeType, isGallery = true)
-                    val mObj= fileSend?.let { MultiFileModel(fileType?:"", it,it.name) }
+                    val mObj = fileSend?.let { MultiFileModel(fileType ?: "", it, it.name) }
                     if (mObj != null) {
                         mMultipleFile.add(mObj)
                     }
@@ -2025,9 +2045,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     chatViewModel.uploadFilesSequentially(mMultipleFile)
 
                 }
-                }
-
             }
+
+        }
 
 
     private fun showLimitExceedPopup(messageIssue: String) {
@@ -2046,6 +2066,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
+
 
     // Common function to validate file size and type
     private fun validateFormAttachment(file: File?): Boolean {
@@ -2178,7 +2199,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 }
             galleryLauncher.launch(galleryIntent)
         } else {
-Log.e("Dataaaa","Gallerryuu")
+            Log.e("Dataaaa", "Gallerryuu")
             val galleryIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
@@ -2189,48 +2210,41 @@ Log.e("Dataaaa","Gallerryuu")
         }
     }
 
+    private val galleryMultipleLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                val clipData = result.data?.clipData
+                if (clipData != null) {
+                    for (i in 0 until clipData.itemCount) {
+                        val uri = clipData.getItemAt(i).uri
+                        val mimeType = contentResolver.getType(uri)
+                        val fileSend = NCWFilePath().getPath(this, uri)?.let { File(it) }
 
-        private val galleryMultipleLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-                    val clipData = result.data?.clipData
-                    if (clipData != null) {
-                        for (i in 0 until clipData.itemCount) {
-                            val uri = clipData.getItemAt(i).uri
-                            val mimeType = contentResolver.getType(uri)
-                            val fileSend =   NCWFilePath().getPath(this, uri)?.let { File(it) }
-
-                            val mObj= fileSend?.let { MultiFileModel(mimeType!!, it,fileSend.name) }
-                            if (mObj != null) {
-                                mMultipleFile.add(mObj)
-                            }
-
+                        val mObj = fileSend?.let { MultiFileModel(mimeType!!, it, fileSend.name) }
+                        if (mObj != null) {
+                            mMultipleFile.add(mObj)
                         }
-                        updateFormSchema()
-                       chatViewModel.uploadFilesSequentially(mMultipleFile)
-
-
-                    } else {
-                        // Handle single selected file
-                        result.data?.data?.let { uri ->
-                            val mimeType = contentResolver.getType(uri)
-                            val fileSend =   NCWFilePath().getPath(this, uri)?.let { File(it) }
-
-                            Log.e("Fileelle","asasasasas "+fileSend)
-
-                            isMultipleFile=true
-                            Log.e("mMultipleFile","mimeType "+mimeType)
-                          // handleFileSelection(uri, mimeType, isGallery = true)
-                            val mObj= fileSend?.let { MultiFileModel(mimeType!!, it,fileSend.name) }
-                            if (mObj != null) {
-                                mMultipleFile.add(mObj)
-                            }
-                        }
-                        updateFormSchema()
-                        chatViewModel.uploadFilesSequentially(mMultipleFile)
                     }
+                    if (!validateFormAttachment(mMultipleFile)) return@registerForActivityResult
+                    checkSupporrtedFilesForm()
+                    updateFormSchema()
+                    chatViewModel.uploadFilesSequentially(mMultipleFile)
+                } else {
+                    result.data?.data?.let { uri ->
+                        val mimeType = contentResolver.getType(uri)
+                        val fileSend = NCWFilePath().getPath(this, uri)?.let { File(it) }
+                        isMultipleFile = true
+                        // handleFileSelection(uri, mimeType, isGallery = true)
+                        val mObj = fileSend?.let { MultiFileModel(mimeType!!, it, fileSend.name) }
+                        if (mObj != null) {
+                            mMultipleFile.add(mObj)
+                        }
+                    }
+                    updateFormSchema()
+                    chatViewModel.uploadFilesSequentially(mMultipleFile)
                 }
             }
+        }
 
 
     private val fileMultipleLauncher =
@@ -2241,14 +2255,16 @@ Log.e("Dataaaa","Gallerryuu")
                     for (i in 0 until clipData.itemCount) {
                         val uri = clipData.getItemAt(i).uri
                         val mimeType = contentResolver.getType(uri)
-                       // val fileSend =   NCWFilePath().getPath(this, uri)?.let { File(it) }
-                        val fileSend =  NCWImageUtils.getFileFromUri(this, uri)
-                        val mObj= fileSend?.let { MultiFileModel(mimeType!!, it,fileSend.name) }
+                        // val fileSend =   NCWFilePath().getPath(this, uri)?.let { File(it) }
+                        val fileSend = NCWImageUtils.getFileFromUri(this, uri)
+                        val mObj = fileSend?.let { MultiFileModel(mimeType!!, it, fileSend.name) }
                         if (mObj != null) {
                             mMultipleFile.add(mObj)
                         }
 
                     }
+                    if (!validateFormAttachment(mMultipleFile)) return@registerForActivityResult
+                    checkSupporrtedFilesForm()
                     updateFormSchema()
                     chatViewModel.uploadFilesSequentially(mMultipleFile)
 
@@ -2257,13 +2273,13 @@ Log.e("Dataaaa","Gallerryuu")
                     // Handle single selected file
                     result.data?.data?.let { uri ->
                         val mimeType = contentResolver.getType(uri)
-                        val fileSend =  NCWImageUtils.getFileFromUri(this, uri)
-                        Log.e("Fileelle","asasasasas "+fileSend)
+                        val fileSend = NCWImageUtils.getFileFromUri(this, uri)
+                        Log.e("Fileelle", "asasasasas " + fileSend)
 
-                        isMultipleFile=true
-                        Log.e("mMultipleFile","mimeType "+mimeType)
+                        isMultipleFile = true
+                        Log.e("mMultipleFile", "mimeType " + mimeType)
                         // handleFileSelection(uri, mimeType, isGallery = true)
-                        val mObj= fileSend?.let { MultiFileModel(mimeType!!, it,fileSend.name) }
+                        val mObj = fileSend?.let { MultiFileModel(mimeType!!, it, fileSend.name) }
                         if (mObj != null) {
                             mMultipleFile.add(mObj)
                         }
@@ -2273,6 +2289,51 @@ Log.e("Dataaaa","Gallerryuu")
                 }
             }
         }
+
+    private fun checkSupporrtedFilesForm() {
+
+
+        val supportedExtensions =
+            formComponent?.config?.attachmentTypes?.map { it.lowercase() } ?: emptyList()
+
+        val (supportedFiles, unsupportedFiles) = mMultipleFile.partition { multiFileModel ->
+            val fileExtension = multiFileModel.file.extension.lowercase().removePrefix(".")
+            supportedExtensions.contains(fileExtension)
+        }
+        mMultipleFile = ArrayList(supportedFiles)
+        if (unsupportedFiles.isNotEmpty()) {
+            handleSessionTimeout(
+                getString(R.string.unsupported_file),
+                "The selected file type(s) are not supported. Please choose supported file types such as: ${formComponent?.config?.attachmentTypes}.",
+                getString(R.string.okay),
+                SIZE_LIMIT
+            )
+        }
+    }
+
+    private fun validateFormAttachment(mMultipleFile: List<MultiFileModel>?): Boolean {
+
+        val formComponent = formComponent ?: return true
+
+        // Perform validation
+        val isValid =
+            mMultipleFile?.let { NCWAppUtils.validateMultipleFormAttachment(formComponent, it) }
+
+        if (!isValid!!) {
+            val maxUploadSizeAllowedMB =
+                formComponent.config?.maxUploadSizeAllowed?.let { "$it MB" } ?: "N/A"
+
+            // Construct the message for exceeding the limit
+            val messageIssue = getString(R.string.upload_file_max_size, maxUploadSizeAllowedMB)
+
+            // Show the popup with the limit exceeded message
+            showLimitExceedPopup(messageIssue)
+            return false
+        }
+
+        return true
+    }
+
 
     private fun updateFormSchema() {
         isMultipleFile = true
@@ -2287,7 +2348,11 @@ Log.e("Dataaaa","Gallerryuu")
                         null,
                         null,
                         files.fileName,
-                        files.file.length()
+                        files.file.length(),
+                        mimeType = files.mimeType,
+                        file = files.file
+
+
                     )
                     targetComponent.fileUpload?.add(fileUpload)
                 }
@@ -2303,7 +2368,7 @@ Log.e("Dataaaa","Gallerryuu")
         }
     }
 
-        // File selection (PDF, DOC, etc.)
+    // File selection (PDF, DOC, etc.)
     private fun openFile() {
 
         if (attachmentType == TYPE_ATTACHMENT) {
@@ -2360,7 +2425,7 @@ Log.e("Dataaaa","Gallerryuu")
             putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         }
         fileMultipleLauncher.launch(fileIntent)
-       // galleryMultipleLauncher.launch(fileIntent)
+
     }
 
     // Handle the result of the gallery selection
@@ -2485,26 +2550,26 @@ Log.e("Dataaaa","Gallerryuu")
                 val sendMessageResponse = apiResponse as NCWSendMessageResponse
                 hideProgressBar()
 
-                if (!isDisableInput){
-                    isDisableInput=true
+                if (!isDisableInput) {
+                    isDisableInput = true
                     setUIState(true)
                 }
 
-                if (idleTimeInMillis>0) {
+                if (idleTimeInMillis > 0) {
                     resetIdleTimer()
-                    isIdle=false
+                    isIdle = false
                 }
 
             }
 
             NCWRoutes.ROUTE_GET_CHAT -> {
                 val response = apiResponse as NCWGetChatHistoryResponse
-                Log.e("ROUTE_GET_MQTT_CREDENTIALS","ROUTE_GET_CHAT")
+                Log.e("ROUTE_GET_MQTT_CREDENTIALS", "ROUTE_GET_CHAT")
                 if (response != null && response.responses.size > 0) {
-                    isHistoryChatAvialbale=true
+                    isHistoryChatAvialbale = true
                     parseHistoryItems(response.responses)
                 } else {
-                    isHistoryChatAvialbale=false
+                    isHistoryChatAvialbale = false
                     loadInitialMessages()
                 }
                 hideProgressBar()
@@ -2512,20 +2577,6 @@ Log.e("Dataaaa","Gallerryuu")
 
             NCWRoutes.ROUTE_GET_PRESIGNED_URL -> {
                 val response = apiResponse as NCWGetPreSignedUrl
-               /* if (isMultipleFile && mMultipleFile.isNotEmpty() && fileSend != null) {
-                    mMultipleFile.forEach { file ->
-                        Log.d("FileProcessing", "Checking file: $file with fileSend: $fileSend")
-                        Log.e("SIXEEEE","hecking file")
-                        if (file.file== fileSend) {
-                            Log.e("SIXEEEE","Match Found")
-                            Log.d("FileProcessing", "Match found. Uploading file: $file")
-                            chatViewModel.uploadFile(file.file, response)
-                        }
-                    }
-                }
-                else {
-                    chatViewModel.uploadFile(fileSend, response)
-                }*/
                 chatViewModel.uploadFile(fileSend, response)
             }
 
@@ -2574,44 +2625,38 @@ Log.e("Dataaaa","Gallerryuu")
                     )
                     sendMessageToBot(payload)
 
-                }
-
-                else {
+                } else {
                     hideProgressBar()
-Log.e("Getttttttttt","MultiMediiaaa"+response)
-                    Log.e("mMultipleFile", "mMultipleFile.sexeeee " + mMultipleFile.size)
-                   NCWAppUtils.showToast(this,mediaType.toString())
-
                     val position = messageList.indexOfLast { it.sender == TYPE_FORM }
                     val item = messageList[position]
-
-                    if (isMultipleFile) {
-                        item.formSchema?.schema?.forEach { targetComponent ->
-                            if (targetComponent.id == formComponent?.id) {
-                                if (targetComponent.fileUpload?.size!! > 0) {
-              Log.e("targetComponent","targetComponent "+targetComponent.fileUpload)
-                                    targetComponent.fileUpload?.forEach { updateFile ->
-                                        if (updateFile.title==response.title) {
-                                            Log.e("Match Condition","saassa "+response.title)
-                                            updateFile.fileUrl = response.url
-                                            updateFile.mediaType = mediaType
-                                            updateFile.isRetry=false
-                                        }
+                    item.formSchema?.schema?.forEach { targetComponent ->
+                        if (targetComponent.id == formComponent?.id) {
+                            if (targetComponent.fileUpload?.size!! > 0) {
+                                targetComponent.fileUpload?.forEach { updateFile ->
+                                    if (updateFile.title == response.title) {
+                                        updateFile.fileUrl = response.url
+                                        updateFile.mediaType = mediaType
+                                        updateFile.isRetry = false
                                     }
                                 }
-                                val updatedSchema = item.formSchema?.schema ?: emptyList()
-                                val viewHolder = chatRecyclerView.findViewHolderForAdapterPosition(position)
-                                if (viewHolder is NCWChatAdapter.FormViewHolder) {
-                                    formComponent?.let { viewHolder.updateFormAdapterData(updatedSchema, it) }
-                                } else {
-                                    messageAdapter.notifyItemChanged(position)
+                            }
+                            val updatedSchema = item.formSchema?.schema ?: emptyList()
+                            val viewHolder =
+                                chatRecyclerView.findViewHolderForAdapterPosition(position)
+                            if (viewHolder is NCWChatAdapter.FormViewHolder) {
+                                formComponent?.let {
+                                    viewHolder.updateFormAdapterData(
+                                        updatedSchema,
+                                        it
+                                    )
                                 }
-
-
+                            } else {
+                                messageAdapter.notifyItemChanged(position)
                             }
                         }
+                    }
 
-                    } else
+                    /*else
                     {
                         item.formSchema?.schema?.forEach { targetComponent ->
                             if (targetComponent.id == formComponent?.id) {
@@ -2637,12 +2682,12 @@ Log.e("Getttttttttt","MultiMediiaaa"+response)
                     } else {
                         messageAdapter.notifyItemChanged(position)
                     }
+*/
 
 
                 }
-            }
-            }
 
+            }
 
             NCWRoutes.ROUTE_END_CHAT -> {
                 hideProgressBar()
@@ -2651,26 +2696,27 @@ Log.e("Getttttttttt","MultiMediiaaa"+response)
                     messageList.clear()
                     messageAdapter.notifyDataSetChanged()
                     loadInitialMessages()
-                    themeData?.isProActiveGreetings=false
-                    chatViewModel.getConversationId(botRefId,externalId,onRestart)
-                    onRestart=false
+                    themeData?.isProActiveGreetings = false
+                    chatViewModel.getConversationId(botRefId, externalId, onRestart)
+                    onRestart = false
                     return
                 }
                 if (mSurveyRule != null) {
                     if (mSurveyRule?.any { key -> key.conversationTriggerType == RULE_EVENT_CHAT_END } == true) {
-                        isSurveyRule=true
+                        isSurveyRule = true
                         return
                     }
                 }
                 NCWThemeUtils.setConversationID(null)
-                themeData?.isProActiveGreetings=false
+                themeData?.isProActiveGreetings = false
                 finish()
             }
 
-             NCWRoutes.WEBHOOK_EVENT -> {
-                 if (idleTimeInMillis>0)
-                     resetIdleTimer()
-             }
+            NCWRoutes.WEBHOOK_EVENT -> {
+                if (idleTimeInMillis > 0)
+                    resetIdleTimer()
+            }
+
             NCWRoutes.LOGIN -> {
                 val response = apiResponse as LoginResponse
                 Log.d(
@@ -2680,7 +2726,7 @@ Log.e("Getttttttttt","MultiMediiaaa"+response)
                 Log.e("ConversationID LOGIN", response.authenticatedConversationId)
                 // Use conversationID as needed
                 conversationID = response.authenticatedConversationId
-                externalId= response.externalId
+                externalId = response.externalId
 
                 chatViewModel.getAWSMQTTCredentials(botRefId)
                 conversationID?.let { NCWThemeUtils.setConversationID(it) }
@@ -2697,16 +2743,16 @@ Log.e("Getttttttttt","MultiMediiaaa"+response)
             }
 
             NCWRoutes.ROUTE_SURVEY -> {
-                if (isSurveyRule){
+                if (isSurveyRule) {
                     NCWThemeUtils.setConversationID(null)
-                    themeData?.isProActiveGreetings=false
+                    themeData?.isProActiveGreetings = false
                     finish()
                 }
             }
 
             NCWRoutes.ROUTE_GET_SURVEY_RULE -> {
                 val surveyRule = apiResponse as SurveyRuleResponse
-                 mSurveyRule=surveyRule.payload
+                mSurveyRule = surveyRule.payload
 
                 if (mSurveyRule != null) {
                     val matchedRule = mSurveyRule?.firstOrNull { key ->
@@ -2715,7 +2761,7 @@ Log.e("Getttttttttt","MultiMediiaaa"+response)
 
                     if (matchedRule != null) {
                         // need to changeeeeeeeeeee
-                       // idleTimeInMillis = NCWAppUtils.parseIdleTimeFromExpression(matchedRule.expression) * 1000
+                        // idleTimeInMillis = NCWAppUtils.parseIdleTimeFromExpression(matchedRule.expression) * 1000
                         resetIdleTimer()
                     }
                 }
@@ -2803,36 +2849,37 @@ Log.e("Getttttttttt","MultiMediiaaa"+response)
 
 
                             }
+
                             CustomFieldName.DISABLE_INPUT_FIELD, CustomFieldName.DISABLE_CHAT_INPUT -> {
                                 val isDisabled = customField.values?.get(0) == "true"
                                 setUIState(!isDisabled)
                                 isHistoryDisableInput = !isDisabled
-                                if (CustomFieldName.fromValue(customField.name)==CustomFieldName.DISABLE_INPUT_FIELD) {
+                                if (CustomFieldName.fromValue(customField.name) == CustomFieldName.DISABLE_INPUT_FIELD) {
                                     isDisableInput = !isDisabled
                                 }
                             }
 
-                          /*  CustomFieldName.DISABLE_INPUT_FIELD -> {
-                                if (customField.values?.get(0) == "true") {
-                                    setUIState(false)
-                                    isHistoryDisableInput = false
-                                    isDisableInput=false
-                                } else {
-                                    setUIState(true)
-                                    isHistoryDisableInput = true
-                                }
+                            /*  CustomFieldName.DISABLE_INPUT_FIELD -> {
+                                  if (customField.values?.get(0) == "true") {
+                                      setUIState(false)
+                                      isHistoryDisableInput = false
+                                      isDisableInput=false
+                                  } else {
+                                      setUIState(true)
+                                      isHistoryDisableInput = true
+                                  }
 
-                            }
+                              }
 
-                            CustomFieldName.DISABLE_CHAT_INPUT -> {
-                                if (customField.values?.get(0) == "true") {
-                                    setUIState(false)
-                                    isHistoryDisableInput = false
-                                } else {
-                                    setUIState(true)
-                                    isHistoryDisableInput = true
-                                }
-                            }*/
+                              CustomFieldName.DISABLE_CHAT_INPUT -> {
+                                  if (customField.values?.get(0) == "true") {
+                                      setUIState(false)
+                                      isHistoryDisableInput = false
+                                  } else {
+                                      setUIState(true)
+                                      isHistoryDisableInput = true
+                                  }
+                              }*/
 
                             CustomFieldName.END_CHAT -> {
                                 // Handle END_CHAT
@@ -2848,9 +2895,9 @@ Log.e("Getttttttttt","MultiMediiaaa"+response)
                 }
                 // else {
                 // Existing logic for attachments
-               /* val newMessages = response.attachments?.mapNotNull {
-                    mapAttachmentToMessage(it, response.requestId!!, NCWAppConstant.NORMAL)
-                } ?: emptyList()*/
+                /* val newMessages = response.attachments?.mapNotNull {
+                     mapAttachmentToMessage(it, response.requestId!!, NCWAppConstant.NORMAL)
+                 } ?: emptyList()*/
 
                 val newMessages = response.attachments?.mapIndexedNotNull { index, attachment ->
                     response.requestId?.let {
@@ -2960,7 +3007,6 @@ Log.e("Getttttttttt","MultiMediiaaa"+response)
         ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)*/
 
 
-
     }
 
     private fun showProgressBar() {
@@ -2977,24 +3023,23 @@ Log.e("Getttttttttt","MultiMediiaaa"+response)
     override fun onThumbUpClick(requestId: String, position: Int, attachmentIndex: Int) {
         Log.e("RequestId ThumbUp", requestId)
         messageAdapter.notifyItemChanged(position)
-        hitFeedbackAPI(requestId, "POSITIVE",attachmentIndex)
+        hitFeedbackAPI(requestId, "POSITIVE", attachmentIndex)
     }
 
     override fun onThumbDownClick(requestId: String, position: Int, attachmentIndex: Int) {
         Log.e("RequestId ThumbDown", requestId)
         messageAdapter.notifyItemChanged(position)
-        hitFeedbackAPI(requestId, "NEGATIVE",attachmentIndex)
+        hitFeedbackAPI(requestId, "NEGATIVE", attachmentIndex)
     }
 
 
-
-    private fun playUserSound(){
-        if (themeData?.sound?.defaultSound == true)
-        {
-        messageSoundPlayer?.playUserSound()
+    private fun playUserSound() {
+        if (themeData?.sound?.defaultSound == true) {
+            messageSoundPlayer?.playUserSound()
         }
     }
-    private fun playBotSound(){
+
+    private fun playBotSound() {
 
         if (themeData?.sound?.defaultSound == true) {
             messageSoundPlayer?.playBotSound()

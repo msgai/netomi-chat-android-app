@@ -18,6 +18,7 @@ object NCWDialogUtils {
         context: Context,
         title: String,
         subtitle: String,
+        confirm: String,
         onYesClick: () -> Unit
     ) {
 
@@ -36,10 +37,13 @@ object NCWDialogUtils {
         val tvSubtitle = dialogView.findViewById<TextView>(R.id.dialogSubtitle)
         val btnConfirm = dialogView.findViewById<TextView>(R.id.btnConfirm)
         val btnCancel = dialogView.findViewById<TextView>(R.id.btnCancel)
+
         NCWThemeUtils.setTitleColor(tvTitle)
         NCWThemeUtils.setDescriptionColor(tvSubtitle)
         tvTitle.text = title
         tvSubtitle.text = subtitle
+        btnConfirm.text = confirm
+
 
         NCWThemeUtils.createRoundedDrawable(btnConfirm)
         NCWThemeUtils.createRoundedDrawableClose(btnCancel)
