@@ -1,6 +1,5 @@
 package com.netomi.chat.ui.view
 
-import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,16 +10,13 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.netomi.chat.R
-
 import com.netomi.chat.model.messages.FileUploadData
-import com.netomi.chat.utils.NCWAppConstant
-import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.formatFileSize
 import com.netomi.chat.utils.NCWParsingUtils.getFileSizeFromUrl
 import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWFormFilesAdapter(
-    private val items: List<FileUploadData>,
+    private val items: ArrayList<FileUploadData>,
     val isClickable: Boolean,
     private val onDelete: (FileUploadData?) -> Unit,
     private val onRetry: (FileUploadData?) -> Unit,
@@ -51,30 +47,20 @@ class NCWFormFilesAdapter(
         // NCWThemeUtils.setUserConfig(holder.requestDocCard)
         NCWThemeUtils.setUserConfigTextColor(holder.tvDocName)
         NCWThemeUtils.setTimeStampColor(holder.tvDocType)
-        if (item.fileUrl!=null){
-
-            holder.icDelete.visibility=View.VISIBLE
-            holder.progressBar.visibility=View.GONE
-            holder.txtCancel.visibility=View.GONE
-        }
-        else
-        {
-            holder.icDelete.visibility=View.GONE
-            holder.progressBar.visibility=View.VISIBLE
-            holder.txtCancel.visibility=View.VISIBLE
-        }
-        if (item.isRetry){
-            holder.constRetry.visibility=View.VISIBLE
-            holder.progressBar.visibility=View.GONE
-        }
-        else
-        {
-            holder.constRetry.visibility=View.GONE
-        }
         NCWThemeUtils.createStrokeDrawable(holder.txtCancel)
-        // holder.icDelete.visibility = if (isClickable) View.VISIBLE else View.GONE
-       /* if (isClickable)
-            holder.icDelete.visibility=View.GONE*/
+        with(holder) {
+            if (item.fileUrl != null) {
+                icDelete.visibility = if (isClickable) View.VISIBLE else View.GONE
+                progressBar.visibility = View.GONE
+                txtCancel.visibility = View.GONE
+            } else {
+                icDelete.visibility = View.GONE
+                progressBar.visibility = if (item.isRetry) View.GONE else View.VISIBLE
+                txtCancel.visibility = if (item.isRetry) View.GONE else View.VISIBLE
+            }
+
+            constRetry.visibility = if (item.isRetry) View.VISIBLE else View.GONE
+        }
 
         item.title?.let {
             holder.tvDocName.text = it
@@ -102,22 +88,28 @@ class NCWFormFilesAdapter(
 
         holder.icDelete.setOnClickListener {
             onDelete(item)
-            notifyItemChanged(position)
+          //  notifyItemChanged(position)
         }
         holder.constRetry.setOnClickListener {
             onRetry(item)
+            holder.constRetry.visibility=View.GONE
+            holder.progressBar.visibility=View.VISIBLE
+            holder.icDelete.visibility=View.GONE
         }
-
-
         holder.txtCancel.setOnClickListener {
-          Log.e("Clcikkk","saasasas")
-        //   item.isCancelled=true
+           item.isCancelled=true
             onDelete(item)
-            notifyItemChanged(position)
         }
-
-
     }
 
     override fun getItemCount() = items.size
+
+    fun itemRemoved(position: Int) {
+        if (position >= 0 && position < items.size) {
+            items.removeAt(position)
+            notifyItemRemoved(position)
+        } else {
+            Log.e("Error", "Invalid position: $position, size: ${items.size}")
+        }
+    }
 }

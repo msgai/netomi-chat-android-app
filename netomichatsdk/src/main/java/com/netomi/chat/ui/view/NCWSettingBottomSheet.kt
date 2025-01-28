@@ -1,8 +1,8 @@
 package com.netomi.chat.ui.view
 
 import android.app.Dialog
+import android.content.res.ColorStateList
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -52,13 +52,24 @@ class NCWSettingBottomSheet(
         val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
         val switchSound = view.findViewById<SwitchCompat>(R.id.toggle_sound)
         val constRestart = view.findViewById<ConstraintLayout>(R.id.constRestart)
+        val greyColor =
+            context?.let { ContextCompat.getColor(it, R.color.gray) } // Replace with your green color resource
+        val greenColor =
+            context?.let { ContextCompat.getColor(it, R.color.green) }
+
 
         NCWThemeUtils.setTitleColor(tvTitle)
         switchSound.isChecked=themeData.sound.defaultSound
 
+        val trackColor = if (themeData.sound.defaultSound) greenColor else greyColor
+        switchSound.trackTintList = trackColor?.let { ColorStateList.valueOf(it) }
+
         switchSound.setOnCheckedChangeListener { button, isChecked ->
             if (button.isPressed){
                 themeData.sound.defaultSound=isChecked
+                val trackColor = if (isChecked) greenColor else greyColor
+                switchSound.trackTintList = trackColor?.let { ColorStateList.valueOf(it) }
+
             }
         }
 

@@ -14,6 +14,7 @@ import android.webkit.MimeTypeMap
 import android.widget.TextView
 import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.netomi.chat.model.media_payload.MultiFileModel
 import com.netomi.chat.model.messages.Component
 import com.netomi.chat.utils.NCWAppConstant.TIME_AM_PM
 import com.netomi.chat.utils.NCWAppConstant.TYPE_FILE
@@ -249,6 +250,23 @@ object NCWAppUtils {
         }
         return true
     }
+    fun validateMultipleFormAttachment(formComponent: Component, filesToSend: List<MultiFileModel>): Boolean {
+        val maxUploadSizeAllowedMB = formComponent?.config?.maxUploadSizeAllowed ?: 0 // Default to 0 if null, unit is MB
+
+        // Sum up the sizes of previously uploaded files (in MB)
+        val previousFileInMB = formComponent?.fileUpload
+            ?.filter { it.fileSize != null }
+            ?.sumOf { it.fileSize!!.toDouble() / (1024 * 1024) }
+            ?: 0.0
+
+        // Sum up the sizes of the new files to send (in MB)
+        val currentFilesSizeMB = filesToSend.sumOf { it.file.length().toDouble() / (1024 * 1024) }
+
+        val allSize = previousFileInMB + currentFilesSizeMB
+
+        return allSize <= maxUploadSizeAllowedMB
+    }
+
 
     fun getDomainOutOfURL(url: String?): String? {
         if (url.isNullOrBlank()) return null

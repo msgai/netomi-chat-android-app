@@ -828,9 +828,15 @@ if (component.config?.isShowAttachmentTypesEnabled == true) {
                             false
                         )
                         recyclerDoc.adapter = NCWFormFilesAdapter(component.fileUpload!!,isClickable, { selectedOption ->
-                            component.fileUpload?.remove(selectedOption)
-                            inputValuesSelected.getOrNull(adapterPosition)?.fileUpload?.remove(selectedOption)
-                        },{ retry ->
+                         //   component.fileUpload?.remove(selectedOption)
+                           // inputValuesSelected.getOrNull(adapterPosition)?.fileUpload?.remove(selectedOption)
+                            val position = component.fileUpload?.indexOf(selectedOption)
+                            if (position != null && position >= 0) {
+                             //  component.fileUpload?.removeAt(position)
+                                inputValuesSelected.getOrNull(adapterPosition)?.fileUpload?.remove(selectedOption)
+                                (recyclerDoc.adapter as? NCWFormFilesAdapter)?.itemRemoved(position)
+                            }
+                            },{ retry ->
                             if (retry != null) {
                                 onRetry(component,retry)
                             }

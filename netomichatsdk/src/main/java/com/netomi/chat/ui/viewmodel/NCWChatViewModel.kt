@@ -107,11 +107,7 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
     private var _getUploadedMediaUrl= NCWSingleLiveEvent<NCWState<NCWGetMediaUploadUrl>>()
     val getUploadedMediaUrl get()= _getUploadedMediaUrl
 
-
-    private var _multiFileUrl= NCWSingleLiveEvent<NCWState<NCWGetMediaUploadUrl>>()
-    val multiFileUrl get()= _multiFileUrl
-
-    private val _errorFile = NCWSingleLiveEvent<NCWSignedUrlPayload>()
+    private val _errorFile = NCWSingleLiveEvent<NCWSignedUrlPayload?>()
     val errorFile get() = _errorFile
     init {
         loadChatHistory()
@@ -235,7 +231,7 @@ Log.e("DataaResposne","response"+response)
                         val payload = response.payload
                         if (payload is NCWSignedUrlPayload) {
                             withContext(Dispatchers.Main) {
-                                errorFile.value = payload
+                                _errorFile.value = payload
 
                             }
                             processNextFile(fileList)
@@ -247,7 +243,7 @@ Log.e("DataaResposne","response"+response)
                         Log.e("Counettee","sasaasas "+uploadResponse)
                         withContext(Dispatchers.Main) {
                            _getUploadedMediaUrl.value = uploadResponse
-                           // _multiFileUrl.value = uploadResponse
+
                         }
                         processNextFile(fileList)
                     } else {

@@ -231,7 +231,7 @@
             android:layout_marginStart="10dp"
             android:text="@string/restart"
             android:textSize="14sp"
-            android:textColor="@color/error_color"
+            android:textColor="#FF7661"
             app:layout_constraintBottom_toBottomOf="@id/icon_restart"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/icon_restart"
