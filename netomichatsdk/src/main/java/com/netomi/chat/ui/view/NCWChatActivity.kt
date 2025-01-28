@@ -1,7 +1,7 @@
 package com.netomi.chat.ui.view
 
 
-import NCWIdleTimeoutManager
+import  NCWIdleTimeoutManager
 import android.Manifest
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -135,6 +135,7 @@ import com.netomi.chat.utils.NCWAppConstant.TYPE_RESPONSE
 import com.netomi.chat.utils.NCWAppConstant.TYPE_SHOW_SURVEY
 import com.netomi.chat.utils.NCWAppConstant.TYPE_SUBMITTED_SURVEY
 import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
+import com.netomi.chat.utils.NCWAppConstant.UPLOAD_FILE_MULTIPLE
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.hideKeyboard
 import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
@@ -580,7 +581,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         if (checkForLogoutAction(messageContent)) return
 
-        if (messageContent.isNotEmpty()) {
+        if (messageContent.trim().isNotEmpty()) {
             val timeStamp = System.currentTimeMillis()
             val payload = createPayload(messageContent, messageContent, timeStamp)
             checkForInitialMessage()
@@ -671,7 +672,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     hideMessage = if (label == PROACTIVE_GREETING) true else null
                 ),
                 attachmentList = attachmentList,
-                additionalAttributes = attributes,
+             //   additionalAttributes = attributes,
                 userDetails = NCWThemeUtils.getSignInUserDetails()
 
             )
@@ -832,8 +833,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
         }, { payload, label, attachmentList ->
             val timeStamp = System.currentTimeMillis()
+            Log.e("FormPayload ","payload "+payload)
+            Log.e("FormPayload ","label "+label)
             val createPayload = payload?.let { createPayload(it, label, timeStamp, attachmentList) }
             if (createPayload != null) {
+                Log.e("FormPayload","FormPayload  "+createPayload)
                 chatViewModel.sendMessageAPI(createPayload)
                 addLoader()
                 playUserSound()
@@ -1429,7 +1433,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                         val textSkip =
                             "event://;SKIP_EVENT;resumeWorkflow::value=${isSkipValue}^$^requestId::value=${response.requestId}"
                         val payload = createPayload(textSkip, label, timeStamp)
-                        addLoader()
+                       if(isSkipValue) { addLoader() }
                         sendMessageToBot(payload)
                     }
                 )
@@ -2191,24 +2195,30 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     // Gallery selection
     private fun openGallery() {
-
-        if (attachmentType == TYPE_ATTACHMENT) {
-            val galleryIntent =
-                Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
-                    type = "image/* video/*"
-                }
-            galleryLauncher.launch(galleryIntent)
-        } else {
-            Log.e("Dataaaa", "Gallerryuu")
-            val galleryIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
+        val galleryIntent = if (attachmentType == TYPE_ATTACHMENT) {
+            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
+                type = "image/* video/*"
+            }
+        } else if (formComponent?.config?.fileUploadType == UPLOAD_FILE_MULTIPLE) {
+            Intent(Intent.ACTION_GET_CONTENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
                 type = "*/*"
                 putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
             }
+        } else {
+            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
+                type = "image/* video/*"
+            }
+        }
+Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUploadType "+formComponent?.config?.fileUploadType)
+        if (attachmentType == TYPE_ATTACHMENT){
+            galleryLauncher.launch(galleryIntent)
+        } else {
             galleryMultipleLauncher.launch(galleryIntent)
         }
     }
+
 
     private val galleryMultipleLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -2324,7 +2334,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 formComponent.config?.maxUploadSizeAllowed?.let { "$it MB" } ?: "N/A"
 
             // Construct the message for exceeding the limit
-            val messageIssue = getString(R.string.upload_file_max_size, maxUploadSizeAllowedMB)
+            val messageIssue = getString(R.string.upload_files_max_size, maxUploadSizeAllowedMB)
 
             // Show the popup with the limit exceeded message
             showLimitExceedPopup(messageIssue)
@@ -2383,50 +2393,37 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun openFormPicker(component: Component) {
-        val attachmentTypes: List<String> = component.config?.attachmentTypes ?: emptyList()
-        val mimeTypes = mutableListOf<String>()
-        if (attachmentTypes.contains("PNG")) {
-            mimeTypes.add("image/png")
-        }
-        if (attachmentTypes.contains("JPG")) {
-            mimeTypes.add("image/jpeg")
-        }
-        if (attachmentTypes.contains("JPEG")) {
-            mimeTypes.add("image/jpeg") // JPEG is the same as JPG
-        }
-        if (attachmentTypes.contains("GIF")) {
-            mimeTypes.add("image/gif")
-        }
-        // Check for video and document types
-        if (attachmentTypes.contains("MP4")) {
-            mimeTypes.add("video/mp4")
-        }
-        if (attachmentTypes.contains("PDF")) {
-            mimeTypes.add("application/pdf")
-        }
-        if (attachmentTypes.contains("TXT")) {
-            mimeTypes.add("text/plain")
-        }
+        val attachmentTypes = component.config?.attachmentTypes.orEmpty()
+        val mimeTypes = attachmentTypes.mapNotNull {
+            when (it.uppercase()) {
+                "PNG" -> "image/png"
+                "JPG", "JPEG" -> "image/jpeg"
+                "GIF" -> "image/gif"
+                "MP4" -> "video/mp4"
+                "PDF" -> "application/pdf"
+                "TXT" -> "text/plain"
+                else -> "image/png"
+            }
+        }.toMutableList()
 
-        // If no specific types are matched, allow all file types
         if (mimeTypes.isEmpty()) {
             mimeTypes.add("*/*")
         }
-        /*val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-            putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
-            addCategory(Intent.CATEGORY_OPENABLE)
-        }*/
-        // Start the file picker activity using ActivityResultLauncher
-        //fileLauncher.launch(Intent.createChooser(intent, "Select a file"))
-
+        //putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
+        Log.e("formComponent?.config?.fileUploadType","mime "+mimeTypes)
+        Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUploadType "+formComponent?.config?.fileUploadType)
         val fileIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
             type = "*/*"
             addCategory(Intent.CATEGORY_OPENABLE)
-            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-        }
-        fileMultipleLauncher.launch(fileIntent)
 
+            if (formComponent?.config?.fileUploadType == UPLOAD_FILE_MULTIPLE) {
+                putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+            }
+        }
+
+        fileMultipleLauncher.launch(fileIntent)
     }
+
 
     // Handle the result of the gallery selection
     private val galleryLauncher =
@@ -2760,8 +2757,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     }
 
                     if (matchedRule != null) {
-                        // need to changeeeeeeeeeee
-                        // idleTimeInMillis = NCWAppUtils.parseIdleTimeFromExpression(matchedRule.expression) * 1000
+                       idleTimeInMillis = NCWAppUtils.parseIdleTimeFromExpression(matchedRule.expression) * 1000
                         resetIdleTimer()
                     }
                 }

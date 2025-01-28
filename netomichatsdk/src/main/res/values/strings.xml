@@ -16,6 +16,7 @@
     <string name="limit_exceed">Limit Exceed</string>
     <string name="okay">Okay</string>
     <string name="upload_file_max_size">Upload a file (maximum size: %1$s)</string>
+    <string name="upload_files_max_size">Upload a file(s) (maximum size: %1$s)</string>
     <string name="select">Select</string>
     <string name="start_typing">Start Typing</string>
     <string name="additional_feedback">Additional Feedback</string>
