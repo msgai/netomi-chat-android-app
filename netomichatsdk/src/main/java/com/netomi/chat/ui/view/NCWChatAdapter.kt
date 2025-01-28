@@ -246,6 +246,7 @@ class NCWChatAdapter(
                 }, { payload, label,attachmentList ->
                     // Handle the payload and label response here
                     formData(payload,label,attachmentList)
+                    formAdapter?.isClickable =false
                 },{ component, fileUploadData ->
 
                     onRetryFormData(component,fileUploadData)
