@@ -1469,6 +1469,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun renderTheFormMessage(response: NCWGenericChannelResponse?) {
         val gson = Gson()
+
         response?.customFields?.forEach { customField ->
             if (customField.name == "FORM_SCHEMA" && !customField.values.isNullOrEmpty()) {
                 val formSchemas: List<FormSchema> = gson.fromJson(
@@ -1476,7 +1477,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     object : TypeToken<List<FormSchema>>() {}.type
                 )
                 val formSchemasModel = formSchemas[0]
-
+                formSchemasModel.requestId=response.requestId
                 val newMessages = NCWMessage(
                     sender = TYPE_FORM,
                     timestamp = System.currentTimeMillis(),
@@ -2717,6 +2718,7 @@ if (isUpdated) {
             }
 
             NCWRoutes.WEBHOOK_EVENT -> {
+                Log.e("Suuusus","saasassa")
                 if (idleTimeInMillis > 0)
                     resetIdleTimer()
             }
@@ -2752,6 +2754,13 @@ if (isUpdated) {
                     themeData?.isProActiveGreetings = false
                     finish()
                 }
+                else{
+                    if (idleTimeInMillis > 0) {
+                        resetIdleTimer()
+                        isIdle = false
+                    }
+                }
+
             }
 
             NCWRoutes.ROUTE_GET_SURVEY_RULE -> {
@@ -2838,18 +2847,17 @@ if (isUpdated) {
                                         customField.values[0],
                                         object : TypeToken<SurveyField>() {}.type
                                     )
-                                    val newMessage = NCWMessage(
-                                        sender = TYPE_EVENT,
-                                        timestamp = response.timestamp
-                                            ?: System.currentTimeMillis(),
-                                        surveyField = surveyField,
-                                        requestID = response.requestId
-                                    )
-                                    messageList.add(newMessage)
-
-
+                                    if(!surveyField.isSurveySkipped) {
+                                        val newMessage = NCWMessage(
+                                            sender = TYPE_EVENT,
+                                            timestamp = response.timestamp
+                                                ?: System.currentTimeMillis(),
+                                            surveyField = surveyField,
+                                            requestID = response.requestId
+                                        )
+                                        messageList.add(newMessage)
+                                    }
                                 }
-
 
                             }
 
