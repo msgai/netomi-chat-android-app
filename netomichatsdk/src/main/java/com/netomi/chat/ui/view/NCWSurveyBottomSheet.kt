@@ -26,6 +26,7 @@ import com.netomi.chat.survey.EventInfo
 import com.netomi.chat.survey.RequestBody
 import com.netomi.chat.survey.SubmitSurveyInfo
 import com.netomi.chat.survey.SubmitSurveyRequest
+import com.netomi.chat.utils.NCWAppConstant.SKIP_LABEL
 import com.netomi.chat.utils.NCWAppConstant.TYPE_SUBMITTED_SURVEY
 import com.netomi.chat.utils.NCWThemeUtils
 import java.util.UUID
@@ -182,7 +183,7 @@ class NCWSurveyBottomSheet(
                 } else {
                     val text =
                         "event://;SKIP_EVENT;resumeWorkflow::value=true^$^requestId::value=$requestId"
-                    onSkipSurvey(text, "SKIP")
+                    onSkipSurvey(text, SKIP_LABEL)
                     dismiss()
                 }
             }

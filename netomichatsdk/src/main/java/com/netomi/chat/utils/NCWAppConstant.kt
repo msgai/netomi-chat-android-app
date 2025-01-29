@@ -82,7 +82,7 @@ object NCWAppConstant {
     const val STREAMING="streaming"
     const val PROACTIVE_GREETING="PROACTIVE_GREETING"
     const val UPLOAD_FILE_MULTIPLE="Multiple"
-
+    const val SKIP_LABEL="SKIP"
 
 
 
