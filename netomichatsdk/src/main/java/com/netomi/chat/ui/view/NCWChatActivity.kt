@@ -110,6 +110,7 @@ import com.netomi.chat.utils.NCWAppConstant.RULE_EVENT_CHAT_END
 import com.netomi.chat.utils.NCWAppConstant.RULE_EVENT_IDLE_USER
 import com.netomi.chat.utils.NCWAppConstant.SESSION
 import com.netomi.chat.utils.NCWAppConstant.SIZE_LIMIT
+import com.netomi.chat.utils.NCWAppConstant.SKIP_LABEL
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_IDLE_USER
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_JOIN
 import com.netomi.chat.utils.NCWAppConstant.SUB_TYPE_LEAVE
@@ -347,7 +348,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             NCWQuickMenuBottomSheet(it.quickMenuOptions) { options ->
                 val timeStamp = System.currentTimeMillis()
                 checkForInitialMessage()
-                val payload = createPayload(options.label, options.text, timeStamp)
+                val payload = createPayload(options.text, options.label, timeStamp)
                 chatViewModel.sendMessage(options.label, timeStamp)
                 if (payload != null) {
                     sendMessageToBot(payload)
@@ -601,6 +602,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
 
     private fun checkForLogoutAction(content: String?): Boolean {
+        Log.e(" themeData?.OAUTH2?.logoutActionKeys?"," themeData?.OAUTH2?.logoutActionKeys?"+ themeData?.OAUTH2?.logoutActionKeys)
+        Log.e("Keyyss","ddd "+content)
         themeData?.OAUTH2?.logoutActionKeys?.let { logoutActionKeys ->
             if (logoutActionKeys.any { key -> content?.contains(key, ignoreCase = true) == true }) {
                 handleSessionTimeout(
@@ -669,10 +672,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     label = label,
                     messageId = messageId,
                     timestamp = timeStamp,
-                    hideMessage = if (label == PROACTIVE_GREETING) true else null
+                    hideMessage = if (label == PROACTIVE_GREETING || label==SKIP_LABEL) true else null
                 ),
                 attachmentList = attachmentList,
-             //   additionalAttributes = attributes,
+                additionalAttributes = attributes,
                 userDetails = NCWThemeUtils.getSignInUserDetails()
 
             )
@@ -2626,6 +2629,7 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
                     hideProgressBar()
                     val position = messageList.indexOfLast { it.sender == TYPE_FORM }
                     val item = messageList[position]
+                    var isUpdated = false
                     item.formSchema?.schema?.forEach { targetComponent ->
                         if (targetComponent.id == formComponent?.id) {
                             if (targetComponent.fileUpload?.size!! > 0) {
@@ -2634,22 +2638,25 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
                                         updateFile.fileUrl = response.url
                                         updateFile.mediaType = mediaType
                                         updateFile.isRetry = false
+                                        isUpdated=true
                                     }
                                 }
                             }
-                            val updatedSchema = item.formSchema?.schema ?: emptyList()
-                            val viewHolder =
-                                chatRecyclerView.findViewHolderForAdapterPosition(position)
-                            if (viewHolder is NCWChatAdapter.FormViewHolder) {
-                                formComponent?.let {
-                                    viewHolder.updateFormAdapterData(
-                                        updatedSchema,
-                                        it
-                                    )
-                                }
-                            } else {
-                                messageAdapter.notifyItemChanged(position)
-                            }
+if (isUpdated) {
+    val updatedSchema = item.formSchema?.schema ?: emptyList()
+    val viewHolder =
+        chatRecyclerView.findViewHolderForAdapterPosition(position)
+    if (viewHolder is NCWChatAdapter.FormViewHolder) {
+        formComponent?.let {
+            viewHolder.updateFormAdapterData(
+                updatedSchema,
+                it
+            )
+        }
+    } else {
+        messageAdapter.notifyItemChanged(position)
+    }
+}
                         }
                     }
 
@@ -2885,8 +2892,6 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
                                 // Handle any other cases
                             }
                         }
-
-
                     }
                 }
                 // else {
