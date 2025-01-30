@@ -1425,16 +1425,18 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                         surveyField.submitSurveyInfo = submitSurveyInfo
 
-                    }, { text, label ->
+                    }, { requestId, label ->
                         val timeStamp = System.currentTimeMillis()
                         if (isSurveyRule) {
+                            NCWThemeUtils.setConversationID(null)
+                            themeData?.isProActiveGreetings = false
                             finish()
                             return@createAndShowSurveyBottomSheet
                         }
                         val isSkipValue = !isIdle
 
                         val textSkip =
-                            "event://;SKIP_EVENT;resumeWorkflow::value=${isSkipValue}^$^requestId::value=${response.requestId}"
+                            "event://;SKIP_EVENT;resumeWorkflow::value=${isSkipValue}^$^requestId::value=${requestId}"
                         val payload = createPayload(textSkip, label, timeStamp)
                        if(isSkipValue) { addLoader() }
                         sendMessageToBot(payload)

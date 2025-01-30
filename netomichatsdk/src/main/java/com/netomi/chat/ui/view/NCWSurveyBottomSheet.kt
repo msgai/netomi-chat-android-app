@@ -181,9 +181,9 @@ class NCWSurveyBottomSheet(
                 if (from == TYPE_SUBMITTED_SURVEY) {
                     dismiss()
                 } else {
-                    val text =
-                        "event://;SKIP_EVENT;resumeWorkflow::value=true^$^requestId::value=$requestId"
-                    onSkipSurvey(text, SKIP_LABEL)
+                 /*   val text =
+                        "event://;SKIP_EVENT;resumeWorkflow::value=true^$^requestId::value=$requestId"*/
+                    onSkipSurvey(requestId?:"", SKIP_LABEL)
                     dismiss()
                 }
             }
