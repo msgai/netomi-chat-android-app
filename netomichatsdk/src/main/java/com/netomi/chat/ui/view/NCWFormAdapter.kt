@@ -1094,6 +1094,7 @@ class NCWFormAdapter(
                     }
                     this@NCWFormAdapter.formSchema.formData = formData
                     isClickable=false
+                    notifyDataSetChanged()
 
                 }
 

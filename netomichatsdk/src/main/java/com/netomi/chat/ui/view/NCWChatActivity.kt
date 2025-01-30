@@ -1947,19 +1947,22 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     // Function to show camera and gallery options
     private fun showMediaOptions() {
 
-        val supportedExtensions = when (attachmentType) {
-            TYPE_ATTACHMENT -> themeData?.fileSharing?.list?.map { it.removePrefix(".") }
-                ?: emptyList()
+        checkNetworkAndExecute {
+            val supportedExtensions = when (attachmentType) {
+                TYPE_ATTACHMENT -> themeData?.fileSharing?.list?.map { it.removePrefix(".") }
+                    ?: emptyList()
 
-            else -> formComponent?.config?.attachmentTypes?.map { it.lowercase() } ?: emptyList()
+                else -> formComponent?.config?.attachmentTypes?.map { it.lowercase() }
+                    ?: emptyList()
+            }
+            val bottomSheet = NCWMediaOptionsBottomSheet(
+                onCameraClick = { showCameraVideoOption() },
+                onGalleryClick = { openGallery() },
+                onFileClick = { openFile() },
+                supportedExtensions
+            )
+            bottomSheet.show(supportFragmentManager, "MediaOptionsBottomSheet")
         }
-        val bottomSheet = NCWMediaOptionsBottomSheet(
-            onCameraClick = { showCameraVideoOption() },
-            onGalleryClick = { openGallery() },
-            onFileClick = { openFile() },
-            supportedExtensions
-        )
-        bottomSheet.show(supportFragmentManager, "MediaOptionsBottomSheet")
     }
 
     private fun showCameraVideoOption() {
@@ -2805,7 +2808,8 @@ if (isUpdated) {
                 if (response.customFields?.isNotEmpty() == true) {
                     for (customField in response.customFields) {
                         when (CustomFieldName.fromValue(customField.name)) {
-                            CustomFieldName.FORM_SCHEMA -> {
+
+                    /*        CustomFieldName.FORM_SCHEMA -> {
                                 val formSchemas: List<FormSchema> = gson.fromJson(
                                     customField.values?.get(0),
                                     object : TypeToken<List<FormSchema>>() {}.type
@@ -2837,7 +2841,47 @@ if (isUpdated) {
                                         )
                                     )
                                 }
+                            }*/
+
+
+                            CustomFieldName.FORM_SCHEMA -> {
+                                val formSchemas: List<FormSchema> = gson.fromJson(
+                                    customField.values?.get(0),
+                                    object : TypeToken<List<FormSchema>>() {}.type
+                                )
+                                val formSchemasModel = formSchemas.firstOrNull()
+                                formSchemasModel?.requestId=response.requestId
+                                formSchemasModel?.let { schema ->
+                                    val matchingResponse = responses
+                                        .drop(index + 1)
+                                        .firstOrNull { nextResponse ->
+                                            val schemaRequestId = nextResponse.requestPayload?.attachmentList
+                                                ?.firstOrNull()?.values?.schemaFormRequestId?.get(0)
+                                            response.requestId == schemaRequestId
+                                        }
+
+
+                                    matchingResponse?.requestPayload?.messagePayload?.text?.let { nextMessagePayload ->
+                                        val formData = parsePayloadToFormData(nextMessagePayload)
+
+                                        if (!formData.isNullOrEmpty()) {
+                                            schema.formData = formData
+                                        }
+                                    }
+
+                                            addSingleMessage(
+                                                NCWMessage(
+                                                    sender = TYPE_FORM,
+                                                    timestamp = System.currentTimeMillis(),
+                                                    formSchema = schema
+                                                )
+                                            )
+
+                                    }
+
                             }
+
+
 
                             CustomFieldName.SURVEY_SCHEMA -> {
 
@@ -3052,6 +3096,13 @@ if (isUpdated) {
 
         if (themeData?.sound?.defaultSound == true) {
             messageSoundPlayer?.playBotSound()
+        }
+    }
+    private fun checkNetworkAndExecute(action: () -> Unit) {
+        if (!NCWAppUtils.isNetworkAvailable(this)) {
+            NCWAppUtils.showToast(this, getString(R.string.please_check_your_network_and_try_again))
+        } else {
+            action.invoke()
         }
     }
 }
