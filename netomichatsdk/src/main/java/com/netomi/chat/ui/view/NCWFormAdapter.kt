@@ -1132,14 +1132,15 @@ class NCWFormAdapter(
 
             val nonEmptyFormValues = formValues.filter { it.isNotBlank() }
 
-            val schemaFormRequestId = items.map { it.id }
+          //  val schemaFormRequestId = items.map { it.id }
 
+            val schemaFormRequestId = listOf(formSchema.requestId ?: "")
             return NCWAttachmentList(
                 type = "ai.msg.domain.responses.core.MessageInfoAttachment",
                 values = Values(
                     status = listOf("SUBMITTED"),
                     isSchemaForm = listOf("true"),
-                    schemaFormRequestId = schemaFormRequestId,
+                    schemaFormRequestId =schemaFormRequestId,
                     question = listOf(formSchema.properties.question ?: ""),
                     optionList = inputValuesSelected.flatMap { it.selectedCheckboxes },
                     formValues = nonEmptyFormValues
