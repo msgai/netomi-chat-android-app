@@ -2736,11 +2736,8 @@ if (isUpdated) {
             }
 
             NCWRoutes.WEBHOOK_EVENT -> {
-                Log.e("Suuusus","saasassa")
                 if (idleTimeInMillis > 0 && isIdle)
                     resetIdleTimer()
-                else
-                    NCWAppUtils.showToast(this,"cxccxcxcx")
             }
 
             NCWRoutes.LOGIN -> {
