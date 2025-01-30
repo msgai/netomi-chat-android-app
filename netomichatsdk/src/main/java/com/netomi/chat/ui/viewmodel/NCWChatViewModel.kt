@@ -211,6 +211,7 @@ Log.e("DataaResposne","response"+response)
 
     private suspend fun processNextFile(fileList: MutableList<MultiFileModel>) {
         if (fileList.isNotEmpty()) {
+
             val currentFile = fileList.first()
 
             val mediaUpload = NCWSignedUrlPayload(
@@ -225,10 +226,11 @@ Log.e("DataaResposne","response"+response)
                     val responseData = response.data as NCWGetPreSignedUrl
 
                     val uploadResponse = chatRepository.uploadFile(currentFile.file, responseData)
-                    if (response is NCWState.SendMessageError<*, *>){
+
+                    if (uploadResponse is NCWState.SendMessageError<*, *>){
 
                         fileList.removeAt(0)
-                        val payload = response.payload
+                        val payload = uploadResponse.payload
                         if (payload is NCWSignedUrlPayload) {
                             withContext(Dispatchers.Main) {
                                 _errorFile.value = payload
@@ -249,7 +251,21 @@ Log.e("DataaResposne","response"+response)
                     } else {
                         Log.e("FileProcessing", "File upload failed for: ${currentFile.fileName}")
                     }
-                } else {
+                }
+
+                else if (response is NCWState.SendMessageError<*, *>){
+                        fileList.removeAt(0)
+                        val payload = response.payload
+                        if (payload is NCWSignedUrlPayload) {
+                            withContext(Dispatchers.Main) {
+                                _errorFile.value = payload
+
+                            }
+                            processNextFile(fileList)
+                        }
+                }
+
+                else {
                     Log.e("FileProcessing", "Failed to get pre-signed URL for: ${currentFile.fileName}")
                 }
             } catch (e: Exception) {

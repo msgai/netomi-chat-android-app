@@ -30,6 +30,7 @@ import com.netomi.chat.utils.NCWAppUtils.createRequestBody
 import com.netomi.chat.utils.NCWAppUtils.getFileContentType
 import com.netomi.chat.utils.NCWAppUtils.prepareFilePart
 import java.io.File
+import java.io.IOException
 
 /**
  * Repository responsible for managing chat-related data operations.
@@ -139,22 +140,36 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
             NCWState.error(e.message.toString(), code = 500)
         }
     }
-
     suspend fun getPreSignedUrl(payload: NCWSignedUrlPayload): NCWState<NCWGetPreSignedUrl> {
-        val response = apiInterface.getPreSignedUrl(payload)
-        return if (response.isSuccessful && response.body() != null) {
-            NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_GET_PRESIGNED_URL)
-        } else {
-            val errorBody = response.errorBody()
-            if (errorBody != null) {
-               // NCWState.error(parseError(errorBody), code = response.code())
-                NCWState.sendMessageError(parseError(errorBody), code = response.code(), payload = payload)
+        return try {
+            val response = apiInterface.getPreSignedUrl(payload)
+            if (response.isSuccessful && response.body() != null) {
+                NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_GET_PRESIGNED_URL)
             } else {
-              //  NCWState.error(mapApiException(response.code()), code = response.code())
-                NCWState.sendMessageError(mapApiException(response.code()), code = response.code(),payload = payload)
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    NCWState.sendMessageError(
+                        parseError(errorBody),
+                        code = response.code(),
+                        payload = payload
+                    )
+                } else {
+                    NCWState.sendMessageError(
+                        mapApiException(response.code()),
+                        code = response.code(),
+                        payload = payload
+                    )
+                }
             }
+        } catch (e: IOException) {
+            NCWState.sendMessageError("Network error", code = 0, payload = payload)
+        } catch (e: Exception) {
+            Log.e("getPreSignedUrl", "Exception occurred during API call: ${e.message}")
+            NCWState.sendMessageError("API call failed", code = 500, payload = payload)
         }
     }
+
+
 
 
     suspend fun uploadFile(
@@ -208,11 +223,8 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
                 val locationHeader = response.headers()["Location"]
                 if (locationHeader != null) {
 
-                    val title = mediaFile.name // File name with extension, e.g., "example.png"
-                    val fileSize = mediaFile.length() // File size in bytes
-                    // Log or print the details
-                    println("Title: $title")
-                    println("File Size: $fileSize bytes")
+                    val title = mediaFile.name
+                    val fileSize = mediaFile.length()
                     val uploadResult = NCWGetMediaUploadUrl(locationHeader, mediaType,title, fileSize = fileSize)
                     Log.d("UploadFile", "File uploaded successfully. Location: $locationHeader")
                     NCWState.success(data = uploadResult, NCWRoutes.ROUTE_UPLOAD_MEDIA)
@@ -221,19 +233,12 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
                     NCWState.error("Location header is missing in the response", code = 500)
                 }
             } else {
-                Log.e("UploadFile", "Error occurred: ${response.code()} - ${response.message()}")
-            //   NCWState.error("File upload failed", code = response.code())
                 val payload=NCWSignedUrlPayload(mediaType,mediaFile.name)
-                Log.e("MedianName","payload q"+mediaFile.name )
-                Log.e("MedianName","payload"+payload )
                 NCWState.sendMessageError("File upload failed", code = response.code(), payload = payload)
             }
         } catch (e: Exception) {
             Log.e("UploadFile", "Exception occurred during upload: ${e.message}")
-            //NCWState.error("File upload failed due to an exception", code = 500)
             val payload=NCWSignedUrlPayload(mediaType,mediaFile.name)
-            Log.e("MedianName","payload q else "+mediaFile.name )
-            Log.e("MedianName","payload"+payload )
             NCWState.sendMessageError("File upload failed", code =500, payload = payload)
         }
     }

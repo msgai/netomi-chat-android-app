@@ -42,7 +42,8 @@ data class NCWAttachmentListRequest(
     var isReviewEnabled: Boolean? = null,
     var thumbnailUrl: String? = null,
     var fileURL: String? = null,
-    var fileSize: String? = null
+    var fileSize: String? = null,
+    var values: Values? = null,
 )
 
 
