@@ -274,7 +274,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         val device = DeviceInfoUtil.getDeviceInfo(this)
-        deviceInfo = device.toNCWCustomAttributes()
+        //deviceInfo = device.toNCWCustomAttributes()
 
         val jwtToken = NCWThemeUtils.getJwtToken()
         if (jwtToken != null) {
@@ -1739,10 +1739,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun addStreamMessages(newMessages: NCWMessage, chunkIndex: Int, chunkStatus: String) {
         val messageId = newMessages.requestID ?: return
-        if (chunkIndex != -1) {
+        if (chunkIndex != -1 && newMessages.type==MessageType.TEXT) {
             val chunkList = messageChunksMap.getOrPut(messageId) { mutableListOf() }
             chunkList.add(newMessages) // Add chunk
             chunkList.sortBy { it.customPayload?.CHUNK_INDEX }
+            Log.e("Chunk List", chunkList.toString())
             val fullMessage = mergeChunks(chunkList)
 
             Handler(Looper.getMainLooper()).postDelayed({
@@ -1761,7 +1762,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private fun mergeChunks(chunkList: List<NCWMessage>): NCWMessage {
         val mergedText = chunkList.joinToString("") { it.message ?: "" }
         val firstChunk = chunkList.first()
-        return firstChunk.copy(message = mergedText)
+        val isReviewEnabled = chunkList.any { it.isReviewEnabled }
+        return firstChunk.copy(message = mergedText, isReviewEnabled = isReviewEnabled)
     }
 
     private fun safelyRemoveLoader(newMessages: List<NCWMessage>) {
