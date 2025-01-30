@@ -1670,6 +1670,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     } else {
                         messageList.addAll(listOf(message))
                         messageAdapter.notifyDataSetChanged()
+                        onScrollToPosition(true)
                         delay(100)
                     }
                 }
@@ -2244,7 +2245,10 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
                             mMultipleFile.add(mObj)
                         }
                     }
-                    if (!validateFormAttachment(mMultipleFile)) return@registerForActivityResult
+                    if (!validateFormAttachment(mMultipleFile)) {
+                        mMultipleFile.clear()
+                        return@registerForActivityResult
+                    }
                     checkSupporrtedFilesForm()
                     updateFormSchema()
                     chatViewModel.uploadFilesSequentially(mMultipleFile)
@@ -2258,6 +2262,10 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
                         if (mObj != null) {
                             mMultipleFile.add(mObj)
                         }
+                    }
+                    if (!validateFormAttachment(mMultipleFile)) {
+                        mMultipleFile.clear()
+                        return@registerForActivityResult
                     }
                     updateFormSchema()
                     chatViewModel.uploadFilesSequentially(mMultipleFile)
@@ -2282,7 +2290,10 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
                         }
 
                     }
-                    if (!validateFormAttachment(mMultipleFile)) return@registerForActivityResult
+                    if (!validateFormAttachment(mMultipleFile)) {
+                        mMultipleFile.clear()
+                        return@registerForActivityResult
+                    }
                     checkSupporrtedFilesForm()
                     updateFormSchema()
                     chatViewModel.uploadFilesSequentially(mMultipleFile)
@@ -2293,15 +2304,17 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
                     result.data?.data?.let { uri ->
                         val mimeType = contentResolver.getType(uri)
                         val fileSend = NCWImageUtils.getFileFromUri(this, uri)
-                        Log.e("Fileelle", "asasasasas " + fileSend)
 
                         isMultipleFile = true
-                        Log.e("mMultipleFile", "mimeType " + mimeType)
-                        // handleFileSelection(uri, mimeType, isGallery = true)
                         val mObj = fileSend?.let { MultiFileModel(mimeType!!, it, fileSend.name) }
                         if (mObj != null) {
                             mMultipleFile.add(mObj)
                         }
+
+                    }
+                    if (!validateFormAttachment(mMultipleFile)) {
+                        mMultipleFile.clear()
+                        return@registerForActivityResult
                     }
                     updateFormSchema()
                     chatViewModel.uploadFilesSequentially(mMultipleFile)
@@ -2724,8 +2737,10 @@ if (isUpdated) {
 
             NCWRoutes.WEBHOOK_EVENT -> {
                 Log.e("Suuusus","saasassa")
-                if (idleTimeInMillis > 0)
+                if (idleTimeInMillis > 0 && isIdle)
                     resetIdleTimer()
+                else
+                    NCWAppUtils.showToast(this,"cxccxcxcx")
             }
 
             NCWRoutes.LOGIN -> {
