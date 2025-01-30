@@ -420,7 +420,9 @@ class NCWChatAdapter(
 
                 }
                 MessageType.MULTISOURCE -> {
-                    imgBot.visibility = if (message.attachmentIndex == 0) View.VISIBLE else View.GONE
+                    //imgBot.visibility = if (message.attachmentIndex == 0) View.VISIBLE else View.GONE
+                    imgBot.visibility = View.GONE
+                    tvTime.visibility=View.GONE
                     constSource.visibility = View.VISIBLE
                     sourceRecyclerView.visibility = View.VISIBLE
                     NCWThemeUtils.setBotConfig(constSource)
