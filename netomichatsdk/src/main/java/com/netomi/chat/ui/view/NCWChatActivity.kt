@@ -388,7 +388,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private val idleRunnable = Runnable {
         if (idleTimeInMillis > 0) {
-           // hitIdealTimeOutEvent()
+            hitIdealTimeOutEvent()
         }
     }
 
