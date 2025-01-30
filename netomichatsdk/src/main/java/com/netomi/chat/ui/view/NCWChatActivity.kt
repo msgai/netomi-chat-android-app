@@ -388,7 +388,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private val idleRunnable = Runnable {
         if (idleTimeInMillis > 0) {
-            hitIdealTimeOutEvent()
+           // hitIdealTimeOutEvent()
         }
     }
 
@@ -1670,7 +1670,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     } else {
                         messageList.addAll(listOf(message))
                         messageAdapter.notifyDataSetChanged()
-                        onScrollToPosition(true)
                         delay(100)
                     }
                 }
