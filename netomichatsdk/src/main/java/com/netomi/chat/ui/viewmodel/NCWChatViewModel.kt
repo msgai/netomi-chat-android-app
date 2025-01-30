@@ -231,7 +231,7 @@ Log.e("DataaResposne","response"+response)
 
                         fileList.removeAt(0)
                         val payload = uploadResponse.payload
-                        if (payload is NCWSignedUrlPayload) {
+                        if (payload != null && payload is NCWSignedUrlPayload) {
                             withContext(Dispatchers.Main) {
                                 _errorFile.value = payload
 
@@ -256,7 +256,7 @@ Log.e("DataaResposne","response"+response)
                 else if (response is NCWState.SendMessageError<*, *>){
                         fileList.removeAt(0)
                         val payload = response.payload
-                        if (payload is NCWSignedUrlPayload) {
+                        if (payload != null && payload is NCWSignedUrlPayload) {
                             withContext(Dispatchers.Main) {
                                 _errorFile.value = payload
 
