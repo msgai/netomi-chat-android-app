@@ -111,6 +111,26 @@ object NCWThemeUtils
         }
     }
 
+    fun setHeader( headerContainer: ConstraintLayout,  window: Window,
+                   rootLayout: View,context: Context,)
+    {
+        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+            // Apply gradient or background color
+            if (headerConfig.isGradientAppied) {
+                createGradientDrawable()?.let { gradientDrawable ->
+                    applyGradient(headerContainer, rootLayout, window, gradientDrawable)
+                } ?: applyBackgroundColor(
+                    headerConfig.backgroundColor,
+                    headerContainer,
+                    window,
+                    context
+                )
+            } else {
+                applyBackgroundColor(headerConfig.backgroundColor, headerContainer, window, context)
+            }
+        }
+    }
+
     fun setLogoIcon(logoIcon: ImageView,context: Context){
         themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
             headerConfig.logoImage?.takeIf { it.isNotEmpty() }?.let { logoUrl ->
