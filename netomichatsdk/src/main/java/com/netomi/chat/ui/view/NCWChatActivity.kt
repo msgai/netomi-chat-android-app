@@ -348,6 +348,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             NCWQuickMenuBottomSheet(it.quickMenuOptions) { options ->
                 val timeStamp = System.currentTimeMillis()
                 checkForInitialMessage()
+                checkForPreviousQuickReply()
                 val payload = createPayload(options.text, options.label, timeStamp)
                 chatViewModel.sendMessage(options.label, timeStamp)
                 if (payload != null) {
