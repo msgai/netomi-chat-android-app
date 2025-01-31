@@ -363,6 +363,7 @@ class NCWFormAdapter(
                 val radioButton = RadioButton(itemView.context).apply {
                     text = option.value
                     NCWThemeUtils.setRadioButtonUserConfig(this)
+                    buttonTintList = ContextCompat.getColorStateList(context, R.color.checkbox_tint)
                     isEnabled = isRadiaClickable
                     setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) {
@@ -416,6 +417,7 @@ class NCWFormAdapter(
                         setMargins(0, 5, 0, 0)
                     }
                     NCWThemeUtils.setTitleColor(this)
+                    buttonTintList = ContextCompat.getColorStateList(context, R.color.checkbox_tint)
                     setPadding(0, 0, 0, 0)
                     setOnCheckedChangeListener { _, isChecked ->
                         val selectedCheckboxes =
@@ -516,6 +518,7 @@ class NCWFormAdapter(
                         textSize = 14f
                         setPadding(15, 16, 10, 16)
                         NCWThemeUtils.setBotTextColor(this)
+                        buttonTintList = ContextCompat.getColorStateList(context, R.color.checkbox_tint)
                         setOnCheckedChangeListener { _, isChecked ->
                             if (isChecked) {
                                 selectedItems.add(option)
