@@ -2250,9 +2250,12 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
                         mMultipleFile.clear()
                         return@registerForActivityResult
                     }
-                    checkSupporrtedFilesForm()
-                    updateFormSchema()
-                    chatViewModel.uploadFilesSequentially(mMultipleFile)
+                    checkSupportedFilesForm()
+
+                    if (mMultipleFile.size>0) {
+                        updateFormSchema()
+                        chatViewModel.uploadFilesSequentially(mMultipleFile)
+                    }
                 } else {
                     result.data?.data?.let { uri ->
                         val mimeType = contentResolver.getType(uri)
@@ -2268,8 +2271,11 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
                         mMultipleFile.clear()
                         return@registerForActivityResult
                     }
-                    updateFormSchema()
-                    chatViewModel.uploadFilesSequentially(mMultipleFile)
+                    checkSupportedFilesForm()
+                    if (mMultipleFile.size>0) {
+                        updateFormSchema()
+                        chatViewModel.uploadFilesSequentially(mMultipleFile)
+                    }
                 }
             }
         }
@@ -2295,9 +2301,11 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
                         mMultipleFile.clear()
                         return@registerForActivityResult
                     }
-                    checkSupporrtedFilesForm()
-                    updateFormSchema()
-                    chatViewModel.uploadFilesSequentially(mMultipleFile)
+                    checkSupportedFilesForm()
+                    if (mMultipleFile.size>0) {
+                        updateFormSchema()
+                        chatViewModel.uploadFilesSequentially(mMultipleFile)
+                    }
 
 
                 } else {
@@ -2317,13 +2325,16 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
                         mMultipleFile.clear()
                         return@registerForActivityResult
                     }
-                    updateFormSchema()
-                    chatViewModel.uploadFilesSequentially(mMultipleFile)
+                    checkSupportedFilesForm()
+                    if (mMultipleFile.size>0) {
+                        updateFormSchema()
+                        chatViewModel.uploadFilesSequentially(mMultipleFile)
+                    }
                 }
             }
         }
 
-    private fun checkSupporrtedFilesForm() {
+    private fun checkSupportedFilesForm() {
 
 
         val supportedExtensions =
