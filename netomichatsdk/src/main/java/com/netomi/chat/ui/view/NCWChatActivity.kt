@@ -1408,11 +1408,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     surveyField = surveyField,
                     TYPE_SHOW_SURVEY,
                     onSubmit = { submitSurvey ->
-                        chatViewModel.hitSubmitSurveyRequestAPI(submitSurvey)
+
                         val submitSurveyInfo =
                             submitSurvey.requestBody.eventData.eventInfo.submitSurveyInfo
-
-
                         val newMessage = NCWMessage(
                             sender = TYPE_EVENT,
                             timestamp = response.timestamp ?: System.currentTimeMillis(),
@@ -1422,9 +1420,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                         )
                         messageList.add(newMessage)
                         addLoader()
-
                         surveyField.submitSurveyInfo = submitSurveyInfo
-
+                        messageAdapter.notifyDataSetChanged()
+                        onScrollToPosition(true)
+                        chatViewModel.hitSubmitSurveyRequestAPI(submitSurvey)
                     }, { requestId, label ->
                         val timeStamp = System.currentTimeMillis()
                         if (isSurveyRule) {
