@@ -1424,10 +1424,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                         )
                         messageList.add(newMessage)
-                        addLoader()
-                        surveyField.submitSurveyInfo = submitSurveyInfo
-                        messageAdapter.notifyDataSetChanged()
-                        onScrollToPosition(true)
+
+                        if (!isSurveyRule) {
+                            addLoader()
+                            surveyField.submitSurveyInfo = submitSurveyInfo
+                            messageAdapter.notifyDataSetChanged()
+                            onScrollToPosition(true)
+                        }
                         chatViewModel.hitSubmitSurveyRequestAPI(submitSurvey)
                     }, { requestId, label ->
                         val timeStamp = System.currentTimeMillis()

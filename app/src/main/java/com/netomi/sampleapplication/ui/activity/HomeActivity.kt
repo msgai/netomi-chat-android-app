@@ -55,7 +55,6 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         botList = mutableListOf()
-
         initView()
         val email = preferences.getString(SharePreferenceConstant.EMAIL)
         if (NetworkUtils.isNetworkAvailable(this))
