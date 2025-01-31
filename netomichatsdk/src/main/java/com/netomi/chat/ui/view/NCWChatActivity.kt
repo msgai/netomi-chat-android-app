@@ -395,27 +395,30 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private fun hitIdealTimeOutEvent() {
         val idleTime = idleTimeInMillis / 1000
         isIdle = true
-        chatViewModel.hitFeedbackAPI(
-            NCWFeedbackRequest(
-                botRefId!!, com.netomi.chat.model.feedback.feedbackresponse.NCWRequestBody(
-                    botReferenceId = botRefId!!,
-                    channelId = CHANNEL_ID,
-                    conversationId = conversationID!!,
-                    eventData = com.netomi.chat.model.feedback.feedbackrequest.NCWEventData(
-                        eventInfo = NCWEventInfo(
-                            idleTime = idleTime
+
+        if (botRefId!=null && conversationID!=null) {
+            chatViewModel.hitFeedbackAPI(
+                NCWFeedbackRequest(
+                    botRefId?:"", com.netomi.chat.model.feedback.feedbackresponse.NCWRequestBody(
+                        botReferenceId = botRefId?:"",
+                        channelId = CHANNEL_ID,
+                        conversationId = conversationID?:"",
+                        eventData = com.netomi.chat.model.feedback.feedbackrequest.NCWEventData(
+                            eventInfo = NCWEventInfo(
+                                idleTime = idleTime
+                            ),
+                            eventType = EVENT_WIDGET,
+                            subType = SUB_TYPE_IDLE_USER
                         ),
-                        eventType = EVENT_WIDGET,
-                        subType = SUB_TYPE_IDLE_USER
-                    ),
-                    eventName = INFO_EVENT,
-                    isPublishToMQTT = false,
-                    requestType = NETOMI,
-                    timestamp = System.currentTimeMillis(),
-                    triggerType = TYPE_EVENT
+                        eventName = INFO_EVENT,
+                        isPublishToMQTT = false,
+                        requestType = NETOMI,
+                        timestamp = System.currentTimeMillis(),
+                        triggerType = TYPE_EVENT
+                    )
                 )
             )
-        )
+        }
     }
 
 
@@ -1567,6 +1570,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         sendMessageIcon.isEnabled = enabled
         messageInputField.isEnabled = enabled
         attachmentIcon.isEnabled = enabled
+        ivMenuOption.isEnabled = enabled
         val alphaValue = if (enabled) 1f else 0.5f
         sendMessageIcon.alpha = alphaValue
         messageInputField.alpha = alphaValue
@@ -1575,9 +1579,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             val colorFilter = PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN)
             sendMessageIcon.colorFilter = colorFilter
             attachmentIcon.colorFilter = colorFilter
+            ivMenuOption.colorFilter = colorFilter
         } else {
             sendMessageIcon.clearColorFilter()
             attachmentIcon.clearColorFilter()
+            ivMenuOption.clearColorFilter()
         }
 
     }

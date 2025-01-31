@@ -201,6 +201,7 @@
                 android:background="@drawable/bg_stroke_rounded_white"
                 android:gravity="top"
                 android:hint="@string/start_typing"
+                android:textColor="@color/black"
                 android:maxLength="200"
                 android:scrollbars="vertical"
                 android:isScrollContainer="true"
