@@ -63,6 +63,9 @@ dependencies {
     implementation (libs.androidx.fragment.ktx)
     implementation ("com.github.bumptech.glide:glide:4.16.0")
 
+
+
+
     //Dagger
     //implementation (libs.dagger.hilt)
     //kapt(libs.dagger.kapt)
