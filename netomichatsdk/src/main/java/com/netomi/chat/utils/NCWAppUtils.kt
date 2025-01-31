@@ -136,6 +136,7 @@ object NCWAppUtils {
         return when (file.extension.lowercase()) {
             "png" -> "image/png"
             "jpg", "jpeg" -> "image/jpeg"
+            "gif" -> "image/gif"
             "pdf" -> "application/pdf"
             "mp4" -> "video/mp4"
             "mov" -> "video/quicktime"
@@ -152,7 +153,7 @@ object NCWAppUtils {
     }
     fun getTypeFromContent(type: String): String {
         return when (type) {
-            "image/png", "image/jpeg" -> TYPE_IMAGE
+            "image/gif","image/png", "image/jpeg" -> TYPE_IMAGE
             "video/quicktime",  "video/mp4" -> TYPE_VIDEO
             else -> TYPE_FILE
         }
