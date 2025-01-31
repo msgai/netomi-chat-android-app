@@ -32,7 +32,7 @@
     <string name="setting">Settings</string>
     <string name="restart">Restart Chat</string>
     <string name="sound">Sound</string>
-    <string name="download_transcript">Download transcript</string>
+    <string name="download_transcript">Download Transcript</string>
     <string name="language_en">Language - EN</string>
     <string name="restart_chat">Restart Chat</string>
     <string name="confirm_restart_chat">Are you sure you want to restart the chat? This will clear your conversation and start a new chat.</string>

@@ -464,6 +464,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             return
         }
         showProgressBar()
+        handler.removeCallbacks(idleRunnable)
         chatViewModel.hitEndChatAPI(
             NCWEndChatRequest(
                 botRefId = botRefId!!, com.netomi.chat.model.endchat.NCWRequestBody(
@@ -2725,6 +2726,7 @@ if (isUpdated) {
 
             NCWRoutes.ROUTE_END_CHAT -> {
                 hideProgressBar()
+
                 if (onRestart) {
 
                     messageList.clear()
