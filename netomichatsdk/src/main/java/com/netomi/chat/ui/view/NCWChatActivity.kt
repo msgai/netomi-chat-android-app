@@ -815,7 +815,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         messageInputField.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-              Log.e("HHsahjsjsa","assasasadsa ")
                 chatRecyclerView.scrollToPosition(messageAdapter.itemCount - 1)
             }
         }
