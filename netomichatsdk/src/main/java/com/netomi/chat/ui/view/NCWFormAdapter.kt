@@ -4,6 +4,8 @@ import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.Context
 import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.text.Editable
@@ -903,6 +905,11 @@ class NCWFormAdapter(
                                     (recyclerDoc.adapter as? NCWFormFilesAdapter)?.itemRemoved(
                                         position
                                     )
+
+                                    uploadMedia.isEnabled=true
+                                    uploadMedia.alpha = 1f
+
+
                                 }
                             },
                             { retry ->
@@ -910,8 +917,16 @@ class NCWFormAdapter(
                                     onRetry(component, retry)
                                 }
                             })
+
+
+
                     } else {
                         recyclerDoc.adapter!!.notifyDataSetChanged()
+                    }
+                    val isMultipleUpload = component.config?.fileUploadType == NCWAppConstant.UPLOAD_FILE_MULTIPLE
+                    if (!isMultipleUpload){
+                        uploadMedia.isEnabled=false
+                        uploadMedia.alpha = 0.5f
                     }
                 } else {
                     recyclerDoc.visibility = View.GONE
@@ -954,7 +969,10 @@ class NCWFormAdapter(
 
                 if (isMultipleUpload || hasNoFiles) {
                     callBack(component)
+
                 }
+
+
             }
             uploadMedia.isEnabled = isClickable
             formContainer.addView(fileInputView)
@@ -1081,6 +1099,24 @@ class NCWFormAdapter(
 
             btnSubmit.setOnClickListener {
                 if (validateInputs(inputValues)) {
+
+                    var isStillFileUpload = false
+
+                    items.filter { it.component == "file" && it.type == "file" }
+                        .forEach { matchList ->
+                            matchList.fileUpload?.forEach { fileUploadData ->
+                                if (fileUploadData.fileUrl == null && fileUploadData.mediaType == null) {
+                                    isStillFileUpload = true
+                                    return@forEach
+                                }
+                            }
+                        }
+
+                    if (isStillFileUpload) {
+                        Log.e("Upload", "Still file upload in progress")
+                        return@setOnClickListener
+                    }
+
                     // Create the payload and label response
                     val messagePayload = createPayload(inputValuesSelected)
                     val labelResponse = createLabelResponse(inputValuesSelected)
