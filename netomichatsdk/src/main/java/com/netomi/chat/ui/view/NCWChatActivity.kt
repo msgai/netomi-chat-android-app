@@ -348,6 +348,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             NCWQuickMenuBottomSheet(it.quickMenuOptions) { options ->
                 val timeStamp = System.currentTimeMillis()
                 checkForInitialMessage()
+                checkForPreviousQuickReply()
                 val payload = createPayload(options.text, options.label, timeStamp)
                 chatViewModel.sendMessage(options.label, timeStamp)
                 if (payload != null) {
@@ -1423,10 +1424,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                         )
                         messageList.add(newMessage)
-                        addLoader()
-                        surveyField.submitSurveyInfo = submitSurveyInfo
-                        messageAdapter.notifyDataSetChanged()
-                        onScrollToPosition(true)
+
+                        if (!isSurveyRule) {
+                            addLoader()
+                            surveyField.submitSurveyInfo = submitSurveyInfo
+                            messageAdapter.notifyDataSetChanged()
+                            onScrollToPosition(true)
+                        }
                         chatViewModel.hitSubmitSurveyRequestAPI(submitSurvey)
                     }, { requestId, label ->
                         val timeStamp = System.currentTimeMillis()
