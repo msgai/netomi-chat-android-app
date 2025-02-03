@@ -206,6 +206,8 @@
                 android:scrollbars="vertical"
                 android:isScrollContainer="true"
                 android:maxLines="5"
+                android:inputType="textMultiLine|text"
+                android:imeOptions="actionDone"
                 android:padding="8dp"
                 android:textSize="12sp"
                 android:visibility="visible"

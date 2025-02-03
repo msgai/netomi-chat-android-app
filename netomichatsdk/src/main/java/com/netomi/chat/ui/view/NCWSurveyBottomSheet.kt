@@ -4,11 +4,13 @@ package com.netomi.chat.ui.view
 import android.app.Dialog
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputType
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.RadioGroup
@@ -127,6 +129,9 @@ class NCWSurveyBottomSheet(
             visibility = if (from == TYPE_SUBMITTED_SURVEY) View.VISIBLE else View.GONE
             isClickable = from == TYPE_SUBMITTED_SURVEY
         }
+        edtAdditionalFeedback.setRawInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE)
+        edtAdditionalFeedback.imeOptions = EditorInfo.IME_ACTION_DONE
+
 
         edtAdditionalFeedback.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -134,9 +139,8 @@ class NCWSurveyBottomSheet(
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val currentLength = s?.length ?: 0
-                if (s?.trim()?.isNotEmpty() == true)
-                    tvFeedbackCount.text = "$currentLength/200"
+                val currentLength = s?.trim()?.length ?: 0
+                tvFeedbackCount.text = "$currentLength/200"
             }
 
             override fun afterTextChanged(s: Editable?) {
