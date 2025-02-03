@@ -379,6 +379,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     getString(R.string.restart_chat)
         ) {
             onRestart = true
+            isHistoryChatAvialbale = false
             if (topic != null) {
                 NCWAwsIotManager.unsubscribeRestart(topic)
             }
@@ -1323,6 +1324,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun refreshChat(eventData: EventData) {
+     //   messageList.clear()
         val oldTopic = topic
         Log.e("OAUTH", eventData.authenticatedConversationId.toString())
         conversationID = eventData.authenticatedConversationId
@@ -2608,6 +2610,7 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
                 Log.e("ROUTE_GET_MQTT_CREDENTIALS", "ROUTE_GET_CHAT")
                 if (response != null && response.responses.size > 0) {
                     isHistoryChatAvialbale = true
+                    messageList.clear()
                     parseHistoryItems(response.responses)
                 } else {
                     isHistoryChatAvialbale = false
