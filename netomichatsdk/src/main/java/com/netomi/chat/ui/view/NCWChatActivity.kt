@@ -1521,7 +1521,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             response?.attachments?.mapIndexedNotNull { index, attachment ->
                 mapAttachmentToMessage(
                     attachment,
-                    response.requestId!!,
+                    response.requestId?:"",
                     type,
                     index
                 )
