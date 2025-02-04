@@ -103,6 +103,7 @@ import com.netomi.chat.utils.NCWAppConstant.EVENT_WIDGET
 import com.netomi.chat.utils.NCWAppConstant.INFO_EVENT
 import com.netomi.chat.utils.NCWAppConstant.LOGOUT
 import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
+import com.netomi.chat.utils.NCWAppConstant.MESSAGE_BACK_TO_BOT
 import com.netomi.chat.utils.NCWAppConstant.NETOMI
 import com.netomi.chat.utils.NCWAppConstant.OAUTH
 import com.netomi.chat.utils.NCWAppConstant.PROACTIVE_GREETING
@@ -383,6 +384,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             if (topic != null) {
                 NCWAwsIotManager.unsubscribeRestart(topic)
             }
+            callBackToBot()
             hitEndChatAPI()
         }
     }
@@ -447,6 +449,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                       } else {
                           hitEndChatAPI()
                       }*/
+                    callBackToBot()
                     hitEndChatAPI()
                 } else {
                     NCWThemeUtils.setJwtToken(null)
@@ -456,6 +459,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         )
         bottomSheet.show(supportFragmentManager, "EndChatBottomSheet")
 
+    }
+
+    private fun callBackToBot() {
+        if (ownerType== TYPE_AGENT){
+            val timeStamp = System.currentTimeMillis()
+            val payload = createPayload(MESSAGE_BACK_TO_BOT, MESSAGE_BACK_TO_BOT, timeStamp)
+            sendMessageToBot(payload)
+
+        }
     }
 
     private fun hitLogoutAPI() {
@@ -682,7 +694,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     label = label,
                     messageId = messageId,
                     timestamp = timeStamp,
-                    hideMessage = if (label == PROACTIVE_GREETING || label==SKIP_LABEL) true else null
+                    hideMessage = if (label == PROACTIVE_GREETING || label==SKIP_LABEL|| label== MESSAGE_BACK_TO_BOT) true else null
+
                 ),
                 attachmentList = attachmentList,
                 additionalAttributes = attributes,
