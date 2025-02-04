@@ -84,6 +84,7 @@ object NCWAppConstant {
     const val UPLOAD_FILE_MULTIPLE="Multiple"
     const val SKIP_LABEL="SKIP"
 
+    const val MESSAGE_BACK_TO_BOT="back to bot"
 
 
     object RatingType {

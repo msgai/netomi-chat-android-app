@@ -104,6 +104,7 @@ import com.netomi.chat.utils.NCWAppConstant.EVENT_WIDGET
 import com.netomi.chat.utils.NCWAppConstant.INFO_EVENT
 import com.netomi.chat.utils.NCWAppConstant.LOGOUT
 import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
+import com.netomi.chat.utils.NCWAppConstant.MESSAGE_BACK_TO_BOT
 import com.netomi.chat.utils.NCWAppConstant.NETOMI
 import com.netomi.chat.utils.NCWAppConstant.OAUTH
 import com.netomi.chat.utils.NCWAppConstant.PROACTIVE_GREETING
@@ -275,7 +276,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         val device = DeviceInfoUtil.getDeviceInfo(this)
-        //deviceInfo = device.toNCWCustomAttributes()
+        deviceInfo = device.toNCWCustomAttributes()
 
         val jwtToken = NCWThemeUtils.getJwtToken()
         if (jwtToken != null) {
@@ -349,6 +350,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             NCWQuickMenuBottomSheet(it.quickMenuOptions) { options ->
                 val timeStamp = System.currentTimeMillis()
                 checkForInitialMessage()
+                checkForPreviousQuickReply()
                 val payload = createPayload(options.text, options.label, timeStamp)
                 chatViewModel.sendMessage(options.label, timeStamp)
                 if (payload != null) {
@@ -379,9 +381,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     getString(R.string.restart_chat)
         ) {
             onRestart = true
+            isHistoryChatAvialbale = false
             if (topic != null) {
                 NCWAwsIotManager.unsubscribeRestart(topic)
             }
+            callBackToBot()
             hitEndChatAPI()
         }
     }
@@ -446,6 +450,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                       } else {
                           hitEndChatAPI()
                       }*/
+                    callBackToBot()
                     hitEndChatAPI()
                 } else {
                     NCWThemeUtils.setJwtToken(null)
@@ -455,6 +460,15 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         )
         bottomSheet.show(supportFragmentManager, "EndChatBottomSheet")
 
+    }
+
+    private fun callBackToBot() {
+        if (ownerType== TYPE_AGENT){
+            val timeStamp = System.currentTimeMillis()
+            val payload = createPayload(MESSAGE_BACK_TO_BOT, MESSAGE_BACK_TO_BOT, timeStamp)
+            sendMessageToBot(payload)
+
+        }
     }
 
     private fun hitLogoutAPI() {
@@ -554,8 +568,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             subtitle = subtitle,
             yesText = submitText,
             onYesClick = {
-                if (from == SESSION)
+                if (from == SESSION) {
+                    NCWThemeUtils.setSignInUserDetails(null)
+                    NCWThemeUtils.setConversationID(null)
+                    themeData?.isProActiveGreetings = false
                     finish()
+                }
                 else if (from == LOGOUT) {
                     NCWThemeUtils.setSignInUserDetails(null)
                     hitEndChatAPI()
@@ -677,7 +695,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     label = label,
                     messageId = messageId,
                     timestamp = timeStamp,
-                    hideMessage = if (label == PROACTIVE_GREETING || label==SKIP_LABEL) true else null
+                    hideMessage = if (label == PROACTIVE_GREETING || label==SKIP_LABEL|| label== MESSAGE_BACK_TO_BOT) true else null
+
                 ),
                 attachmentList = attachmentList,
                 additionalAttributes = attributes,
@@ -1323,6 +1342,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun refreshChat(eventData: EventData) {
+     //   messageList.clear()
         val oldTopic = topic
         Log.e("OAUTH", eventData.authenticatedConversationId.toString())
         conversationID = eventData.authenticatedConversationId
@@ -1424,10 +1444,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
                         )
                         messageList.add(newMessage)
-                        addLoader()
-                        surveyField.submitSurveyInfo = submitSurveyInfo
-                        messageAdapter.notifyDataSetChanged()
-                        onScrollToPosition(true)
+
+                        if (!isSurveyRule) {
+                            addLoader()
+                            surveyField.submitSurveyInfo = submitSurveyInfo
+                            messageAdapter.notifyDataSetChanged()
+                            onScrollToPosition(true)
+                        }
                         chatViewModel.hitSubmitSurveyRequestAPI(submitSurvey)
                     }, { requestId, label ->
                         val timeStamp = System.currentTimeMillis()
@@ -1517,7 +1540,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 response.customPayload?.let {
                     mapAttachmentToMessage(
                         attachment,
-                        response.requestId!!,
+                        response.requestId?:"",
                         type,
                         index,
                         it
@@ -1769,6 +1792,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             // If not a chunked message, update directly
             messageAdapter.updateOrAppendMessage(newMessages, false)
         }
+
+        /* chatRecyclerView.post {
+             chatRecyclerView.post(messageList.size - 1)
+         }*/
 
     }
 
@@ -2611,6 +2638,7 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
                 Log.e("ROUTE_GET_MQTT_CREDENTIALS", "ROUTE_GET_CHAT")
                 if (response != null && response.responses.size > 0) {
                     isHistoryChatAvialbale = true
+                    messageList.clear()
                     parseHistoryItems(response.responses)
                 } else {
                     isHistoryChatAvialbale = false
@@ -2756,6 +2784,7 @@ if (isUpdated) {
                         return
                     }
                 }
+                NCWThemeUtils.setSignInUserDetails(null)
                 NCWThemeUtils.setConversationID(null)
                 themeData?.isProActiveGreetings = false
                 finish()
