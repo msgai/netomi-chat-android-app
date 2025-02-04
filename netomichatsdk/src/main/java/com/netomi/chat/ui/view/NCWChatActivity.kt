@@ -555,8 +555,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             subtitle = subtitle,
             yesText = submitText,
             onYesClick = {
-                if (from == SESSION)
+                if (from == SESSION) {
+                    NCWThemeUtils.setSignInUserDetails(null)
+                    NCWThemeUtils.setConversationID(null)
+                    themeData?.isProActiveGreetings = false
                     finish()
+                }
                 else if (from == LOGOUT) {
                     NCWThemeUtils.setSignInUserDetails(null)
                     hitEndChatAPI()
@@ -2756,6 +2760,7 @@ if (isUpdated) {
                         return
                     }
                 }
+                NCWThemeUtils.setSignInUserDetails(null)
                 NCWThemeUtils.setConversationID(null)
                 themeData?.isProActiveGreetings = false
                 finish()
