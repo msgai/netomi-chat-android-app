@@ -1485,23 +1485,21 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             type = NCWAppConstant.NORMAL
         }
         val newMessages =
-            response?.attachments?.mapIndexedNotNull { index, attachment ->
-                response.customPayload?.let {
-                    mapAttachmentToMessage(
+            response.attachments?.mapIndexedNotNull { index, attachment ->
+                mapAttachmentToMessage(
                         attachment,
                         response.requestId?:"",
                         type,
                         index,
-                        it
+                        response.customPayload
                     )
-                }
             } ?: emptyList()
 
         if (newMessages.isNotEmpty()) {
             newMessages.forEachIndexed { index, message ->
                 message.isSameTimeMessage = index == 0
             }
-            val customPayload = response?.customPayload
+            val customPayload = response.customPayload
             if (customPayload?.CHUNK_INDEX != null && customPayload.CHUNK_INDEX.toInt() == 0 && customPayload.CHUNK_STATUS.equals(
                     "IN-PROGRESS")) {
                 Log.e("Streaming Chunk", "Streaming Chunk")
@@ -1529,14 +1527,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 )
             ) {
                 Log.e("Streaming Chunk", "Streaming Chunk Not")
-               // updateMessageList(newMessages,response)
-
                 CoroutineScope(Dispatchers.Main).launch {
                     updateMessageList(newMessages, response)
                 }
             } else {
                 Log.e("Streaming Chunk", "Streaming Chunk Not")
-             //   updateMessageList(newMessages,response)
                 CoroutineScope(Dispatchers.Main).launch {
                     updateMessageList(newMessages, response)
                 }
@@ -1548,7 +1543,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             renderEventAndCustomFields(response)
         }
 
-       // renderEventAndCustomFields(response)
        /* if (response.triggerType == TYPE_EVENT) {
             val eventData = response.eventObject?.eventData
             renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
@@ -1685,7 +1679,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         requestId: String,
         type: String,
         index: Int,
-        customPayload: NCWCustomPayload
+        customPayload: NCWCustomPayload?
     ): NCWMessage? {
         val attach = attachment.attachment ?: return null
         val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
@@ -1749,17 +1743,13 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private suspend fun updateMessageList(newMessages: List<NCWMessage>, response: NCWGenericChannelResponse) {
-        Log.e("NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled", "s " + NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled)
 
-        if (false) {
-            Log.e("NCWThemeUtils.getThemeData()?.str", "ifffffffffff " + NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled)
+        if (NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled == true) {
             removeStreamLoader()
 
             withContext(Dispatchers.Main) {
                 for (message in newMessages) {
-                    Log.e("NCWThemeUtils.getThemeData()?.str", "Start Message ")
                     if (message.type == MessageType.TEXT) {
-                        Log.e("NCWThemeUtils.getThemeData()?.str", "Start TEXT ")
                         message.message?.let { fullMessage ->
                             val chunks = splitIntoChunks(
                                 fullMessage,
@@ -1772,7 +1762,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                             }
                         }
                     } else {
-                        Log.e("NCWThemeUtils.getThemeData()?.str", "Start Otherrr ")
                         messageList.addAll(listOf(message))
                         messageAdapter.notifyDataSetChanged()
                         delay(100)
@@ -1780,7 +1769,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 }
             }
         } else {
-            Log.e("NCWThemeUtils.getThemeData()?.str", "elssssssss " + NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled)
             val typingIndicatorEnabled = themeData?.typingIndicator?.enabled ?: false
             if (!typingIndicatorEnabled) {
                 addMessages(newMessages)
@@ -1808,9 +1796,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 addMessages(newMessages)
             }
         }
-
-        // Ensure this runs **AFTER** all delays and processing
-        Log.e("NCWThemeUtils.getThemeData()?.str", "Start Outside, calling renderEventAndCustomFields")
         renderEventAndCustomFields(response)
     }
 
@@ -3018,15 +3003,16 @@ if (isUpdated) {
                 val gson = Gson()
 
                 val newMessages = response.attachments?.mapIndexedNotNull { index, attachment ->
-                    response.requestId?.let {
-                        mapAttachmentToMessage(
-                            attachment,
-                            it, NCWAppConstant.NORMAL, index
-                        )
-                    }
-                } ?: emptyList()
+                    mapAttachmentToMessage(
+                                attachment,
+                        response.requestId?:"",
+                        NCWAppConstant.NORMAL, index,
+                                response.customPayload
 
+                            )
+                        }
 
+                 ?: emptyList()
 
                 if (newMessages.isNotEmpty()) {
                     newMessages.forEachIndexed { idx, message ->
@@ -3164,18 +3150,7 @@ if (isUpdated) {
                      mapAttachmentToMessage(it, response.requestId!!, NCWAppConstant.NORMAL)
                  } ?: emptyList()*/
 
-                val newMessages = response.attachments?.mapIndexedNotNull { index, attachment ->
-                    response.requestId?.let {
-                        response.customPayload?.let { it1 ->
-                            mapAttachmentToMessage(
-                                attachment,
-                                it, NCWAppConstant.NORMAL, index,
-                                it1
 
-                            )
-                        }
-                    }
-                } ?: emptyList()
 
 
 
@@ -3229,7 +3204,6 @@ if (isUpdated) {
 
         messageAdapter.notifyDataSetChanged()
         onScrollToPosition(true)
-      //  chatRecyclerView.scrollToPosition(messageList.size - 1)
 
 
     }
