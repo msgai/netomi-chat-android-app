@@ -3077,13 +3077,23 @@ if (isUpdated) {
                                             response.requestId == schemaRequestId
                                         }
 
-
+Log.e("matchingResponse?.requestPayload?.","matchingResponse?.requestPayload?."+matchingResponse?.requestPayload?.attachmentList)
                                     matchingResponse?.requestPayload?.messagePayload?.text?.let { nextMessagePayload ->
                                         val formData = parsePayloadToFormData(nextMessagePayload)
 
                                         if (!formData.isNullOrEmpty()) {
                                             schema.formData = formData
                                         }
+
+                                    }
+
+                                    matchingResponse?.requestPayload?.attachmentList?.let { nextMessagePayload ->
+                                        val formData = nextMessagePayload[0]
+
+                                        if (formData!=null) {
+                                            schema.formValues = formData.values?.formValues
+                                        }
+
                                     }
                                     messageList.add(NCWMessage(
                                         sender = TYPE_FORM,
