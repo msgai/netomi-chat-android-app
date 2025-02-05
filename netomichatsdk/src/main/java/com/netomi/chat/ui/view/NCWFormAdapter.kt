@@ -192,7 +192,6 @@ class NCWFormAdapter(
                     val inputText = s?.toString().orEmpty()
                     if (isValidationEnabled) {
                         val validations = component.validations.orEmpty()
-                        Log.e("ssss", "asasdssd" + validations)
                         if (inputText.isNotEmpty()) {
                             val errorMessage = inputFieldValidation(inputText, validations)
                             if (errorMessage != null) {
@@ -202,8 +201,6 @@ class NCWFormAdapter(
                                 inputValuesSelected[adapterPosition].textInput = inputText
                             }
                         } else if (component.additionalSettings["Required"]?.value == true) {
-
-                            Log.e("ssss", "else if")
                             updateErrorView(
                                 itemView.context.getString(R.string.field_required),
                                 true,
@@ -441,7 +438,7 @@ class NCWFormAdapter(
 
 
                     isChecked = previouslySelectedCheckboxes.contains(text.toString())
-                    Log.e("isClickable","Outsidee"+isClickable)
+
 
                 }
 
@@ -1122,7 +1119,6 @@ class NCWFormAdapter(
                         }
 
                     if (isStillFileUpload) {
-                        Log.e("Upload", "Still file upload in progress")
                         return@setOnClickListener
                     }
 
