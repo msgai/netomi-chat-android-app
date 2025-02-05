@@ -68,6 +68,7 @@ import com.netomi.chat.model.messages.NCWAttachment
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.NCWCarouselButton
 import com.netomi.chat.model.messages.NCWCustomAttribute
+import com.netomi.chat.model.messages.NCWCustomPayload
 import com.netomi.chat.model.messages.NCWGenericChannelResponse
 import com.netomi.chat.model.messages.NCWMessagePayload
 import com.netomi.chat.model.messages.NCWQuickReply
@@ -1483,13 +1484,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         } else {
             type = NCWAppConstant.NORMAL
         }
-        val newMessages = response.attachments?.mapIndexedNotNull { index, attachment ->
-                mapAttachmentToMessage(
-                    attachment,
-                    response.requestId?:"",
-                    type,
-                    index
-                )
+        val newMessages =
+            response?.attachments?.mapIndexedNotNull { index, attachment ->
+                response.customPayload?.let {
+                    mapAttachmentToMessage(
+                        attachment,
+                        response.requestId?:"",
+                        type,
+                        index,
+                        it
+                    )
+                }
             } ?: emptyList()
 
         if (newMessages.isNotEmpty()) {
@@ -1679,7 +1684,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         attachment: NCWAttachment,
         requestId: String,
         type: String,
-        index: Int
+        index: Int,
+        customPayload: NCWCustomPayload
     ): NCWMessage? {
         val attach = attachment.attachment ?: return null
         val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
@@ -1711,7 +1717,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             agentAvatar = agentAvatar,
             attachmentIndex = index,
             id = attachment.attachment.id,
-            multipleSourceDetails = if (messageType == MessageType.MULTISOURCE) attach.multipleSourceDetails else arrayListOf()
+            multipleSourceDetails = if (messageType == MessageType.MULTISOURCE) attach.multipleSourceDetails else arrayListOf(),
+            customPayload = customPayload
         )
     }
 
@@ -1879,18 +1886,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 */
     // Helper function to split a message into chunks of 8 words
     private fun splitIntoChunks(text: String, wordsPerChunk: Int): List<String> {
-        val words = text.split(" ")
+        val words = text.split("(?<=\\s)".toRegex()) // Splitting while keeping spaces
         val chunks = mutableListOf<String>()
         val chunkBuilder = StringBuilder()
         var wordCount = 0
 
         for ((index, word) in words.withIndex()) {
-            chunkBuilder.append(word).append(" ")
+            chunkBuilder.append(word) // Append word with its existing space
             wordCount++
 
-            // When chunk is full or it's the last word, add it to chunks
             if (wordCount == wordsPerChunk || index == words.size - 1) {
-                chunks.add(chunkBuilder.toString().trim())
+                chunks.add(chunkBuilder.toString()) // Add chunk without trimming
                 chunkBuilder.clear()
                 wordCount = 0
             }
@@ -1910,19 +1916,24 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
 
     private fun addStreamMessages(newMessages: NCWMessage, chunkIndex: Int, chunkStatus: String) {
+        Log.e("NCWMessage111111", "Received Message: ${newMessages.message}, CHUNK_INDEX: $chunkIndex, CHUNK_STATUS: $chunkStatus")
         val messageId = newMessages.requestID ?: return
-        if (chunkIndex != -1 && newMessages.type==MessageType.TEXT) {
+        if (chunkIndex != -1 && newMessages.type == MessageType.TEXT) {
             val chunkList = messageChunksMap.getOrPut(messageId) { mutableListOf() }
-            chunkList.add(newMessages) // Add chunk
-            chunkList.sortBy { it.customPayload?.CHUNK_INDEX }
-            Log.e("Chunk List", chunkList.toString())
-            val fullMessage = mergeChunks(chunkList)
+            chunkList.add(newMessages)
+            // Create a partial merged message for streaming effect
+            val partialMessage = mergeChunks(chunkList)
+            // Update UI in real-time
+            Handler(Looper.getMainLooper()).post {
+                messageAdapter.updateOrAppendMessage(partialMessage, false)
+            }
 
-            Handler(Looper.getMainLooper()).postDelayed({
-                messageAdapter.updateOrAppendMessage(fullMessage, false)
-            }, 300)
-        } else {
-            Log.e("addStreamMessages","Other Message")
+            // If the chunk is the last one (CHUNK_STATUS = "COMPLETED"), remove stored chunks
+           /* if (chunkStatus == "SUCCESS") {
+                messageChunksMap.remove(messageId)
+            }*/
+        }else{
+            // If not a chunked message, update directly
             messageAdapter.updateOrAppendMessage(newMessages, false)
         }
 
@@ -2976,9 +2987,9 @@ if (isUpdated) {
                     val matchedRule = mSurveyRule?.firstOrNull { key ->
                         key.conversationTriggerType == RULE_EVENT_IDLE_USER
                     }
-                        //need to change
+
                     if (matchedRule != null) {
-                     //  idleTimeInMillis = NCWAppUtils.parseIdleTimeFromExpression(matchedRule.expression) * 1000
+                       idleTimeInMillis = NCWAppUtils.parseIdleTimeFromExpression(matchedRule.expression) * 1000
                         resetIdleTimer()
                     }
                 }
@@ -3152,6 +3163,19 @@ if (isUpdated) {
                 /* val newMessages = response.attachments?.mapNotNull {
                      mapAttachmentToMessage(it, response.requestId!!, NCWAppConstant.NORMAL)
                  } ?: emptyList()*/
+
+                val newMessages = response.attachments?.mapIndexedNotNull { index, attachment ->
+                    response.requestId?.let {
+                        response.customPayload?.let { it1 ->
+                            mapAttachmentToMessage(
+                                attachment,
+                                it, NCWAppConstant.NORMAL, index,
+                                it1
+
+                            )
+                        }
+                    }
+                } ?: emptyList()
 
 
 
