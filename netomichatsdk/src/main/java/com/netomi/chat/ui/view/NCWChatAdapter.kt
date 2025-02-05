@@ -630,13 +630,19 @@ class NCWChatAdapter(
             val existingMessage = messages[index]
             when (newMessage.type) {
                 MessageType.TEXT -> {
+                    Log.e("addStreamMessages","MessageType.TEXT")
                     existingMessage.message = if (customStreamType) {
                         existingMessage.message + newMessage.message
                     } else {
                         newMessage.message
                     }
                 }
-                MessageType.MULTISOURCE -> {
+                else->{
+                    messages.add(newMessage)
+                    notifyItemInserted(messages.size - 1)
+                }
+                /*MessageType.MULTISOURCE -> {
+                    Log.e("addStreamMessages","MessageType.MULTISOURCE")
                     messages.add(newMessage)
                     notifyItemInserted(messages.size - 1)
                     return
@@ -647,7 +653,7 @@ class NCWChatAdapter(
                 MessageType.CAROUSEL -> {}
                 MessageType.CARD -> {}
                 MessageType.FILE -> {}
-                MessageType.MESSAGEINFO -> {}
+                MessageType.MESSAGEINFO -> {}*/
             }
 
             if (!existingMessage.isReviewEnabled) {

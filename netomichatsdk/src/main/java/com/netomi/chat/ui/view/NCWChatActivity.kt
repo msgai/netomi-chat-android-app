@@ -156,6 +156,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -1272,61 +1273,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
             val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
             playBotSound()
-            if (response.triggerType == TYPE_EVENT) {
-                val eventData = response.eventObject?.eventData
-                renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
-
-                if (eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPING) {
-                    if (!checkLoaderRunning()) {
-                        addLoader()
-                        messageAdapter.notifyDataSetChanged()
-                        onScrollToPosition(true)
-                    }
-
-                }
+            if (response!=null) {
+                renderTheNormalMessage(response)
             }
-
-            val data = response.eventObject?.eventData
-            if (data?.eventType == OAUTH && data.subType == SUB_TYPE_OAUTH) {
-                refreshChat(response.eventObject.eventData)
-            }
-
-            if (response.customFields?.isNotEmpty() == true) {
-                for (customField in response.customFields) {
-                    when (CustomFieldName.fromValue(customField.name)) {
-                        CustomFieldName.FORM_SCHEMA -> {
-                            removeLoader()
-                            renderTheFormMessage(response)
-                        }
-
-                        CustomFieldName.SURVEY_SCHEMA -> {
-                            renderTheSurveyMessage(response)
-
-                        }
-
-                        CustomFieldName.DISABLE_INPUT_FIELD, CustomFieldName.DISABLE_CHAT_INPUT -> {
-                            val isDisabled = customField.values?.get(0) == "true"
-                            setUIState(!isDisabled)
-                            if (CustomFieldName.fromValue(customField.name) == CustomFieldName.DISABLE_INPUT_FIELD) {
-                                isDisableInput = !isDisabled
-                            }
-                        }
-
-
-                        CustomFieldName.END_CHAT -> {
-
-                        }
-
-                        else -> {
-
-                        }
-                    }
-                }
-            } else {
-            }
-            renderTheNormalMessage(response)
-
-
         } catch (e: Exception) {
             Log.e("ParsingError", "Failed to parse JSON: ${e.localizedMessage}")
         }
@@ -1520,7 +1469,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
     }
 
-    private fun renderTheNormalMessage(response: NCWGenericChannelResponse?) {
+    private fun renderTheNormalMessage(response: NCWGenericChannelResponse) {
         var type: String = ""
         if (response?.customPayload?.CHUNK_INDEX != null &&
             (
@@ -1536,27 +1485,23 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             type = NCWAppConstant.NORMAL
         }
         val newMessages =
-            response?.attachments?.mapIndexedNotNull { index, attachment ->
-                response.customPayload?.let {
-                    mapAttachmentToMessage(
+            response.attachments?.mapIndexedNotNull { index, attachment ->
+                mapAttachmentToMessage(
                         attachment,
                         response.requestId?:"",
                         type,
                         index,
-                        it
+                        response.customPayload
                     )
-                }
             } ?: emptyList()
 
         if (newMessages.isNotEmpty()) {
             newMessages.forEachIndexed { index, message ->
                 message.isSameTimeMessage = index == 0
             }
-            val customPayload = response?.customPayload
+            val customPayload = response.customPayload
             if (customPayload?.CHUNK_INDEX != null && customPayload.CHUNK_INDEX.toInt() == 0 && customPayload.CHUNK_STATUS.equals(
-                    "IN-PROGRESS"
-                )
-            ) {
+                    "IN-PROGRESS")) {
                 Log.e("Streaming Chunk", "Streaming Chunk")
                 for (i in newMessages.indices) {
                     updateStreamMessage(
@@ -1582,13 +1527,125 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 )
             ) {
                 Log.e("Streaming Chunk", "Streaming Chunk Not")
-                updateMessageList(newMessages)
+                CoroutineScope(Dispatchers.Main).launch {
+                    updateMessageList(newMessages, response)
+                }
             } else {
                 Log.e("Streaming Chunk", "Streaming Chunk Not")
-                updateMessageList(newMessages)
+                CoroutineScope(Dispatchers.Main).launch {
+                    updateMessageList(newMessages, response)
+                }
 
             }
 
+        }
+        else{
+            renderEventAndCustomFields(response)
+        }
+
+       /* if (response.triggerType == TYPE_EVENT) {
+            val eventData = response.eventObject?.eventData
+            renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
+
+            if (eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPING) {
+                if (!checkLoaderRunning()) {
+                    addLoader()
+                    messageAdapter.notifyDataSetChanged()
+                    onScrollToPosition(true)
+                }
+
+            }
+            else  if (eventData?.eventType == OAUTH && eventData.subType == SUB_TYPE_OAUTH) {
+                refreshChat(response.eventObject.eventData)
+            }
+        }
+
+        if (response.customFields?.isNotEmpty() == true) {
+            for (customField in response.customFields) {
+                when (CustomFieldName.fromValue(customField.name)) {
+                    CustomFieldName.FORM_SCHEMA -> {
+                        removeLoader()
+                        renderTheFormMessage(response)
+                    }
+
+                    CustomFieldName.SURVEY_SCHEMA -> {
+                        renderTheSurveyMessage(response)
+
+                    }
+
+                    CustomFieldName.DISABLE_INPUT_FIELD, CustomFieldName.DISABLE_CHAT_INPUT -> {
+                        val isDisabled = customField.values?.get(0) == "true"
+                        setUIState(!isDisabled)
+                        if (CustomFieldName.fromValue(customField.name) == CustomFieldName.DISABLE_INPUT_FIELD) {
+                            isDisableInput = !isDisabled
+                        }
+                    }
+
+
+                    CustomFieldName.END_CHAT -> {
+
+                    }
+
+                    else -> {
+
+                    }
+                }
+            }
+        } else {
+        }*/
+    }
+
+    private fun renderEventAndCustomFields(response: NCWGenericChannelResponse) {
+        if (response.triggerType == TYPE_EVENT) {
+            val eventData = response.eventObject?.eventData
+            renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
+
+            if (eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPING) {
+                if (!checkLoaderRunning()) {
+                    addLoader()
+                    messageAdapter.notifyDataSetChanged()
+                    onScrollToPosition(true)
+                }
+
+            }
+            else  if (eventData?.eventType == OAUTH && eventData.subType == SUB_TYPE_OAUTH) {
+                refreshChat(response.eventObject.eventData)
+            }
+        }
+
+        if (response.customFields?.isNotEmpty() == true) {
+            for (customField in response.customFields) {
+                when (CustomFieldName.fromValue(customField.name)) {
+                    CustomFieldName.FORM_SCHEMA -> {
+                        Log.e("NCWThemeUtils.getThemeData()?.str ","Render Form ")
+                        removeLoader()
+                        renderTheFormMessage(response)
+                    }
+
+                    CustomFieldName.SURVEY_SCHEMA -> {
+                        renderTheSurveyMessage(response)
+
+                    }
+
+                    CustomFieldName.DISABLE_INPUT_FIELD, CustomFieldName.DISABLE_CHAT_INPUT -> {
+                        val isDisabled = customField.values?.get(0) == "true"
+                        setUIState(!isDisabled)
+                        if (CustomFieldName.fromValue(customField.name) == CustomFieldName.DISABLE_INPUT_FIELD) {
+                            isDisableInput = !isDisabled
+                        }
+                    }
+
+
+                    CustomFieldName.END_CHAT -> {
+
+                    }
+
+                    else -> {
+
+                    }
+                }
+            }
+        } else {
         }
     }
 
@@ -1622,7 +1679,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         requestId: String,
         type: String,
         index: Int,
-        customPayload: NCWCustomPayload
+        customPayload: NCWCustomPayload?
     ): NCWMessage? {
         val attach = attachment.attachment ?: return null
         val messageType = attach.type?.let { MessageType.fromTypeName(it) } ?: return null
@@ -1685,12 +1742,76 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         addStreamMessages(streamMessage, chunkIndex = chunkIndex, chunkStatus = chunkStatus)
     }
 
-    private fun updateMessageList(newMessages: List<NCWMessage>) {
+    private suspend fun updateMessageList(newMessages: List<NCWMessage>, response: NCWGenericChannelResponse) {
+
         if (NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled == true) {
             removeStreamLoader()
-            CoroutineScope(Dispatchers.Main).launch {
+
+            withContext(Dispatchers.Main) {
                 for (message in newMessages) {
                     if (message.type == MessageType.TEXT) {
+                        message.message?.let { fullMessage ->
+                            val chunks = splitIntoChunks(
+                                fullMessage,
+                                NCWThemeUtils.getThemeData()?.streamOnChatWidget?.chunkSize ?: 8
+                            )
+                            for (chunk in chunks) {
+                                val chunkMessage = message.copy(message = chunk)
+                                messageAdapter.updateOrAppendMessage(chunkMessage, true)
+                                delay(300) // This will wait before processing next chunk
+                            }
+                        }
+                    } else {
+                        messageList.addAll(listOf(message))
+                        messageAdapter.notifyDataSetChanged()
+                        delay(100)
+                    }
+                }
+            }
+        } else {
+            val typingIndicatorEnabled = themeData?.typingIndicator?.enabled ?: false
+            if (!typingIndicatorEnabled) {
+                addMessages(newMessages)
+                return
+            }
+
+            val currentTime = System.currentTimeMillis()
+            val elapsedTime = currentTime - loaderAddedTime
+            val minTime = themeData?.typingIndicator?.minTime ?: 1000L
+
+            if (isLoaderActive && elapsedTime < minTime) {
+                Log.e("CallActive", "Waiting for minTime: $minTime")
+                withContext(Dispatchers.Main) {
+                    delay(minTime - elapsedTime)
+                    if (isLoaderActive) {
+                        safelyRemoveLoader(newMessages)
+                        Log.e("CallActive", "Removed after minTime")
+                    }
+                }
+            } else if (isLoaderActive) {
+                Log.e("CallActive", "Removed loader immediately")
+                safelyRemoveLoader(newMessages)
+            } else {
+                Log.e("CallActive", "Loader already removed, updating messages only")
+                addMessages(newMessages)
+            }
+        }
+        renderEventAndCustomFields(response)
+    }
+
+
+    /*   private fun updateMessageList(newMessages: List<NCWMessage>,response: NCWGenericChannelResponse) {
+        Log.e("NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled ","s "+NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled)
+       //
+        if ( NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled == false) {
+            Log.e("NCWThemeUtils.getThemeData()?.str ","ifffffffffff "+NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled)
+            removeStreamLoader()
+            CoroutineScope(Dispatchers.Main).launch {
+
+                for (message in newMessages) {
+                    Log.e("NCWThemeUtils.getThemeData()?.str ","Start Message ")
+                    if (message.type == MessageType.TEXT) {
+                        Log.e("NCWThemeUtils.getThemeData()?.str ","Start TEXT ")
                         message.message?.let { fullMessage ->
                             val chunks = splitIntoChunks(
                                 fullMessage,
@@ -1703,13 +1824,18 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                             }
                         }
                     } else {
+                        Log.e("NCWThemeUtils.getThemeData()?.str ","Start Otherrr ")
                         messageList.addAll(listOf(message))
                         messageAdapter.notifyDataSetChanged()
                         delay(100)
                     }
                 }
             }
-        } else {
+        }
+
+        else {
+
+            Log.e("NCWThemeUtils.getThemeData()?.str ","elssssssss "+NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled)
             val typingIndicatorEnabled = themeData?.typingIndicator?.enabled ?: false
             if (!typingIndicatorEnabled) {
                 addMessages(newMessages)
@@ -1738,8 +1864,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
         }
 
-    }
+        Log.e("NCWThemeUtils.getThemeData()?.str ","Start Otside ")
+        renderEventAndCustomFields(response)
 
+    }
+*/
     // Helper function to split a message into chunks of 8 words
     private fun splitIntoChunks(text: String, wordsPerChunk: Int): List<String> {
         val words = text.split("(?<=\\s)".toRegex()) // Splitting while keeping spaces
@@ -2868,12 +2997,31 @@ if (isUpdated) {
             if (response.triggerType == TYPE_EVENT) {
                 val eventData = response.eventObject?.eventData
                 renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
-
-
             }
 
             if (response.triggerType == TYPE_RESPONSE) {
                 val gson = Gson()
+
+                val newMessages = response.attachments?.mapIndexedNotNull { index, attachment ->
+                    mapAttachmentToMessage(
+                                attachment,
+                        response.requestId?:"",
+                        NCWAppConstant.NORMAL, index,
+                                response.customPayload
+
+                            )
+                        }
+
+                 ?: emptyList()
+
+                if (newMessages.isNotEmpty()) {
+                    newMessages.forEachIndexed { idx, message ->
+                        message.isSameTimeMessage = idx == 0
+                    }
+                }
+                messageList.addAll(newMessages)
+
+
                 if (response.customFields?.isNotEmpty() == true) {
                     for (customField in response.customFields) {
                         when (CustomFieldName.fromValue(customField.name)) {
@@ -2937,14 +3085,18 @@ if (isUpdated) {
                                             schema.formData = formData
                                         }
                                     }
-
-                                            addSingleMessage(
+                                    messageList.add(NCWMessage(
+                                        sender = TYPE_FORM,
+                                        timestamp = System.currentTimeMillis(),
+                                        formSchema = schema
+                                    ))
+                                           /* addSingleMessage(
                                                 NCWMessage(
                                                     sender = TYPE_FORM,
                                                     timestamp = System.currentTimeMillis(),
                                                     formSchema = schema
                                                 )
-                                            )
+                                            )*/
 
                                     }
 
@@ -2982,29 +3134,6 @@ if (isUpdated) {
                                     isDisableInput = !isDisabled
                                 }
                             }
-
-                            /*  CustomFieldName.DISABLE_INPUT_FIELD -> {
-                                  if (customField.values?.get(0) == "true") {
-                                      setUIState(false)
-                                      isHistoryDisableInput = false
-                                      isDisableInput=false
-                                  } else {
-                                      setUIState(true)
-                                      isHistoryDisableInput = true
-                                  }
-
-                              }
-
-                              CustomFieldName.DISABLE_CHAT_INPUT -> {
-                                  if (customField.values?.get(0) == "true") {
-                                      setUIState(false)
-                                      isHistoryDisableInput = false
-                                  } else {
-                                      setUIState(true)
-                                      isHistoryDisableInput = true
-                                  }
-                              }*/
-
                             CustomFieldName.END_CHAT -> {
                                 // Handle END_CHAT
                             }
@@ -3021,27 +3150,9 @@ if (isUpdated) {
                      mapAttachmentToMessage(it, response.requestId!!, NCWAppConstant.NORMAL)
                  } ?: emptyList()*/
 
-                val newMessages = response.attachments?.mapIndexedNotNull { index, attachment ->
-                    response.requestId?.let {
-                        response.customPayload?.let { it1 ->
-                            mapAttachmentToMessage(
-                                attachment,
-                                it, NCWAppConstant.NORMAL, index,
-                                it1
-
-                            )
-                        }
-                    }
-                } ?: emptyList()
 
 
 
-                if (newMessages.isNotEmpty()) {
-                    newMessages.forEachIndexed { idx, message ->
-                        message.isSameTimeMessage = idx == 0
-                    }
-                }
-                messageList.addAll(newMessages)
 
             }
 
@@ -3092,7 +3203,7 @@ if (isUpdated) {
         }
 
         messageAdapter.notifyDataSetChanged()
-        chatRecyclerView.scrollToPosition(messageList.size - 1)
+        onScrollToPosition(true)
 
 
     }
