@@ -389,6 +389,8 @@ class NCWFormAdapter(
                         view.isChecked = view.text == radioSelected
                     }
                 }
+                if (!isClickable) {
+                    radioGroup.alpha = 0.5f }
             }
         }
 
@@ -439,7 +441,11 @@ class NCWFormAdapter(
 
 
                     isChecked = previouslySelectedCheckboxes.contains(text.toString())
+                    Log.e("isClickable","Outsidee"+isClickable)
+
                 }
+
+
 
                 (checkBox.parent as? ViewGroup)?.removeView(checkBox)
 
@@ -450,6 +456,9 @@ class NCWFormAdapter(
                     inputValues[component.id] = CheckBoxField(checkBox, errorTextView)
                 }
                 checkBox.isEnabled = isClickable
+                if (!isClickable) {
+                    checkBox.alpha = 0.5f }
+
             }
 
             formContainer.addView(errorTextView)
