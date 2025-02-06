@@ -1,15 +1,18 @@
 package com.netomi.sampleapplication.ui.activity
 
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
@@ -25,11 +28,10 @@ import com.netomi.sampleapplication.model.BotListingResponse
 import com.netomi.sampleapplication.ui.fragment.ChangeAiAgentFragment
 import com.netomi.sampleapplication.ui.fragment.HomeFragment
 import com.netomi.sampleapplication.utils.AppSharedPreferences
-import com.netomi.sampleapplication.utils.HostRoutes
+import com.netomi.sampleapplication.utils.NetworkUtils
 import com.netomi.sampleapplication.utils.State
 import com.netomi.sampleapplication.utils.customView.DialogUtils
 import com.netomi.sampleapplication.viewmodel.OnboardingViewModel
-import okhttp3.Route
 
 class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
 
@@ -47,22 +49,28 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
     private lateinit var progressOverlay: FrameLayout
     private var name:String=""
 
+    private lateinit var usernameProfile: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         botList = mutableListOf()
-        onboardingViewModel.getBotListing()
-        observeChatMessages()
-        initView()
 
+        initView()
+        val email = preferences.getString(SharePreferenceConstant.EMAIL)
+        if (NetworkUtils.isNetworkAvailable(this))
+        onboardingViewModel.getBotListing(email)
+        else
+            Toast.makeText(this,
+                getString(R.string.please_check_your_network_and_try_again), Toast.LENGTH_SHORT).show()
+
+        observeChatMessages()
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, HomeFragment())
                 .commit()
-            llParent.visibility = View.VISIBLE
-            tvTitle.visibility = View.GONE
-            usernameTextView.text = name
-            tvWelcome.text = "Welcome"
+
+            updateUIForFragment(HomeFragment())
         }
 
 
@@ -76,6 +84,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
 
         name = preferences.getString(SharePreferenceConstant.NAME)
         usernameTextView.text = name
+        usernameProfile.text = name
 
 
         // Handle logout action
@@ -107,7 +116,15 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
             drawerLayout.closeDrawers()
             true
         }
+
+        supportFragmentManager.addOnBackStackChangedListener {
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+            currentFragment?.let {
+                updateUIForFragment(it)
+            }
+        }
     }
+
 
     private fun observeChatMessages() {
         onboardingViewModel.botListing.observe(this) { messages ->
@@ -132,10 +149,12 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
 
             is State.Error -> {
                 showLoader(false)
+                Toast.makeText(this,response.message,Toast.LENGTH_SHORT).show()
             }
 
             else -> {
                 showLoader(false)
+                //Toast.makeText(this,response.message,Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -155,6 +174,8 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         tvTitle = findViewById(R.id.tv_ai)
         tvWelcome = findViewById(R.id.tv_welcome)
         progressOverlay = findViewById(R.id.progress_overlay)
+        val headerView = navView.getHeaderView(0)
+        usernameProfile= headerView.findViewById(R.id.userName)
         window.statusBarColor = ContextCompat.getColor(this, R.color.status_bar)
     }
 
@@ -163,26 +184,34 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         if (currentFragment != null && currentFragment::class == fragment::class) {
             return
         }
-        when (fragment) {
-            is HomeFragment -> {
-                llParent.visibility = View.VISIBLE
-                tvTitle.visibility = View.GONE
-                usernameTextView.text = name
-                tvWelcome.text = "Welcome"
-                drawerLayout.closeDrawers()
-            }
-            is ChangeAiAgentFragment -> {
-                llParent.visibility = View.GONE
-                tvTitle.visibility = View.VISIBLE
-                drawerLayout.closeDrawers() //
-            }
-            else ->   tvTitle.visibility = View.VISIBLE
-        }
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .addToBackStack(null)
             .commit()
+
+        updateUIForFragment(fragment)
+    }
+
+
+    private fun updateUIForFragment(fragmentClass: Fragment) {
+        when (fragmentClass) {
+            is HomeFragment -> {
+                llParent.visibility = View.VISIBLE
+                tvTitle.visibility = View.GONE
+                usernameTextView.text = name
+                usernameProfile.text = name
+                tvWelcome.text = "Welcome"
+
+            }
+            is ChangeAiAgentFragment  -> {
+                llParent.visibility = View.GONE
+                tvTitle.visibility = View.VISIBLE
+            }
+            else -> {
+                tvTitle.visibility = View.VISIBLE
+            }
+        }
     }
 
     /**
@@ -222,4 +251,8 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         startActivity(intent)
         finishAffinity()
     }
+
+
+
+
 }

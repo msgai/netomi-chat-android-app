@@ -16,6 +16,7 @@
     <string name="limit_exceed">Limit Exceed</string>
     <string name="okay">Okay</string>
     <string name="upload_file_max_size">Upload a file (maximum size: %1$s)</string>
+    <string name="upload_files_max_size">Upload a file(s) (maximum size: %1$s)</string>
     <string name="select">Select</string>
     <string name="start_typing">Start Typing</string>
     <string name="additional_feedback">Additional Feedback</string>
@@ -24,5 +25,27 @@
     <string name="skip">Skip</string>
     <string name="submit">Submit</string>
     <string name="view_response">View response</string>
+    <string name="unsupported_file">Unsupported File Format</string>
+    <string name="field_required">This field is required</string>
+    <string name="quick_menu">Quick Menu</string>
+    <string name="quick_reply">Quick Reply</string>
+    <string name="setting">Settings</string>
+    <string name="restart">Restart Chat</string>
+    <string name="sound">Sound</string>
+    <string name="download_transcript">Download Transcript</string>
+    <string name="language_en">Language - EN</string>
+    <string name="restart_chat">Restart Chat</string>
+    <string name="confirm_restart_chat">Are you sure you want to restart the chat? This will clear your conversation and start a new chat.</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="connection_error">Connection error.</string>
+    <string name="retry"><u>Retry</u></string>
+    <string name="session_timeout">Session Timeout</string>
+    <string name="your_session_has_expired_due_to_inactivity">Your session has expired due to inactivity.</string>
+    <string name="ok">OK</string>
+    <string name="please_check_your_network_and_try_again">Please check your network and try again.</string>
+    <string name="logout">Logout</string>
+    <string name="you_have_been_logged_out">You have been logged out.</string>
+
 
 </resources>

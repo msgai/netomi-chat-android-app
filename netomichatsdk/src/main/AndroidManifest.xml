@@ -14,6 +14,7 @@
         android:name=".ui.init.NCWApplication"
         android:allowBackup="true"
         android:supportsRtl="true">
+
         <activity
             android:name=".ui.view.NCWFullScreenMediaActivity"
             android:exported="false" />

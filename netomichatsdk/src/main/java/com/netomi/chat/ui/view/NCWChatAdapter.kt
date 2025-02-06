@@ -1,25 +1,27 @@
 package com.netomi.chat.ui.view
 
-import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.marginBottom
+import androidx.core.view.marginTop
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.google.android.material.chip.ChipGroup
 import com.netomi.chat.R
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.messages.Component
+import com.netomi.chat.model.messages.FileUploadData
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.utils.NCWAppConstant
@@ -36,10 +38,10 @@ class NCWChatAdapter(
     private val callBack: (Component?) -> Unit,
     private val formData: (String?, String?, ArrayList<NCWAttachmentList>) -> Unit,
     private val callBackSurvey: (NCWMessage?) -> Unit,
+    private val onRetryFormData: (Component?, FileUploadData) -> Unit
 
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    // To map messageIDs to positions in the RecyclerView
-    private val messageMap = mutableMapOf<String, Int>()
+
     companion object {
         private const val VIEW_TYPE_REQUEST = 1
         private const val VIEW_TYPE_RESPONSE = 2
@@ -67,6 +69,7 @@ class NCWChatAdapter(
             VIEW_TYPE_FORM -> inflater.inflate(R.layout.layout_form, parent, false)
             VIEW_TYPE_EVENT -> inflater.inflate(R.layout.layout_survey_event, parent, false)
             VIEW_TYPE_PILLS -> inflater.inflate(R.layout.layout_pills, parent, false)
+            VIEW_TYPE_RESPONSE->inflater.inflate(R.layout.layout_response, parent, false)
             else -> inflater.inflate(R.layout.layout_response, parent, false)
         }
         return when (viewType) {
@@ -75,7 +78,7 @@ class NCWChatAdapter(
             VIEW_TYPE_FORM -> FormViewHolder(view)
             VIEW_TYPE_EVENT -> SurveyViewHolder(view)
             VIEW_TYPE_PILLS->PillViewHolder(view)
-            else -> ResponseViewHolder(view,themeData,actionCallback,feedbackActionCallBack)
+            else -> ResponseViewHolder(view,actionCallback,feedbackActionCallBack)
         }
     }
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -84,9 +87,10 @@ class NCWChatAdapter(
         when (holder) {
             is RequestViewHolder -> holder.bind(message)
             is ResponseViewHolder -> holder.bind(message,position)
-            is FormViewHolder->holder.bind(message,callBack,formData)
+            is FormViewHolder->holder.bind(message,callBack,formData,onRetryFormData)
             is SurveyViewHolder->holder.bind(message,callBackSurvey)
-         is PillViewHolder -> holder.bind(message)
+            is PillViewHolder -> holder.bind(message)
+            is InitialViewHolder -> holder.bind(message)
         }
     }
 
@@ -197,7 +201,8 @@ class NCWChatAdapter(
     class FormViewHolder(
         itemView: View,
     ) : RecyclerView.ViewHolder(itemView) {
-
+        private val imgBot: ImageView = itemView.findViewById(R.id.img_bot)
+        private val tvTime: TextView = itemView.findViewById(R.id.tvTime)
         private val rootLayout: ConstraintLayout = itemView.findViewById(R.id.constRow)
         private val tvFormTitle: TextView = itemView.findViewById(R.id.tvFormTitle)
         private val recyclerViewForm: RecyclerView = itemView.findViewById(R.id.formRecyclerView)
@@ -207,8 +212,16 @@ class NCWChatAdapter(
         fun bind(
             message: NCWMessage,
             callBack: (Component?) -> Unit,
-            formData: (String?, String?,ArrayList<NCWAttachmentList>) -> Unit
+            formData: (String?, String?, ArrayList<NCWAttachmentList>) -> Unit,
+            onRetryFormData: (Component?,FileUploadData) -> Unit,
         ) {
+            tvTime.text=NCWAppUtils.formatTimestampToTime(message.timestamp)
+            NCWThemeUtils.setTimeStampColor(tvTime)
+            Glide.with(itemView.context)
+                .load(message.agentAvatar ?: R.drawable.ic_bot_profile)
+                .placeholder(R.drawable.ic_bot_profile)
+                .into(imgBot)
+
             NCWThemeUtils.setBotConfig(rootLayout)
             NCWThemeUtils.setBotTextColor(tvFormTitle)
             NCWThemeUtils.setTimeStampColor(tvFormTitle)
@@ -232,31 +245,19 @@ class NCWChatAdapter(
                     }
                 }, { payload, label,attachmentList ->
                     // Handle the payload and label response here
-                    println("Payload: $payload")
-                    println("Label: $label")
                     formData(payload,label,attachmentList)
+                    formAdapter?.isClickable =false
+                },{ component, fileUploadData ->
+
+                    onRetryFormData(component,fileUploadData)
                 })
             }
 
             recyclerViewForm.adapter = formAdapter
 
-         //   recyclerViewForm.isEnabled = message.formSchema?.formData.isNullOrEmpty()
-
-            /*if (!message.formSchema?.formData.isNullOrEmpty()) {
-                Log.e("recyclerViewForm.isEnabled", "recyclerViewForm.isEnabled Ifff")
-                recyclerViewForm.isEnabled = false
-                recyclerViewForm.isClickable = false
-            } else {
-                Log.e("recyclerViewForm.isEnabled", "recyclerViewForm.isEnabled Elseeee")
-                recyclerViewForm.isEnabled = true
-                recyclerViewForm.isClickable = true
-            }*/
-
             if (message.formSchema?.formData.isNullOrEmpty()) {
-                Log.e("formSchema","Uuuduudd")
                 formAdapter?.isClickable =true
             } else {
-                Log.e("formSchema ","Elllssseee")
                 formAdapter?.isClickable =false
             }
 
@@ -265,9 +266,6 @@ class NCWChatAdapter(
 
         }
 
-        class NonInteractiveLayoutManager(context: Context) : LinearLayoutManager(context) {
-            override fun canScrollVertically(): Boolean = false
-        }
         fun updateFormAdapterData(components: List<Component>, formComponent: Component) {
             val index = components.indexOfFirst { it.id == formComponent.id }
             if (index != -1) {
@@ -285,13 +283,19 @@ class NCWChatAdapter(
         itemView: View,
     ) : RecyclerView.ViewHolder(itemView) {
 
-
+        private val imgBot: ImageView = itemView.findViewById(R.id.img_bot)
+        private val tvTime: TextView = itemView.findViewById(R.id.tvTime)
         private val constRowEvent: ConstraintLayout = itemView.findViewById(R.id.constRowEvent)
         private val tvThank: TextView = itemView.findViewById(R.id.tvThank)
         private val tvComplete: TextView = itemView.findViewById(R.id.tvComplete)
         private val tvViewResponse: TextView = itemView.findViewById(R.id.tvViewResponse)
         fun bind(message: NCWMessage, callBackSurvey: (NCWMessage?) -> Unit) {
-
+            tvTime.text=NCWAppUtils.formatTimestampToTime(message.timestamp)
+            NCWThemeUtils.setTimeStampColor(tvTime)
+            Glide.with(itemView.context)
+                .load(message.agentAvatar ?: R.drawable.ic_bot_profile)
+                .placeholder(R.drawable.ic_bot_profile)
+                .into(imgBot)
             NCWThemeUtils.setBotConfig(constRowEvent)
             NCWThemeUtils.setBotTextColor(tvComplete)
             NCWThemeUtils.setBotTextColor(tvThank)
@@ -321,43 +325,56 @@ class NCWChatAdapter(
         itemView: View,
     ) : RecyclerView.ViewHolder(itemView) {
 
-
-
-
+        private val imgBot: ImageView = itemView.findViewById(R.id.img_bot)
+        fun bind(message: NCWMessage) {
+            Glide.with(itemView.context)
+                .load(message.agentAvatar ?: R.drawable.ic_bot_profile)
+                .placeholder(R.drawable.ic_bot_profile)
+                .into(imgBot)
+        }
     }
 
     class ResponseViewHolder(
         itemView: View,
-        val themeData: NCWThemeResponse?,
         private val chatActionCallback:NCWChatActionCallback,
         private val feedbackActionCallBack: NCWFeedbackActionCallback
     ) : RecyclerView.ViewHolder(itemView) {
         private val messageText: TextView = itemView.findViewById(R.id.tvReceiverMessage)
+
         private val imageView: ImageView = itemView.findViewById(R.id.receiverImage)
+        private val constReceiverMessage: ConstraintLayout = itemView.findViewById(R.id.constReceiverMessage)
         private val videoView: ImageView = itemView.findViewById(R.id.receiverVideo)
         private val imgBot: ImageView = itemView.findViewById(R.id.img_bot)
         private val carouselRecyclerView: RecyclerView = itemView.findViewById(R.id.carouselRecyclerView)
         private val chipRecyclerViewGroup: RecyclerView = itemView.findViewById(R.id.quickReplyRecyclerView)
         private val receiverImageCard: CardView = itemView.findViewById(R.id.receiverImageCard)
-        private val chipGroup: ChipGroup = itemView.findViewById(R.id.quickReplyChipGroup)
         private val cardViewCard: ConstraintLayout = itemView.findViewById(R.id.cardViewCard)
         private val cardTitle: TextView = itemView.findViewById(R.id.cardTitle)
-        private val cardText: TextView = itemView.findViewById(R.id.cardText)
+        private val cardMessage: TextView = itemView.findViewById(R.id.cardMessage)
         private val buttonRecyclerView: RecyclerView = itemView.findViewById(R.id.buttonRecyclerView)
         private val tvTime: TextView = itemView.findViewById(R.id.tvTime)
         private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
         private val thumbUpImageButton: ImageView = itemView.findViewById(R.id.thumbUpButton)
         private val thumbDownImageButton: ImageView = itemView.findViewById(R.id.thumbDownButton)
         private val llFeedback: LinearLayout = itemView.findViewById(R.id.ll_feedback)
+        private val sourceRecyclerView: RecyclerView = itemView.findViewById(R.id.sourceRecyclerView)
+        private val constSource: ConstraintLayout = itemView.findViewById(R.id.constSource)
+        private val tvSourceCount: TextView = itemView.findViewById(R.id.tvSourceCount)
+        private val imgSourceDropDown: ImageView = itemView.findViewById(R.id.imgSourceDropDown)
 
         fun bind(message: NCWMessage,position: Int) {
             // Hide all views initially to avoid redundant visibility changes
+            llFeedback.visibility = View.GONE
+            constSource.visibility = View.GONE
+            sourceRecyclerView.visibility = View.GONE
+            constReceiverMessage.visibility = View.GONE
+            thumbDownImageButton.visibility = View.GONE
+            thumbUpImageButton.visibility = View.GONE
             messageText.visibility = View.GONE
             imageView.visibility = View.GONE
             videoView.visibility = View.GONE
             carouselRecyclerView.visibility = View.GONE
             receiverImageCard.visibility = View.GONE
-            chipGroup.visibility = View.GONE
             cardViewCard.visibility = View.GONE
             cardVideo.visibility = View.GONE
             chipRecyclerViewGroup.visibility = View.GONE
@@ -365,7 +382,7 @@ class NCWChatAdapter(
             NCWThemeUtils.setTimeStampColor(tvTime)
             imgBot.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.INVISIBLE
             tvTime.visibility = if (message.isSameTimeMessage) View.VISIBLE else View.GONE
-            llFeedback.visibility=if(message.isSameTimeMessage)View.VISIBLE else View.GONE
+           // llFeedback.visibility=if(message.isSameTimeMessage)View.VISIBLE else View.GONE
 
             if (message.isSameTimeMessage) {
                 Glide.with(itemView.context)
@@ -386,17 +403,88 @@ class NCWChatAdapter(
             when (message.type) {
                 MessageType.TEXT -> {
                     message.message?.let {
-                      //messageText.text=NCWAppUtils.setHtmText(it)
                         NCWAppUtils.setHtmlText(messageText,it)
+                        constReceiverMessage.visibility = View.VISIBLE
                         messageText.visibility = View.VISIBLE
-                        NCWThemeUtils.setBotConfig(messageText)
+                            NCWThemeUtils.setBotTextColor(messageText)
+                        NCWThemeUtils.setBotConfig(constReceiverMessage)
+
+
+
                     } ?: run {
                         messageText.visibility = View.GONE
+                        constReceiverMessage.visibility = View.GONE
                         tvTime.visibility = View.GONE
                         imgBot.visibility= View.INVISIBLE
                     }
 
                 }
+                MessageType.MULTISOURCE -> {
+                    //imgBot.visibility = if (message.attachmentIndex == 0) View.VISIBLE else View.GONE
+                    imgBot.visibility = View.GONE
+                    tvTime.visibility=View.GONE
+                    constSource.visibility = View.VISIBLE
+                    sourceRecyclerView.visibility = View.VISIBLE
+                    NCWThemeUtils.setBotConfig(constSource)
+                    NCWThemeUtils.setBotTextColor(tvSourceCount)
+                    tvSourceCount.text = "Sources (${message.multipleSourceDetails.size})"
+                    var isDropdownOpen = false
+                    val adapter = NCWSourceLinksAdapter(
+                        message.multipleSourceDetails
+                    ) { selectedOption ->
+                        if (selectedOption != null) {
+                            chatActionCallback.onSourceClicked(selectedOption)
+                        }
+                    }
+                    sourceRecyclerView.adapter = adapter
+                    sourceRecyclerView.layoutManager = LinearLayoutManager(itemView.context)
+
+                    sourceRecyclerView.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                        override fun onGlobalLayout() {
+                            sourceRecyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                            val firstItemView = sourceRecyclerView.layoutManager?.findViewByPosition(0)
+                            firstItemView?.let {
+                                val singleItemHeight = it.measuredHeight +
+                                        (it.marginTop + it.marginBottom)
+
+                                if (singleItemHeight > 0) {
+                                    sourceRecyclerView.layoutParams.height = singleItemHeight
+                                    sourceRecyclerView.requestLayout()
+                                }
+                            }
+                        }
+                    })
+
+                    imgSourceDropDown.visibility = if (message.multipleSourceDetails.size > 1) View.VISIBLE else View.GONE
+
+
+                    imgSourceDropDown.setOnClickListener {
+                        isDropdownOpen = !isDropdownOpen
+
+                        if (isDropdownOpen) {
+                            imgSourceDropDown.setImageResource(R.drawable.ic_arrow_dropup)
+                            sourceRecyclerView.layoutParams.height = RecyclerView.LayoutParams.WRAP_CONTENT
+                            chatActionCallback.onScrollToPosition(true)
+                        } else {
+                            imgSourceDropDown.setImageResource(R.drawable.ic_arrow_dropdown)
+
+                            val firstItemView = sourceRecyclerView.layoutManager?.findViewByPosition(0)
+                            firstItemView?.let {
+                                val singleItemHeight = it.measuredHeight +
+                                        (it.marginTop + it.marginBottom)
+
+                                if (singleItemHeight > 0) {
+                                    sourceRecyclerView.layoutParams.height = singleItemHeight
+                                    sourceRecyclerView.requestLayout()
+                                }
+                            }
+                        }
+                        sourceRecyclerView.requestLayout()
+                    }
+                }
+
+
+
 
                 MessageType.IMAGE -> {
                     Glide.with(itemView.context).load(message.largeImageUrl).placeholder(R.drawable.ic_place_holder).into(imageView)
@@ -431,8 +519,10 @@ class NCWChatAdapter(
                 MessageType.CARD -> {
                     cardViewCard.visibility = View.VISIBLE
                     NCWThemeUtils.setBotConfig(cardViewCard)
-                    cardTitle.text=message.message
-                    cardText.text=message.title
+                    cardTitle.text=message.title
+                    cardMessage.text=message.message
+                    NCWThemeUtils.setBotTextColor(cardTitle)
+                    NCWThemeUtils.setTimeStampColor(cardMessage)
                     buttonRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
                     val carouselAdapter = NCWCarouselButtonAdapter(message.buttons){
                         chatActionCallback.carouselButtonAction(it)
@@ -485,8 +575,8 @@ class NCWChatAdapter(
            thumbUpImageButton.setOnClickListener {
                if (message.feedbackValue != "POSITIVE") { // Prevent API call if already selected
                    message.feedbackValue = "POSITIVE"
-                   updateFeedbackUI(message)
-                   feedbackActionCallBack.onThumbUpClick(message.requestID!!) // API call
+                  // updateFeedbackUI(message)
+                   message.requestID?.let { it1 -> feedbackActionCallBack.onThumbUpClick(it1,position,message.attachmentIndex) } // API call
                }
             }
 
@@ -494,8 +584,8 @@ class NCWChatAdapter(
             thumbDownImageButton.setOnClickListener {
                 if (message.feedbackValue != "NEGATIVE") { // Prevent API call if already selected
                     message.feedbackValue = "NEGATIVE"
-                    updateFeedbackUI(message)
-                    feedbackActionCallBack.onThumbDownClick(message.requestID!!) // API call
+                  //  updateFeedbackUI(message)
+                    message.requestID?.let { it1 -> feedbackActionCallBack.onThumbDownClick(it1,position,message.attachmentIndex) } // API call
                 }
             }
         }
@@ -504,11 +594,13 @@ class NCWChatAdapter(
             when (message.feedbackValue) {
                 "POSITIVE" -> {
                     thumbUpImageButton.setImageResource(R.drawable.thumbs_up_selected)
+                    thumbUpImageButton.visibility = View.VISIBLE
                     thumbDownImageButton.visibility = View.GONE
                 }
                 "NEGATIVE" -> {
                     thumbDownImageButton.setImageResource(R.drawable.thumbs_down_selected)
                     thumbUpImageButton.visibility = View.GONE
+                    thumbDownImageButton.visibility = View.VISIBLE
                 }
                 else -> {
                     thumbUpImageButton.setImageResource(R.drawable.thumbs_up_unselected)
@@ -521,20 +613,54 @@ class NCWChatAdapter(
     }
 
     // Function to append text or add a new message
-    fun updateOrAppendMessage(newMessage: NCWMessage) {
-        val index = messages.indexOfFirst { it.requestID == newMessage.requestID && it.sender==newMessage.sender }
+    fun updateOrAppendMessage(newMessage: NCWMessage,customStreamType:Boolean) {
+        val index = if (customStreamType) {
+            messages.indexOfFirst {
+                it.requestID == newMessage.requestID &&
+                        it.sender == newMessage.sender &&
+                        it.id == newMessage.id
+            }
+        } else {
+            messages.indexOfFirst {
+                it.requestID == newMessage.requestID &&
+                        it.sender == newMessage.sender
+            }
+        }
         if (index != -1) {
-            // Message already exists; append text
-            messages[index].message += newMessage.message
+            val existingMessage = messages[index]
+            when (newMessage.type) {
+                MessageType.TEXT -> {
+                    Log.e("addStreamMessages","MessageType.TEXT")
+                    existingMessage.message = if (customStreamType) {
+                        existingMessage.message + newMessage.message
+                    } else {
+                        newMessage.message
+                    }
+                }
+                else->{
+                    messages.add(newMessage)
+                    notifyItemInserted(messages.size - 1)
+                }
+                /*MessageType.MULTISOURCE -> {
+                    Log.e("addStreamMessages","MessageType.MULTISOURCE")
+                    messages.add(newMessage)
+                    notifyItemInserted(messages.size - 1)
+                    return
+                }
 
-            // Update isReviewEnabled flag if it changes
-            if(!messages[index].isReviewEnabled) {
-                messages[index].isReviewEnabled = newMessage.isReviewEnabled
+                MessageType.IMAGE -> {}
+                MessageType.VIDEO -> {}
+                MessageType.CAROUSEL -> {}
+                MessageType.CARD -> {}
+                MessageType.FILE -> {}
+                MessageType.MESSAGEINFO -> {}*/
             }
 
+            if (!existingMessage.isReviewEnabled) {
+                existingMessage.isReviewEnabled = newMessage.isReviewEnabled
+            }
             notifyItemChanged(index)
         } else {
-            // Add new message to the list
             messages.add(newMessage)
             notifyItemInserted(messages.size - 1)
         }

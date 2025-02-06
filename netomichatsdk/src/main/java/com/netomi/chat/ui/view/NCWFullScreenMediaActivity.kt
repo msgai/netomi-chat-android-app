@@ -12,15 +12,18 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.netomi.chat.R
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.utils.NCWAppConstant
+import com.netomi.chat.utils.NCWAppConstant.TYPE_IMAGE
+import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
 import com.netomi.chat.utils.NCWAppUtils
+import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWFullScreenMediaActivity : AppCompatActivity() {
 
-    private lateinit var imageView: ImageView
-    private lateinit var videoView: VideoView
+
     private lateinit var ivBack: ImageView
     private lateinit var webView: WebView
     private lateinit var progressBar: ProgressBar
@@ -28,6 +31,7 @@ class NCWFullScreenMediaActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_full_screen_image)
+
 
         // Initialize views
         initializeViews()
@@ -56,6 +60,7 @@ class NCWFullScreenMediaActivity : AppCompatActivity() {
         val mediaUrl = intent.getStringExtra(NCWAppConstant.ARG_MEDIA_URL)
         val fileUri = intent.getStringExtra(NCWAppConstant.ARG_FILE_URI)
 
+
         // Handle media display
         when {
             mediaUrl != null -> handleMedia(mediaUrl, mediaType)
@@ -68,16 +73,21 @@ class NCWFullScreenMediaActivity : AppCompatActivity() {
     }
 
     private fun initializeViews() {
-        imageView = findViewById(R.id.fullScreenImageView)
-        videoView = findViewById(R.id.videoView)
         ivBack = findViewById(R.id.ivBack)
         progressBar = findViewById(R.id.progressBar)
         webView = findViewById(R.id.webView)
 
         ivBack.setOnClickListener { finish() }
-        imageView.visibility = View.GONE
-        videoView.visibility = View.GONE
+
         webView.visibility = View.GONE
+         val headerContainer:ConstraintLayout = findViewById(R.id.constHeader)
+        val rootLayout = findViewById<View>(R.id.rootLayout)
+        NCWThemeUtils.setHeader(
+            headerContainer, window,
+            rootLayout,
+            this
+            )
+
     }
 
     private fun handleMedia(mediaUrl: String, mediaType: String?) {
@@ -93,7 +103,6 @@ class NCWFullScreenMediaActivity : AppCompatActivity() {
     private fun handleMediaFileUri(fileUri: String, mediaType: String?) {
         progressBar.visibility = View.VISIBLE
         val uri = Uri.parse(fileUri)
-        Log.e("WebView","sssxxc"+fileUri)
         when (mediaType) {
             MessageType.IMAGE.name -> showImageURI(fileUri)
             MessageType.VIDEO.name -> showVideo(uri.toString())
@@ -132,11 +141,42 @@ class NCWFullScreenMediaActivity : AppCompatActivity() {
     private fun showImage(imageUrl: String) {
         webView.apply {
             visibility = View.VISIBLE
-            loadHtmlContent("<img src=\"$imageUrl\" style=\"width:100%;height:auto;\" />")
-        }
-    }
+            //   loadHtmlContent("<img src=\"$imageUrl\" style=\"width:100%;height:auto;\" />")
 
-    private fun showVideo(videoUrl: String) {
+            loadHtmlContent("""
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+        <style>
+            body { 
+                display: flex; 
+                justify-content: center; 
+                align-items: center; 
+                height: 100vh; 
+                margin: 0; 
+                background-color: black; 
+            }
+            img { 
+                width: 100vw;
+                height: auto;
+                max-height: 100vh;
+                object-fit: contain;
+            }
+        </style>
+    </head>
+    <body>
+        <img src="$imageUrl" />
+    </body>
+    </html>
+""".trimIndent())
+
+
+
+        }
+
+        }
+
+/*    private fun showVideo(videoUrl: String) {
         webView.apply {
             visibility = View.VISIBLE
             loadHtmlContent("""
@@ -146,7 +186,41 @@ class NCWFullScreenMediaActivity : AppCompatActivity() {
                 </video>
             """.trimIndent())
         }
+    }*/
+private fun showVideo(videoUrl: String) {
+    webView.apply {
+        visibility = View.VISIBLE
+        loadHtmlContent("""
+            <html>
+            <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+                <style>
+                    body { 
+                        display: flex; 
+                        justify-content: center; 
+                        align-items: center; 
+                        height: 100vh; 
+                        margin: 0; 
+                        background-color: black;
+                    }
+                    video { 
+                        max-width: 100vw;
+                        max-height: 100vh;
+                        object-fit: contain;
+                    }
+                </style>
+            </head>
+            <body>
+                <video controls>
+                    <source src="$videoUrl" type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+            </body>
+            </html>
+        """.trimIndent())
     }
+}
+
 
     private fun showFileInWebView(fileUrl: String) {
         webView.apply {
@@ -168,11 +242,34 @@ class NCWFullScreenMediaActivity : AppCompatActivity() {
         progressBar.visibility = View.GONE
     }
 
-    private fun WebView.loadHtmlContent(content: String) {
+    /*private fun WebView.loadHtmlContent(content: String) {
         Log.e("WebView","assas "+content)
         settings.javaScriptEnabled = true
         settings.allowFileAccess = true
         settings.cacheMode = WebSettings.LOAD_NO_CACHE
+
+        settings.allowFileAccess = true
+        settings.domStorageEnabled = true
+        settings.loadWithOverviewMode = true
+        settings.useWideViewPort = true
+        settings.builtInZoomControls = true
+        settings.displayZoomControls = false
+        settings.setSupportZoom(true)
+       // settings.setSupportZoom(true)
         loadData(content, "text/html", "UTF-8")
+    }*/
+    private fun WebView.loadHtmlContent(content: String) {
+        Log.e("WebView", "assas $content")
+        settings.javaScriptEnabled = true
+        settings.allowFileAccess = true
+        settings.domStorageEnabled = true
+        settings.cacheMode = WebSettings.LOAD_NO_CACHE
+        settings.loadWithOverviewMode = true
+        settings.useWideViewPort = true
+        settings.setSupportZoom(true)  // Enables pinch-to-zoom
+        settings.builtInZoomControls = true  // Shows zoom controls
+        settings.displayZoomControls = false // Hides zoom buttons for cleaner UI
+
+        loadDataWithBaseURL(null, content, "text/html", "UTF-8", null)
     }
 }

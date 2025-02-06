@@ -18,21 +18,9 @@ object NCWDialogUtils {
         context: Context,
         title: String,
         subtitle: String,
-        yesText: String,
-        noText: String,
-        titleColor: Int = Color.BLACK,
-        subtitleColor: Int = Color.GRAY,
-        backgroundColor: Int = Color.WHITE,
-        yesButtonBackgroundColor: Int=Color.RED,
-        yesTextColor:Int=Color.BLACK,
-        noButtonBackgroundColor: Int=Color.GRAY,
-        noTextColor:Int=Color.BLACK,
-
-        onYesClick: () -> Unit,
-        onNoClick: () -> Unit
+        confirm: String,
+        onYesClick: () -> Unit
     ) {
-       /* val builder = AlertDialog.Builder(context)
-        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_custom, null)*/
 
         val dialogView = Dialog(context)
         dialogView.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -45,36 +33,27 @@ object NCWDialogUtils {
         layoutParams?.height = WindowManager.LayoutParams.WRAP_CONTENT // Adjust height as needed
         dialogView.window?.attributes = layoutParams
         // Set up custom view
-        val titleTextView = dialogView.findViewById<TextView>(R.id.dialogTitle)
-        val subtitleTextView = dialogView.findViewById<TextView>(R.id.dialogSubtitle)
-        val yesButton = dialogView.findViewById<Button>(R.id.yesButton)
-        val noButton = dialogView.findViewById<Button>(R.id.noButton)
-        val dialogLayout = dialogView.findViewById<View>(R.id.dialogLayout)
+        val tvTitle = dialogView.findViewById<TextView>(R.id.dialogTitle)
+        val tvSubtitle = dialogView.findViewById<TextView>(R.id.dialogSubtitle)
+        val btnConfirm = dialogView.findViewById<TextView>(R.id.btnConfirm)
+        val btnCancel = dialogView.findViewById<TextView>(R.id.btnCancel)
 
-        // Customize dialog properties
-        titleTextView.text = title
-        titleTextView.setTextColor(titleColor)
-        subtitleTextView.text = subtitle
-        subtitleTextView.setTextColor(subtitleColor)
-       // dialogLayout.setBackgroundColor(backgroundColor)
-        yesButton.text = yesText
-        noButton.text = noText
+        NCWThemeUtils.setTitleColor(tvTitle)
+        NCWThemeUtils.setDescriptionColor(tvSubtitle)
+        tvTitle.text = title
+        tvSubtitle.text = subtitle
+        btnConfirm.text = confirm
 
 
-        // Apply button colors dynamically
-        yesButton.background = createRoundedDrawable(resolveColor(context, yesButtonBackgroundColor))
-        yesButton.setTextColor(resolveColor(context, yesTextColor))
-        noButton.background = createRoundedDrawable(resolveColor(context, noButtonBackgroundColor))
-        noButton.setTextColor(resolveColor(context, noTextColor))
+        NCWThemeUtils.createRoundedDrawable(btnConfirm)
+        NCWThemeUtils.createRoundedDrawableClose(btnCancel)
 
-        // Set click listeners
-       // val dialog = builder.setView(dialogView).create()
-        yesButton.setOnClickListener {
+
+        btnConfirm.setOnClickListener {
             onYesClick()
             dialogView.dismiss()
         }
-        noButton.setOnClickListener {
-            onNoClick()
+        btnCancel.setOnClickListener {
             dialogView.dismiss()
         }
 
@@ -94,18 +73,6 @@ object NCWDialogUtils {
     }
 
 
-    /**
-     * Resolves a color value, whether it's a resource ID or a raw color.
-     */
-    private fun resolveColor(context: Context, color: Int): Int {
-        return try {
-            // Try resolving as a resource ID
-            ContextCompat.getColor(context, color)
-        } catch (e: Exception) {
-            // If it fails, assume it's a raw color value
-            color
-        }
-    }
 
 
 

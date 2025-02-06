@@ -2,6 +2,7 @@ package com.netomi.chat.model
 
 import com.netomi.chat.model.messages.EventObject
 import com.netomi.chat.model.messages.FormSchema
+import com.netomi.chat.model.messages.MultipleSourceDetail
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.NCWCarouselButton
 import com.netomi.chat.model.messages.NCWCarouselElement
@@ -35,8 +36,9 @@ data class NCWMessage(
     var feedbackValue: String?=null,
     var isReviewEnabled: Boolean = false,
     val surveyField: SurveyField? = null,
-    var agentAvatar:String?=null
-
+    var agentAvatar:String?=null,
+    var attachmentIndex:Int=0,
+    val multipleSourceDetails: ArrayList<MultipleSourceDetail> = arrayListOf(),
 
     )
 
@@ -47,7 +49,8 @@ enum class MessageType(val typeName: String) {
     CAROUSEL("ai.msg.domain.responses.core.Carousel"),
     CARD("ai.msg.domain.responses.core.Card"),
     FILE("ai.msg.domain.responses.core.GenericFileAttachment"),
-    MESSAGEINFO("ai.msg.domain.responses.core.MessageInfoAttachment");
+    MESSAGEINFO("ai.msg.domain.responses.core.MessageInfoAttachment"),
+    MULTISOURCE("ai.msg.domain.responses.core.MultiSource");
 
 
 

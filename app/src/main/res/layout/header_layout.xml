@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginTop="10dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- Profile Image -->
@@ -20,9 +21,13 @@
     <!-- User Name -->
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/userName"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
         android:layout_height="wrap_content"
         android:text="John Doe"
+        android:layout_marginEnd="20dp"
+        android:maxLines="1"
+        android:ellipsize="end"
         android:textColor="@color/gray_black"
         android:textSize="20sp"
         android:layout_marginStart="10dp"

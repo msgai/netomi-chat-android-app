@@ -1,6 +1,7 @@
 package com.netomi.chat.model.messages
 
 import com.netomi.chat.ui.view.FormData
+import java.io.File
 
 data class CustomField(
     val botId: String,
@@ -15,9 +16,10 @@ data class CustomField(
 data class FormSchema(
     val properties: Properties,
     val schema: ArrayList<Component>,
-    var formData: ArrayList<FormData>?=null
+    var formData: ArrayList<FormData>?=null,
+    var requestId: String? = null,
 
-)
+    )
 
 data class Properties(
     val intentId: String,
@@ -65,7 +67,12 @@ data class FileUploadData(
     var fileUrl:String?=null,
     var title: String? = null,
     var fileSize: Long? = null,
-)
+    var isRetry :Boolean=false,
+    var isCancelled :Boolean=false,
+    var mimeType: String? = null,
+    var file: File? = null,
+
+    )
 
 
 data class FileConfig(

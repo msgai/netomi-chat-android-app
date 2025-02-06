@@ -5,21 +5,26 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.netomi.chat.data.repository.NCWChatRepository
+import com.netomi.chat.model.GetConversationPayload
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.NCWSendMessageResponse
+import com.netomi.chat.model.auth.LoginResponse
+import com.netomi.chat.model.auth.LogoutResponse
 import com.netomi.chat.model.chat_history.NCWGetChatHistoryPayload
 import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEndChatResponse
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackResponse
+import com.netomi.chat.model.media_payload.MultiFileModel
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.NCWWebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
+import com.netomi.chat.model.survey_rule.SurveyRuleResponse
 import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWBaseResponse
@@ -70,6 +75,15 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
     private val _feedbackResponse=NCWSingleLiveEvent<NCWState<NCWFeedbackResponse>>()
     val feedbackResponse get()=_feedbackResponse
 
+    private val _loginResponse=NCWSingleLiveEvent<NCWState<LoginResponse>>()
+    val loginResponse get()= _loginResponse
+
+    private val _logoutResponse=NCWSingleLiveEvent<NCWState<LogoutResponse>>()
+    val logoutResponse get()= _logoutResponse
+
+    private val _surveyRuleResponse=NCWSingleLiveEvent<NCWState<SurveyRuleResponse>>()
+    val surveyRuleResponse get()= _surveyRuleResponse
+
 
    /* private var _getConversationId =
         SingleLiveEvent<State<GetConversationIdResponse>>()
@@ -92,6 +106,9 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
 
     private var _getUploadedMediaUrl= NCWSingleLiveEvent<NCWState<NCWGetMediaUploadUrl>>()
     val getUploadedMediaUrl get()= _getUploadedMediaUrl
+
+    private val _errorFile = NCWSingleLiveEvent<NCWSignedUrlPayload?>()
+    val errorFile get() = _errorFile
     init {
         loadChatHistory()
     }
@@ -136,10 +153,10 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
 
     }
 
-    fun getConversationId(botRef: String?) {
-        Log.e("ConversationIdResponse", "botRef " + botRef)
+    fun getConversationId(botRef: String?, externalId: String?, onRestart: Boolean?=false) {
         viewModelScope.launch(Dispatchers.IO) {
-            val response = chatRepository.getConversationId(botRef)
+            val  payload=GetConversationPayload(botRefId=botRef,externalId=externalId)
+            val response = chatRepository.getConversationId(payload,onRestart)
 
             withContext(Dispatchers.Main) {
                 Log.e("ConversationIdResponse", "response " + response)
@@ -182,6 +199,134 @@ Log.e("DataaResposne","response"+response)
         }
     }
 
+    fun uploadFilesSequentially(mMultipleFile: MutableList<MultiFileModel>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (mMultipleFile.isNotEmpty()) {
+                processNextFile(mMultipleFile)
+            } else {
+                Log.d("FileProcessing", "No files to upload.")
+            }
+        }
+    }
+
+    private suspend fun processNextFile(fileList: MutableList<MultiFileModel>) {
+        if (fileList.isNotEmpty()) {
+
+            val currentFile = fileList.first()
+
+            val mediaUpload = NCWSignedUrlPayload(
+                fileType = currentFile.mimeType,
+                uploadKeyPrefix = currentFile.fileName
+            )
+
+            try {
+                val response = chatRepository.getPreSignedUrl(mediaUpload)
+
+                if (response is NCWState.Success) {
+                    val responseData = response.data as NCWGetPreSignedUrl
+
+                    val uploadResponse = chatRepository.uploadFile(currentFile.file, responseData)
+
+                    if (uploadResponse is NCWState.SendMessageError<*, *>){
+
+                        fileList.removeAt(0)
+                        val payload = uploadResponse.payload
+                        if (payload != null && payload is NCWSignedUrlPayload) {
+                            withContext(Dispatchers.Main) {
+                                _errorFile.value = payload
+
+                            }
+                            processNextFile(fileList)
+                        }
+                    }
+
+                    else if (uploadResponse != null) {
+                        fileList.removeAt(0)
+                        Log.e("Counettee","sasaasas "+uploadResponse)
+                        withContext(Dispatchers.Main) {
+                           _getUploadedMediaUrl.value = uploadResponse
+
+                        }
+                        processNextFile(fileList)
+                    } else {
+                        Log.e("FileProcessing", "File upload failed for: ${currentFile.fileName}")
+                    }
+                }
+
+                else if (response is NCWState.SendMessageError<*, *>){
+                        fileList.removeAt(0)
+                        val payload = response.payload
+                        if (payload != null && payload is NCWSignedUrlPayload) {
+                            withContext(Dispatchers.Main) {
+                                _errorFile.value = payload
+
+                            }
+                            processNextFile(fileList)
+                        }
+                }
+
+                else {
+                    Log.e("FileProcessing", "Failed to get pre-signed URL for: ${currentFile.fileName}")
+                }
+            } catch (e: Exception) {
+                Log.e("FileProcessing", "Error processing file: ${currentFile.fileName}", e)
+            }
+        } else {
+            Log.d("FileProcessing", "All files processed.")
+        }
+    }
+
+
+
+
+    /* fun uploadFilesSequentially(mMultipleFile: MutableList<MultiFileModel>) {
+         viewModelScope.launch(Dispatchers.IO) {
+         if (mMultipleFile.isNotEmpty()) {
+             processNextFile(mMultipleFile)
+         }
+         }
+     }
+
+     private suspend fun processNextFile(
+         fileList: MutableList<MultiFileModel>,
+     ) {
+         if (fileList.isNotEmpty()) {
+             val currentFile = fileList.first()
+             val mediaUpload = NCWSignedUrlPayload(
+                 fileType = currentFile.mimeType,
+                 uploadKeyPrefix = currentFile.fileName
+             )
+
+             val response = chatRepository.getPreSignedUrl(mediaUpload)
+             if (response != null) {
+                 when (response) {
+                     is NCWState.Success -> {
+                         val responseData = response.data as NCWGetPreSignedUrl
+                         val uploadResponse =
+                             chatRepository.uploadFile(currentFile.file, responseData)
+                         if (uploadResponse != null) {
+                             fileList.removeAt(0)
+                             processNextFile(fileList)
+                             withContext(Dispatchers.Main) {
+                                 _getUploadedMediaUrl.value = uploadResponse
+                             }
+                         }
+                     }
+
+                     else -> {}
+                 }
+
+             }
+
+         }
+     }
+
+
+ */
+
+
+
+
     fun uploadFile(mediaUri: File?, response: NCWGetPreSignedUrl) {
         viewModelScope.launch(Dispatchers.IO) {
             val response = chatRepository.uploadFile(mediaUri,response)
@@ -195,8 +340,7 @@ Log.e("DataaResposne","response"+response)
     fun hitEndChatAPI(message: NCWEndChatRequest) {
 
         viewModelScope.launch(Dispatchers.IO) {
-            val response = chatRepository.hitEndChatAPI(message)
-
+            val response = chatRepository.hitEndChatAPI(payload = message)
             withContext(Dispatchers.Main) {
                 Log.e("sendMessageAPI", "response " + response)
                 _NCW_endChatResponse.value = response
@@ -229,5 +373,44 @@ Log.e("DataaResposne","response"+response)
         }
 
     }
+
+    fun hitAuthenticateUserApi(jwtToken:String, botRefID:String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.hitAuthenticateUserApi(jwtToken = jwtToken,botRefID = botRefID,authEnabled = "true")
+
+            withContext(Dispatchers.Main) {
+                Log.e("Auth Response", "response " + response)
+                _loginResponse.value = response
+            }
+        }
+
+    }
+
+    fun hitLogoutApi(jwtToken:String, botRefID:String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.hitLogoutApi(jwtToken = jwtToken,botRefID = botRefID,authEnabled = "true")
+
+            withContext(Dispatchers.Main) {
+                Log.e("Auth Response", "response " + response)
+                _logoutResponse.value = response
+            }
+        }
+
+    }
+
+    fun getSurveyRule(botRefID:String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.getSurveyRule(botRefID)
+
+            withContext(Dispatchers.Main) {
+                _surveyRuleResponse.value = response
+            }
+        }
+
+    }
+
+
+
+
 
 }

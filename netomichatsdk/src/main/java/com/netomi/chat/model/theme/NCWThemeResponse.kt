@@ -6,7 +6,7 @@ data class NCWThemeResponse(
     val agentDeskForm: NCWAgentDeskForm,
     val aiAgentName: String,
     val borderRadius: String,
-    val botImage: String,
+    val botImage: String? = null,
     val botResponseBubbleColor: String,
     val calloutBubble: List<NCWCalloutBubble>,
     val chatHistory: NCWChatHistory,
@@ -34,7 +34,7 @@ data class NCWThemeResponse(
     val multilingual: NCWMultilingual,
     val nbaConfig_: NCWNbaConfig,
     val persistentSurveyConfig: NCWPersistentSurveyConfig,
-    val proactiveTriggerType: String,
+    val proactiveTriggerType: String?=null,
     val quickMenuOptions: List<NCWQuickMenuOption>,
     val realTimeChatService: NCWRealTimeChatService,
     val restartChat: NCWRestartChat,
@@ -50,5 +50,10 @@ data class NCWThemeResponse(
     val timeDelayBetweenMessageBubbles: Int,
     val title: String,
     val typingIndicator: NCWTypingIndicator,
-    val whitelisting: NCWWhitelisting
+    val whitelisting: NCWWhitelisting,
+    val OAUTH2: NCWOauth,
+    var proActiveGreetings: ArrayList<String> = arrayListOf(),
+    var isProActiveGreetings:Boolean=false,
+    var streamOnChatWidget:NCWStreamOnChatWidget
+
 )

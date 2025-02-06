@@ -20,7 +20,9 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import com.bumptech.glide.Glide
+import com.netomi.chat.R
 import com.netomi.chat.model.theme.NCWThemeResponse
+import com.netomi.chat.survey.NCWSignInUserDetails
 import com.netomi.chat.ui.init.NCWChatSdk
 
 object NCWThemeUtils
@@ -37,6 +39,8 @@ object NCWThemeUtils
     }
 
     private var conversationID : String? = null
+    private var jwtToken : String? = null
+    var userDetails: NCWSignInUserDetails? = null
 
     fun setConversationID(id: String?) {
         conversationID = id
@@ -44,6 +48,22 @@ object NCWThemeUtils
     fun getConversationID():String?{
         return conversationID
     }
+
+    fun setJwtToken(token: String?) {
+        jwtToken = token
+    }
+    fun getJwtToken():String?{
+        return jwtToken
+    }
+    fun setSignInUserDetails(signInUserDetails: NCWSignInUserDetails?) {
+        userDetails = signInUserDetails
+    }
+
+    fun getSignInUserDetails():NCWSignInUserDetails? {
+       return userDetails
+    }
+
+
 
     fun configureHeader(
         headerContainer: ConstraintLayout,
@@ -53,7 +73,8 @@ object NCWThemeUtils
         window: Window,
         rootLayout: View,
         context: Context,
-        progressBar: ProgressBar
+        progressBar: ProgressBar,
+        logoIcon: ImageView
     ) {
         themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
             // Apply gradient or background color
@@ -78,8 +99,48 @@ object NCWThemeUtils
             val progressBarColor= headerConfig.backgroundColor?.let { parseColor(it) }
             progressBar.indeterminateDrawable.colorFilter =
                 progressBarColor?.let { PorterDuffColorFilter(it, PorterDuff.Mode.SRC_IN) }
+
+            headerConfig.logoImage?.takeIf { it.isNotEmpty() }?.let { logoUrl ->
+                Glide.with(context)
+                    .load(logoUrl)
+                    .placeholder(R.drawable.ic_support)
+                    .into(logoIcon)
+            }
+
+
         }
     }
+
+    fun setHeader( headerContainer: ConstraintLayout,  window: Window,
+                   rootLayout: View,context: Context,)
+    {
+        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+            // Apply gradient or background color
+            if (headerConfig.isGradientAppied) {
+                createGradientDrawable()?.let { gradientDrawable ->
+                    applyGradient(headerContainer, rootLayout, window, gradientDrawable)
+                } ?: applyBackgroundColor(
+                    headerConfig.backgroundColor,
+                    headerContainer,
+                    window,
+                    context
+                )
+            } else {
+                applyBackgroundColor(headerConfig.backgroundColor, headerContainer, window, context)
+            }
+        }
+    }
+
+    fun setLogoIcon(logoIcon: ImageView,context: Context){
+        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+            headerConfig.logoImage?.takeIf { it.isNotEmpty() }?.let { logoUrl ->
+                Glide.with(context)
+                    .load(logoUrl)
+                    .placeholder(R.drawable.ic_support)
+                    .into(logoIcon)
+            }
+        }
+        }
 
     fun configureFooter(
         footerContainer: ConstraintLayout,
@@ -87,14 +148,18 @@ object NCWThemeUtils
         messageInputField: EditText,
         attachmentIcon: ImageView,
         sendMessageIcon: ImageView,
-        cardViewInputBox: CardView
+        cardViewInputBox: CardView,
+        tvBrandName: TextView
     ) {
         footerContainer.visibility = if (themeData?.mobileConfig?.lightTheme?.footerConfig?.isFooterHidden == true) View.GONE else View.VISIBLE
 
         themeData?.mobileConfig?.lightTheme?.footerConfig?.let { footerConfig ->
             // Set background color
             footerConfig.backgroundColor?.let { color ->
-                parseColor(color).let { footerContainer.setBackgroundColor(it) }
+                parseColor(color).let {
+                    footerContainer.setBackgroundColor(it)
+                    tvBrandName.setBackgroundColor(it)
+                }
             }
 
             // Set icon styles and tints
@@ -238,7 +303,7 @@ object NCWThemeUtils
             val parsedColor = Color.parseColor( otherConfig.backgroundColor)
             val backgroundDrawable = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
-                cornerRadius = 16f
+                cornerRadius = 20f
                 setColor(parsedColor)
             }
             view.background = backgroundDrawable
@@ -253,7 +318,7 @@ object NCWThemeUtils
             val parsedColor = Color.parseColor( userConfig.backgroundColor)
             val backgroundDrawable = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
-                cornerRadius = 16f
+                cornerRadius = 20f
                 setColor(parsedColor)
             }
             view.background = backgroundDrawable
@@ -598,6 +663,22 @@ object NCWThemeUtils
 
         }
         view.background = backgroundDrawable
+    }
+
+    fun createStrokeDrawable(view: View) {
+        themeData?.mobileConfig?.lightTheme?.otherConfig?.let { otherConfig ->
+            // val parsedColor = Color.parseColor(headerConfig.backgroundColor)
+            val parsedColor = Color.parseColor(otherConfig.backgroundColor)
+            val backgroundDrawable = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 16f
+                setStroke(2, parsedColor)
+            }
+            view.background = backgroundDrawable
+            if (view is TextView)
+         setTitleColor(view)
+
+        }
     }
 
 }

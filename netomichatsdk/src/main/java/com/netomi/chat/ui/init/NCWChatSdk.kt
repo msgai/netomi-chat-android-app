@@ -58,7 +58,8 @@ object NCWChatSdk {
      * This function ensures the theme data is fetched and available before launching the chat.
      * If the theme is already cached, it directly starts the chat activity.
      */
-    fun launch(context: Context) {
+    fun launch(context: Context,jwtToken:String?=null) {
+        NCWThemeUtils.setJwtToken(jwtToken)
         if (!NCWAppUtils.isNetworkAvailable(context)) {
             NCWAppUtils.showToast(
                 context,
@@ -176,7 +177,7 @@ object NCWChatSdk {
     }
 
     fun getUpdatedBotConfiguration():NCWBotConfig{
-        return botConfig?:NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.botConfig
+        return botConfig?:NCWThemeUtils.getThemeData()?.mobileConfig?.lightTheme?.botConfig?:NCWBotConfig()
     }
 
     fun updateHeaderConfiguration(config: NCWHeaderConfig){
@@ -185,7 +186,7 @@ object NCWChatSdk {
     }
 
     fun getUpdateHeaderConfiguration():NCWHeaderConfig{
-        return headerConfig?: NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.headerConfig
+        return headerConfig?: NCWThemeUtils.getThemeData()?.mobileConfig?.lightTheme?.headerConfig?: NCWHeaderConfig()
     }
 
     fun updateFooterConfiguration(config: NCWFooterConfig){
@@ -194,7 +195,7 @@ object NCWChatSdk {
     }
 
     fun getUpdatedFooterConfiguration():NCWFooterConfig{
-        return footerConfig?: NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.footerConfig
+        return footerConfig?: NCWThemeUtils.getThemeData()?.mobileConfig?.lightTheme?.footerConfig?: NCWFooterConfig()
     }
 
     fun updateUserConfiguration(config:NCWUserConfig){
@@ -203,7 +204,7 @@ object NCWChatSdk {
     }
 
     fun getUpdatedUserConfiguration(): NCWUserConfig{
-        return userConfig?: NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.userConfig
+        return userConfig?: NCWThemeUtils.getThemeData()?.mobileConfig?.lightTheme?.userConfig?: NCWUserConfig()
     }
 
     fun updateBubbleConfiguration(config: NCWBubbleConfig){
@@ -212,7 +213,7 @@ object NCWChatSdk {
     }
 
     fun getUpdatedBubbleConfiguration():NCWBubbleConfig{
-        return bubbleConfig?: NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.bubbleConfig
+        return bubbleConfig?: NCWThemeUtils.getThemeData()?.mobileConfig?.lightTheme?.bubbleConfig?: NCWBubbleConfig()
     }
 
     fun updateChatWindowConfiguration(config: NCWChatWindowConfig){
@@ -221,16 +222,16 @@ object NCWChatSdk {
     }
 
     fun getUpdatedChatWindowConfiguration():NCWChatWindowConfig{
-        return chatWindowConfig?: NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.chatWindowConfig
+        return chatWindowConfig?: NCWThemeUtils.getThemeData()?.mobileConfig?.lightTheme?.chatWindowConfig?: NCWChatWindowConfig()
     }
 
     fun updateOtherConfiguration(config: NCWOtherConfig){
         val currentConfig = otherConfig ?: NCWOtherConfig()
-        otherConfig = otherConfig?.mergeWith(config)
+        otherConfig = currentConfig?.mergeWith(config)
     }
 
     fun getUpdatedOtherConfiguration():NCWOtherConfig{
-        return otherConfig?: NCWThemeUtils.getThemeData()!!.mobileConfig.lightTheme.otherConfig
+        return otherConfig ?: NCWThemeUtils.getThemeData()?.mobileConfig?.lightTheme?.otherConfig ?: NCWOtherConfig()
     }
 
     private fun NCWHeaderConfig.mergeWith(newConfig: NCWHeaderConfig): NCWHeaderConfig {

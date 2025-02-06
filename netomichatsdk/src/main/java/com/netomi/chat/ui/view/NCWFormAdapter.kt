@@ -4,6 +4,8 @@ import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.Context
 import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.text.Editable
@@ -17,6 +19,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
@@ -37,6 +40,7 @@ import com.netomi.chat.model.messages.FormSchema
 import com.netomi.chat.model.messages.NCWAttachmentList
 import com.netomi.chat.model.messages.Validation
 import com.netomi.chat.model.messages.Values
+import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppConstant.FORM_DATE_FORMAT
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWParsingUtils
@@ -51,51 +55,53 @@ data class FormData(
     var selectedCheckboxes: List<String> = emptyList(),
     var dropdownSelection: String? = null,
     var dateInput: String? = null,
-    var fileUpload: ArrayList<FileUploadData>?= arrayListOf()
+    var fileUpload: ArrayList<FileUploadData>? = arrayListOf()
 )
 
 data class InputField(
     val editText: EditText,
     val errorTextView: TextView
 )
-data class TextAreaInputField(
-    val editText: EditText,
-    val errorTextView: TextView
-)
+
 data class DateField(
     val dateField: EditText,
     val errorTextView: TextView,
     val container: RelativeLayout
 )
+
 data class RadioField(
     val radioGroup: RadioGroup,
     val errorTextView: TextView
 )
+
 data class CheckBoxField(
     val checkGroup: CheckBox,
     val errorTextView: TextView
 )
+
 data class DropdownField(
     val selectedValue: String,
     val errorTextView: TextView
 )
 
 
-
-class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: FormSchema, private val callBack: (Component?) -> Unit, private val formData: (String?, String?, ArrayList<NCWAttachmentList>) -> Unit) : RecyclerView.Adapter<NCWFormAdapter.FormViewHolder>() {
+class NCWFormAdapter(
+    private val items: ArrayList<Component>,
+    val formSchema: FormSchema,
+    private val callBack: (Component?) -> Unit,
+    private val formData: (String?, String?, ArrayList<NCWAttachmentList>) -> Unit,
+    private val onRetry: (Component?, FileUploadData) -> Unit
+) : RecyclerView.Adapter<NCWFormAdapter.FormViewHolder>() {
 
 
     private val inputValues = mutableMapOf<String, Any?>()
     private val inputValuesSelected = MutableList(items.size) { FormData() }
-
     var isClickable: Boolean = true
 
     fun updateItem(position: Int, component: Component) {
         if (position in items.indices) {
             items[position] = component
             notifyItemChanged(position)
-        } else {
-            Log.e("Adapter", "Invalid position: $position")
         }
     }
 
@@ -113,19 +119,23 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 component.isRadioGroup() -> createRadioGroup(component)
                 component.isCheckboxGroup() -> createCheckboxGroup(component)
                 component.isDropdown() -> createDropdown(component)
-               component.isDateInput() -> createDateInput(component)
+                component.isDateInput() -> createDateInput(component)
                 component.isFileInput() -> createFileInput(component)
             }
             if (adapterPosition == items.lastIndex) {
-                addSubmitButtonDynamically(formContainer, itemView.context,formSchema)
+                addSubmitButtonDynamically(formContainer, itemView.context, formSchema)
             }
         }
 
 
         private fun Component.isTextInput() = component == "input" && type == "text"
         private fun Component.isTextArea() = component == "textarea" && type == "textarea"
-        private fun Component.isRadioGroup() = component == "input" && type == "choice" && subType == "radio"
-        private fun Component.isCheckboxGroup() = component == "input" && type == "choice" && subType == "checkbox"
+        private fun Component.isRadioGroup() =
+            component == "input" && type == "choice" && subType == "radio"
+
+        private fun Component.isCheckboxGroup() =
+            component == "input" && type == "choice" && subType == "checkbox"
+
         private fun Component.isDropdown() = component == "select" && type == "choice"
         private fun Component.isDateInput() = component == "input" && type == "date"
         private fun Component.isFileInput() = component == "file" && type == "file"
@@ -134,11 +144,13 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             addLabel(component)
 
             val editText = EditText(itemView.context).apply {
-                hint = component.attributes?.getOrNull(0)?.value?.toString()?.removeSurrounding("[", "]")
+                hint = component.attributes?.getOrNull(0)?.value?.toString()
+                    ?.removeSurrounding("[", "]")
                 setHintTextColor(ContextCompat.getColor(context, R.color.hint_color))
                 createDrawable(this)
-                isSingleLine=true
-                maxLines=1
+                isSingleLine = true
+                maxLines = 1
+                imeOptions = EditorInfo.IME_ACTION_DONE
                 setPadding(16, 30, 16, 30)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                 layoutParams = defaultLayoutParams()
@@ -155,62 +167,85 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
             formContainer.addView(editText)
             formContainer.addView(errorTextView)
-
-            if (component.additionalSettings["Required"]?.value == true) {
-                inputValues[component.id] = InputField(editText, errorTextView)
-            }
+            inputValues[component.id] = InputField(editText, errorTextView)
 
             val isValidationEnabled = component.dropDownSelections["Validation"]?.value == true
-            if (isValidationEnabled) {
-                val validations = component.validations.orEmpty()
-                editText.addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) {
-                        val inputText = s.toString()
+
+            fun updateErrorView(
+                errorText: String? = null,
+                showError: Boolean = false,
+                editText: EditText
+            ) {
+                if (showError) {
+                    errorTextView.text = errorText
+                    errorTextView.visibility = View.VISIBLE
+                    createErrorDrawable(editText)
+                } else {
+                    errorTextView.text = ""
+                    errorTextView.visibility = View.GONE
+                    createDrawable(editText)
+                }
+            }
+
+            editText.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    val inputText = s?.toString().orEmpty()
+                    if (isValidationEnabled) {
+                        val validations = component.validations.orEmpty()
                         if (inputText.isNotEmpty()) {
                             val errorMessage = inputFieldValidation(inputText, validations)
-
                             if (errorMessage != null) {
-                                errorTextView.text = errorMessage
-                                createErrorDrawable(editText)
-                                errorTextView.visibility = View.VISIBLE
+                                updateErrorView(errorMessage, true, editText)
                             } else {
-                                errorTextView.visibility = View.GONE
-                                createDrawable(editText)
+                                updateErrorView(editText = editText)
                                 inputValuesSelected[adapterPosition].textInput = inputText
                             }
+                        } else if (component.additionalSettings["Required"]?.value == true) {
+                            updateErrorView(
+                                itemView.context.getString(R.string.field_required),
+                                true,
+                                editText
+                            )
+                        } else {
+                            updateErrorView(editText = editText)
                         }
-                    }
+                    } else {
+                        inputValuesSelected[adapterPosition].textInput = inputText
+                        if (errorTextView.visibility == View.VISIBLE) {
+                            errorTextView.visibility = View.GONE
+                            updateErrorView(editText = editText)
+                        }
 
-                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-                })
-            } else {
-                editText.addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) {
-                        inputValuesSelected[adapterPosition].textInput = s.toString()
-                        if (errorTextView.visibility==View.VISIBLE)
-                        errorTextView.visibility = View.GONE
                     }
+                }
 
-                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-                })
-            }
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            })
+
 
             formSchema.formData?.getOrNull(adapterPosition)?.textInput?.let { textInput ->
                 editText.setText(textInput)
+                editText.setTextColor(ContextCompat.getColor(itemView.context, R.color.hint_color))
             }
 
             editText.isEnabled = isClickable
         }
 
 
-
         private fun createTextArea(component: Component) {
             addLabel(component)
 
             val editText = EditText(itemView.context).apply {
-                hint = component.attributes?.getOrNull(0)?.value?.toString()?.replace("[", "")?.replace("]", "")
+                hint = component.attributes?.getOrNull(0)?.value?.toString()?.replace("[", "")
+                    ?.replace("]", "")
                 createDrawable(this)
                 setHintTextColor(ContextCompat.getColor(context, R.color.hint_color))
                 setPadding(16, 16, 16, 16)
@@ -231,57 +266,77 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
             formContainer.addView(editText)
             formContainer.addView(errorTextView)
+            inputValues[component.id] = InputField(editText, errorTextView)
+            val isValidationEnabled = component.dropDownSelections["Validation"]?.value == true
+            val validations =
+                if (isValidationEnabled) component.validations.orEmpty() else emptyList()
 
-            // Store the input field in the map
-            inputValues[component.id] = if (component.additionalSettings["Required"]?.value == true) {
-                TextAreaInputField(editText, errorTextView)
-            } else {
-                editText
+            fun updateErrorView(
+                errorText: String? = null,
+                showError: Boolean = false,
+                editText: EditText
+            ) {
+                if (showError) {
+                    errorTextView.text = errorText
+                    errorTextView.visibility = View.VISIBLE
+                    createErrorDrawable(editText)
+                } else {
+                    errorTextView.text = ""
+                    errorTextView.visibility = View.GONE
+                    createDrawable(editText)
+                }
             }
 
-            // Check if validation is enabled
-            val isValidationEnabled = component.dropDownSelections["Validation"]?.value == true
-            if (isValidationEnabled) {
-                val validations = component.validations.orEmpty()
-                editText.addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) {
-                        val inputText = s.toString()
+            editText.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    val inputText = s?.toString().orEmpty()
+
+                    if (isValidationEnabled) {
                         if (inputText.isNotEmpty()) {
                             val errorMessage = inputFieldValidation(inputText, validations)
-
                             if (errorMessage != null) {
-                                errorTextView.text = errorMessage
-                                createErrorDrawable(editText)
-                                errorTextView.visibility = View.VISIBLE
+                                updateErrorView(errorMessage, true, editText)
                             } else {
-                                errorTextView.visibility = View.GONE
-                                createDrawable(editText)
+                                updateErrorView(editText = editText)
                                 inputValuesSelected[adapterPosition].textAreaInput = inputText
                             }
+                        } else if (component.additionalSettings["Required"]?.value == true) {
+                            if (errorTextView.text.isEmpty()) {
+                                updateErrorView(
+                                    itemView.context.getString(R.string.field_required),
+                                    true,
+                                    editText
+                                )
+                            }
+                        } else {
+                            updateErrorView(editText = editText)
+                        }
+                    } else {
+                        inputValuesSelected[adapterPosition].textAreaInput = inputText
+                        if (errorTextView.visibility == View.VISIBLE) {
+                            errorTextView.visibility = View.GONE
+                            updateErrorView(editText = editText)
                         }
                     }
+                }
 
-                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-                })
-            }
-             else {
-                // Handle simple text change without validation
-                editText.addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) {
-                        inputValuesSelected[adapterPosition].textAreaInput = s.toString()
-                        if (errorTextView.visibility==View.VISIBLE)
-                            errorTextView.visibility = View.GONE
-                    }
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
 
-                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-                })
-            }
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            })
+
 
             // Restore previous input value if available
-            formSchema.formData?.get(adapterPosition)?.textAreaInput?.let {
+            formSchema.formData?.getOrNull(adapterPosition)?.textAreaInput?.let {
                 editText.setText(it)
+                editText.setTextColor(ContextCompat.getColor(itemView.context, R.color.hint_color))
+
             }
             editText.isEnabled = isClickable
         }
@@ -292,7 +347,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             val radioGroup = RadioGroup(itemView.context).apply {
                 layoutParams = defaultLayoutParams()
             }
-            val isRadiaClickable=isClickable
+            val isRadiaClickable = isClickable
             formContainer.addView(radioGroup)
             val errorTextView = TextView(itemView.context).apply {
                 layoutParams = defaultLayoutParams()
@@ -307,11 +362,12 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 val radioButton = RadioButton(itemView.context).apply {
                     text = option.value
                     NCWThemeUtils.setRadioButtonUserConfig(this)
+                    buttonTintList = ContextCompat.getColorStateList(context, R.color.checkbox_tint)
                     isEnabled = isRadiaClickable
                     setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) {
                             inputValuesSelected[adapterPosition].selectedRadio = text.toString()
-                            if (errorTextView.visibility==View.VISIBLE)
+                            if (errorTextView.visibility == View.VISIBLE)
                                 errorTextView.visibility = View.GONE
                         }
                     }
@@ -324,21 +380,24 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 inputValues[component.id] = RadioField(radioGroup, errorTextView)
             }
             if (adapterPosition in (formSchema.formData?.indices ?: emptyList())) {
-                val radioSelected = formSchema.formData?.get(adapterPosition)?.selectedRadio
+                val radioSelected = formSchema.formData?.getOrNull(adapterPosition)?.selectedRadio
                 radioGroup.children.forEach { view ->
                     if (view is RadioButton) {
                         view.isChecked = view.text == radioSelected
                     }
                 }
+                if (!isClickable) {
+                    radioGroup.alpha = 0.5f }
             }
         }
 
         private fun createCheckboxGroup(component: Component) {
             addRadioLabel(component)
-
+            addSpaceToContainer(5)
             // Retrieve previously selected checkboxes if available
-            val checkBoxSelected = formSchema.formData?.get(adapterPosition)?.textInput
-            val previouslySelectedCheckboxes = checkBoxSelected?.split(",")?.map { it.trim() } ?: emptyList()
+            val checkBoxSelected = formSchema.formData?.getOrNull(adapterPosition)?.textInput
+            val previouslySelectedCheckboxes =
+                checkBoxSelected?.split(",")?.map { it.trim() } ?: emptyList()
 
             val errorTextView = TextView(itemView.context).apply {
                 layoutParams = defaultLayoutParams()
@@ -352,9 +411,18 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             component.optionList?.forEach { option ->
                 val checkBox = CheckBox(itemView.context).apply {
                     text = option.value
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        setMargins(0, 5, 0, 0)
+                    }
                     NCWThemeUtils.setTitleColor(this)
+                    buttonTintList = ContextCompat.getColorStateList(context, R.color.checkbox_tint)
+                    setPadding(0, 0, 0, 0)
                     setOnCheckedChangeListener { _, isChecked ->
-                        val selectedCheckboxes = inputValuesSelected[adapterPosition].selectedCheckboxes.toMutableList()
+                        val selectedCheckboxes =
+                            inputValuesSelected[adapterPosition].selectedCheckboxes.toMutableList()
                         if (isChecked) {
                             selectedCheckboxes.add(text.toString())
                         } else {
@@ -370,7 +438,11 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
 
                     isChecked = previouslySelectedCheckboxes.contains(text.toString())
+
+
                 }
+
+
 
                 (checkBox.parent as? ViewGroup)?.removeView(checkBox)
 
@@ -381,6 +453,9 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                     inputValues[component.id] = CheckBoxField(checkBox, errorTextView)
                 }
                 checkBox.isEnabled = isClickable
+                if (!isClickable) {
+                    checkBox.alpha = 0.5f }
+
             }
 
             formContainer.addView(errorTextView)
@@ -394,9 +469,10 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             val rootView: RelativeLayout = dropdownView.findViewById(R.id.selected_view)
             val selectedText: TextView = dropdownView.findViewById(R.id.selected_text)
             val arrowIcon: ImageView = dropdownView.findViewById(R.id.arrow_icon)
-            val itemsContainer: LinearLayout = dropdownView.findViewById(R.id.dropdown_items_container)
+            val itemsContainer: LinearLayout =
+                dropdownView.findViewById(R.id.dropdown_items_container)
             var isDropdownOpen = false
-            NCWThemeUtils.setBotTextColor(selectedText)
+
             createDrawable(rootView)
 
             dropdownView.findViewById<RelativeLayout>(R.id.selected_view).setOnClickListener {
@@ -420,25 +496,62 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
             val options = component.optionList?.map { it.value } ?: emptyList()
             itemsContainer.removeAllViews()
-            options.forEach { option ->
-                val optionView = TextView(itemView.context).apply {
-                    text = option
-                    textSize = 14f
-                    setPadding(15, 16, 10, 16)
-                    NCWThemeUtils.setBotTextColor(this)
-                    setOnClickListener {
-                        selectedText.text = option
-                        isDropdownOpen = false
-                        itemsContainer.visibility = View.GONE
-                        arrowIcon.setImageResource(R.drawable.ic_arrow_dropdown)
-                        inputValues[component.id] = DropdownField(option, errorTextView)
-                        inputValuesSelected[adapterPosition].dropdownSelection = option
-                        if (errorTextView.visibility==View.VISIBLE)
-                            errorTextView.visibility = View.GONE
+            if (component.subType == "radio")
+                options.forEach { option ->
+                    val optionView = TextView(itemView.context).apply {
+                        text = option
+                        textSize = 14f
+                        setPadding(15, 16, 10, 16)
+                        NCWThemeUtils.setBotTextColor(this)
+                        setOnClickListener {
+                            selectedText.text = option
+                            NCWThemeUtils.setBotTextColor(selectedText)
+                            isDropdownOpen = false
+                            itemsContainer.visibility = View.GONE
+                            arrowIcon.setImageResource(R.drawable.ic_arrow_dropdown)
+                            inputValues[component.id] = DropdownField(option, errorTextView)
+                            inputValuesSelected[adapterPosition].dropdownSelection = option
+                            if (errorTextView.visibility == View.VISIBLE)
+                                errorTextView.visibility = View.GONE
+                        }
                     }
+                    itemsContainer.addView(optionView)
                 }
-                itemsContainer.addView(optionView)
+            else if (component.subType == "checkbox") {
+                val selectedItems = mutableSetOf<String>() // Maintain selected items in a set
+
+                options.forEach { option ->
+                    val optionView = CheckBox(itemView.context).apply {
+                        text = option
+                        textSize = 14f
+                        setPadding(15, 16, 10, 16)
+                        NCWThemeUtils.setBotTextColor(this)
+                        buttonTintList = ContextCompat.getColorStateList(context, R.color.checkbox_tint)
+                        setOnCheckedChangeListener { _, isChecked ->
+                            if (isChecked) {
+                                selectedItems.add(option)
+                            } else {
+                                selectedItems.remove(option)
+                            }
+                            selectedText.text = when (selectedItems.size) {
+                                0 -> "Select"
+                                else -> "${selectedItems.size} items selected"
+                            }
+                            NCWThemeUtils.setBotTextColor(selectedText)
+                            inputValues[component.id] =
+                                DropdownField(selectedItems.joinToString(", "), errorTextView)
+                            inputValuesSelected[adapterPosition].dropdownSelection =
+                                selectedItems.joinToString(", ")
+
+                            if (errorTextView.visibility == View.VISIBLE) {
+                                errorTextView.visibility = View.GONE
+                            }
+                        }
+                    }
+                    itemsContainer.addView(optionView)
+                }
             }
+
 
 
 
@@ -447,13 +560,35 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                 inputValues[component.id] = DropdownField("", errorTextView)
             }
 
-          dropdownView.isEnabled=isClickable
+            dropdownView.isEnabled = isClickable
             if (adapterPosition in (formSchema.formData?.indices ?: emptyList())) {
-              val selectedDropDown=formSchema.formData?.get(adapterPosition)?.selectedRadio
-              selectedText.text=selectedDropDown
-          }
+                val selectedDropDown =
+                    formSchema.formData?.getOrNull(adapterPosition)?.selectedRadio
+                if (component.subType == "checkbox") {
+                    val selectedCount =
+                        selectedDropDown?.split(",")?.filter { it.isNotBlank() }?.size ?: 0
+                    if (selectedCount > 0) {
+                        selectedText.text = "$selectedCount items selected"
+                    } else {
+                        selectedText.text = itemView.context.getString(R.string.select)
+                    }
+
+
+                } else {
+                    if (!selectedDropDown.isNullOrEmpty()) {
+                        selectedText.text = selectedDropDown
+                    }
+                }
+                selectedText.setTextColor(
+                    ContextCompat.getColor(
+                        itemView.context,
+                        R.color.hint_color
+                    )
+                )
+            }
 
         }
+
         private fun createDateInput(component: Component) {
             addLabel(component)
 
@@ -492,18 +627,19 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                         { _, year, month, dayOfMonth ->
                             val selectedDate = "${month + 1}-$dayOfMonth-$year"
                             val showSelectedDate = "${month + 1}/$dayOfMonth/$year"
-                           // val showSelectedDate = "$dayOfMonth/${month + 1}/$year"
+                            // val showSelectedDate = "$dayOfMonth/${month + 1}/$year"
                             val errorMessage = validateDate(selectedDate, component)
+                            setText(showSelectedDate)
                             if (errorMessage == null) {
-                               setText(showSelectedDate)
+
                                 inputValuesSelected[adapterPosition].dateInput = selectedDate
                                 textViewError.visibility = View.GONE
+                                textViewError.text = ""
                                 createDrawable(container)
                             } else {
                                 textViewError.text = errorMessage
                                 textViewError.visibility = View.VISIBLE
                                 createErrorDrawable(container)
-                                hint = FORM_DATE_FORMAT
                             }
                         },
                         calendar.get(Calendar.YEAR),
@@ -543,18 +679,27 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             formContainer.addView(container)
             formContainer.addView(textViewError)
 
-            inputValues[component.id] = DateField(textView, textViewError,container)
+            inputValues[component.id] = DateField(textView, textViewError, container)
 
             if (adapterPosition in (formSchema.formData?.indices ?: emptyList())) {
-                val textInput = formSchema.formData?.get(adapterPosition)?.textInput
+                val textInput = formSchema.formData?.getOrNull(adapterPosition)?.textInput
                 if (textInput != null) {
                     textView.setText(textInput)
+                    textView.setTextColor(
+                        ContextCompat.getColor(
+                            itemView.context,
+                            R.color.hint_color
+                        )
+                    )
                     //textView.text = textInput.toString()
                 }
             }
         }
 
-        private fun inputFieldValidation(inputText: String, validations: List<Validation>): String? {
+        private fun inputFieldValidation(
+            inputText: String,
+            validations: List<Validation>
+        ): String? {
             validations.forEach { validation ->
                 when (validation.type) {
                     "length" -> {
@@ -565,6 +710,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                     return validation.errorMessage
                                 }
                             }
+
                             "length-max-char" -> {
                                 val maxLength = validation.value.getOrNull(0)?.toIntOrNull()
                                 if (maxLength != null && inputText.length > maxLength) {
@@ -584,12 +730,14 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                         return validation.errorMessage
                                     }
                                 }
+
                                 "less-than" -> {
                                     val maxValue = validation.value.getOrNull(0)?.toIntOrNull()
                                     if (maxValue != null && inputNumber >= maxValue) {
                                         return validation.errorMessage
                                     }
                                 }
+
                                 "between" -> {
                                     val minValue = validation.value.getOrNull(0)?.toIntOrNull()
                                     val maxValue = validation.value.getOrNull(1)?.toIntOrNull()
@@ -599,12 +747,14 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                         }
                                     }
                                 }
+
                                 "equal-to" -> {
                                     val targetValue = validation.value.getOrNull(0)?.toIntOrNull()
                                     if (targetValue != null && inputNumber != targetValue) {
                                         return validation.errorMessage
                                     }
                                 }
+
                                 "number-only" -> {
                                     if (inputText.any { !it.isDigit() }) {
                                         return validation.errorMessage
@@ -624,18 +774,21 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                     return validation.errorMessage
                                 }
                             }
+
                             "text-doesnt-contains" -> {
                                 val forbiddenText = validation.value.getOrNull(0).orEmpty()
                                 if (inputText.contains(forbiddenText)) {
                                     return validation.errorMessage
                                 }
                             }
-                            "text-email"->{
+
+                            "text-email" -> {
                                 if (!NCWAppUtils.isValidEmail(inputText)) {
                                     return validation.errorMessage
                                 }
                             }
-                            "text-url"->{
+
+                            "text-url" -> {
                                 if (!NCWAppUtils.isValidUrl(inputText)) {
                                     return validation.errorMessage
                                 }
@@ -646,19 +799,22 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                     "regex" -> {
                         when (validation.subType) {
                             "regex-contains" -> {
-                                val pattern = validation.value.getOrNull(0)?.toRegex() ?: return null
+                                val pattern =
+                                    validation.value.getOrNull(0)?.toRegex() ?: return null
                                 if (!pattern.containsMatchIn(inputText)) {
                                     return validation.errorMessage
                                 }
                             }
+
                             "regex-doesnt-contains" -> {
-                                val pattern = validation.value.getOrNull(0)?.toRegex() ?: return null
+                                val pattern =
+                                    validation.value.getOrNull(0)?.toRegex() ?: return null
                                 if (pattern.containsMatchIn(inputText)) {
                                     return validation.errorMessage
                                 }
                             }
                         }
-                        }
+                    }
 
                 }
             }
@@ -670,8 +826,10 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
             for (validation in validations) {
                 val selectedDateObj = parseDate(selectedDate) ?: continue
-                val minDate = validation.value.getOrNull(0)?.takeIf { it.isNotBlank() }?.let { parseDate(it) }
-                val maxDate = validation.value.getOrNull(1)?.takeIf { it.isNotBlank() }?.let { parseDate(it) }
+                val minDate =
+                    validation.value.getOrNull(0)?.takeIf { it.isNotBlank() }?.let { parseDate(it) }
+                val maxDate =
+                    validation.value.getOrNull(1)?.takeIf { it.isNotBlank() }?.let { parseDate(it) }
 
                 when (validation.subType) {
                     "date-in-between" -> {
@@ -699,30 +857,30 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
         }
 
 
-
-
-
         private fun createFileInput(component: Component) {
             val fileInputView = LayoutInflater.from(itemView.context)
                 .inflate(R.layout.custom_file_input_view, formContainer, false) as ConstraintLayout
 
-            val uploadMedia: ConstraintLayout = fileInputView.findViewById(R.id.file_input_container)
+            val uploadMedia: ConstraintLayout =
+                fileInputView.findViewById(R.id.file_input_container)
             val uploadText: TextView = fileInputView.findViewById(R.id.upload_text)
             val formatHint: TextView = fileInputView.findViewById(R.id.format_hint)
             val recyclerDoc: RecyclerView = fileInputView.findViewById(R.id.recyclerDoc)
             val uploadDocTitle: TextView = fileInputView.findViewById(R.id.uploadDocTitle)
             val label = component.labels?.firstOrNull() ?: ""
-            uploadDocTitle.text=label
+            uploadDocTitle.text = label
             NCWThemeUtils.setUserConfigTextColor(uploadDocTitle)
             NCWThemeUtils.setUserConfigTextColor(uploadText)
             NCWThemeUtils.setTimeStampColor(formatHint)
-
-            formatHint.text = "Format: ${component.config?.attachmentTypes?.joinToString(", ") ?: ""}"
-
-            Log.d("FileUpload", "Before files: ${component.fileUpload}")
+            if (component.config?.isShowAttachmentTypesEnabled == true) {
+                formatHint.visibility = View.VISIBLE
+                formatHint.text =
+                    "Format: ${component.config?.attachmentTypes?.joinToString(", ") ?: ""}"
+            } else {
+                formatHint.visibility = View.GONE
+            }
             try {
                 if (!component.fileUpload.isNullOrEmpty()) {
-                    Log.d("FileUpload", "All files: ${component.fileUpload}")
                     recyclerDoc.visibility = View.VISIBLE
 
                     // Update the input values for the adapter position
@@ -738,14 +896,43 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                             LinearLayoutManager.VERTICAL,
                             false
                         )
-                        recyclerDoc.adapter = NCWFormFilesAdapter(component.fileUpload!!,isClickable) { selectedOption ->
-                            Log.d("SelectedOption", "Selected file: $selectedOption")
-                            component.fileUpload?.remove(selectedOption)
-                            inputValuesSelected.getOrNull(adapterPosition)?.fileUpload?.remove(selectedOption)
-                            //notifyDataSetChanged()
-                        }
+                        recyclerDoc.adapter = NCWFormFilesAdapter(
+                            component.fileUpload!!,
+                            isClickable,
+                            { selectedOption ->
+                                //   component.fileUpload?.remove(selectedOption)
+                                // inputValuesSelected.getOrNull(adapterPosition)?.fileUpload?.remove(selectedOption)
+                                val position = component.fileUpload?.indexOf(selectedOption)
+                                if (position != null && position >= 0) {
+                                    //  component.fileUpload?.removeAt(position)
+                                    inputValuesSelected.getOrNull(adapterPosition)?.fileUpload?.remove(
+                                        selectedOption
+                                    )
+                                    (recyclerDoc.adapter as? NCWFormFilesAdapter)?.itemRemoved(
+                                        position
+                                    )
+
+                                    uploadMedia.isEnabled=true
+                                    uploadMedia.alpha = 1f
+
+
+                                }
+                            },
+                            { retry ->
+                                if (retry != null) {
+                                    onRetry(component, retry)
+                                }
+                            })
+
+
+
                     } else {
                         recyclerDoc.adapter!!.notifyDataSetChanged()
+                    }
+                    val isMultipleUpload = component.config?.fileUploadType == NCWAppConstant.UPLOAD_FILE_MULTIPLE
+                    if (!isMultipleUpload){
+                        uploadMedia.isEnabled=false
+                        uploadMedia.alpha = 0.5f
                     }
                 } else {
                     recyclerDoc.visibility = View.GONE
@@ -753,10 +940,10 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
 
             } catch (ex: Exception) {
-                Log.e("Exception", "Error inflating file input: ${ex.message}", ex)
+                ex.printStackTrace()
             }
 
-            formSchema.formData?.get(adapterPosition)?.fileUpload?.let {
+            formSchema.formData?.getOrNull(adapterPosition)?.fileUpload?.let {
                 recyclerDoc.visibility = View.VISIBLE
                 if (recyclerDoc.adapter == null) {
                     recyclerDoc.layoutManager = LinearLayoutManager(
@@ -764,22 +951,17 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                         LinearLayoutManager.VERTICAL,
                         false
                     )
-                    val formDataList=formSchema.formData?.get(adapterPosition)?.fileUpload
+                    val formDataList = formSchema.formData?.getOrNull(adapterPosition)?.fileUpload
 
-                    if (!formDataList.isNullOrEmpty() && formDataList.size>0) {
-                        if (formDataList[0].fileUrl!=null && formDataList[0].fileUrl?.isNotEmpty() == true) {
+                    if (!formDataList.isNullOrEmpty() && formDataList.size > 0) {
+                        if (formDataList[0].fileUrl != null && formDataList[0].fileUrl?.isNotEmpty() == true) {
                             recyclerDoc.adapter = NCWFormFilesAdapter(
-                                formSchema.formData?.get(adapterPosition)?.fileUpload!!,
-                                isClickable
-                            ) {
-
-                            }
-                        }
-                        else{
+                                formSchema.formData?.getOrNull(adapterPosition)?.fileUpload!!,
+                                isClickable, {}, {})
+                        } else {
                             recyclerDoc.visibility = View.GONE
                         }
-                    }
-                    else{
+                    } else {
                         recyclerDoc.visibility = View.GONE
                     }
 
@@ -787,18 +969,24 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
 
             }
 
-
-
-
             uploadMedia.setOnClickListener {
-                callBack(component) // Trigger the callback when upload icon is clicked
+                val isMultipleUpload = component.config?.fileUploadType == NCWAppConstant.UPLOAD_FILE_MULTIPLE
+                val hasNoFiles = (component.fileUpload?.size ?: 0) < 1
+
+                if (isMultipleUpload || hasNoFiles) {
+                    callBack(component)
+
+                }
+
+
             }
-            uploadMedia.isEnabled=isClickable
+            uploadMedia.isEnabled = isClickable
             formContainer.addView(fileInputView)
             inputValues[component.id] = fileInputView
         }
 
         private fun addLabel(component: Component) {
+            addSpaceToContainer(5)
             val textView = TextView(itemView.context).apply {
                 val label = component.labels?.firstOrNull() ?: "Label"
                 val isRequired = component.additionalSettings["Required"]?.value == true
@@ -823,7 +1011,9 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             NCWThemeUtils.setBotTextColor(textView)
             formContainer.addView(textView)
         }
+
         private fun addRadioLabel(component: Component) {
+            addSpaceToContainer(5)
             val textView = TextView(itemView.context).apply {
                 val label = component.groupLabel ?: "Label"
                 val isRequired = component.additionalSettings["Required"]?.value == true
@@ -855,12 +1045,27 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply { setMargins(0, 15, 0, 0) }
 
+        private fun addSpaceToContainer(heightDp: Int) {
+            val spaceView = View(itemView.context).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    dpToPx(heightDp)
+                )
+            }
+            formContainer.addView(spaceView)
+        }
+
+        private fun dpToPx(dp: Int): Int {
+            val density = itemView.context.resources.displayMetrics.density
+            return (dp * density).toInt()
+        }
+
         private fun addSubmitButtonDynamically(
             parentLayout: LinearLayout,
             context: Context,
             formSchecma: FormSchema
         ) {
-
+            addSpaceToContainer(5)
             val btnSubmit = TextView(context).apply {
                 text = "Submit"
                 id = View.generateViewId()
@@ -870,56 +1075,71 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 ).apply {
-                    setMargins(10, 30, 10, 30) // Add padding/margins as needed
+                    setMargins(0, 30, 0, 30) // Add padding/margins as needed
                 }
 
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                 NCWThemeUtils.createRoundedDrawable(this)
             }
 
-            btnSubmit.isEnabled=isClickable
+            btnSubmit.isEnabled = isClickable
 
             parentLayout.addView(btnSubmit)
-            setupSubmitButton(btnSubmit,parentLayout,formSchecma)
+            setupSubmitButton(btnSubmit, parentLayout, formSchecma)
         }
+
         private fun setupSubmitButton(
             btnSubmit: TextView,
             parentLayout: LinearLayout,
             formSchema: FormSchema
         ) {
 
-            if(formSchema.formData.isNullOrEmpty()) {
-                isClickable =true
+            if (formSchema.formData.isNullOrEmpty()) {
+                isClickable = true
             } else {
-                btnSubmit.visibility=View.GONE
-                isClickable =false
+                btnSubmit.visibility = View.GONE
+                isClickable = false
                 showFormSubmittedView(parentLayout, btnSubmit.context)
             }
 
 
             btnSubmit.setOnClickListener {
-                Log.e("CheckList", "InputValues Size: ${inputValues.size}")
                 if (validateInputs(inputValues)) {
+
+                    var isStillFileUpload = false
+
+                    items.filter { it.component == "file" && it.type == "file" }
+                        .forEach { matchList ->
+                            matchList.fileUpload?.forEach { fileUploadData ->
+                                if (fileUploadData.fileUrl == null && fileUploadData.mediaType == null) {
+                                    isStillFileUpload = true
+                                    return@forEach
+                                }
+                            }
+                        }
+
+                    if (isStillFileUpload) {
+                        return@setOnClickListener
+                    }
+
                     // Create the payload and label response
                     val messagePayload = createPayload(inputValuesSelected)
                     val labelResponse = createLabelResponse(inputValuesSelected)
-                  val attachePayload=createNCWAttachmentList(inputValuesSelected,formSchema.properties.intentId)
-
-                  val attachmentList = arrayListOf(attachePayload)
-                    formData(messagePayload, labelResponse,attachmentList)
-                    btnSubmit.visibility=View.GONE
+                    val attachePayload =
+                        createNCWAttachmentList(inputValuesSelected, formSchema.properties.intentId)
+                    val attachmentList = arrayListOf(attachePayload)
+                    formData(messagePayload, labelResponse, attachmentList)
+                    btnSubmit.visibility = View.GONE
                     showFormSubmittedView(parentLayout, btnSubmit.context)
-                    val formData= messagePayload.let {
+                    val formData = messagePayload.let {
                         NCWParsingUtils.parsePayloadToFormData(
                             it
                         )
                     }
-                    this@NCWFormAdapter.formSchema.formData=formData
+                    this@NCWFormAdapter.formSchema.formData = formData
+                    isClickable=false
+                    notifyDataSetChanged()
 
-
-               }
-                else{
-                    Log.e("IsValidte","I am falseee")
                 }
 
 
@@ -934,32 +1154,39 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
         ): NCWAttachmentList {
             val formValues = mutableListOf<String>()
             inputValuesSelected.forEach { formData ->
-                formData.textInput?.takeIf { it.isNotBlank() }?.let { formValues.add(it) } // Add only non-blank text input
-                formData.selectedRadio?.takeIf { it.isNotBlank() }?.let { formValues.add(it) } // Add only non-blank selected radio
+                formData.textInput?.takeIf { it.isNotBlank() }
+                    ?.let { formValues.add(it) } // Add only non-blank text input
+                formData.selectedRadio?.takeIf { it.isNotBlank() }
+                    ?.let { formValues.add(it) } // Add only non-blank selected radio
                 formData.selectedCheckboxes
                     .filter { it.isNotBlank() }
                     .joinToString(",")
-                    .takeIf { it.isNotBlank() }?.let { formValues.add(it) } // Add only non-blank checkboxes
-                formData.dropdownSelection?.takeIf { it.isNotBlank() }?.let { formValues.add(it) } // Add only non-blank dropdown selection
-                formData.dateInput?.takeIf { it.isNotBlank() }?.let { formValues.add(it) } // Add only non-blank date input
+                    .takeIf { it.isNotBlank() }
+                    ?.let { formValues.add(it) } // Add only non-blank checkboxes
+                formData.dropdownSelection?.takeIf { it.isNotBlank() }
+                    ?.let { formValues.add(it) } // Add only non-blank dropdown selection
+                formData.dateInput?.takeIf { it.isNotBlank() }
+                    ?.let { formValues.add(it) } // Add only non-blank date input
                 formData.fileUpload
                     ?.mapNotNull { it.fileUrl }
                     ?.filter { it.isNotBlank() }
                     ?.joinToString(",")
-                    ?.takeIf { it.isNotBlank() }?.let { formValues.add(it) } // Add only non-blank file URLs
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { formValues.add(it) } // Add only non-blank file URLs
             }
 
             val nonEmptyFormValues = formValues.filter { it.isNotBlank() }
 
-            val schemaFormRequestId = items.map { it.id }
+          //  val schemaFormRequestId = items.map { it.id }
 
+            val schemaFormRequestId = listOf(formSchema.requestId ?: "")
             return NCWAttachmentList(
                 type = "ai.msg.domain.responses.core.MessageInfoAttachment",
                 values = Values(
                     status = listOf("SUBMITTED"),
                     isSchemaForm = listOf("true"),
-                    schemaFormRequestId = schemaFormRequestId,
-                    question = listOf(formSchema.properties.question?:""),
+                    schemaFormRequestId =schemaFormRequestId,
+                    question = listOf(formSchema.properties.question ?: ""),
                     optionList = inputValuesSelected.flatMap { it.selectedCheckboxes },
                     formValues = nonEmptyFormValues
                 ),
@@ -1016,6 +1243,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
             parentLayout.addView(horizontalLayout)
 
         }
+
         private fun createPayload(inputValuesSelected: List<FormData>): String {
             val stringBuilder = StringBuilder("event://;LEARN_ATTRIBUTE_EVENT;")
 
@@ -1027,30 +1255,38 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                         val value = formData.textInput.orEmpty()
                         stringBuilder.append("DEFAULT_OUTPUT_KEY_INPUT::value=$value&")
                     }
+
                     item.isTextArea() -> {
                         val value = formData.textAreaInput.orEmpty()
                         stringBuilder.append("DEFAULT_OUTPUT_KEY_TEXTAREA::value=$value&")
                     }
+
                     item.isRadioGroup() -> {
                         val value = formData.selectedRadio.orEmpty()
                         stringBuilder.append("DEFAULT_OUTPUT_KEY_SELECT::value=$value&")
                     }
+
                     item.isCheckboxGroup() -> {
                         val value = if (formData.selectedCheckboxes.isNotEmpty()) {
                             formData.selectedCheckboxes.joinToString(",")
                         } else ""
                         stringBuilder.append("DEFAULT_OUTPUT_KEY_INPUT::value=$value&")
                     }
+
                     item.isDropdown() -> {
                         val value = formData.dropdownSelection.orEmpty()
                         stringBuilder.append("DEFAULT_OUTPUT_KEY_SELECT::value=$value&")
                     }
+
                     item.isDateInput() -> {
                         val value = formData.dateInput.orEmpty()
                         stringBuilder.append("DEFAULT_OUTPUT_KEY_INPUT::value=$value&")
                     }
+
                     item.isFileInput() -> {
-                        val value = formData.fileUpload?.mapNotNull { it.fileUrl }?.joinToString(",").orEmpty()
+                        val value =
+                            formData.fileUpload?.mapNotNull { it.fileUrl }?.joinToString(",")
+                                .orEmpty()
                         stringBuilder.append("DEFAULT_OUTPUT_KEY_PILL::value=$value&")
                     }
                 }
@@ -1125,9 +1361,17 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                         errorTextView.visibility = View.GONE
                                     }
                                 }
+                                if (value.errorTextView.text.toString().isNotEmpty()) {
+
+                                    isValid = false
+                                    value.errorTextView.visibility = View.VISIBLE
+                                }
+
+
                             }
                         }
                     }
+
                     is DateField -> {
                         items.forEach { item ->
                             if (item.id == key) {
@@ -1143,9 +1387,14 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                                         errorTextView.visibility = View.GONE
                                     }
                                 }
+                                if (value.errorTextView.text.toString().isNotEmpty()) {
+                                    isValid = false
+                                    value.errorTextView.visibility = View.VISIBLE
+                                }
                             }
                         }
                     }
+
                     is RadioField -> {
                         items.forEach { item ->
                             if (item.id == key) {
@@ -1164,6 +1413,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                             }
                         }
                     }
+
                     is CheckBoxField -> {
                         items.forEach { item ->
                             if (item.id == key) {
@@ -1187,6 +1437,7 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                             }
                         }
                     }
+
                     is DropdownField -> { // Dropdown validation
                         items.forEach { item ->
                             if (item.id == key) {
@@ -1206,7 +1457,6 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
                     }
 
 
-
                 }
             }
 
@@ -1214,32 +1464,29 @@ class NCWFormAdapter(private val items: ArrayList<Component>, val formSchema: Fo
         }
 
 
-
-        private fun createDrawable(view :View){
+        private fun createDrawable(view: View) {
             val drawable = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
                 cornerRadius = 15f
                 setStroke(1, Color.BLACK)
                 setColor(Color.WHITE)
             }
-            view.background=drawable
+            view.background = drawable
 
         }
 
     }
-    private fun createErrorDrawable(view :View){
+
+    private fun createErrorDrawable(view: View) {
         val drawable = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadius = 15f
             setStroke(2, ContextCompat.getColor(view.context, R.color.error_color))
             setColor(Color.WHITE)
         }
-        view.background=drawable
+        view.background = drawable
 
     }
-
-
-
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FormViewHolder {

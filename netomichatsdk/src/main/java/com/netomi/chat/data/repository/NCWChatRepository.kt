@@ -6,9 +6,12 @@ import androidx.lifecycle.MutableLiveData
 import com.netomi.chat.data.network.NCWApiInterface
 import com.netomi.chat.data.network.NCWBaseService
 import com.netomi.chat.data.network.NCWRetrofitClient
+import com.netomi.chat.model.GetConversationPayload
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
 import com.netomi.chat.model.NCWSendMessageResponse
+import com.netomi.chat.model.auth.LoginResponse
+import com.netomi.chat.model.auth.LogoutResponse
 import com.netomi.chat.model.chat_history.NCWGetChatHistoryPayload
 import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEndChatResponse
@@ -19,6 +22,7 @@ import com.netomi.chat.model.messages.NCWWebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
+import com.netomi.chat.model.survey_rule.SurveyRuleResponse
 import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.utils.NCWRoutes
 import com.netomi.chat.utils.NCWState
@@ -26,6 +30,7 @@ import com.netomi.chat.utils.NCWAppUtils.createRequestBody
 import com.netomi.chat.utils.NCWAppUtils.getFileContentType
 import com.netomi.chat.utils.NCWAppUtils.prepareFilePart
 import java.io.File
+import java.io.IOException
 
 /**
  * Repository responsible for managing chat-related data operations.
@@ -96,11 +101,12 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
 
     // API to get ConversationId
     suspend fun getConversationId(
-        botRef: String?,
+        payload: GetConversationPayload,
+        onRestart: Boolean?,
     ): NCWState<NCWGetConversationIdResponse> {
         return try {
             //    liveData.value = State.loading(Routes.ROUTE_GET_CONVERSATION_ID, loadingType)
-            val response = apiInterface.getConversationId(botRef)
+            val response = apiInterface.getConversationId(onRestart,payload)
             if (response.isSuccessful && response.body() != null) {
                 NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_GET_CONVERSATION_ID)
             } else {
@@ -134,22 +140,36 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
             NCWState.error(e.message.toString(), code = 500)
         }
     }
-
     suspend fun getPreSignedUrl(payload: NCWSignedUrlPayload): NCWState<NCWGetPreSignedUrl> {
-        val response = apiInterface.getPreSignedUrl(payload)
-        return if (response.isSuccessful && response.body() != null) {
-            NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_GET_PRESIGNED_URL)
-        } else {
-            val errorBody = response.errorBody()
-            if (errorBody != null) {
-               // NCWState.error(parseError(errorBody), code = response.code())
-                NCWState.sendMessageError(parseError(errorBody), code = response.code(), payload = payload)
+        return try {
+            val response = apiInterface.getPreSignedUrl(payload)
+            if (response.isSuccessful && response.body() != null) {
+                NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_GET_PRESIGNED_URL)
             } else {
-              //  NCWState.error(mapApiException(response.code()), code = response.code())
-                NCWState.sendMessageError(mapApiException(response.code()), code = response.code(),payload = payload)
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    NCWState.sendMessageError(
+                        parseError(errorBody),
+                        code = response.code(),
+                        payload = payload
+                    )
+                } else {
+                    NCWState.sendMessageError(
+                        mapApiException(response.code()),
+                        code = response.code(),
+                        payload = payload
+                    )
+                }
             }
+        } catch (e: IOException) {
+            NCWState.sendMessageError("Network error", code = 0, payload = payload)
+        } catch (e: Exception) {
+            Log.e("getPreSignedUrl", "Exception occurred during API call: ${e.message}")
+            NCWState.sendMessageError("API call failed", code = 500, payload = payload)
         }
     }
+
+
 
 
     suspend fun uploadFile(
@@ -203,11 +223,8 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
                 val locationHeader = response.headers()["Location"]
                 if (locationHeader != null) {
 
-                    val title = mediaFile.name // File name with extension, e.g., "example.png"
-                    val fileSize = mediaFile.length() // File size in bytes
-                    // Log or print the details
-                    println("Title: $title")
-                    println("File Size: $fileSize bytes")
+                    val title = mediaFile.name
+                    val fileSize = mediaFile.length()
                     val uploadResult = NCWGetMediaUploadUrl(locationHeader, mediaType,title, fileSize = fileSize)
                     Log.d("UploadFile", "File uploaded successfully. Location: $locationHeader")
                     NCWState.success(data = uploadResult, NCWRoutes.ROUTE_UPLOAD_MEDIA)
@@ -216,19 +233,12 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
                     NCWState.error("Location header is missing in the response", code = 500)
                 }
             } else {
-                Log.e("UploadFile", "Error occurred: ${response.code()} - ${response.message()}")
-            //   NCWState.error("File upload failed", code = response.code())
                 val payload=NCWSignedUrlPayload(mediaType,mediaFile.name)
-                Log.e("MedianName","payload q"+mediaFile.name )
-                Log.e("MedianName","payload"+payload )
                 NCWState.sendMessageError("File upload failed", code = response.code(), payload = payload)
             }
         } catch (e: Exception) {
             Log.e("UploadFile", "Exception occurred during upload: ${e.message}")
-            //NCWState.error("File upload failed due to an exception", code = 500)
             val payload=NCWSignedUrlPayload(mediaType,mediaFile.name)
-            Log.e("MedianName","payload q else "+mediaFile.name )
-            Log.e("MedianName","payload"+payload )
             NCWState.sendMessageError("File upload failed", code =500, payload = payload)
         }
     }
@@ -239,7 +249,7 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
     // Hit API to get AWS MQTT Credentials
     suspend fun hitEndChatAPI(payload: NCWEndChatRequest): NCWState<NCWEndChatResponse> {
         return try {
-            val response = apiInterface.hitEndChatAPI(payload)
+            val response = apiInterface.hitEndChatAPI(payload = payload)
             if (response.isSuccessful && response.body() != null) {
                 NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_END_CHAT)
             } else {
@@ -260,7 +270,7 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
         return try {
             val response = apiInterface.hitFeedbackAPI(payload)
             if (response.isSuccessful && response.body() != null) {
-                NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_FEEDBACK_CHAT)
+                NCWState.success(data = response.body()!!, NCWRoutes.WEBHOOK_EVENT)
             } else {
                 val errorBody = response.errorBody()
                 if (errorBody != null) {
@@ -278,6 +288,62 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
             val response = apiInterface.hitSubmitSurveyRequestAPI(payload)
             if (response.isSuccessful && response.body() != null) {
                 NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_SURVEY)
+            } else {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    NCWState.error(parseError(errorBody), code = response.code())
+                } else {
+                    NCWState.error(mapApiException(response.code()), code = response.code())
+                }
+            }
+        } catch (e: Exception) {
+            NCWState.error(e.message.toString(), code = 500)
+        }
+    }
+
+    suspend fun hitAuthenticateUserApi(jwtToken:String, botRefID:String,authEnabled:String): NCWState<LoginResponse> {
+        return try {
+            val response = apiInterface.hitAuthenticateUserApi(botRefId = botRefID, authToken = jwtToken, authEnabled = "true")
+            if (response.isSuccessful && response.body() != null) {
+                NCWState.success(data = response.body()!!, NCWRoutes.LOGIN)
+            } else {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    NCWState.error(parseError(errorBody), code = response.code())
+                } else {
+                    NCWState.error(mapApiException(response.code()), code = response.code())
+                }
+            }
+        } catch (e: Exception) {
+            NCWState.error(e.message.toString(), code = 500)
+        }
+    }
+
+    suspend fun hitLogoutApi(jwtToken:String, botRefID:String,authEnabled:String): NCWState<LogoutResponse> {
+        return try {
+            val response = apiInterface.hitLogoutAPI(botRefId = botRefID, authToken = jwtToken, authEnabled = "true")
+            if (response.isSuccessful && response.body() != null) {
+                NCWState.success(data = response.body()!!, NCWRoutes.LOGOUT)
+            } else {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    NCWState.error(parseError(errorBody), code = response.code())
+                } else {
+                    NCWState.error(mapApiException(response.code()), code = response.code())
+                }
+            }
+        } catch (e: Exception) {
+            NCWState.error(e.message.toString(), code = 500)
+        }
+    }
+
+
+
+    suspend fun getSurveyRule(botRefID:String): NCWState<SurveyRuleResponse> {
+        return try {
+            val response = apiInterface.getSurveyRule(botRefID)
+            if (response.isSuccessful && response.body() != null) {
+                NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_GET_SURVEY_RULE)
             } else {
                 val errorBody = response.errorBody()
                 if (errorBody != null) {

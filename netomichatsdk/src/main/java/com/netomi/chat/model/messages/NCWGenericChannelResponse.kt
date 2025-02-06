@@ -2,6 +2,7 @@ package com.netomi.chat.model.messages
 
 import com.netomi.chat.survey.EventData
 import com.netomi.chat.survey.EventInfo
+import com.netomi.chat.survey.NCWSignInUserDetails
 
 data class NCWGenericChannelResponse(
     val type: String? = null,
@@ -11,7 +12,6 @@ data class NCWGenericChannelResponse(
     val channel: String? = null,
     val requestId: String? = null,
     val requestPayload: NCWRequestPayload? = null,
-
     val botId: String? = null,
     val attachments: List<NCWAttachment>? = null,
     val customPayload: NCWCustomPayload? = null,
@@ -42,7 +42,8 @@ data class NCWAttachmentListRequest(
     var isReviewEnabled: Boolean? = null,
     var thumbnailUrl: String? = null,
     var fileURL: String? = null,
-    var fileSize: String? = null
+    var fileSize: String? = null,
+    var values: Values? = null,
 )
 
 
@@ -60,6 +61,7 @@ data class NCWAttachmentContent(
     val attachmentResponseType: String? = null,
     val intentId: String? = null,
     val responseId: Int? = null,
+    val id:String?=null,
     val nodeName: String? = null,
     val isVariationsEnabled: Boolean? = null,
     val largeImageUrl: String? = null,
@@ -69,8 +71,14 @@ data class NCWAttachmentContent(
     val thumbnailUrl: String? = null,
     val title: String? = null,
     val feedbackValue: String?=null,
-    var buttons: ArrayList<NCWCarouselButton> = arrayListOf()
+    var buttons: ArrayList<NCWCarouselButton> = arrayListOf(),
+    val multipleSourceDetails: ArrayList<MultipleSourceDetail> = arrayListOf(),
 
+)
+
+data class MultipleSourceDetail(
+    val text: String?=null,
+    val index: Int=1
 )
 
 data class NCWQuickReply(

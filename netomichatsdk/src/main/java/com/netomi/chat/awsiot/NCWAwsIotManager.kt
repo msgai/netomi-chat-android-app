@@ -91,6 +91,23 @@ object NCWAwsIotManager {
     }
 
     /**
+     * Unsubscribes from the current topic and subscribes to a new one.
+     */
+    fun switchTopic(oldTopic: String, newTopic: String, chatViewModel: NCWChatViewModel) {
+        if (connectionStatus == 1) { // Ensure MQTT is connected before switching topics
+            Log.d("IoT", "Switching from topic [$oldTopic] to [$newTopic]")
+
+            // Unsubscribe from the old topic
+            unsubscribeToTopic(oldTopic)
+
+            // Subscribe to the new topic
+            subscribeToTopic(newTopic, chatViewModel)
+        } else {
+            Log.e("IoT", "Cannot switch topics. MQTT is not connected.")
+        }
+    }
+
+    /**
      * Subscribes to a topic to receive messages.
      * @param topic Topic to subscribe to.
      */
@@ -98,7 +115,30 @@ object NCWAwsIotManager {
         mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS0) { topic, data ->
             val message = String(data, Charsets.UTF_8)
             Log.d("IoT", "Message received on topic [$topic]: $message")
+           /* if (chatViewModel.awsMessage.hasActiveObservers()) {
+                Log.d("IoT", "Active observers found for awsMessage")
+            } else {
+                Log.d("IoT", "No active observers for awsMessage")
+            }*/
+
             chatViewModel.awsMessage.postValue(message)
+        }
+    }
+
+
+     fun unsubscribeRestart(topic: String) {
+         unsubscribeToTopic(topic)
+    }
+    /**
+     * Subscribes to a topic to receive messages.
+     * @param topic Topic to subscribe to.
+     */
+    private fun unsubscribeToTopic(topic: String) {
+        try {
+            mqttManager.unsubscribeTopic(topic)
+            Log.d("IoT", "Unsubscribed from topic: $topic")
+        } catch (e: Exception) {
+            Log.e("IoT", "Error unsubscribing from topic $topic", e)
         }
     }
 

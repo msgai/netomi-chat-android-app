@@ -42,19 +42,22 @@ class ChangeAiAgentFragment : Fragment() {
 
         val botsResponse = preferences.get<BotListingResponse>(SharePreferenceConstant.BOT_RESPONSE)
         val bots = botsResponse?.bots ?: emptyList()
-        var bot=preferences.getSelectedBot()
 
-        adapter = ChangeAiAgentAdapter(bots,bot!!.botRefId) { bot ->
-            // Handle bot item click
-            selectedBot=bot
-            onboardingViewModel.updateBotList(selectedBot!!)
-            preferences.saveSelectedBot(selectedBot!!)
+        val bot=preferences.getSelectedBot()
+        if (bot != null) {
+            adapter = ChangeAiAgentAdapter(bots,bot.botRefId) { bot ->
+                // Handle bot item click
+                selectedBot=bot
+                onboardingViewModel.updateBotList(selectedBot!!)
+                preferences.saveSelectedBot(selectedBot!!)
 
-            (activity as HomeActivity).loadFragment(HomeFragment())
-          //  Toast.makeText(requireContext(), "Clicked: ${bot.botName}", Toast.LENGTH_SHORT).show()
-        }
+                (activity as HomeActivity).loadFragment(HomeFragment())
+                //  Toast.makeText(requireContext(), "Clicked: ${bot.botName}", Toast.LENGTH_SHORT).show()
+            }
+
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
+        }
     }
 }

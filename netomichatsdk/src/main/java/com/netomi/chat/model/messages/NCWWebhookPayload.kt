@@ -1,5 +1,6 @@
 package com.netomi.chat.model.messages
 
+import com.netomi.chat.survey.NCWSignInUserDetails
 import com.netomi.chat.utils.DeviceInfo
 
 data class NCWWebhookPayload(
@@ -11,7 +12,7 @@ data class NCWRequestBody(
     val conversationId: String? = null,
     val ownerType: String? = "BOT",
     val messagePayload: NCWMessagePayload? = null,
-    val userDetails: NCWUserDetails? = null,
+    val userDetails: NCWSignInUserDetails? = null,
     val additionalAttributes: NCWAdditionalAttributes? = null,
     var attachmentList: ArrayList<NCWAttachmentList>? = null,
 )
