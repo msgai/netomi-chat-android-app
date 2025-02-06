@@ -12,7 +12,7 @@ import java.util.Locale
 
 object NCWParsingUtils {
 
-    fun parsePayloadToFormData(payload: String): ArrayList<FormData>? {
+   /* fun parsePayloadToFormData(payload: String): ArrayList<FormData>? {
 
         if (!payload.contains("event://;LEARN_ATTRIBUTE_EVENT;")) {
             return null // Return null if the substring is not found
@@ -49,7 +49,7 @@ object NCWParsingUtils {
         }
 
         return formDataList
-    }
+    }*/
 
 
     fun parseDate(dateString: String): Date? {

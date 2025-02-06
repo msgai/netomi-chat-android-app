@@ -73,7 +73,7 @@ class NCWFormFilesAdapter(
 
         if (item.fileSize != null)
             holder.tvDocType.text = formatFileSize(item.fileSize!!.toLong())
-        else
+       /* else
             item.fileUrl?.let {
                 getFileSizeFromUrl(it) { fileSize ->
                     if (fileSize != null) {
@@ -82,19 +82,19 @@ class NCWFormFilesAdapter(
                         Log.e("File", "Failed to retrieve file size.")
                     }
                 }
-            }
+            }*/
 
 
 
         holder.icDelete.setOnClickListener {
             onDelete(item)
-          //  notifyItemChanged(position)
         }
         holder.constRetry.setOnClickListener {
             onRetry(item)
             holder.constRetry.visibility=View.GONE
             holder.progressBar.visibility=View.VISIBLE
             holder.icDelete.visibility=View.GONE
+            holder.txtCancel.visibility=View.VISIBLE
         }
         holder.txtCancel.setOnClickListener {
            item.isCancelled=true

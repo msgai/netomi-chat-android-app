@@ -1,7 +1,7 @@
 package com.netomi.chat.ui.view
 
 
-import  NCWIdleTimeoutManager
+import NCWIdleTimeoutManager
 import android.Manifest
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -44,9 +44,9 @@ import com.netomi.chat.awsiot.NCWAwsIotManager
 import com.netomi.chat.awsiot.NCWConnectionStatus
 import com.netomi.chat.model.CarouselButtonType
 import com.netomi.chat.model.CustomFieldName
+import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
-import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.NCWSendMessageResponse
 import com.netomi.chat.model.auth.LoginResponse
@@ -76,8 +76,8 @@ import com.netomi.chat.model.messages.NCWQuickReplyOption
 import com.netomi.chat.model.messages.NCWRequestBody
 import com.netomi.chat.model.messages.NCWWebhookPayload
 import com.netomi.chat.model.messages.SurveyField
-import com.netomi.chat.model.mqtt.NCWCredentials
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
+import com.netomi.chat.model.mqtt.NCWCredentials
 import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
 import com.netomi.chat.model.survey_rule.SurveyRule
@@ -89,12 +89,9 @@ import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
-import com.netomi.chat.utils.NCWChatActionCallback
 import com.netomi.chat.utils.DeviceInfoUtil
 import com.netomi.chat.utils.MessageSoundPlayer
 import com.netomi.chat.utils.NCWAppConstant
-import com.netomi.chat.utils.NCWFilePath
-import com.netomi.chat.utils.NCWImageUtils
 import com.netomi.chat.utils.NCWAppConstant.ARG_MEDIA_URL
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHANNEL_ID
@@ -143,9 +140,11 @@ import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.hideKeyboard
 import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
 import com.netomi.chat.utils.NCWAppUtils.isFormSizeValid
+import com.netomi.chat.utils.NCWChatActionCallback
 import com.netomi.chat.utils.NCWDialogUtils
 import com.netomi.chat.utils.NCWFeedbackActionCallback
-import com.netomi.chat.utils.NCWParsingUtils.parsePayloadToFormData
+import com.netomi.chat.utils.NCWFilePath
+import com.netomi.chat.utils.NCWImageUtils
 import com.netomi.chat.utils.NCWRoutes
 import com.netomi.chat.utils.NCWSingleAlertDialog
 import com.netomi.chat.utils.NCWState
@@ -3077,15 +3076,15 @@ if (isUpdated) {
                                             response.requestId == schemaRequestId
                                         }
 
-Log.e("matchingResponse?.requestPayload?.","matchingResponse?.requestPayload?."+matchingResponse?.requestPayload?.attachmentList)
-                                    matchingResponse?.requestPayload?.messagePayload?.text?.let { nextMessagePayload ->
+
+                                   /* matchingResponse?.requestPayload?.messagePayload?.text?.let { nextMessagePayload ->
                                         val formData = parsePayloadToFormData(nextMessagePayload)
 
                                         if (!formData.isNullOrEmpty()) {
                                             schema.formData = formData
                                         }
 
-                                    }
+                                    }*/
 
                                     matchingResponse?.requestPayload?.attachmentList?.let { nextMessagePayload ->
                                         val formData = nextMessagePayload[0]

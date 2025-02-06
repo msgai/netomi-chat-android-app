@@ -11,7 +11,6 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
-import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -41,9 +40,9 @@ import com.netomi.chat.model.messages.Values
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppConstant.FORM_DATE_FORMAT
 import com.netomi.chat.utils.NCWAppUtils
-import com.netomi.chat.utils.NCWParsingUtils
 import com.netomi.chat.utils.NCWParsingUtils.parseDate
 import com.netomi.chat.utils.NCWThemeUtils
+import com.netomi.chat.utils.toArrayList
 import java.util.Calendar
 
 data class FormData(
@@ -1003,7 +1002,35 @@ class NCWFormAdapter(
                 ex.printStackTrace()
             }
 
-            formSchema.formData?.getOrNull(adapterPosition)?.fileUpload?.let {
+            formSchema.formValues?.getOrNull(adapterPosition)?.let{
+                val formDataList = it.split(",")?.map { FileUploadData(fileUrl = it) } ?: emptyList()
+                val convertList=formDataList.toArrayList()
+                recyclerDoc.visibility = View.VISIBLE
+                if (recyclerDoc.adapter == null) {
+                    recyclerDoc.layoutManager = LinearLayoutManager(
+                        itemView.context,
+                        LinearLayoutManager.VERTICAL,
+                        false
+                    )
+                  //  val formDataList = formSchema.formData?.getOrNull(adapterPosition)?.fileUpload
+
+                    if (!formDataList.isNullOrEmpty() && formDataList.size > 0) {
+                        if (formDataList[0].fileUrl != null && formDataList[0].fileUrl?.isNotEmpty() == true) {
+                            recyclerDoc.adapter = NCWFormFilesAdapter(
+                                convertList,
+                                isClickable, {}, {})
+                        } else {
+                            recyclerDoc.visibility = View.GONE
+                        }
+                    } else {
+                        recyclerDoc.visibility = View.GONE
+                    }
+
+                }
+
+            }
+
+       /*     formSchema.formData?.getOrNull(adapterPosition)?.fileUpload?.let {
                 recyclerDoc.visibility = View.VISIBLE
                 if (recyclerDoc.adapter == null) {
                     recyclerDoc.layoutManager = LinearLayoutManager(
@@ -1027,7 +1054,7 @@ class NCWFormAdapter(
 
                 }
 
-            }
+            }*/
 
             uploadMedia.setOnClickListener {
                 val isMultipleUpload = component.config?.fileUploadType == NCWAppConstant.UPLOAD_FILE_MULTIPLE
@@ -1155,7 +1182,7 @@ class NCWFormAdapter(
             formSchema: FormSchema
         ) {
 
-            if (formSchema.formData.isNullOrEmpty()) {
+            if (formSchema.formValues.isNullOrEmpty()) {
                 isClickable = true
             } else {
                 btnSubmit.visibility = View.GONE
@@ -1192,12 +1219,12 @@ class NCWFormAdapter(
                     formData(messagePayload, labelResponse, attachmentList)
                     btnSubmit.visibility = View.GONE
                     showFormSubmittedView(parentLayout, btnSubmit.context)
-                    val formData = messagePayload.let {
+                    /*val formData = messagePayload.let {
                         NCWParsingUtils.parsePayloadToFormData(
                             it
                         )
                     }
-                    this@NCWFormAdapter.formSchema.formData = formData
+                    this@NCWFormAdapter.formSchema.formData = formData*/
                     this@NCWFormAdapter.formSchema.formValues = attachePayload.values?.formValues
 
                     isClickable=false
@@ -1263,31 +1290,6 @@ class NCWFormAdapter(
                       }
                   }
               }
-          /* inputValuesSelected.forEach { formData ->
-               formData.textInput?.takeIf { it.isNotBlank() }
-                   ?.let { formValues.add(it) } // Add only non-blank text input
-               formData.selectedRadio?.takeIf { it.isNotBlank() }
-                   ?.let { formValues.add(it) } // Add only non-blank selected radio
-               formData.selectedCheckboxes
-                   .filter { it.isNotBlank() }
-                   .joinToString(",")
-                   .takeIf { it.isNotBlank() }
-                   ?.let { formValues.add(it) } // Add only non-blank checkboxes
-               formData.dropdownSelection?.takeIf { it.isNotBlank() }
-                   ?.let { formValues.add(it) } // Add only non-blank dropdown selection
-               formData.dateInput?.takeIf { it.isNotBlank() }
-                   ?.let { formValues.add(it) } // Add only non-blank date input
-               formData.fileUpload
-                   ?.mapNotNull { it.fileUrl }
-                   ?.filter { it.isNotBlank() }
-                   ?.joinToString(",")
-                   ?.takeIf { it.isNotBlank() }
-                   ?.let { formValues.add(it) } // Add only non-blank file URLs
-           }*/
-
-              Log.e("nonEmptyFormValues", "nonEmptyFormValues " + formValues)
-         //  val schemaFormRequestId = items.map { it.id }
-
            val schemaFormRequestId = listOf(formSchema.requestId ?: "")
            return NCWAttachmentList(
                type = "ai.msg.domain.responses.core.MessageInfoAttachment",
@@ -1304,7 +1306,8 @@ class NCWFormAdapter(
            )
        }
 
-     /*   private fun createNCWAttachmentList(
+     /*  previous logic
+      private fun createNCWAttachmentList(
             inputValuesSelected: List<FormData>,
             attachmentId: String,
         ): NCWAttachmentList {
@@ -1694,7 +1697,7 @@ class NCWFormAdapter(
     override fun onBindViewHolder(holder: FormViewHolder, position: Int) {
         holder.bindForm(items[position])
 
-        val isDisabled = !formSchema.formData.isNullOrEmpty() // Pass this flag from the parent
+        val isDisabled = !formSchema.formValues.isNullOrEmpty() // Pass this flag from the parent
 
         holder.itemView.isClickable = !isDisabled
         holder.itemView.isEnabled = !isDisabled

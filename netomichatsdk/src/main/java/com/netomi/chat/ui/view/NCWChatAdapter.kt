@@ -255,7 +255,14 @@ class NCWChatAdapter(
 
             recyclerViewForm.adapter = formAdapter
 
-            if (message.formSchema?.formData.isNullOrEmpty()) {
+//            if (message.formSchema?.formData.isNullOrEmpty()) {
+//                formAdapter?.isClickable =true
+//            } else {
+//                formAdapter?.isClickable =false
+//            }
+
+
+            if (message.formSchema?.formValues.isNullOrEmpty()) {
                 formAdapter?.isClickable =true
             } else {
                 formAdapter?.isClickable =false
