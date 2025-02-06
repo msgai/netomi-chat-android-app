@@ -3,6 +3,7 @@ package com.netomi.chat.ui.init
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.netomi.chat.R
 import com.netomi.chat.model.theme.light_theme.NCWBotConfig
 import com.netomi.chat.model.theme.light_theme.NCWBubbleConfig
 import com.netomi.chat.model.theme.light_theme.NCWChatWindowConfig
@@ -63,7 +64,7 @@ object NCWChatSdk {
         if (!NCWAppUtils.isNetworkAvailable(context)) {
             NCWAppUtils.showToast(
                 context,
-                "Unable to load chat at the moment. Please check your network and try again."
+                context.getString(R.string.please_check_your_network_and_try_again)
             )
             return
         }
