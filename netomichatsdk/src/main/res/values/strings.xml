@@ -47,5 +47,7 @@
     <string name="logout">Logout</string>
     <string name="you_have_been_logged_out">You have been logged out.</string>
 
+    <string name="languages">Languages</string>
+
 
 </resources>

@@ -363,16 +363,26 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
     }
 
+    private fun setUpLanguageOption() {
+        val bottomSheet = themeData?.let {
+            NCWLanguageBottomSheet(it.multilingual.languages) { options ->
+
+            }
+        }
+        bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
+    }
+
     private fun setUpSettingOption() {
         val bottomSheet = themeData?.let {
-            NCWSettingBottomSheet(it) { showWarning->
+            NCWSettingBottomSheet(it ,{showWarning->
                 if (showWarning!=null)
                 showRestartPopUp(showWarning)
                 else{
                     onRestartAction()
                 }
 
-            }
+            },{
+                setUpLanguageOption() })
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
     }
