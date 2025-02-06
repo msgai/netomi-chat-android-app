@@ -22,6 +22,7 @@ import com.netomi.chat.utils.NCWThemeUtils
 class NCWSettingBottomSheet(
     private val themeData: NCWThemeResponse,
     private val onRestartClick: (showWarning: NCWShowWarning?) -> Unit,
+    private val onLanguageClick: () -> Unit,
 
 ) : BottomSheetDialogFragment() {
 
@@ -58,6 +59,7 @@ class NCWSettingBottomSheet(
         val constRestart = view.findViewById<ConstraintLayout>(R.id.constRestart)
         val constSound = view.findViewById<ConstraintLayout>(R.id.constSound)
         val viewLineSound = view.findViewById<View>(R.id.viewLineSound)
+        val constLang = view.findViewById<ConstraintLayout>(R.id.constLang)
 
         val isVisible = themeData?.sound?.status == ENABLED
         constSound.visibility = if (isVisible) View.VISIBLE else View.GONE
@@ -105,6 +107,11 @@ class NCWSettingBottomSheet(
                 }
             } ?: onRestartClick(null)
 
+            dismiss()
+        }
+
+        constLang.setOnClickListener {
+            onLanguageClick()
             dismiss()
         }
     }

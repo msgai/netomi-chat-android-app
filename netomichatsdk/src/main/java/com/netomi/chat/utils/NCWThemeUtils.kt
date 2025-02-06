@@ -681,4 +681,17 @@ object NCWThemeUtils
         }
     }
 
+
+    fun setRadioButtonColor(radio: RadioButton) {
+        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+            try {
+                val color = parseColor(headerConfig.backgroundColor)
+                radio.buttonTintList = ColorStateList.valueOf(color)
+            } catch (e: IllegalArgumentException) {
+              e.printStackTrace()
+            }
+        }
+    }
+
+
 }
