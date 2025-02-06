@@ -106,6 +106,132 @@
         </LinearLayout>
     </RadioGroup>
 
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constTranscript"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+       android:layout_marginTop="10dp"
+        android:visibility="gone"
+        android:layout_marginStart="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/radioGroup">
+
+        <TextView
+            android:id="@+id/tvTranscript"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:text="Transcripts"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+
+        <CheckBox
+
+            app:layout_constraintTop_toBottomOf="@+id/tvTranscript"
+            app:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/checkboxTranscript"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tvSendTranscript"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="12sp"
+            android:text="@string/transcripts"
+            app:layout_constraintBottom_toBottomOf="@+id/checkboxTranscript"
+            app:layout_constraintTop_toTopOf="@+id/checkboxTranscript"
+            app:layout_constraintStart_toEndOf="@+id/checkboxTranscript"
+
+            />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constDownload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/tvSendTranscript"
+            app:layout_constraintTop_toTopOf="@+id/tvSendTranscript"
+            app:layout_constraintEnd_toEndOf="parent"
+            >
+
+            <ImageView
+                android:id="@+id/icon_download"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@string/download_transcript"
+                android:src="@drawable/ic_download"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvDownload"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="@string/download"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                app:layout_constraintBottom_toBottomOf="@id/icon_download"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/icon_download"
+                app:layout_constraintTop_toTopOf="@id/icon_download" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/emailTextInputLayout"
+            android:layout_width="0dp"
+            android:padding="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/bg_stroke_rounded_white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tvTranscript"
+            app:layout_constraintTop_toBottomOf="@id/tvSendTranscript">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/emailIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="10dp"
+                android:src="@drawable/ic_send_email"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/emailEditText"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:maxLength="50"
+                android:background="@android:color/transparent"
+                android:gravity="center|start"
+
+                android:inputType="textEmailAddress"
+
+                android:textSize="14sp"
+                app:layout_constraintStart_toEndOf="@id/emailIcon"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <!-- Confirm Button -->
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_confirm"
@@ -123,5 +249,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/radioGroup" />
+        app:layout_constraintTop_toBottomOf="@id/constTranscript" />
 </androidx.constraintlayout.widget.ConstraintLayout>
