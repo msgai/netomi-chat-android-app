@@ -85,6 +85,7 @@ import com.netomi.chat.model.survey_rule.SurveyRuleResponse
 import com.netomi.chat.model.theme.NCWShowWarning
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
+import com.netomi.chat.model.transcript.NCWEmailRequest
 import com.netomi.chat.survey.EventData
 import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.ui.init.NCWChatSdk
@@ -302,6 +303,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         attachmentIcon.setOnClickListener {
             attachmentType = TYPE_ATTACHMENT
             showMedia()
+
 
 
         }
@@ -2940,6 +2942,11 @@ if (isUpdated) {
                 finish()
             }
 
+            NCWRoutes.ROUTE_SEND_TRANSCRIPT -> {
+Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
+
+            }
+
             NCWRoutes.WEBHOOK_EVENT -> {
                 if (idleTimeInMillis > 0 && isIdle)
                     resetIdleTimer()
@@ -3319,5 +3326,14 @@ if (isUpdated) {
         } else {
             action.invoke()
         }
+    }
+
+    private fun sendTranscriptApI(email: String) {
+        val payload = NCWEmailRequest(
+            botRefId = botRefId.orEmpty(),
+            conversationId = conversationID.orEmpty(),
+            mail = email
+        )
+        chatViewModel.sendTranscript(payload)
     }
 }

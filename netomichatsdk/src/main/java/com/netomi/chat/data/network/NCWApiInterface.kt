@@ -17,6 +17,7 @@ import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
 import com.netomi.chat.model.survey_rule.SurveyRuleResponse
 import com.netomi.chat.model.theme.NCWThemeResponse
+import com.netomi.chat.model.transcript.NCWEmailRequest
 import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.utils.NCWRoutes.LOGIN
 import com.netomi.chat.utils.NCWRoutes.LOGOUT
@@ -28,6 +29,7 @@ import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_MQTT_CREDENTIALS
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_PRESIGNED_URL
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_SURVEY_RULE
 import com.netomi.chat.utils.NCWRoutes.ROUTE_SEND_CHAT
+import com.netomi.chat.utils.NCWRoutes.ROUTE_SEND_TRANSCRIPT
 import com.netomi.chat.utils.NCWRoutes.ROUTE_WEBHOOK_EVENT
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -183,6 +185,12 @@ interface NCWApiInterface {
 
     @GET(ROUTE_GET_SURVEY_RULE)
     suspend fun getSurveyRule( @Header("x-bot-ref-id") botRefId: String): Response<SurveyRuleResponse>
+
+
+
+    @POST(ROUTE_SEND_TRANSCRIPT)
+    suspend fun sendTranscript(@Body payload: NCWEmailRequest): Response<NCWSendMessageResponse>
+
 
 
 }
