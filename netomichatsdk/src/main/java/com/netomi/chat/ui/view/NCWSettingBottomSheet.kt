@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
 import com.netomi.chat.model.theme.NCWThemeResponse
+import com.netomi.chat.utils.NCWAppConstant.ENABLED
 import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWSettingBottomSheet(
@@ -56,7 +57,7 @@ class NCWSettingBottomSheet(
         val constSound = view.findViewById<ConstraintLayout>(R.id.constSound)
         val viewLineSound = view.findViewById<View>(R.id.viewLineSound)
 
-        val isVisible = themeData?.sound?.defaultSound == true
+        val isVisible = themeData?.sound?.status == ENABLED
         constSound.visibility = if (isVisible) View.VISIBLE else View.GONE
         viewLineSound.visibility = if (isVisible) View.VISIBLE else View.GONE
 
