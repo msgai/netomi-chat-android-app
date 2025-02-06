@@ -349,8 +349,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun setUpQuickReplyOption() {
+        handler.removeCallbacks(idleRunnable)
         val bottomSheet = themeData?.let {
-            NCWQuickMenuBottomSheet(it.quickMenuOptions) { options ->
+            NCWQuickMenuBottomSheet(it.quickMenuOptions,{ options ->
                 val timeStamp = System.currentTimeMillis()
                 checkForInitialMessage()
                 checkForPreviousQuickReply()
@@ -360,7 +361,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     sendMessageToBot(payload)
                 }
                 messageInputField.text.clear()
-            }
+            },{
+                setIdealSurveyAgain()
+            })
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
     }
@@ -375,6 +378,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun setUpSettingOption() {
+        handler.removeCallbacks(idleRunnable)
         val bottomSheet = themeData?.let {
             NCWSettingBottomSheet(it ,{showWarning->
                 if (showWarning!=null)
@@ -384,9 +388,18 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 }
 
             },{
-                setUpLanguageOption() })
+                setUpLanguageOption() },{
+                setIdealSurveyAgain()
+            })
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
+    }
+
+    private fun setIdealSurveyAgain() {
+        if (idleTimeInMillis > 0) {
+            resetIdleTimer()
+            isIdle = false
+        }
     }
 
     private fun showRestartPopUp(ncwShowWarning: NCWShowWarning) {
@@ -1418,7 +1431,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                         messageList.add(newMessage)
 
                         if (!isSurveyRule) {
-                            addLoader()
+                            if (!isIdle) {
+                                addLoader()
+                            }
                             surveyField.submitSurveyInfo = submitSurveyInfo
                             messageAdapter.notifyDataSetChanged()
                             onScrollToPosition(true)
@@ -1640,7 +1655,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             for (customField in response.customFields) {
                 when (CustomFieldName.fromValue(customField.name)) {
                     CustomFieldName.FORM_SCHEMA -> {
-                        Log.e("NCWThemeUtils.getThemeData()?.str ","Render Form ")
                         removeLoader()
                         renderTheFormMessage(response)
                     }
