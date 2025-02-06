@@ -31,6 +31,9 @@ object NCWRoutes {
 
     const val WEBHOOK_EVENT="webhook-event"
 
+    const val ROUTE_SEND_TRANSCRIPT=API +"sendTranscript"
+
+
 
 
 
