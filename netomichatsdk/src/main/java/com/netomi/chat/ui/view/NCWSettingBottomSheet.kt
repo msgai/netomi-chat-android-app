@@ -14,13 +14,15 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
+import com.netomi.chat.model.theme.NCWShowWarning
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.utils.NCWAppConstant.ENABLED
 import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWSettingBottomSheet(
     private val themeData: NCWThemeResponse,
-    private val onRestartClick: () -> Unit,
+    private val onRestartClick: (showWarning: NCWShowWarning?) -> Unit,
+
 ) : BottomSheetDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -61,6 +63,10 @@ class NCWSettingBottomSheet(
         constSound.visibility = if (isVisible) View.VISIBLE else View.GONE
         viewLineSound.visibility = if (isVisible) View.VISIBLE else View.GONE
 
+        val isRestartChatVisible = themeData?.restartChat?.isEnabled   == true
+        constRestart.visibility = if (isRestartChatVisible) View.VISIBLE else View.GONE
+
+
         val greyColor =
             context?.let { ContextCompat.getColor(it, R.color.gray) } // Replace with your green color resource
         val greenColor =
@@ -91,8 +97,17 @@ class NCWSettingBottomSheet(
         }
 
         constRestart.setOnClickListener {
-            onRestartClick()
+            themeData.restartChat?.showWarning?.let { warning ->
+                if (warning.isEnabled) {
+                    onRestartClick(warning)
+                } else {
+                    onRestartClick(null)
+                }
+            } ?: onRestartClick(null)
+
             dismiss()
         }
     }
+
+
 }

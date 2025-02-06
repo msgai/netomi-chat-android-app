@@ -37,7 +37,7 @@ data class NCWThemeResponse(
     val proactiveTriggerType: String?=null,
     val quickMenuOptions: List<NCWQuickMenuOption>,
     val realTimeChatService: NCWRealTimeChatService,
-    val restartChat: NCWRestartChat,
+    val restartChat: NCWRestartChat?=null,
     val scrollToBottom: NCWScrollToBottom,
     val sendTranscriptEmailSetup: NCWSendTranscriptEmailSetup,
     val sound: NCWSound,

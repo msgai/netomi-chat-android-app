@@ -82,6 +82,7 @@ import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
 import com.netomi.chat.model.survey_rule.SurveyRule
 import com.netomi.chat.model.survey_rule.SurveyRuleResponse
+import com.netomi.chat.model.theme.NCWShowWarning
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
 import com.netomi.chat.survey.EventData
@@ -364,30 +365,41 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun setUpSettingOption() {
         val bottomSheet = themeData?.let {
-            NCWSettingBottomSheet(it) {
-                showRestartPopUp()
+            NCWSettingBottomSheet(it) { showWarning->
+                if (showWarning!=null)
+                showRestartPopUp(showWarning)
+                else{
+                    onRestartAction()
+                }
 
             }
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
     }
 
-    private fun showRestartPopUp() {
+    private fun showRestartPopUp(ncwShowWarning: NCWShowWarning) {
 
         NCWDialogUtils.showCustomDialog(
             this,
-            getString(R.string.restart_chat),
-            getString(R.string.confirm_restart_chat),
-                    getString(R.string.restart_chat)
+            title = ncwShowWarning.restartButtonText?:getString(R.string.restart_chat),
+            subtitle = ncwShowWarning.warningText?:getString(R.string.confirm_restart_chat),
+            confirm = ncwShowWarning.restartButtonText?:getString(R.string.restart_chat),
+            cancelButtonText = ncwShowWarning.cancelButtonText?:getString(R.string.cancel)
         ) {
-            onRestart = true
-            isHistoryChatAvialbale = false
-            if (topic != null) {
-                NCWAwsIotManager.unsubscribeRestart(topic)
-            }
-            callBackToBot()
-            hitEndChatAPI()
+
+            onRestartAction()
+
         }
+    }
+
+    private fun onRestartAction() {
+        onRestart = true
+        isHistoryChatAvialbale = false
+        if (topic != null) {
+            NCWAwsIotManager.unsubscribeRestart(topic)
+        }
+        callBackToBot()
+        hitEndChatAPI()
     }
 
 
