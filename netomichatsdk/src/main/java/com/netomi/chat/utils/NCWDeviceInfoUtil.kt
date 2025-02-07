@@ -24,7 +24,8 @@ object DeviceInfoUtil {
             hostBuildNumber = context.packageManager.getPackageInfo(context.packageName, 0).versionCode.toString(),
             deviceWidth = displayMetrics.widthPixels,
             deviceHeight = displayMetrics.heightPixels,
-            scale = displayMetrics.density
+            scale = displayMetrics.density,
+            ipAddress=NCWAppUtils.getIPAddress(context)
         )
     }
 
@@ -59,5 +60,6 @@ data class DeviceInfo(
     val hostBuildNumber: String,
     val deviceWidth: Int,
     val deviceHeight: Int,
-    val scale: Float
+    val scale: Float,
+    val ipAddress :String
 )
