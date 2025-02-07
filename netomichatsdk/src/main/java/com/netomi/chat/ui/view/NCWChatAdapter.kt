@@ -109,8 +109,8 @@ class NCWChatAdapter(
       private val tvTime: TextView = itemView.findViewById(R.id.tvTime)
       private val senderVideoCard: CardView = itemView.findViewById(R.id.senderVideoCard)
       private val requestDocCard: ConstraintLayout = itemView.findViewById(R.id.docCard)
-      private val tvDocName: TextView = itemView.findViewById(R.id.tvDocName)
-      private val tvDocType: TextView = itemView.findViewById(R.id.tvDocType)
+      private val tvDocName: TextView = itemView.findViewById(R.id.tvFileName)
+      private val tvDocType: TextView = itemView.findViewById(R.id.tvFileType)
       private val tvRetry: TextView = itemView.findViewById(R.id.tvRetry)
 
 
@@ -149,13 +149,13 @@ class NCWChatAdapter(
 
       private fun setupFileMessage(message: NCWMessage) {
           requestDocCard.visibility=View.VISIBLE
-          val cornerRadii = floatArrayOf(15f, 15f, 0f, 0f, 15f, 15f, 15f, 15f)
-          NCWThemeUtils.applyBackgroundWithCorners(requestDocCard, themeData?.botResponseBubbleColor, cornerRadii)
+          NCWThemeUtils.setUserConfigTextColor(tvDocName)
+          NCWThemeUtils.setUserConfigTextColor(tvDocType)
+          NCWThemeUtils.setUserConfig(requestDocCard)
           tvDocName.text=message.title
           if (message.fileSize!=null)
           tvDocType.text= NCWAppUtils.formatFileSize(message.fileSize.toLong())
-          NCWThemeUtils.setUserConfig(tvDocName)
-          NCWThemeUtils.setUserConfig(tvDocType)
+
 
       }
 

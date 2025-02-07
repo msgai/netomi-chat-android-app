@@ -195,15 +195,13 @@ object NCWThemeUtils
         }
     }
 
-    fun setUserConfigTextColor(textView: TextView)
-    {
-        themeData?.mobileConfig?.lightTheme?.userConfig?.let { userConfig ->{
-            userConfig.textColor?.let { color -> setTextColor(textView, color) }
-        }}
-    }
-
-
-
+   fun setUserConfigTextColor(textView: TextView) {
+       themeData?.mobileConfig?.lightTheme?.userConfig?.let { userConfig ->
+           userConfig.textColor?.let { color ->
+               setTextColor(textView,color)
+           }
+       }
+   }
 
     fun setRadioButtonUserConfig(messageText: RadioButton) {
         messageText.setTextColor(Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().titleColor))
@@ -351,6 +349,7 @@ object NCWThemeUtils
      }
 
     private fun setTextColor(textView: TextView, color: String){
+        Log.e("FinalSet","final Set "+color)
         textView.setTextColor(parseColor(color))
     }
 
