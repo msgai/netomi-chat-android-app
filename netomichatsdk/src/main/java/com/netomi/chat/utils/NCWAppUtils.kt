@@ -148,6 +148,7 @@ object NCWAppUtils {
             "aac" -> "audio/aac"
             "ogg" -> "audio/ogg"
             "doc" -> "application/msword"
+            "text/plain","txt" -> "text/plain"
             else -> "application/octet-stream"
         }
     }
