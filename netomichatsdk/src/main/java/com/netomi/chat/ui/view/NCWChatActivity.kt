@@ -206,6 +206,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private lateinit var ivMenu: ImageView
     private lateinit var connectionHeader: TextView
     private lateinit var progressBar: ProgressBar
+    private lateinit var cardToday: ConstraintLayout
     private var photoUri: Uri? = null
     private var ncwSdkConfig: NCWHeaderConfig? = null
     private var themeData: NCWThemeResponse? = null
@@ -845,7 +846,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         // Configure footer branding
         themeData?.mobileConfig?.lightTheme?.footerConfig?.let { footerConfig ->
-            if (footerConfig.isNetomiBrandingEnabled) {
+            if (footerConfig.isNetomiBrandingEnabled  && !footerConfig.isFooterHidden) {
                 tvBrandName.apply {
                     visibility = View.VISIBLE
                     text = footerConfig.netomiBrandingText
@@ -862,9 +863,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
             }
         }
-        // it.chatWindowBackgroundColor
+
         themeData?.mobileConfig?.lightTheme?.chatWindowConfig?.let {
             chatRecyclerView.setBackgroundColor(Color.parseColor(it.chatWindowBackgroundColor))
+            cardToday.setBackgroundColor(Color.parseColor(it.chatWindowBackgroundColor))
         }
 
 
@@ -891,6 +893,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         constProgressBar = findViewById(R.id.constLoader)
         progressBar = findViewById(R.id.progress_loader)
         cardViewInputBox = findViewById(R.id.cardView)
+        cardToday = findViewById(R.id.cardToday)
 
         messageInputField.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
