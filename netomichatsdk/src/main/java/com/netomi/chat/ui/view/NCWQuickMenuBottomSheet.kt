@@ -18,6 +18,7 @@ import com.netomi.chat.utils.NCWThemeUtils
 class NCWQuickMenuBottomSheet(
     private val quickMenuOptions: List<NCWQuickMenuOption>,
     private val onQuickMenuClicked: (NCWQuickMenuOption) -> Unit,
+    private val onCrossClick: () -> Unit,
 ) : BottomSheetDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -61,6 +62,7 @@ class NCWQuickMenuBottomSheet(
 
 
         ivClose.setOnClickListener {
+            onCrossClick()
             dismiss()
         }
     }

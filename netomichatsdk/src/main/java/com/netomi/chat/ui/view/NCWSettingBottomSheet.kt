@@ -23,6 +23,7 @@ class NCWSettingBottomSheet(
     private val themeData: NCWThemeResponse,
     private val onRestartClick: (showWarning: NCWShowWarning?) -> Unit,
     private val onLanguageClick: () -> Unit,
+    private val onCrossClick: () -> Unit,
 
 ) : BottomSheetDialogFragment() {
 
@@ -95,6 +96,7 @@ class NCWSettingBottomSheet(
         }
 
         ivClose.setOnClickListener {
+            onCrossClick()
             dismiss()
         }
 
