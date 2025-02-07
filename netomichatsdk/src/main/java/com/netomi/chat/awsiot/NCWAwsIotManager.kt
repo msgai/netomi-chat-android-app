@@ -121,7 +121,7 @@ object NCWAwsIotManager {
                 Log.d("IoT", "No active observers for awsMessage")
             }*/
 
-            chatViewModel.awsMessage.postValue(message)
+            chatViewModel.updateAwsMessage(message)
         }
     }
 

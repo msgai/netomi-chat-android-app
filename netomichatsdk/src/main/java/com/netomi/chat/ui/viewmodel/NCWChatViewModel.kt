@@ -3,6 +3,8 @@ package com.netomi.chat.ui.viewmodel
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.netomi.chat.data.repository.NCWChatRepository
 import com.netomi.chat.model.GetConversationPayload
@@ -29,7 +31,10 @@ import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.NCWState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -95,8 +100,11 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
     private var _getAWSMQTTCredentials= NCWSingleLiveEvent<NCWState<MQTTCredentialsResponse>>()
     val getAWSMQTTCredentials get()= _getAWSMQTTCredentials
 
-    private var _awsMessage = NCWSingleLiveEvent<String>()
-    val awsMessage get() = _awsMessage
+   /* private val _awsMessage = MutableLiveData<String>()
+    val awsMessage: LiveData<String> get() = _awsMessage*/
+
+    private val _awsMessage = MutableStateFlow<String?>(null)
+    val awsMessage = _awsMessage.asStateFlow()
 
     private var _getChatHistory= NCWSingleLiveEvent<NCWState<NCWGetChatHistoryResponse>>()
     val getChatHistory get()= _getChatHistory
@@ -113,6 +121,12 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
         loadChatHistory()
     }
 
+    // Function to update message safely
+    fun updateAwsMessage(message: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            _awsMessage.value = message
+        }
+    }
 
     private fun loadChatHistory() {
         viewModelScope.launch(Dispatchers.IO) {
