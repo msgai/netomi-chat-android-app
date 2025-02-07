@@ -12,13 +12,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
+import com.netomi.chat.model.theme.NCWLanguage
 import com.netomi.chat.model.theme.NCWQuickMenuOption
 import com.netomi.chat.utils.NCWThemeUtils
 
-class NCWQuickMenuBottomSheet(
-    private val quickMenuOptions: List<NCWQuickMenuOption>,
-    private val onQuickMenuClicked: (NCWQuickMenuOption) -> Unit,
-    private val onCrossClick: () -> Unit,
+class NCWLanguageBottomSheet(
+    private val languageMenuOptions: List<NCWLanguage>,
+    private val onLanguageClicked: (NCWLanguage) -> Unit,
 ) : BottomSheetDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -45,24 +45,22 @@ class NCWQuickMenuBottomSheet(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val recyclerQuickMenu = view.findViewById<RecyclerView>(R.id.recyclerQuickMenu)
+        val recyclerLanguageMenu = view.findViewById<RecyclerView>(R.id.recyclerQuickMenu)
         val ivClose = view.findViewById<ImageView>(R.id.ivClose)
         val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
         NCWThemeUtils.setTitleColor(tvTitle)
-        recyclerQuickMenu.layoutManager =
+        tvTitle.text = getString(R.string.languages)
+        recyclerLanguageMenu.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        val carouselAdapter = NCWQuickMenuAdapter(quickMenuOptions) {
+        val carouselAdapter = NCWLanguageAdapter(languageMenuOptions) {
             if (it != null) {
-                onQuickMenuClicked(it)
+                onLanguageClicked(it)
                 dismiss()
             }
         }
-        recyclerQuickMenu.adapter = carouselAdapter
-
-
+        recyclerLanguageMenu.adapter = carouselAdapter
         ivClose.setOnClickListener {
-            onCrossClick()
             dismiss()
         }
     }

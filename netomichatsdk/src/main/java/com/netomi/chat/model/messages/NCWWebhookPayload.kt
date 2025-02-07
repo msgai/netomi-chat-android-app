@@ -56,7 +56,7 @@ data class Values(
     val schemaFormRequestId: List<String>? = null,
     val question: List<String>? = null,
     val optionList: List<String>? = null,
-    val formValues: List<String>? = null
+    val formValues: ArrayList<String>? = null
 )
 
 data class NCWAdditionalAttributes(

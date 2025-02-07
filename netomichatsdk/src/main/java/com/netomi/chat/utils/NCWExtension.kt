@@ -94,4 +94,10 @@ fun NCWSignInUserDetails.toNCWUserDetailAttribute(): ArrayList<NCWCustomAttribut
             scope = "LIFE_TIME"
         )
     )
+
+
+}
+
+fun <T> List<T>.toArrayList(): ArrayList<T> {
+    return ArrayList(this)
 }

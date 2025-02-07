@@ -27,6 +27,7 @@ import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
 import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
 import com.netomi.chat.model.survey_rule.SurveyRuleResponse
+import com.netomi.chat.model.transcript.NCWEmailRequest
 import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWBaseResponse
@@ -422,6 +423,18 @@ Log.e("DataaResposne","response"+response)
         }
 
     }
+    fun sendTranscript(payload:NCWEmailRequest) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.sendTranscript(payload)
+
+            withContext(Dispatchers.Main) {
+                _sendMessage.value = response
+            }
+        }
+
+    }
+
+
 
 
 

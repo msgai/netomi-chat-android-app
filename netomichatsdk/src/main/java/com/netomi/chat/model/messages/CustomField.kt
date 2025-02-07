@@ -16,8 +16,8 @@ data class CustomField(
 data class FormSchema(
     val properties: Properties,
     val schema: ArrayList<Component>,
-    var formData: ArrayList<FormData>?=null,
     var requestId: String? = null,
+    var formValues: ArrayList<String>?=null,
 
     )
 
@@ -56,8 +56,8 @@ data class Component(
     val dropDownSelections: Map<String, Setting>,
     val optionList: List<Option>?,
     val config:FileConfig?=null,
-    var fileUpload: ArrayList<FileUploadData>?=null
-
+    var fileUpload: ArrayList<FileUploadData>?=null,
+    var variableId:String=""
 
 
 )

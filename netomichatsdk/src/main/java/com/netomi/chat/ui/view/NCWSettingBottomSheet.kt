@@ -3,6 +3,7 @@ package com.netomi.chat.ui.view
 import android.app.Dialog
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,12 +14,17 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
+import com.netomi.chat.model.theme.NCWShowWarning
 import com.netomi.chat.model.theme.NCWThemeResponse
+import com.netomi.chat.utils.NCWAppConstant.ENABLED
 import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWSettingBottomSheet(
     private val themeData: NCWThemeResponse,
-    private val onRestartClick: () -> Unit,
+    private val onRestartClick: (showWarning: NCWShowWarning?) -> Unit,
+    private val onLanguageClick: () -> Unit,
+    private val onCrossClick: () -> Unit,
+
 ) : BottomSheetDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -52,6 +58,18 @@ class NCWSettingBottomSheet(
         val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
         val switchSound = view.findViewById<SwitchCompat>(R.id.toggle_sound)
         val constRestart = view.findViewById<ConstraintLayout>(R.id.constRestart)
+        val constSound = view.findViewById<ConstraintLayout>(R.id.constSound)
+        val viewLineSound = view.findViewById<View>(R.id.viewLineSound)
+        val constLang = view.findViewById<ConstraintLayout>(R.id.constLang)
+
+        val isVisible = themeData?.sound?.status == ENABLED
+        constSound.visibility = if (isVisible) View.VISIBLE else View.GONE
+        viewLineSound.visibility = if (isVisible) View.VISIBLE else View.GONE
+
+        val isRestartChatVisible = themeData?.restartChat?.isEnabled   == true
+        constRestart.visibility = if (isRestartChatVisible) View.VISIBLE else View.GONE
+
+
         val greyColor =
             context?.let { ContextCompat.getColor(it, R.color.gray) } // Replace with your green color resource
         val greenColor =
@@ -78,12 +96,27 @@ class NCWSettingBottomSheet(
         }
 
         ivClose.setOnClickListener {
+            onCrossClick()
             dismiss()
         }
 
         constRestart.setOnClickListener {
-            onRestartClick()
+            themeData.restartChat?.showWarning?.let { warning ->
+                if (warning.isEnabled) {
+                    onRestartClick(warning)
+                } else {
+                    onRestartClick(null)
+                }
+            } ?: onRestartClick(null)
+
+            dismiss()
+        }
+
+        constLang.setOnClickListener {
+            onLanguageClick()
             dismiss()
         }
     }
+
+
 }

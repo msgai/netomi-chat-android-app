@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.View
 import android.view.Window
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -195,15 +196,13 @@ object NCWThemeUtils
         }
     }
 
-    fun setUserConfigTextColor(textView: TextView)
-    {
-        themeData?.mobileConfig?.lightTheme?.userConfig?.let { userConfig ->{
-            userConfig.textColor?.let { color -> setTextColor(textView, color) }
-        }}
-    }
-
-
-
+   fun setUserConfigTextColor(textView: TextView) {
+       themeData?.mobileConfig?.lightTheme?.userConfig?.let { userConfig ->
+           userConfig.textColor?.let { color ->
+               setTextColor(textView,color)
+           }
+       }
+   }
 
     fun setRadioButtonUserConfig(messageText: RadioButton) {
         messageText.setTextColor(Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().titleColor))
@@ -351,6 +350,7 @@ object NCWThemeUtils
      }
 
     private fun setTextColor(textView: TextView, color: String){
+        Log.e("FinalSet","final Set "+color)
         textView.setTextColor(parseColor(color))
     }
 
@@ -680,5 +680,29 @@ object NCWThemeUtils
 
         }
     }
+
+
+    fun setRadioButtonColor(radio: RadioButton) {
+        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+            try {
+                val color = parseColor(headerConfig.backgroundColor)
+                radio.buttonTintList = ColorStateList.valueOf(color)
+            } catch (e: IllegalArgumentException) {
+              e.printStackTrace()
+            }
+        }
+    }
+
+    fun setCheckBoxColor(checkBox: CheckBox) {
+        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+            try {
+                val color = parseColor(headerConfig.backgroundColor)
+                checkBox.buttonTintList = ColorStateList.valueOf(color)
+            } catch (e: IllegalArgumentException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
 
 }

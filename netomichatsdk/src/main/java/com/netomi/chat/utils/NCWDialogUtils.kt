@@ -12,6 +12,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.netomi.chat.R
+import com.netomi.chat.model.theme.NCWShowWarning
 
 object NCWDialogUtils {
     fun showCustomDialog(
@@ -19,6 +20,7 @@ object NCWDialogUtils {
         title: String,
         subtitle: String,
         confirm: String,
+        cancelButtonText: String,
         onYesClick: () -> Unit
     ) {
 
@@ -43,6 +45,7 @@ object NCWDialogUtils {
         tvTitle.text = title
         tvSubtitle.text = subtitle
         btnConfirm.text = confirm
+        btnCancel.text =cancelButtonText
 
 
         NCWThemeUtils.createRoundedDrawable(btnConfirm)

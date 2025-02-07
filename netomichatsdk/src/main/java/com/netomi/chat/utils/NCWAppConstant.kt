@@ -85,6 +85,7 @@ object NCWAppConstant {
     const val SKIP_LABEL="SKIP"
 
     const val MESSAGE_BACK_TO_BOT="back to bot"
+    const val ENABLED="enabled"
 
 
     object RatingType {

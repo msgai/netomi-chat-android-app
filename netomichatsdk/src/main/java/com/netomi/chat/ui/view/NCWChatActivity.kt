@@ -1,7 +1,7 @@
 package com.netomi.chat.ui.view
 
 
-import  NCWIdleTimeoutManager
+import NCWIdleTimeoutManager
 import android.Manifest
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -47,9 +47,9 @@ import com.netomi.chat.awsiot.NCWAwsIotManager
 import com.netomi.chat.awsiot.NCWConnectionStatus
 import com.netomi.chat.model.CarouselButtonType
 import com.netomi.chat.model.CustomFieldName
+import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
-import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.NCWSendMessageResponse
 import com.netomi.chat.model.auth.LoginResponse
@@ -79,25 +79,24 @@ import com.netomi.chat.model.messages.NCWQuickReplyOption
 import com.netomi.chat.model.messages.NCWRequestBody
 import com.netomi.chat.model.messages.NCWWebhookPayload
 import com.netomi.chat.model.messages.SurveyField
-import com.netomi.chat.model.mqtt.NCWCredentials
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
+import com.netomi.chat.model.mqtt.NCWCredentials
 import com.netomi.chat.model.presigned_url.NCWGetMediaUploadUrl
 import com.netomi.chat.model.presigned_url.NCWGetPreSignedUrl
 import com.netomi.chat.model.survey_rule.SurveyRule
 import com.netomi.chat.model.survey_rule.SurveyRuleResponse
+import com.netomi.chat.model.theme.NCWShowWarning
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
+import com.netomi.chat.model.transcript.NCWEmailRequest
 import com.netomi.chat.survey.EventData
 import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
-import com.netomi.chat.utils.NCWChatActionCallback
 import com.netomi.chat.utils.DeviceInfoUtil
 import com.netomi.chat.utils.MessageSoundPlayer
 import com.netomi.chat.utils.NCWAppConstant
-import com.netomi.chat.utils.NCWFilePath
-import com.netomi.chat.utils.NCWImageUtils
 import com.netomi.chat.utils.NCWAppConstant.ARG_MEDIA_URL
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHANNEL_ID
@@ -146,9 +145,11 @@ import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.hideKeyboard
 import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
 import com.netomi.chat.utils.NCWAppUtils.isFormSizeValid
+import com.netomi.chat.utils.NCWChatActionCallback
 import com.netomi.chat.utils.NCWDialogUtils
 import com.netomi.chat.utils.NCWFeedbackActionCallback
-import com.netomi.chat.utils.NCWParsingUtils.parsePayloadToFormData
+import com.netomi.chat.utils.NCWFilePath
+import com.netomi.chat.utils.NCWImageUtils
 import com.netomi.chat.utils.NCWRoutes
 import com.netomi.chat.utils.NCWSingleAlertDialog
 import com.netomi.chat.utils.NCWState
@@ -320,6 +321,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             showMedia()
 
 
+
         }
 
         ivMenuOption.setOnClickListener {
@@ -363,8 +365,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun setUpQuickReplyOption() {
+        handler.removeCallbacks(idleRunnable)
         val bottomSheet = themeData?.let {
-            NCWQuickMenuBottomSheet(it.quickMenuOptions) { options ->
+            NCWQuickMenuBottomSheet(it.quickMenuOptions,{ options ->
                 val timeStamp = System.currentTimeMillis()
                 checkForInitialMessage()
                 checkForPreviousQuickReply()
@@ -374,37 +377,70 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     sendMessageToBot(payload)
                 }
                 messageInputField.text.clear()
+            },{
+                setIdealSurveyAgain()
+            })
+        }
+        bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
+    }
+
+    private fun setUpLanguageOption() {
+        val bottomSheet = themeData?.let {
+            NCWLanguageBottomSheet(it.multilingual.languages) { options ->
+
             }
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
     }
 
     private fun setUpSettingOption() {
+        handler.removeCallbacks(idleRunnable)
         val bottomSheet = themeData?.let {
-            NCWSettingBottomSheet(it) {
-                showRestartPopUp()
+            NCWSettingBottomSheet(it ,{showWarning->
+                if (showWarning!=null)
+                showRestartPopUp(showWarning)
+                else{
+                    onRestartAction()
+                }
 
-            }
+            },{
+                setUpLanguageOption() },{
+                setIdealSurveyAgain()
+            })
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
     }
 
-    private fun showRestartPopUp() {
+    private fun setIdealSurveyAgain() {
+        if (idleTimeInMillis > 0) {
+            resetIdleTimer()
+            isIdle = false
+        }
+    }
+
+    private fun showRestartPopUp(ncwShowWarning: NCWShowWarning) {
 
         NCWDialogUtils.showCustomDialog(
             this,
-            getString(R.string.restart_chat),
-            getString(R.string.confirm_restart_chat),
-                    getString(R.string.restart_chat)
+            title = ncwShowWarning.restartButtonText?:getString(R.string.restart_chat),
+            subtitle = ncwShowWarning.warningText?:getString(R.string.confirm_restart_chat),
+            confirm = ncwShowWarning.restartButtonText?:getString(R.string.restart_chat),
+            cancelButtonText = ncwShowWarning.cancelButtonText?:getString(R.string.cancel)
         ) {
-            onRestart = true
-            isHistoryChatAvialbale = false
-            if (topic != null) {
-                NCWAwsIotManager.unsubscribeRestart(topic)
-            }
-            callBackToBot()
-            hitEndChatAPI()
+
+            onRestartAction()
+
         }
+    }
+
+    private fun onRestartAction() {
+        onRestart = true
+        isHistoryChatAvialbale = false
+        if (topic != null) {
+            NCWAwsIotManager.unsubscribeRestart(topic)
+        }
+        callBackToBot()
+        hitEndChatAPI()
     }
 
 
@@ -458,23 +494,28 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             requestPermissionsAndShowMediaOptions()
     }
 
+      /*if (NCWThemeUtils.getJwtToken() != null) {
+                     hitLogoutAPI()
+                 } else {
+                     hitEndChatAPI()
+                 }*/
     private fun backClicked() {
         val bottomSheet = NCWEndChatBottomSheet(
-            onConfirmClick = { isEndChat ->
+            themeData,
+            { isEndChat ->
                 if (isEndChat) {
-                    /*  if (NCWThemeUtils.getJwtToken() != null) {
-                          hitLogoutAPI()
-                      } else {
-                          hitEndChatAPI()
-                      }*/
                     callBackToBot()
                     hitEndChatAPI()
                 } else {
                     NCWThemeUtils.setJwtToken(null)
                     finish()
                 }
-            }
-        )
+            },{ from,mail->
+              sendTranscriptApI(from,mail)
+                callBackToBot()
+                hitEndChatAPI()
+
+            })
         bottomSheet.show(supportFragmentManager, "EndChatBottomSheet")
 
     }
@@ -1411,7 +1452,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                         messageList.add(newMessage)
 
                         if (!isSurveyRule) {
-                            addLoader()
+                            if (!isIdle) {
+                                addLoader()
+                            }
                             surveyField.submitSurveyInfo = submitSurveyInfo
                             messageAdapter.notifyDataSetChanged()
                             onScrollToPosition(true)
@@ -1633,12 +1676,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             for (customField in response.customFields) {
                 when (CustomFieldName.fromValue(customField.name)) {
                     CustomFieldName.FORM_SCHEMA -> {
-                        Log.e("NCWThemeUtils.getThemeData()?.str ","Render Form ")
                         removeLoader()
                         renderTheFormMessage(response)
                     }
 
                     CustomFieldName.SURVEY_SCHEMA -> {
+                        handler.removeCallbacks(idleRunnable)
                         renderTheSurveyMessage(response)
 
                     }
@@ -2936,9 +2979,16 @@ if (isUpdated) {
                 finish()
             }
 
+            NCWRoutes.ROUTE_SEND_TRANSCRIPT -> {
+Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
+
+            }
+
             NCWRoutes.WEBHOOK_EVENT -> {
-                if (idleTimeInMillis > 0 && isIdle)
+                if (idleTimeInMillis > 0 && isIdle) {
                     resetIdleTimer()
+                    isIdle=false
+                }
             }
 
             NCWRoutes.LOGIN -> {
@@ -3095,12 +3145,22 @@ if (isUpdated) {
                                         }
 
 
-                                    matchingResponse?.requestPayload?.messagePayload?.text?.let { nextMessagePayload ->
+                                   /* matchingResponse?.requestPayload?.messagePayload?.text?.let { nextMessagePayload ->
                                         val formData = parsePayloadToFormData(nextMessagePayload)
 
                                         if (!formData.isNullOrEmpty()) {
                                             schema.formData = formData
                                         }
+
+                                    }*/
+
+                                    matchingResponse?.requestPayload?.attachmentList?.let { nextMessagePayload ->
+                                        val formData = nextMessagePayload[0]
+
+                                        if (formData!=null) {
+                                            schema.formValues = formData.values?.formValues
+                                        }
+
                                     }
                                     messageList.add(NCWMessage(
                                         sender = TYPE_FORM,
@@ -3305,5 +3365,15 @@ if (isUpdated) {
         } else {
             action.invoke()
         }
+    }
+
+    private fun sendTranscriptApI(from: String?,email: String) {
+        val payload = NCWEmailRequest(
+            botRefId = botRefId.orEmpty(),
+            conversationId = conversationID.orEmpty(),
+            mail = email,
+            from = from
+        )
+        chatViewModel.sendTranscript(payload)
     }
 }
