@@ -34,7 +34,10 @@ import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
@@ -156,6 +159,7 @@ import com.netomi.chat.utils.toNCWUserDetailAttribute
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -275,10 +279,22 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         applyTheme(themeData)
         observeChatMessages()
 
+        // Properly collect the streaming messages
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                chatViewModel.awsMessage.collectLatest { message ->
+                    message?.let {
+                        Log.e("Streaming Chunk", it)
+                        val response = Gson().fromJson(it, NCWGenericChannelResponse::class.java)
+                        renderTheNormalMessage(response)
+                    }
+                }
+            }
+        }
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         val device = DeviceInfoUtil.getDeviceInfo(this)
-        deviceInfo = device.toNCWCustomAttributes()
+        //deviceInfo = device.toNCWCustomAttributes()
 
         val jwtToken = NCWThemeUtils.getJwtToken()
         if (jwtToken != null) {
@@ -1212,7 +1228,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             handleApiCallback(it as NCWState<Any>)
         }
 
-        chatViewModel.awsMessage.observeForever(awsMessageObserver)
+        //chatViewModel.awsMessage.observeForever(awsMessageObserver)
 
         ncwAwsCredentialsViewModel.credentials.observe(this) {
             topic = "$CHAT_WIDGET/$botRefId/$conversationID"
@@ -1327,7 +1343,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         handler.removeCallbacks(idleRunnable)
         messageSoundPlayer?.release()
         // Remove the observer to prevent memory leaks
-        chatViewModel.awsMessage.removeObserver(awsMessageObserver)
+       // chatViewModel.awsMessage.removeObserver(awsMessageObserver)
 
     }
 
@@ -1949,6 +1965,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         if (chunkIndex != -1 && newMessages.type == MessageType.TEXT) {
             val chunkList = messageChunksMap.getOrPut(messageId) { mutableListOf() }
             chunkList.add(newMessages)
+            chunkList.sortBy { chunkIndex }
             // Create a partial merged message for streaming effect
             val partialMessage = mergeChunks(chunkList)
             // Update UI in real-time
