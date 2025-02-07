@@ -39,7 +39,7 @@ data class NCWThemeResponse(
     val realTimeChatService: NCWRealTimeChatService,
     val restartChat: NCWRestartChat?=null,
     val scrollToBottom: NCWScrollToBottom,
-    val sendTranscriptEmailSetup: NCWSendTranscriptEmailSetup,
+    val sendTranscriptEmailSetup: NCWSendTranscriptEmailSetup?,
     val sound: NCWSound,
     val subtitle: String,
     val supportIcon: Any,

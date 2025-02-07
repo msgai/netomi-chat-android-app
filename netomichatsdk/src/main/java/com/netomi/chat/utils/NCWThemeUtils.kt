@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.View
 import android.view.Window
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -688,6 +689,17 @@ object NCWThemeUtils
                 radio.buttonTintList = ColorStateList.valueOf(color)
             } catch (e: IllegalArgumentException) {
               e.printStackTrace()
+            }
+        }
+    }
+
+    fun setCheckBoxColor(checkBox: CheckBox) {
+        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+            try {
+                val color = parseColor(headerConfig.backgroundColor)
+                checkBox.buttonTintList = ColorStateList.valueOf(color)
+            } catch (e: IllegalArgumentException) {
+                e.printStackTrace()
             }
         }
     }
