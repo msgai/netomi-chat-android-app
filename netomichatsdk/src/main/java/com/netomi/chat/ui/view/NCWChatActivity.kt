@@ -294,7 +294,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         val device = DeviceInfoUtil.getDeviceInfo(this)
-        //deviceInfo = device.toNCWCustomAttributes()
+        deviceInfo = device.toNCWCustomAttributes()
 
         val jwtToken = NCWThemeUtils.getJwtToken()
         if (jwtToken != null) {
@@ -360,6 +360,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         })
 
         botRefId?.let { chatViewModel.getSurveyRule(it) }
+
 
 
     }
@@ -1529,6 +1530,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun renderTheNormalMessage(response: NCWGenericChannelResponse) {
+        playBotSound()
         var type: String = ""
         if (response?.customPayload?.CHUNK_INDEX != null &&
             (
@@ -2809,7 +2811,6 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
             NCWRoutes.ROUTE_SEND_CHAT -> {
                 val sendMessageResponse = apiResponse as NCWSendMessageResponse
                 hideProgressBar()
-
                 if (!isDisableInput) {
                     isDisableInput = true
                     setUIState(true)
@@ -3204,11 +3205,14 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
                             }
 
                             CustomFieldName.DISABLE_INPUT_FIELD, CustomFieldName.DISABLE_CHAT_INPUT -> {
+
                                 val isDisabled = customField.values?.get(0) == "true"
                                 setUIState(!isDisabled)
                                 isHistoryDisableInput = !isDisabled
                                 if (CustomFieldName.fromValue(customField.name) == CustomFieldName.DISABLE_INPUT_FIELD) {
+
                                     isDisableInput = !isDisabled
+
                                 }
                             }
                             CustomFieldName.END_CHAT -> {

@@ -75,6 +75,12 @@ fun DeviceInfo.toNCWCustomAttributes(): ArrayList<NCWCustomAttribute> {
             value = scale.toString(),
             scope = "LIFE_TIME"
         ),
+        NCWCustomAttribute(
+            type = "TEXT",
+            name = "ip_address",
+            value = ipAddress,
+            scope = "LIFE_TIME"
+        ),
 
         )
 
