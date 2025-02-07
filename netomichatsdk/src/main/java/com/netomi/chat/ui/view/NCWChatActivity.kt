@@ -478,23 +478,28 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             requestPermissionsAndShowMediaOptions()
     }
 
+      /*if (NCWThemeUtils.getJwtToken() != null) {
+                     hitLogoutAPI()
+                 } else {
+                     hitEndChatAPI()
+                 }*/
     private fun backClicked() {
         val bottomSheet = NCWEndChatBottomSheet(
-            onConfirmClick = { isEndChat ->
+            themeData,
+            { isEndChat ->
                 if (isEndChat) {
-                    /*  if (NCWThemeUtils.getJwtToken() != null) {
-                          hitLogoutAPI()
-                      } else {
-                          hitEndChatAPI()
-                      }*/
                     callBackToBot()
                     hitEndChatAPI()
                 } else {
                     NCWThemeUtils.setJwtToken(null)
                     finish()
                 }
-            }
-        )
+            },{ from,mail->
+              sendTranscriptApI(from,mail)
+                callBackToBot()
+                hitEndChatAPI()
+
+            })
         bottomSheet.show(supportFragmentManager, "EndChatBottomSheet")
 
     }
@@ -3345,11 +3350,12 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
         }
     }
 
-    private fun sendTranscriptApI(email: String) {
+    private fun sendTranscriptApI(from: String?,email: String) {
         val payload = NCWEmailRequest(
             botRefId = botRefId.orEmpty(),
             conversationId = conversationID.orEmpty(),
-            mail = email
+            mail = email,
+            from = from
         )
         chatViewModel.sendTranscript(payload)
     }
