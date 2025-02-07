@@ -1646,6 +1646,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     }
 
                     CustomFieldName.SURVEY_SCHEMA -> {
+                        handler.removeCallbacks(idleRunnable)
                         renderTheSurveyMessage(response)
 
                     }
@@ -2948,8 +2949,10 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
             }
 
             NCWRoutes.WEBHOOK_EVENT -> {
-                if (idleTimeInMillis > 0 && isIdle)
+                if (idleTimeInMillis > 0 && isIdle) {
                     resetIdleTimer()
+                    isIdle=false
+                }
             }
 
             NCWRoutes.LOGIN -> {
