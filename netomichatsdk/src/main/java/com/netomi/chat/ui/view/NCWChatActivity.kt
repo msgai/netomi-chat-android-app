@@ -422,7 +422,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun showRestartPopUp(ncwShowWarning: NCWShowWarning) {
 
-        NCWDialogUtils.showCustomDialog(
+      /* NCWDialogUtils.showCustomDialog(
             this,
             title = ncwShowWarning.restartButtonText?:getString(R.string.restart_chat),
             subtitle = ncwShowWarning.warningText?:getString(R.string.confirm_restart_chat),
@@ -432,7 +432,20 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
             onRestartAction()
 
-        }
+        }*/
+
+        handler.removeCallbacks(idleRunnable)
+
+          val bottomSheet=  NCWRestartChatBottomSheet(themeData,ncwShowWarning ,{
+                onRestartAction()
+            },{ from,mail->
+              sendTranscriptApI(from,mail)
+              onRestartAction()
+              }, {
+                setIdealSurveyAgain() })
+        bottomSheet.show(supportFragmentManager, "RestartBottomSheet")
+
+
     }
 
     private fun onRestartAction() {

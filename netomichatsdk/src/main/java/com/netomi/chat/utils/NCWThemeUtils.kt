@@ -704,5 +704,29 @@ object NCWThemeUtils
         }
     }
 
+     fun createNormalDrawable(view: View) {
+        val drawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 15f
+            setStroke(1, Color.BLACK)
+            setColor(Color.WHITE)
+        }
+        view.background = drawable
+
+    }
+
+
+
+ fun createErrorDrawable(view: View) {
+    val drawable = GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = 15f
+        setStroke(2, ContextCompat.getColor(view.context, R.color.error_color))
+        setColor(Color.WHITE)
+    }
+    view.background = drawable
+
+}
+
 
 }
