@@ -79,7 +79,7 @@ object NCWAwsIotManager {
                     connectionStatus = 3
                     Log.d("IoT", "Reconnecting to AWS IoT...")
                     connectionStatusLiveData.postValue(NCWConnectionStatus.RE_CONNECTED.toString())
-                    chatViewModel.getAWSMQTTCredentials("")
+                    //chatViewModel.getAWSMQTTCredentials("")
                 }
 
                 else -> {
