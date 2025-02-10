@@ -50,6 +50,8 @@
     <string name="languages">Languages</string>
     <string name="transcripts">Transcripts</string>
     <string name="download">Download</string>
+    <string name="please_provide_valid_email">Please provide valid email</string>
+    <string name="send_transcript">Send Transcript</string>
 
 
 </resources>
