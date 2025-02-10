@@ -1277,6 +1277,12 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
                     setUIState(false)
+                    if (NCWAppUtils.isNetworkAvailable(this)) {
+                        ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)
+                    }
+                    else{
+                        NCWAppUtils.showToast(this, getString(R.string.please_check_your_network_and_try_again))
+                    }
                 }
 
                 NCWConnectionStatus.RE_CONNECTED.toString() -> {
@@ -1965,10 +1971,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         if (chunkIndex != -1 && newMessages.type == MessageType.TEXT) {
             val chunkList = messageChunksMap.getOrPut(messageId) { mutableListOf() }
             chunkList.add(newMessages)
-            chunkList.sortBy { chunkIndex }
-            // Create a partial merged message for streaming effect
+            chunkList.sortBy { it.customPayload?.CHUNK_INDEX?.toInt() ?: Int.MAX_VALUE}
             val partialMessage = mergeChunks(chunkList)
-            // Update UI in real-time
             Handler(Looper.getMainLooper()).post {
                 messageAdapter.updateOrAppendMessage(partialMessage, false)
             }
@@ -1978,7 +1982,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 messageChunksMap.remove(messageId)
             }*/
         }else{
-            // If not a chunked message, update directly
             messageAdapter.updateOrAppendMessage(newMessages, false)
         }
 
