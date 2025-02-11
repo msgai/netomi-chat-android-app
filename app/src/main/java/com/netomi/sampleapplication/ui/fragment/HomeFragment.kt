@@ -78,7 +78,7 @@ class HomeFragment : Fragment() {
 
     private fun showErrorDialog(message: String) {
         SingleAlertDialog.showSingleButtonDialog(
-            context = requireContext(),
+            context = requireContext()?:return,
             title = "Error",
             subtitle = message,
             yesText = "Okay",
