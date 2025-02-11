@@ -1562,8 +1562,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     )
         ) {
             type = NCWAppConstant.STREAMING
-            if (isLoaderActive)
-                removeStreamLoader()
+
+            removeStreamLoaderMissed()
+           /* if (isLoaderActive) {
+             removeStreamLoader()
+            }*/
         } else {
             type = NCWAppConstant.NORMAL
         }
@@ -2046,7 +2049,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 agentAvatar = agentAvatar
             )
         )
-
         // Schedule maxTime check
         themeData?.typingIndicator?.maxTime?.let {
             Handler(Looper.getMainLooper()).postDelayed({
@@ -2071,6 +2073,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun removeStreamLoader() {
+
         isLoaderActive = false
         hideKeyboard(this)
         if (messageList.isNotEmpty() && messageList.last().sender == TYPE_INDICATOR) {
@@ -2079,6 +2082,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             messageAdapter.notifyItemRemoved(lastIndex)
         }
     }
+    private fun removeStreamLoaderMissed() {
+        isLoaderActive = false
+        val lastIndex = messageList.indexOfLast { it.sender == TYPE_INDICATOR }
+        if (lastIndex != -1) {
+            messageList.removeAt(lastIndex)
+            messageAdapter.notifyItemRemoved(lastIndex)
+        }
+    }
+
+
+
 
     private fun handleApiCallback(response: NCWState<Any>) {
         when (response) {
