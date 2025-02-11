@@ -21,6 +21,13 @@ android {
         }
     }
 
+    testOptions {
+        unitTests.all {
+            // Allow mocking final classes
+            it.useJUnitPlatform()
+        }
+    }
+
     buildFeatures {
         buildConfig = true
     }
@@ -59,12 +66,20 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.browser)
+    implementation(libs.core.ktx)
     // Unit Test cases
+    androidTestImplementation ("org.mockito:mockito-android:2.24.5")
     testImplementation ("junit:junit:4.13.2")
     androidTestImplementation ("androidx.test.ext:junit:1.1.5")
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.6.1")
-    testImplementation ("org.mockito:mockito-core:2.28.2")
-    androidTestImplementation ("org.mockito:mockito-android:2.24.5")
+    testImplementation ("org.mockito:mockito-core:3.4.0")
+    testImplementation ("org.mockito.kotlin:mockito-kotlin:4.0.0")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0")
+    // AndroidX Core Testing for LiveData and InstantTaskExecutorRule
+    testImplementation ("androidx.arch.core:core-testing:2.1.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+
+
 
     // ViewModel and LiveData
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")

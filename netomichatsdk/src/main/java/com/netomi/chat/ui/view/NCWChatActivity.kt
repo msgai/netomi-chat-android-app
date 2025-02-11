@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -198,6 +199,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private lateinit var messageAdapter: NCWChatAdapter
     private lateinit var messageList: MutableList<NCWMessage>
     private lateinit var chatRecyclerView: RecyclerView
+    private lateinit var rootView: View
     private lateinit var attachmentIcon: ImageView
     private lateinit var headerContainer: ConstraintLayout
     private lateinit var footerContainer: ConstraintLayout
@@ -361,7 +363,24 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         botRefId?.let { chatViewModel.getSurveyRule(it) }
 
+        setupKeyboardListener()
 
+    }
+
+    private fun setupKeyboardListener() {
+        rootView.viewTreeObserver.addOnGlobalLayoutListener {
+            val rect = Rect()
+            rootView.getWindowVisibleDisplayFrame(rect)
+
+            val screenHeight = rootView.height
+            val keyboardHeight = screenHeight - rect.bottom
+
+            if (keyboardHeight > screenHeight * 0.15) { // Keyboard is open
+                chatRecyclerView.postDelayed({
+                    chatRecyclerView.smoothScrollToPosition(chatRecyclerView.adapter?.itemCount?.minus(1) ?: 0)
+                }, 100) // Small delay for better UX
+            }
+        }
     }
 
     private fun setUpQuickReplyOption() {
@@ -879,6 +898,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         messageInputField = findViewById(R.id.edtMessage)
         sendMessageIcon = findViewById(R.id.ivSend)
         chatRecyclerView = findViewById(R.id.rvChat)
+        rootView = findViewById(android.R.id.content)
         attachmentIcon = findViewById(R.id.ivAttachment)
         headerTextView = findViewById(R.id.tvHeader)
         closeIcon = findViewById(R.id.ivClose)
@@ -944,7 +964,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         })
 
 // Set the layout manager and adapter for the RecyclerView
-        chatRecyclerView.layoutManager = LinearLayoutManager(this)
+        chatRecyclerView.layoutManager = LinearLayoutManager(this).apply {
+            stackFromEnd=true
+        }
         chatRecyclerView.adapter = messageAdapter
     }
 
