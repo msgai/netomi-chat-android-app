@@ -4,13 +4,11 @@ package com.netomi.chat.ui.view
 import android.app.Dialog
 import android.os.Bundle
 import android.text.Editable
-import android.text.InputType
 import android.text.TextWatcher
-import android.util.Log
+import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.RadioGroup
@@ -125,12 +123,13 @@ class NCWSurveyBottomSheet(
         tvSuggestionTitle = findViewById(R.id.tvSuggestionTitle)
         submitButton = view.findViewById(R.id.submitButton)
 
-        findViewById<View>(R.id.overlayView)?.apply {
+       findViewById<View>(R.id.overlayView)?.apply {
             visibility = if (from == TYPE_SUBMITTED_SURVEY) View.VISIBLE else View.GONE
             isClickable = from == TYPE_SUBMITTED_SURVEY
         }
-        edtAdditionalFeedback.setRawInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE)
-        edtAdditionalFeedback.imeOptions = EditorInfo.IME_ACTION_DONE
+
+//        edtAdditionalFeedback.setRawInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE)
+//        edtAdditionalFeedback.imeOptions = EditorInfo.IME_ACTION_DONE
 
 
         edtAdditionalFeedback.addTextChangedListener(object : TextWatcher {
@@ -139,7 +138,8 @@ class NCWSurveyBottomSheet(
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val currentLength = s?.trim()?.length ?: 0
+             //   val currentLength = s?.trim()?.length ?: 0
+                val currentLength = s?.length ?: 0
                 tvFeedbackCount.text = "$currentLength/200"
             }
 
@@ -213,7 +213,7 @@ class NCWSurveyBottomSheet(
 
     }
 
-    fun setButtonState(isEnabled: Boolean) {
+    private fun setButtonState(isEnabled: Boolean) {
         submitButton.isEnabled = isEnabled
         submitButton.alpha = if (isEnabled) 1.0f else 0.5f
     }
@@ -401,8 +401,18 @@ class NCWSurveyBottomSheet(
                                 if (surveyField?.submitSurveyInfo?.additionalFeedback.isNullOrEmpty()) " "
                                 else surveyField?.submitSurveyInfo?.additionalFeedback
                             )
+                            movementMethod = ScrollingMovementMethod()
+                            isFocusable = false
+                            isFocusableInTouchMode = false
+                            isClickable = true
+                            setOnTouchListener { v, event ->
+                                v.parent.requestDisallowInterceptTouchEvent(true)
+                                false
+                            }
+
                         }
                     }
+
                 }
             }
     }

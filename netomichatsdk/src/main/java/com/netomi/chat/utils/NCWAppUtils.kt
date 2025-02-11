@@ -25,10 +25,13 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
+import java.net.InetAddress
 import java.net.MalformedURLException
+import java.net.NetworkInterface
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Enumeration
 import java.util.Locale
 
 
@@ -306,5 +309,61 @@ object NCWAppUtils {
         val matchResult = regex.find(expression)
         return matchResult?.groupValues?.get(1)?.toLongOrNull() ?: 0L
     }
+
+    fun getIPAddress(context: Context): String {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            val activeNetwork = connectivityManager.activeNetwork ?: return ""
+            val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return ""
+
+            return if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+            ) {
+                getIPAddress(true)
+            } else {
+                ""
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            val networkInfo = connectivityManager.activeNetworkInfo
+            if (networkInfo != null) {
+                return getIPAddress(true)
+            }
+
+
+        }
+        return ""
+    }
+
+    private fun getIPAddress(useIPv4: Boolean): String {
+        try {
+            val interfaces: Enumeration<NetworkInterface> = NetworkInterface.getNetworkInterfaces()
+            while (interfaces.hasMoreElements()) {
+                val networkInterface: NetworkInterface = interfaces.nextElement()
+                val addresses: Enumeration<InetAddress> = networkInterface.inetAddresses
+                while (addresses.hasMoreElements()) {
+                    val inetAddress: InetAddress = addresses.nextElement()
+                    if (!inetAddress.isLoopbackAddress) {
+                        val ip = inetAddress.hostAddress ?: continue
+                        val isIPv4 = ip.indexOf(':') < 0
+
+                        if (useIPv4) {
+                            if (isIPv4) return ip
+                        } else {
+                            if (!isIPv4) {
+                                val index = ip.indexOf('%')
+                                return if (index < 0) ip.uppercase(Locale.getDefault()) else ip.substring(0, index)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
+    }
+
 
 }

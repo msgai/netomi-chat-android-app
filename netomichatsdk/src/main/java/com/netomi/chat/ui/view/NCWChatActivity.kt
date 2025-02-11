@@ -208,6 +208,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     private lateinit var ivMenu: ImageView
     private lateinit var connectionHeader: TextView
     private lateinit var progressBar: ProgressBar
+    private lateinit var cardToday: ConstraintLayout
     private var photoUri: Uri? = null
     private var ncwSdkConfig: NCWHeaderConfig? = null
     private var themeData: NCWThemeResponse? = null
@@ -296,7 +297,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         val device = DeviceInfoUtil.getDeviceInfo(this)
-        //deviceInfo = device.toNCWCustomAttributes()
+        deviceInfo = device.toNCWCustomAttributes()
 
         val jwtToken = NCWThemeUtils.getJwtToken()
         if (jwtToken != null) {
@@ -364,6 +365,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         botRefId?.let { chatViewModel.getSurveyRule(it) }
 
         setupKeyboardListener()
+
 
     }
 
@@ -439,7 +441,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     private fun showRestartPopUp(ncwShowWarning: NCWShowWarning) {
 
-        NCWDialogUtils.showCustomDialog(
+      /* NCWDialogUtils.showCustomDialog(
             this,
             title = ncwShowWarning.restartButtonText?:getString(R.string.restart_chat),
             subtitle = ncwShowWarning.warningText?:getString(R.string.confirm_restart_chat),
@@ -449,7 +451,20 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
             onRestartAction()
 
-        }
+        }*/
+
+        handler.removeCallbacks(idleRunnable)
+
+          val bottomSheet=  NCWRestartChatBottomSheet(themeData,ncwShowWarning ,{
+                onRestartAction()
+            },{ from,mail->
+              sendTranscriptApI(from,mail)
+              onRestartAction()
+              }, {
+                setIdealSurveyAgain() })
+        bottomSheet.show(supportFragmentManager, "RestartBottomSheet")
+
+
     }
 
     private fun onRestartAction() {
@@ -863,7 +878,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         // Configure footer branding
         themeData?.mobileConfig?.lightTheme?.footerConfig?.let { footerConfig ->
-            if (footerConfig.isNetomiBrandingEnabled) {
+            if (footerConfig.isNetomiBrandingEnabled  && !footerConfig.isFooterHidden) {
                 tvBrandName.apply {
                     visibility = View.VISIBLE
                     text = footerConfig.netomiBrandingText
@@ -880,9 +895,10 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
             }
         }
-        // it.chatWindowBackgroundColor
+
         themeData?.mobileConfig?.lightTheme?.chatWindowConfig?.let {
             chatRecyclerView.setBackgroundColor(Color.parseColor(it.chatWindowBackgroundColor))
+            cardToday.setBackgroundColor(Color.parseColor(it.chatWindowBackgroundColor))
         }
 
 
@@ -910,6 +926,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         constProgressBar = findViewById(R.id.constLoader)
         progressBar = findViewById(R.id.progress_loader)
         cardViewInputBox = findViewById(R.id.cardView)
+        cardToday = findViewById(R.id.cardToday)
 
         messageInputField.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -1557,6 +1574,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun renderTheNormalMessage(response: NCWGenericChannelResponse) {
+        playBotSound()
         var type: String = ""
         if (response?.customPayload?.CHUNK_INDEX != null &&
             (
@@ -1566,8 +1584,11 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                     )
         ) {
             type = NCWAppConstant.STREAMING
-            if (isLoaderActive)
-                removeStreamLoader()
+
+            removeStreamLoaderMissed()
+           /* if (isLoaderActive) {
+             removeStreamLoader()
+            }*/
         } else {
             type = NCWAppConstant.NORMAL
         }
@@ -2050,7 +2071,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 agentAvatar = agentAvatar
             )
         )
-
         // Schedule maxTime check
         themeData?.typingIndicator?.maxTime?.let {
             Handler(Looper.getMainLooper()).postDelayed({
@@ -2075,6 +2095,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun removeStreamLoader() {
+
         isLoaderActive = false
         hideKeyboard(this)
         if (messageList.isNotEmpty() && messageList.last().sender == TYPE_INDICATOR) {
@@ -2083,6 +2104,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             messageAdapter.notifyItemRemoved(lastIndex)
         }
     }
+    private fun removeStreamLoaderMissed() {
+        isLoaderActive = false
+        val lastIndex = messageList.indexOfLast { it.sender == TYPE_INDICATOR }
+        if (lastIndex != -1) {
+            messageList.removeAt(lastIndex)
+            messageAdapter.notifyItemRemoved(lastIndex)
+        }
+    }
+
+
+
 
     private fun handleApiCallback(response: NCWState<Any>) {
         when (response) {
@@ -2834,7 +2866,6 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
             NCWRoutes.ROUTE_SEND_CHAT -> {
                 val sendMessageResponse = apiResponse as NCWSendMessageResponse
                 hideProgressBar()
-
                 if (!isDisableInput) {
                     isDisableInput = true
                     setUIState(true)
@@ -3229,11 +3260,14 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
                             }
 
                             CustomFieldName.DISABLE_INPUT_FIELD, CustomFieldName.DISABLE_CHAT_INPUT -> {
+
                                 val isDisabled = customField.values?.get(0) == "true"
                                 setUIState(!isDisabled)
                                 isHistoryDisableInput = !isDisabled
                                 if (CustomFieldName.fromValue(customField.name) == CustomFieldName.DISABLE_INPUT_FIELD) {
+
                                     isDisableInput = !isDisabled
+
                                 }
                             }
                             CustomFieldName.END_CHAT -> {
