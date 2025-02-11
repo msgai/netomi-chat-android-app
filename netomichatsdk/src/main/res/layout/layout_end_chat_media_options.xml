@@ -106,51 +106,46 @@
         </LinearLayout>
     </RadioGroup>
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constTranscript"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-       android:layout_marginTop="10dp"
+        android:layout_marginTop="15dp"
         android:visibility="gone"
-
+        app:layout_constraintTop_toBottomOf="@id/radioGroup"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/radioGroup">
+        app:layout_constraintStart_toStartOf="parent">
 
         <TextView
             android:id="@+id/tvTranscript"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@android:color/black"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:textStyle="bold"
-            android:textSize="15sp"
             android:text="@string/transcripts"
-            app:layout_constraintTop_toTopOf="parent"
+            android:textColor="@android:color/black"
+            android:textSize="15sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            />
+            app:layout_constraintTop_toTopOf="parent" />
 
 
         <CheckBox
-
-            app:layout_constraintTop_toBottomOf="@+id/tvTranscript"
-            app:layout_constraintStart_toStartOf="parent"
             android:id="@+id/checkboxTranscript"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvTranscript" />
 
         <TextView
             android:id="@+id/tvSendTranscript"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="@string/send_transcript"
             android:textColor="@android:color/black"
             android:textSize="14sp"
-            android:text="@string/transcripts"
             app:layout_constraintBottom_toBottomOf="@+id/checkboxTranscript"
-            app:layout_constraintTop_toTopOf="@+id/checkboxTranscript"
             app:layout_constraintStart_toEndOf="@+id/checkboxTranscript"
+            app:layout_constraintTop_toTopOf="@+id/checkboxTranscript"
 
             />
 
@@ -160,9 +155,8 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
             app:layout_constraintBottom_toBottomOf="@+id/tvSendTranscript"
-            app:layout_constraintTop_toTopOf="@+id/tvSendTranscript"
             app:layout_constraintEnd_toEndOf="parent"
-            >
+            app:layout_constraintTop_toTopOf="@+id/tvSendTranscript">
 
             <ImageView
                 android:id="@+id/icon_download"
@@ -180,8 +174,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:text="@string/download"
+                android:textColor="@color/green"
                 android:textSize="14sp"
-                android:textColor="@color/black"
                 app:layout_constraintBottom_toBottomOf="@id/icon_download"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/icon_download"
@@ -192,46 +186,60 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/emailTextInputLayout"
             android:layout_width="0dp"
-            android:padding="10dp"
-            android:visibility="gone"
-            android:layout_marginEnd="10dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:background="@drawable/bg_stroke_rounded_white"
+
+            android:layout_marginBottom="10dp"
+            android:padding="10dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/tvTranscript"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvSendTranscript">
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/emailIcon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="10dp"
-                android:src="@drawable/ic_send_email"
+            <TextView
+                android:id="@+id/tvEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
+
+                />
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/emailEditText"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:maxLength="50"
-                android:background="@android:color/transparent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_stroke_rounded_white"
                 android:gravity="center|start"
-
                 android:inputType="textEmailAddress"
-
+                android:maxLength="50"
+                android:padding="12dp"
                 android:textSize="14sp"
-                app:layout_constraintStart_toEndOf="@id/emailIcon"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/tvEmail"
+
+                />
+
+            <TextView
+                android:id="@+id/tvErrorEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/error_color"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/emailEditText"
+
+                />
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
