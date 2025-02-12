@@ -57,8 +57,14 @@ data class Component(
     val optionList: List<Option>?,
     val config:FileConfig?=null,
     var fileUpload: ArrayList<FileUploadData>?=null,
-    var variableId:String=""
+    var variableId:String="",
 
+    var textInput: String? = null,
+    var textAreaInput: String? = null,
+    var selectedRadio: String? = null,
+    var selectedCheckboxes: List<String> = emptyList(),
+    var dropdownSelection: String? = null,
+    var dateInput: String? = null
 
 )
 

@@ -142,6 +142,7 @@ import com.netomi.chat.utils.NCWAppConstant.TYPE_SHOW_SURVEY
 import com.netomi.chat.utils.NCWAppConstant.TYPE_SUBMITTED_SURVEY
 import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
 import com.netomi.chat.utils.NCWAppConstant.UPLOAD_FILE_MULTIPLE
+import com.netomi.chat.utils.NCWAppConstant.WIDGET_EVENT_IDLE_USER
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.hideKeyboard
 import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
@@ -284,7 +285,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         // Properly collect the streaming messages
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 chatViewModel.awsMessage.collectLatest { message ->
                     message?.let {
                         Log.e("Streaming Chunk", it)
@@ -980,10 +981,8 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         })
 
-// Set the layout manager and adapter for the RecyclerView
-        chatRecyclerView.layoutManager = LinearLayoutManager(this).apply {
-            stackFromEnd=true
-        }
+        // Set the layout manager and adapter for the RecyclerView
+        chatRecyclerView.layoutManager = LinearLayoutManager(this)
         chatRecyclerView.adapter = messageAdapter
     }
 
@@ -1072,11 +1071,31 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
     }
 
-    override fun onScrollToPosition(isScrollToPosition: Boolean) {
-        chatRecyclerView.post {
-            chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
+   /* override fun onScrollToPosition(isScrollToPosition: Boolean) {
+        try {
+            chatRecyclerView.post {
+                chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
+            }5
         }
-    }
+        catch (ex:Exception){
+             ex.printStackTrace()
+        }
+
+    }*/
+   override fun onScrollToPosition(isScrollToPosition: Boolean) {
+       try {
+           if (messageList.isNotEmpty()) {
+
+                   chatRecyclerView.post {
+                       chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
+                   }
+
+           }
+       } catch (ex: Exception) {
+           ex.printStackTrace()
+       }
+   }
+
 
     private fun retryAttachmentMessage(message: NCWMessage) {
         message.isRetry = false
@@ -2508,7 +2527,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 type = "image/* video/*"
             }
         }
-Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUploadType "+formComponent?.config?.fileUploadType)
         if (attachmentType == TYPE_ATTACHMENT){
             galleryLauncher.launch(galleryIntent)
         } else {
@@ -2932,7 +2950,6 @@ Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUpload
                         }
                     }
 
-                    Log.e("attachmentList", "attachmentList" + attachmentList)
                     val timeStamp = System.currentTimeMillis()
                     val payload = createPayload(
                         "event://;LEARN_ATTRIBUTE_EVENT;ATTACHMENT::value=Media has been uploaded",
@@ -3119,10 +3136,12 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
         responses.forEachIndexed { index, response ->
             if (response.triggerType == TYPE_EVENT) {
                 val eventData = response.eventObject?.eventData
+
                 renderPillsMessage(eventData, response.timestamp ?: System.currentTimeMillis())
             }
 
             if (response.triggerType == TYPE_RESPONSE) {
+
                 val gson = Gson()
 
                 val newMessages = response.attachments?.mapIndexedNotNull { index, attachment ->
@@ -3215,6 +3234,7 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
 
                                         if (formData!=null) {
                                             schema.formValues = formData.values?.formValues
+
                                         }
 
                                     }
@@ -3245,17 +3265,18 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
                                         customField.values[0],
                                         object : TypeToken<SurveyField>() {}.type
                                     )
-                                    if(!surveyField.isSurveySkipped) {
-                                        val newMessage = NCWMessage(
-                                            sender = TYPE_EVENT,
-                                            timestamp = response.timestamp
-                                                ?: System.currentTimeMillis(),
-                                            surveyField = surveyField,
-                                            requestID = response.requestId
-                                        )
-                                        messageList.add(newMessage)
-                                    }
-                                }
+                                       if (!surveyField.isSurveySkipped) {
+                                           val newMessage = NCWMessage(
+                                                sender = TYPE_EVENT,
+                                                timestamp = response.timestamp
+                                                    ?: System.currentTimeMillis(),
+                                                surveyField = surveyField,
+                                                requestID = response.requestId
+                                            )
+                                            messageList.add(newMessage)
+                                        }
+                                   }
+
 
                             }
 
@@ -3345,11 +3366,12 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
     }
 
     private fun getChatHistory() {
-        Log.e("ConversationID Fetch", conversationID.toString())
-        val payload = conversationID?.let {
+        Log.e("ConversationID Fetch", "conversationID "+conversationID.toString())
+        Log.e(" ConversationID Fetch","botRefId"+ botRefId.toString())
+        val payload = conversationID?.let {conversationID->
             botRefId?.let { it1 ->
                 NCWGetChatHistoryPayload(
-                    conversationId = it,
+                    conversationId = conversationID,
                     requestBody = NCWHistoryRequestBody(
                         numberOfMessages = 100,
                         numberOfDays = 10

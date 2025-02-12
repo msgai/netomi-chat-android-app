@@ -39,7 +39,7 @@ object NCWAppConstant {
     const val INFO_EVENT="INFO"
     const val NETOMI="NETOMI"
     const val EVENT_WIDGET="WIDGET_EVENT"
-
+    const val WIDGET_EVENT_IDLE_USER="WIDGET_EVENT_IDLE_USER"
 
 
     const val SESSION="session"
