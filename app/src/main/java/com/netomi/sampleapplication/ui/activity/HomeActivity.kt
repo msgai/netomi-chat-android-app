@@ -1,8 +1,10 @@
 package com.netomi.sampleapplication.ui.activity
 
+import android.Manifest
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
@@ -16,11 +18,14 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.messaging.FirebaseMessaging
 import com.netomi.sampleapplication.R
 import com.netomi.sampleapplication.constant.SharePreferenceConstant
 import com.netomi.sampleapplication.model.Bot
@@ -47,6 +52,8 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
     private val onboardingViewModel: OnboardingViewModel by viewModels()
     private lateinit var botList: MutableList<Bot>
     private lateinit var progressOverlay: FrameLayout
+    private val notificationPermission = 100
+    private var permissions = arrayOf(Manifest.permission.POST_NOTIFICATIONS)
     private var name:String=""
 
     private lateinit var usernameProfile: TextView
@@ -55,7 +62,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         botList = mutableListOf()
-
+        checkPermission()
         initView()
         val email = preferences.getString(SharePreferenceConstant.EMAIL)
         if (NetworkUtils.isNetworkAvailable(this))
@@ -122,6 +129,37 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
             currentFragment?.let {
                 updateUIForFragment(it)
             }
+        }
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FCM Token", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            // Get new FCM registration token
+            val token = task.result
+
+            // Log and toast
+            //val msg = getString("Token", token)
+            Log.d("FCM Token", token)
+            //Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+        })
+    }
+
+    private fun checkPermission() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // Requesting the permission
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                permissions,
+                notificationPermission
+            )
         }
     }
 

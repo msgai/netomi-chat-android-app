@@ -93,7 +93,7 @@ class NCWChatViewModelTest {
     }
 
     @Test
-    fun `test_getConversationId_errorresponse`() = runTest {
+    fun `test getConversationId error response`() = runTest {
         val botRef = "sampleBotRef"
         val errorMessage = "Error occurred"
         val errorCode = 500

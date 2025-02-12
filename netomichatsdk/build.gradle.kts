@@ -66,7 +66,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.browser)
-    implementation(libs.core.ktx)
+    //implementation(libs.core.ktx)
     // Unit Test cases
     androidTestImplementation ("org.mockito:mockito-android:2.24.5")
     testImplementation ("junit:junit:4.13.2")
