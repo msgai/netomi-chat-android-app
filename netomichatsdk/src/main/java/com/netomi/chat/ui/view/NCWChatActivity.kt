@@ -392,14 +392,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                 chatRecyclerView.postDelayed({
                     chatRecyclerView.smoothScrollToPosition(chatRecyclerView.adapter?.itemCount?.minus(1) ?: 0)
                 }, 100)
-            // Small delay for better UX*/
-               /* chatRecyclerView.postDelayed({
-                    chatRecyclerView.adapter?.let { adapter ->
-                        if (adapter.itemCount > 0) {
-                            chatRecyclerView.smoothScrollToPosition(adapter.itemCount - 1)
-                        }
-                    }
-                }, 100)*/
+
 
 
 
@@ -1016,24 +1009,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             }
         }
 
-      /*  chatRecyclerView.viewTreeObserver.addOnGlobalLayoutListener {
-            val rect = Rect()
-            chatRecyclerView.getWindowVisibleDisplayFrame(rect)
-            val screenHeight = chatRecyclerView.rootView.height
-            val keyboardHeight = screenHeight - rect.bottom
 
-            if (keyboardHeight > screenHeight * 0.15) { // Keyboard is visible
-                chatRecyclerView.postDelayed({
-                    chatRecyclerView.scrollToPosition(messageAdapter.itemCount - 1)
-                }, 200)
-            }
-        }
-*/
-       /* ViewCompat.setOnApplyWindowInsetsListener(chatRecyclerView) { v, insets ->
-            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-            v.setPadding(0, 0, 0, imeHeight) // Adjust padding to avoid overlapping
-            insets
-        }*/
     }
 
     private fun showSubmittedSurvey(ncwMessage: NCWMessage) {
