@@ -18,6 +18,7 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.widget.EditText
@@ -35,11 +36,15 @@ import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -365,23 +370,32 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         botRefId?.let { chatViewModel.getSurveyRule(it) }
 
-        setupKeyboardListener()
+   //     setupKeyboardListener()
 
 
     }
 
     private fun setupKeyboardListener() {
+        val rootLayout = findViewById<View>(R.id.rootLayout)
         rootView.viewTreeObserver.addOnGlobalLayoutListener {
             val rect = Rect()
             rootView.getWindowVisibleDisplayFrame(rect)
 
-            val screenHeight = rootView.height
+            val screenHeight = rootLayout.rootView.height
             val keyboardHeight = screenHeight - rect.bottom
 
-            if (keyboardHeight > screenHeight * 0.15) { // Keyboard is open
+            if (keyboardHeight > screenHeight * 0.15) {
+                Log.e("Teststs","Keykiis ifffff")
+                Log.e("TEststs","saaasasas")
+               // chatRecyclerView.smoothScrollToPosition(messageAdapter.itemCount - 1)
+                // Keyboard is open
                 chatRecyclerView.postDelayed({
                     chatRecyclerView.smoothScrollToPosition(chatRecyclerView.adapter?.itemCount?.minus(1) ?: 0)
-                }, 100) // Small delay for better UX
+                }, 100)
+
+
+
+
             }
         }
     }
@@ -983,7 +997,19 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         // Set the layout manager and adapter for the RecyclerView
         chatRecyclerView.layoutManager = LinearLayoutManager(this)
+        chatRecyclerView.itemAnimator = DefaultItemAnimator()
         chatRecyclerView.adapter = messageAdapter
+
+
+        chatRecyclerView.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
+            if (bottom < oldBottom) {
+                chatRecyclerView.postDelayed({
+                    chatRecyclerView.scrollToPosition(messageAdapter.itemCount - 1)
+                }, 100)
+            }
+        }
+
+
     }
 
     private fun showSubmittedSurvey(ncwMessage: NCWMessage) {
@@ -1885,12 +1911,17 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
                             for (chunk in chunks) {
                                 val chunkMessage = message.copy(message = chunk)
                                 messageAdapter.updateOrAppendMessage(chunkMessage, true)
+
+                                if (shouldAutoScroll()) {
+                                    chatRecyclerView.postDelayed({ smoothScrollToBottom() }, 200)
+                                }
                                 delay(300) // This will wait before processing next chunk
                             }
                         }
                     } else {
                         messageList.addAll(listOf(message))
                         messageAdapter.notifyDataSetChanged()
+                        chatRecyclerView.postDelayed({ smoothScrollToBottom() }, 100)
                         delay(100)
                     }
                 }
@@ -1926,6 +1957,43 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         renderEventAndCustomFields(response)
     }
 
+   /*private fun smoothScrollToBottom() {
+        val layoutManager = chatRecyclerView.layoutManager as LinearLayoutManager
+        val smoothScroller = object : LinearSmoothScroller(chatRecyclerView.context) {
+            override fun getVerticalSnapPreference(): Int = SNAP_TO_END
+        }
+        smoothScroller.targetPosition = messageAdapter.itemCount - 1
+        layoutManager.startSmoothScroll(smoothScroller)
+    }*/
+  private fun smoothScrollToBottom() {
+      val layoutManager = chatRecyclerView.layoutManager as LinearLayoutManager
+      val smoothScroller = object : LinearSmoothScroller(chatRecyclerView.context) {
+          override fun getVerticalSnapPreference(): Int = SNAP_TO_END
+          override fun calculateSpeedPerPixel(displayMetrics: DisplayMetrics): Float {
+              return 0.2f
+          }
+      }
+      smoothScroller.targetPosition = messageAdapter.itemCount - 1
+      layoutManager.startSmoothScroll(smoothScroller)
+  }
+
+
+ /*   private fun shouldAutoScroll(): Boolean {
+        val layoutManager = chatRecyclerView.layoutManager as LinearLayoutManager
+        val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+        val totalItems = messageAdapter.itemCount
+
+        // Calculate a dynamic threshold based on screen height
+        val dynamicThreshold = (totalItems * 0.8).toInt().coerceAtLeast(1)
+
+        return lastVisibleItem >= dynamicThreshold
+    }*/
+
+     private fun shouldAutoScroll(): Boolean {
+         val layoutManager = chatRecyclerView.layoutManager as LinearLayoutManager
+         val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+         return lastVisibleItem >= messageAdapter.itemCount - 3
+     }
 
     /*   private fun updateMessageList(newMessages: List<NCWMessage>,response: NCWGenericChannelResponse) {
         Log.e("NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled ","s "+NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled)
