@@ -82,9 +82,9 @@ data class FileUploadData(
 
 
 data class FileConfig(
-    val attachmentTypes: List<String>,
-    val isShowAttachmentTypesEnabled: Boolean,
-    val fileUploadType: String,
+    val attachmentTypes: List<String>?=null,
+    val isShowAttachmentTypesEnabled: Boolean=false,
+    val fileUploadType: String?=null,
     val maxUploadSizeAllowed: Long
 
 )
