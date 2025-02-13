@@ -458,8 +458,6 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
               }, {
                 setIdealSurveyAgain() })
         bottomSheet.show(supportFragmentManager, "RestartBottomSheet")
-
-
     }
 
     private fun onRestartAction() {
@@ -956,11 +954,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             }
         }, { payload, label, attachmentList ->
             val timeStamp = System.currentTimeMillis()
-            Log.e("FormPayload ","payload "+payload)
-            Log.e("FormPayload ","label "+label)
             val createPayload = payload?.let { createPayload(it, label, timeStamp, attachmentList) }
             if (createPayload != null) {
-                Log.e("FormPayload","FormPayload  "+createPayload)
                 chatViewModel.sendMessageAPI(createPayload)
                 addLoader()
                 playUserSound()
@@ -1011,9 +1006,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     }
 
     override fun onQuickReply(option: NCWQuickReplyOption?, position: Int) {
-
         // if (connectionStatus == NCWConnectionStatus.CONNECTED.toString()) {
-
         messageList[position].isQuickReplyVisible = false
         onQuickReplyClicked(option)
         // }
@@ -1255,7 +1248,6 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                 }
 
                 is NCWState.Success -> {
-                    //messageAdapter.notifyDataSetChanged()
                 }
 
                 is NCWState.Error -> {
@@ -2754,8 +2746,6 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             mimeTypes.add("*/*")
         }
         //putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
-        Log.e("formComponent?.config?.fileUploadType","mime "+mimeTypes)
-        Log.e("formComponent?.config?.fileUploadType","formComponent?.config?.fileUploadType "+formComponent?.config?.fileUploadType)
         val fileIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
             type = "*/*"
             addCategory(Intent.CATEGORY_OPENABLE)
@@ -2835,9 +2825,6 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             fileSize = fileSend?.length().toString()
         )
         messageList.add(newMessage)
-//        messageAdapter.notifyItemInserted(messageList.size - 1)
-//        chatRecyclerView.scrollToPosition(messageList.size - 1) // Scroll to the latest message
-
         messageAdapter.notifyDataSetChanged()
         chatRecyclerView.scrollToPosition(messageList.size)
         addLoader()
@@ -2855,11 +2842,6 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             fileSize = fileSend?.length().toString()
         )
         messageList.add(newMessage)
-
-
-//        messageAdapter.notifyItemInserted(messageList.size - 1)
-//        chatRecyclerView.scrollToPosition(messageList.size - 1) // Scroll to the latest message
-
         messageAdapter.notifyDataSetChanged()
         chatRecyclerView.scrollToPosition(messageList.size)
         addLoader()
@@ -3249,13 +3231,6 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
                                         timestamp = System.currentTimeMillis(),
                                         formSchema = schema
                                     ))
-                                           /* addSingleMessage(
-                                                NCWMessage(
-                                                    sender = TYPE_FORM,
-                                                    timestamp = System.currentTimeMillis(),
-                                                    formSchema = schema
-                                                )
-                                            )*/
 
                                     }
 
@@ -3446,14 +3421,6 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
             messageSoundPlayer?.playBotSound()
         }
     }
- /*   private fun checkNetworkAndExecute(action: () -> Unit) {
-        if (!NCWAppUtils.isNetworkAvailable(this)) {
-            NCWAppUtils.showToast(this, getString(R.string.please_check_your_network_and_try_again))
-        } else {
-            action.invoke()
-        }
-    }*/
-
     private fun sendTranscriptApI(from: String?,email: String) {
         val payload = NCWEmailRequest(
             botRefId = botRefId.orEmpty(),
