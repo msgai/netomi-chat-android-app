@@ -1,16 +1,13 @@
 package com.netomi.chat.utils
 
 import android.app.Activity
-import android.content.ContentResolver
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
-import android.os.Build
 import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.inputmethod.InputMethodManager
-import android.webkit.MimeTypeMap
 import android.widget.TextView
 import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -56,25 +53,10 @@ object NCWAppUtils {
         )
     }
 
-    fun showKeyboard(context: Activity) {
-        val inputMethodManager =
-            context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputMethodManager.showSoftInput(context.currentFocus, InputMethodManager.SHOW_IMPLICIT)
-    }
-
     fun formatTimestampToTime(timestamp: Long): String {
         val dateFormat = SimpleDateFormat(TIME_AM_PM, Locale.getDefault())
         val date = Date(timestamp)
         return dateFormat.format(date).uppercase()
-    }
-
-
-    fun setHtmText(input: String): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(input, Html.FROM_HTML_MODE_LEGACY).toString().trim()
-        } else {
-            Html.fromHtml(input).toString().trim()
-        }
     }
 
     fun setHtmlText(textView: TextView, input: String) {
@@ -125,11 +107,6 @@ object NCWAppUtils {
             }.show()
     }
 
-  /*  fun prepareFilePart(file: File): MultipartBody.Part {
-        val requestFile = RequestBody.create("application/octet-stream".toMediaTypeOrNull(), file)
-        return MultipartBody.Part.createFormData("file", file.name, requestFile)
-    }
-*/
   fun prepareFilePart(file: File): MultipartBody.Part {
         val requestFile = file.asRequestBody("application/octet-stream".toMediaTypeOrNull())
         return MultipartBody.Part.createFormData("file", file.name, requestFile)
@@ -186,27 +163,6 @@ object NCWAppUtils {
         return RequestBody.create("text/plain".toMediaTypeOrNull(), value) // Create RequestBody for other fields
     }
 
-    fun getPrefix(mediaPath: String): String {
-        val parts = mediaPath.split("/") // Split the string by "/"
-        return parts.take(parts.size - 1).joinToString("/") // Join all parts except the last one
-    }
-
-
-    fun getMimeType(context: Context, uri: Uri): String? {
-
-        //Check uri format to avoid null
-        val extension: String? = if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
-            //If scheme is a content
-            val mime = MimeTypeMap.getSingleton()
-            mime.getExtensionFromMimeType(context.contentResolver.getType(uri))
-        } else {
-            //If scheme is a File
-            //This will replace white spaces with %20 and also other special characters. This will avoid returning null values on file name with spaces and special characters.
-            MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(File(uri.path)).toString())
-        }
-        return extension
-    }
-
     fun getFileFromUri(context: Context, uri: Uri): File? {
         // Since `photoUri` is created from `createImageFile`, it already points to the file
         return if ("file" == uri.scheme) {
@@ -224,15 +180,8 @@ object NCWAppUtils {
     }
 
     fun isFileSizeValid(context: Context, fileSizeInBytes: Long?, maxFileSizeInBytes: Long?): Boolean {
-        //val fileSizeInMB = fileSizeInBytes?.toDouble()?.div(1024 * 1024) ?: 0.0
-        val maxFileSizeInMB = maxFileSizeInBytes?.toDouble()?.div(1024 * 1024) ?: 0.0
-
+        // val maxFileSizeInMB = maxFileSizeInBytes?.toDouble()?.div(1024 * 1024) ?: 0.0
         if (fileSizeInBytes != null && maxFileSizeInBytes != null && fileSizeInBytes > maxFileSizeInBytes) {
-            /*showToast(
-                context = context,
-                message = "File size should not be greater than ${String.format("%.2f", maxFileSizeInMB)} MB"
-            )*/
-
             return false
         }
         return true
