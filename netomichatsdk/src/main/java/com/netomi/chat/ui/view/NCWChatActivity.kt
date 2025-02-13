@@ -2,17 +2,14 @@ package com.netomi.chat.ui.view
 
 
 import NCWIdleTimeoutManager
-import android.Manifest
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
@@ -29,15 +26,11 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
@@ -147,16 +140,16 @@ import com.netomi.chat.utils.NCWAppConstant.TYPE_SHOW_SURVEY
 import com.netomi.chat.utils.NCWAppConstant.TYPE_SUBMITTED_SURVEY
 import com.netomi.chat.utils.NCWAppConstant.TYPE_VIDEO
 import com.netomi.chat.utils.NCWAppConstant.UPLOAD_FILE_MULTIPLE
-import com.netomi.chat.utils.NCWAppConstant.WIDGET_EVENT_IDLE_USER
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWAppUtils.hideKeyboard
-import com.netomi.chat.utils.NCWAppUtils.isFileSizeValid
-import com.netomi.chat.utils.NCWAppUtils.isFormSizeValid
 import com.netomi.chat.utils.NCWChatActionCallback
-import com.netomi.chat.utils.NCWDialogUtils
 import com.netomi.chat.utils.NCWFeedbackActionCallback
 import com.netomi.chat.utils.NCWFilePath
 import com.netomi.chat.utils.NCWImageUtils
+import com.netomi.chat.utils.NCWMessageUtils
+import com.netomi.chat.utils.NCWMessageUtils.mergeChunks
+import com.netomi.chat.utils.NCWMessageUtils.splitIntoChunks
+import com.netomi.chat.utils.NCWMessageUtils.validateFileAttachment
 import com.netomi.chat.utils.NCWRoutes
 import com.netomi.chat.utils.NCWSingleAlertDialog
 import com.netomi.chat.utils.NCWState
@@ -192,7 +185,7 @@ import java.util.UUID
  * This activity is intended to be launched by the host application or as part of the Chat SDK.
  *
  */
-class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackActionCallback {
+class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackActionCallback {
 
     private val chatViewModel: NCWChatViewModel by viewModels()
     private val ncwAwsCredentialsViewModel: NCWAwsCredentialsViewModel by viewModels()
@@ -455,22 +448,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
     private fun showRestartPopUp(ncwShowWarning: NCWShowWarning) {
-
-      /* NCWDialogUtils.showCustomDialog(
-            this,
-            title = ncwShowWarning.restartButtonText?:getString(R.string.restart_chat),
-            subtitle = ncwShowWarning.warningText?:getString(R.string.confirm_restart_chat),
-            confirm = ncwShowWarning.restartButtonText?:getString(R.string.restart_chat),
-            cancelButtonText = ncwShowWarning.cancelButtonText?:getString(R.string.cancel)
-        ) {
-
-            onRestartAction()
-
-        }*/
-
         handler.removeCallbacks(idleRunnable)
 
-          val bottomSheet=  NCWRestartChatBottomSheet(themeData,ncwShowWarning ,{
+        val bottomSheet=  NCWRestartChatBottomSheet(themeData,ncwShowWarning ,{
                 onRestartAction()
             },{ from,mail->
               sendTranscriptApI(from,mail)
@@ -536,7 +516,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
     }
 
-    private fun showMedia() {
+   private fun showMedia() {
         if (arePermissionsGranted())
             showMediaOptions()
         else
@@ -647,16 +627,20 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     override fun onResume() {
         super.onResume()
         // Check for timeout whenever the activity is resumed
-        idleTimeoutManager.checkForTimeout()
+        if (::idleTimeoutManager.isInitialized) {
+            idleTimeoutManager.checkForTimeout()
+        }
     }
 
 
     override fun onUserInteraction() {
         super.onUserInteraction()
         // Update last active time on any interaction
-        idleTimeoutManager.updateLastActiveTime()
-        // Check if session has timed out
-        idleTimeoutManager.checkForTimeout()
+        if (::idleTimeoutManager.isInitialized) {
+            idleTimeoutManager.updateLastActiveTime()
+            // Check if session has timed out
+            idleTimeoutManager.checkForTimeout()
+        }
     }
 
     /**
@@ -720,7 +704,9 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
             chatViewModel.sendMessage(messageContent, timeStamp)
             sendMessageToBot(payload)
         }
-        idleTimeoutManager.checkForTimeout()
+        if (::idleTimeoutManager.isInitialized) {
+            idleTimeoutManager.checkForTimeout()
+        }
     }
 
     private fun sendMessageToBot(payload: NCWWebhookPayload) {
@@ -1097,17 +1083,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
     }
 
-   /* override fun onScrollToPosition(isScrollToPosition: Boolean) {
-        try {
-            chatRecyclerView.post {
-                chatRecyclerView.smoothScrollToPosition(messageList.size - 1)
-            }5
-        }
-        catch (ex:Exception){
-             ex.printStackTrace()
-        }
-
-    }*/
    override fun onScrollToPosition(isScrollToPosition: Boolean) {
        try {
            if (messageList.isNotEmpty()) {
@@ -1184,12 +1159,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
 
     }
-
-    private fun makePhoneCall(phoneNumber: String?) {
-        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
-        startActivity(intent)
-    }
-
 
     /**
      * Handles quick reply option click by sending a message based on the option selected.
@@ -2064,25 +2033,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
     }
 */
-    // Helper function to split a message into chunks of 8 words
-    private fun splitIntoChunks(text: String, wordsPerChunk: Int): List<String> {
-        val words = text.split("(?<=\\s)".toRegex()) // Splitting while keeping spaces
-        val chunks = mutableListOf<String>()
-        val chunkBuilder = StringBuilder()
-        var wordCount = 0
 
-        for ((index, word) in words.withIndex()) {
-            chunkBuilder.append(word) // Append word with its existing space
-            wordCount++
-
-            if (wordCount == wordsPerChunk || index == words.size - 1) {
-                chunks.add(chunkBuilder.toString()) // Add chunk without trimming
-                chunkBuilder.clear()
-                wordCount = 0
-            }
-        }
-        return chunks
-    }
 
     // Helper function to add messages and scroll to the latest
     private fun addMessages(newMessages: List<NCWMessage>) {
@@ -2119,13 +2070,6 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
              chatRecyclerView.post(messageList.size - 1)
          }*/
 
-    }
-
-    private fun mergeChunks(chunkList: List<NCWMessage>): NCWMessage {
-        val mergedText = chunkList.joinToString("") { it.message ?: "" }
-        val firstChunk = chunkList.first()
-        val isReviewEnabled = chunkList.any { it.isReviewEnabled }
-        return firstChunk.copy(message = mergedText, isReviewEnabled = isReviewEnabled)
     }
 
     private fun safelyRemoveLoader(newMessages: List<NCWMessage>) {
@@ -2270,59 +2214,14 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
 
-    private fun requestPermissionsAndShowMediaOptions() {
-        val permissions: Array<String> =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                arrayOf(
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.READ_MEDIA_IMAGES,
-                    Manifest.permission.READ_MEDIA_VIDEO
-                )
-            } else {
-                arrayOf(
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                )
-            }
-        requestPermissionLauncher.launch(permissions)
-    }
-
-    private fun arePermissionsGranted(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_MEDIA_IMAGES
-            ) == PackageManager.PERMISSION_GRANTED &&
-                    ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.CAMERA
-                    ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED &&
-                    ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.CAMERA
-                    ) == PackageManager.PERMISSION_GRANTED
-        }
-    }
 
 
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val allGranted = permissions.values.all { it }
-            if (allGranted) {
-                showMediaOptions()
-            } else {
-                Toast.makeText(this, "Permissions are required to upload media", Toast.LENGTH_SHORT)
-                    .show()
-            }
-        }
+
+
+
 
     // Function to show camera and gallery options
-    private fun showMediaOptions() {
+    override fun showMediaOptions() {
 
         checkNetworkAndExecute {
             val supportedExtensions = when (attachmentType) {
@@ -2456,11 +2355,27 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
     }
 
 
-    // Common function to validate file size and type
     private fun validateFormAttachment(file: File?): Boolean {
+        val supportedExtensions = formComponent?.config?.attachmentTypes?.map { it.lowercase() }
 
-        val supportedExtensions =
-            formComponent?.config?.attachmentTypes?.map { it.lowercase() } ?: emptyList()
+        return validateFileAttachment(
+            formComponent = formComponent,
+            file = file,
+            supportedExtensions = supportedExtensions,
+            context = this,
+            onValidationFailed = { message, description ->
+                if (description != null)
+                    handleSessionTimeout(message, description, getString(R.string.okay), SIZE_LIMIT)
+                else
+                    showLimitExceedPopup(message)
+            }
+        )
+    }
+
+    // Common function to validate file size and type
+   /* private fun validateFormAttachment(file: File?): Boolean {
+
+        val supportedExtensions = formComponent?.config?.attachmentTypes?.map { it.lowercase() } ?: emptyList()
         Log.e("supportedExtensions", "supportedExtensions: $supportedExtensions")
 
 // Normalize the file extension (remove the dot and convert to lowercase)
@@ -2490,10 +2405,28 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
 
         return true
-    }
+    }*/
+
 
     // Common function to validate file size and type
     private fun validateFile(file: File?): Boolean {
+        val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
+        val maxFileSize = themeData?.fileSharing?.fileSize
+
+        return validateFileAttachment(
+            file = file,
+            supportedExtensions = supportedExtensions,
+            maxFileSize = maxFileSize,
+            context = this,
+            onValidationFailed = { message, description ->
+                if (description != null)
+                    handleSessionTimeout(message, description, getString(R.string.okay), SIZE_LIMIT)
+                else
+                    showLimitExceedPopup(message)
+            }
+        )
+    }
+ /*   private fun validateFile(file: File?): Boolean {
 
         // Validate file type
         val supportedExtensions = themeData?.fileSharing?.list ?: emptyList()
@@ -2522,7 +2455,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
 
         return true
     }
-
+*/
     // Common function to handle file result
     private fun handleFileSelection(
         selectedMediaUri: Uri?,
@@ -2707,11 +2640,7 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
 
     private fun checkSupportedFilesForm() {
-
-
-        val supportedExtensions =
-            formComponent?.config?.attachmentTypes?.map { it.lowercase() } ?: emptyList()
-
+        val supportedExtensions = formComponent?.config?.attachmentTypes?.map { it.lowercase() } ?: emptyList()
         val (supportedFiles, unsupportedFiles) = mMultipleFile.partition { multiFileModel ->
             val fileExtension = multiFileModel.file.extension.lowercase().removePrefix(".")
             supportedExtensions.contains(fileExtension)
@@ -2727,27 +2656,36 @@ class NCWChatActivity : AppCompatActivity(), NCWChatActionCallback, NCWFeedbackA
         }
     }
 
-    private fun validateFormAttachment(mMultipleFile: List<MultiFileModel>?): Boolean {
+   /* private fun validateFormAttachment(mMultipleFile: List<MultiFileModel>?): Boolean {
 
         val formComponent = formComponent ?: return true
 
         // Perform validation
-        val isValid =
-            mMultipleFile?.let { NCWAppUtils.validateMultipleFormAttachment(formComponent, it) }
+        val isValid = mMultipleFile?.let { NCWAppUtils.validateMultipleFormAttachment(formComponent, it) }
 
         if (!isValid!!) {
-            val maxUploadSizeAllowedMB =
-                formComponent.config?.maxUploadSizeAllowed?.let { "$it MB" } ?: "N/A"
+            val maxUploadSizeAllowedMB = formComponent.config?.maxUploadSizeAllowed?.let { "$it MB" } ?: "N/A"
 
             // Construct the message for exceeding the limit
             val messageIssue = getString(R.string.upload_files_max_size, maxUploadSizeAllowedMB)
-
             // Show the popup with the limit exceeded message
             showLimitExceedPopup(messageIssue)
             return false
         }
 
         return true
+    }*/
+
+    private fun validateFormAttachment(mMultipleFile: List<MultiFileModel>): Boolean {
+        val formComponent = formComponent ?: return true
+
+        return NCWMessageUtils.validateFormAttachment(
+            formComponent,
+            mMultipleFile,
+            this
+        ) { message ->
+            showLimitExceedPopup(message)
+        }
     }
 
 
@@ -3508,13 +3446,13 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
             messageSoundPlayer?.playBotSound()
         }
     }
-    private fun checkNetworkAndExecute(action: () -> Unit) {
+ /*   private fun checkNetworkAndExecute(action: () -> Unit) {
         if (!NCWAppUtils.isNetworkAvailable(this)) {
             NCWAppUtils.showToast(this, getString(R.string.please_check_your_network_and_try_again))
         } else {
             action.invoke()
         }
-    }
+    }*/
 
     private fun sendTranscriptApI(from: String?,email: String) {
         val payload = NCWEmailRequest(
