@@ -59,6 +59,7 @@ import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEventData
 import com.netomi.chat.model.feedback.feedbackrequest.NCWEventInfo
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
+import com.netomi.chat.model.language.LanguageResponse
 import com.netomi.chat.model.media_payload.MultiFileModel
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.Component
@@ -332,6 +333,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         }
         ivMenu.setOnClickListener {
             setUpSettingOption()
+
         }
 
         closeIcon.setOnClickListener {
@@ -364,6 +366,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         botRefId?.let { chatViewModel.getSurveyRule(it) }
 
    //     setupKeyboardListener()
+
+
 
 
     }
@@ -416,7 +420,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     private fun setUpLanguageOption() {
         val bottomSheet = themeData?.let {
             NCWLanguageBottomSheet(it.multilingual.languages) { options ->
-
+                Log.e("Option","optyui"+options.code)
+                botRefId?.let { chatViewModel.getLanguageStrings(it,options.code) }
             }
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
@@ -900,8 +905,11 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             cardToday.setBackgroundColor(Color.parseColor(it.chatWindowBackgroundColor))
         }
 
+        setUIStrings()
 
     }
+
+
 
     /**
      * Initializes and binds UI components in the chat activity layout.
@@ -1202,6 +1210,12 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         chatViewModel.sendMessages.observe(this) { message ->
             updateMessageList(message)
         }
+        chatViewModel.getLanguage.observe(this) { language ->
+
+            handleApiCallback(language as NCWState<Any>)
+        }
+
+
 
         chatViewModel.errorFile.observe(this) { errorFile ->
             val position = messageList.indexOfLast { it.sender == TYPE_FORM }
@@ -3109,6 +3123,11 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
 
 
             }
+            NCWRoutes.ROUTE_GET_LANGUAGE -> {
+                val languageResponse = apiResponse as LanguageResponse
+                Log.e("languageResponse","languageResponse "+languageResponse)
+                updateLanguageStrings(languageResponse)
+            }
 
             else -> {
                 Toast.makeText(this, "Else..", Toast.LENGTH_SHORT).show()
@@ -3116,6 +3135,8 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
         }
 
     }
+
+
 
 
     private fun parseHistoryItems(responses: ArrayList<NCWGenericChannelResponse>) {
@@ -3429,5 +3450,30 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
             from = from
         )
         chatViewModel.sendTranscript(payload)
+    }
+
+    private fun updateLanguageStrings(languageResponse: LanguageResponse) {
+        themeData?.let {
+            themeData->
+            themeData.quickMenuOptions=languageResponse.quickMenuOptions
+            themeData.initialFlows=languageResponse.initialFlows
+            themeData.restartChat=languageResponse.restartChat
+            themeData.otherlocalized=languageResponse.otherlocalized
+        }
+        languageResponse.otherlocalized?.let { otherlocalized->
+            tvBrandName.text=otherlocalized.powered_by_netomi
+
+        }
+
+
+    }
+
+    private fun setUIStrings() {
+        themeData?.let {themeData->
+            Log.e("themeData.otherlocalized.","themeData.otherlocalized. "+themeData.otherlocalized)
+            messageInputField.hint=themeData.otherlocalized.ask_a_question
+
+        }
+
     }
 }

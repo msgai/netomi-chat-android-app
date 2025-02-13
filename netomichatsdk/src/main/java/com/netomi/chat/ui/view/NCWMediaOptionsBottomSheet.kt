@@ -5,9 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
+import com.netomi.chat.ui.init.NCWChatTheme
+import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWMediaOptionsBottomSheet(
     private val onCameraClick: () -> Unit,
@@ -38,6 +41,14 @@ class NCWMediaOptionsBottomSheet(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val tvCamera= view.findViewById<TextView>(R.id.tvCamera)
+        val tvGallery= view.findViewById<TextView>(R.id.tvGallery)
+        val tvFile= view.findViewById<TextView>(R.id.tvFile)
+
+        tvCamera.text= NCWThemeUtils.getThemeData()?.otherlocalized?.camera ?: getString(R.string.camera)
+        tvGallery.text= NCWThemeUtils.getThemeData()?.otherlocalized?.upload_from_gallery ?: getString(R.string.upload_from_gallery)
+        tvFile.text= NCWThemeUtils.getThemeData()?.otherlocalized?.attach_from_device ?: getString(R.string.attach_from_device)
 
         val imageVideoExtensions = listOf("jpg", "jpeg", "png", "mp4", "mov","mp3")
         val fileExtensions = listOf("pdf", "doc", "docx", "txt")

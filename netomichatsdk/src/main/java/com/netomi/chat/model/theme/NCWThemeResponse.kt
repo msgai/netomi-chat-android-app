@@ -1,5 +1,7 @@
 package com.netomi.chat.model.theme
 
+import com.netomi.chat.model.language.NCWOtherLocalized
+
 data class NCWThemeResponse(
     val `$LAST_TIME_SAVED`: String,
     val _botResponseBubbleColor: String,
@@ -19,7 +21,7 @@ data class NCWThemeResponse(
     val footerStatus: String,
     val hideContextMenu: Boolean,
     val hideMinMax: Boolean,
-    val initialFlows: NCWInitialFlows,
+    var initialFlows: NCWInitialFlows,
     val isDefaultFullScreen: Boolean,
     val isDefaultOpen: Boolean,
     val isFooterHidden: Boolean=false,
@@ -35,9 +37,9 @@ data class NCWThemeResponse(
     val nbaConfig_: NCWNbaConfig,
     val persistentSurveyConfig: NCWPersistentSurveyConfig,
     val proactiveTriggerType: String?=null,
-    val quickMenuOptions: List<NCWQuickMenuOption>,
+    var quickMenuOptions: List<NCWQuickMenuOption>,
     val realTimeChatService: NCWRealTimeChatService,
-    val restartChat: NCWRestartChat?=null,
+    var restartChat: NCWRestartChat?=null,
     val scrollToBottom: NCWScrollToBottom,
     val sendTranscriptEmailSetup: NCWSendTranscriptEmailSetup?,
     val sound: NCWSound,
@@ -54,6 +56,6 @@ data class NCWThemeResponse(
     val OAUTH2: NCWOauth,
     var proActiveGreetings: ArrayList<String> = arrayListOf(),
     var isProActiveGreetings:Boolean=false,
-    var streamOnChatWidget:NCWStreamOnChatWidget
-
+    var streamOnChatWidget:NCWStreamOnChatWidget,
+    var otherlocalized: NCWOtherLocalized=NCWOtherLocalized()
 )

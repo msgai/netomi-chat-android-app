@@ -34,7 +34,7 @@ object NCWRoutes {
     const val ROUTE_SEND_TRANSCRIPT=API +"sendTranscript"
 
 
-
+    const val ROUTE_GET_LANGUAGE="{botRefId}/language/configurable/{code}.json"
 
 
 

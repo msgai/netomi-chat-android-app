@@ -61,6 +61,14 @@ class NCWSettingBottomSheet(
         val constSound = view.findViewById<ConstraintLayout>(R.id.constSound)
         val viewLineSound = view.findViewById<View>(R.id.viewLineSound)
         val constLang = view.findViewById<ConstraintLayout>(R.id.constLang)
+        val tvLanguage = view.findViewById<TextView>(R.id.tvLanguage)
+        val tvSound = view.findViewById<TextView>(R.id.tvSound)
+        val textRestart = view.findViewById<TextView>(R.id.text_restart)
+
+        //tvTitle.text= NCWThemeUtils.getThemeData()?.otherlocalized?.se ?: getString(R.string.setting)
+        tvLanguage.text= NCWThemeUtils.getThemeData()?.otherlocalized?.language ?: getString(R.string.language_en)
+        tvSound.text= NCWThemeUtils.getThemeData()?.otherlocalized?.sound ?: getString(R.string.sound)
+        textRestart.text= NCWThemeUtils.getThemeData()?.otherlocalized?.restart_chat ?: getString(R.string.restart_chat)
 
         val isVisible = themeData?.sound?.status == ENABLED
         constSound.visibility = if (isVisible) View.VISIBLE else View.GONE

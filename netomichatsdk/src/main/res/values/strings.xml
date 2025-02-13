@@ -52,6 +52,11 @@
     <string name="download">Download</string>
     <string name="please_provide_valid_email">Please provide valid email</string>
     <string name="send_transcript">Send Transcript</string>
+    <string name="camera">Camera</string>
+    <string name="upload_from_gallery">Upload from Gallery</string>
+    <string name="attach_from_device">Attach from device</string>
+    <string name="chat_session_will_be_saved">Chat session will be saved and you can continue the conversation from where you left.</string>
+    <string name="chat_will_end_you_wont_able_to_resume_later">Chat will end and you won\'t be able to resume later.</string>
 
 
 </resources>
