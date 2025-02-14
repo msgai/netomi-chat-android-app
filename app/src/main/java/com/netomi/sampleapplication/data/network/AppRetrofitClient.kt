@@ -39,6 +39,8 @@ import java.util.concurrent.TimeUnit
 object AppRetrofitClient {
 
     private const val BASE_URL = "https://hd-web-us.netomi.com/"
+
+    //https://hd-web-us.netomi.com/v1/webapi/c368f6ee-4286-423f-a9d7-5e4571cba8cb
     private const val BASE_URL_NEW = "https://chatapps-qa.netomi.com/"
 
 
