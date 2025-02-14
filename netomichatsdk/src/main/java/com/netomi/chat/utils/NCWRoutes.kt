@@ -36,6 +36,9 @@ object NCWRoutes {
 
     const val ROUTE_GET_LANGUAGE="{botRefId}/language/configurable/{code}.json"
 
+    const val ROUTE_DOWNLOAD_TRANSCRIPT= API + "downloadTranscript"
+
+
 
 
 }

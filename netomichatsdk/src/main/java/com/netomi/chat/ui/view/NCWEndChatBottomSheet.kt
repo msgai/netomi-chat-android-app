@@ -24,7 +24,8 @@ import com.netomi.chat.utils.NCWThemeUtils
 class NCWEndChatBottomSheet(
     private val themeData: NCWThemeResponse?,
     private val onConfirmClick: (isEndChat: Boolean) -> Unit,
-    private val onSendTranscript:(from:String?,mailTo:String) -> Unit
+    private val onSendTranscript:(from:String?,mailTo:String) -> Unit,
+    private val onDownloadClick: () -> Unit,
 ) : BottomSheetDialogFragment() {
 
     private var isEndChat:Boolean=false
@@ -163,6 +164,11 @@ class NCWEndChatBottomSheet(
             }
 
             dismiss()
+        }
+
+        tvDownload.setOnClickListener {
+            onDownloadClick()
+
         }
 
     }
