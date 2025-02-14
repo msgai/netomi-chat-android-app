@@ -65,5 +65,8 @@
     <string name="for_completing_the_survey">for completing the survey</string>
     <string name="items_selected">%1$s items selected</string>
     <string name="email">Email</string>
+    <string name="format">Format: %1$s</string>
+    <string name="submitted">Submitted</string>
+    <string name="unable_to_open_the_link">Unable to open the link: %1$s</string>
 
 </resources>

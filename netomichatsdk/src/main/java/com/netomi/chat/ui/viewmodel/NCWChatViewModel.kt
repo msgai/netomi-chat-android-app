@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.netomi.chat.data.repository.NCWChatRepository
+import com.netomi.chat.model.ChatTranscriptResponse
 import com.netomi.chat.model.GetConversationPayload
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
@@ -120,6 +121,9 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
 
     private val _getLanguage = NCWSingleLiveEvent<NCWState<LanguageResponse>>()
     val getLanguage get() = _getLanguage
+
+    private val _getTranscriptUrl = NCWSingleLiveEvent<NCWState<ChatTranscriptResponse>>()
+    val getTranscriptUrl get() = _getTranscriptUrl
 
     init {
         loadChatHistory()
@@ -443,6 +447,17 @@ Log.e("DataaResposne","response"+response)
 
             withContext(Dispatchers.Main) {
                 _getLanguage.value = response
+            }
+        }
+
+    }
+
+    fun getDownloadTranscriptUrl(botRefId: String,conversationId:String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.getDownloadTranscriptUrl(botRefId,conversationId)
+
+            withContext(Dispatchers.Main) {
+                _getTranscriptUrl.value = response
             }
         }
 

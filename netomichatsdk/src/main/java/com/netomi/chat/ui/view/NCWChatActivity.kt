@@ -45,6 +45,7 @@ import com.netomi.chat.R
 import com.netomi.chat.awsiot.NCWAwsIotManager
 import com.netomi.chat.awsiot.NCWConnectionStatus
 import com.netomi.chat.model.CarouselButtonType
+import com.netomi.chat.model.ChatTranscriptResponse
 import com.netomi.chat.model.CustomFieldName
 import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWGetChatHistoryResponse
@@ -95,6 +96,7 @@ import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel
 import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.DeviceInfoUtil
+import com.netomi.chat.utils.DownloadHelper
 import com.netomi.chat.utils.MessageSoundPlayer
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppConstant.ARG_MEDIA_URL
@@ -334,6 +336,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         ivMenu.setOnClickListener {
             setUpSettingOption()
 
+
         }
 
         closeIcon.setOnClickListener {
@@ -461,9 +464,16 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
               sendTranscriptApI(from,mail)
               onRestartAction()
               }, {
-                setIdealSurveyAgain() })
+                setIdealSurveyAgain() }
+            ,{
+                getTranscriptUrl()
+            }
+
+        )
         bottomSheet.show(supportFragmentManager, "RestartBottomSheet")
     }
+
+
 
     private fun onRestartAction() {
         onRestart = true
@@ -547,6 +557,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                 callBackToBot()
                 hitEndChatAPI()
 
+            },{
+                getTranscriptUrl()
             })
         bottomSheet.show(supportFragmentManager, "EndChatBottomSheet")
 
@@ -1080,7 +1092,14 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(multipleSourceDetail.text))
             startActivity(intent)
         } catch (e: Exception) {
-            NCWAppUtils.showToast(this, "Unable to open the link")
+            val unableToOpenUrlTemplate = NCWThemeUtils.getThemeData()?.otherlocalized?.unable_to_open_url
+            val unableToOpenUrlMessage = if (unableToOpenUrlTemplate != null) {
+                String.format(unableToOpenUrlTemplate.replace("%@", "%s"), multipleSourceDetail.text)
+            } else {
+                getString(R.string.unable_to_open_the_link, multipleSourceDetail.text)
+            }
+
+            NCWAppUtils.showToast(this, unableToOpenUrlMessage)
         }
     }
 
@@ -1138,10 +1157,14 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it?.url))
                         startActivity(intent) // Directly start the activity
                     } catch (e: Exception) {
-                        Log.e("OpenURL", "Failed to open URL: ${it?.url}", e)
-                        NCWAppUtils.showToast(this, "Unable to open the link")
+                        val unableToOpenUrlTemplate = NCWThemeUtils.getThemeData()?.otherlocalized?.unable_to_open_url
+                        val unableToOpenUrlMessage = if (unableToOpenUrlTemplate != null) {
+                            String.format(unableToOpenUrlTemplate.replace("%@", "%s"), it?.url)
+                        } else {
+                            getString(R.string.unable_to_open_the_link, it?.url)
+                        }
+                        NCWAppUtils.showToast(this, unableToOpenUrlMessage)
                     }
-                    Log.e("WEB", it?.title.toString())
                 }
             }
 
@@ -1214,6 +1237,11 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
             handleApiCallback(language as NCWState<Any>)
         }
+        chatViewModel.getTranscriptUrl.observe(this) { language ->
+
+            handleApiCallback(language as NCWState<Any>)
+        }
+
 
 
 
@@ -2655,10 +2683,17 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         }
         mMultipleFile = ArrayList(supportedFiles)
         if (unsupportedFiles.isNotEmpty()) {
+            val messageTemplate = NCWThemeUtils.getThemeData()?.otherlocalized?.selected_files_type_is_not_supported
+            val subtitle = if (messageTemplate != null) {
+                String.format(messageTemplate, formComponent?.config?.attachmentTypes)
+            } else {
+                getString(R.string.selected_files_type_is_not_supported, formComponent?.config?.attachmentTypes)
+            }
+
             handleSessionTimeout(
-                getString(R.string.unsupported_file),
-                "The selected file type(s) are not supported. Please choose supported file types such as: ${formComponent?.config?.attachmentTypes}.",
-                getString(R.string.okay),
+                NCWThemeUtils.getThemeData()?.otherlocalized?.unsupported_file_format ?:getString(R.string.unsupported_file),
+                subtitle,
+                NCWThemeUtils.getThemeData()?.otherlocalized?.okay ?:getString(R.string.okay),
                 SIZE_LIMIT
             )
         }
@@ -3130,6 +3165,15 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
                 Log.e("languageResponse","languageResponse "+languageResponse)
                 updateLanguageStrings(languageResponse)
             }
+            NCWRoutes.ROUTE_DOWNLOAD_TRANSCRIPT -> {
+                hideProgressBar()
+                val chatTranscriptResponse = apiResponse as ChatTranscriptResponse
+                val url =chatTranscriptResponse.chatTranscriptUrl
+                val fileName = Uri.parse(url).lastPathSegment
+                if (fileName != null) {
+                    DownloadHelper.downloadFile(this, url, fileName)
+                }
+            }
 
             else -> {
                 Toast.makeText(this, "Else..", Toast.LENGTH_SHORT).show()
@@ -3477,5 +3521,14 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
 
         }
 
+    }
+
+    private fun getTranscriptUrl() {
+        showProgressBar()
+        botRefId?.let { conversationID?.let { it1 ->
+            chatViewModel.getDownloadTranscriptUrl(it,
+                it1
+            )
+        } }
     }
 }

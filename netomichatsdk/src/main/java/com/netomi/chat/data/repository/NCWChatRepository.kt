@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import com.netomi.chat.data.network.NCWApiInterface
 import com.netomi.chat.data.network.NCWBaseService
 import com.netomi.chat.data.network.NCWRetrofitClient
+import com.netomi.chat.model.ChatTranscriptResponse
 import com.netomi.chat.model.GetConversationPayload
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
@@ -402,6 +403,33 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
 
         }
     }
+
+
+
+
+    suspend fun getDownloadTranscriptUrl(botRefId: String,conversationId:String): NCWState<ChatTranscriptResponse> {
+        return try {
+            val response = apiInterface.getDownloadTranscriptUrl(botRefId,conversationId)
+            if (response.isSuccessful && response.body() != null) {
+                NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_DOWNLOAD_TRANSCRIPT)
+            } else {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    NCWState.error(parseError(errorBody), code = response.code())
+
+
+                } else {
+                    NCWState.error(mapApiException(response.code()), code = response.code())
+
+                }
+            }
+        } catch (e: Exception) {
+            NCWState.error(e.message.toString(), code = 500)
+
+        }
+    }
+
+
 
 
 }
