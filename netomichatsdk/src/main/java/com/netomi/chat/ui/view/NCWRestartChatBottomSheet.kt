@@ -27,6 +27,8 @@ class NCWRestartChatBottomSheet(
     val onYesClick: () -> Unit,
     private val onSendTranscript: (from: String?, mailTo: String) -> Unit,
     private val onCrossClick: () -> Unit,
+    private val onDownloadClick: () -> Unit,
+
 ) : BottomSheetDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -139,6 +141,10 @@ class NCWRestartChatBottomSheet(
                 onYesClick()
             }
             dismiss()
+        }
+        tvDownload.setOnClickListener {
+            onDownloadClick()
+
         }
         btnCancel.setOnClickListener {
             onCrossClick()

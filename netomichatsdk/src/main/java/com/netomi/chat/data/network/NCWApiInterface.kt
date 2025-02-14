@@ -1,5 +1,6 @@
 package com.netomi.chat.data.network
 
+import com.netomi.chat.model.ChatTranscriptResponse
 import com.netomi.chat.model.GetConversationPayload
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
@@ -22,6 +23,7 @@ import com.netomi.chat.model.transcript.NCWEmailRequest
 import com.netomi.chat.survey.SubmitSurveyRequest
 import com.netomi.chat.utils.NCWRoutes.LOGIN
 import com.netomi.chat.utils.NCWRoutes.LOGOUT
+import com.netomi.chat.utils.NCWRoutes.ROUTE_DOWNLOAD_TRANSCRIPT
 import com.netomi.chat.utils.NCWRoutes.ROUTE_END_CHAT
 
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_CHAT
@@ -205,6 +207,10 @@ interface NCWApiInterface {
 
 
 
+    @GET(ROUTE_DOWNLOAD_TRANSCRIPT)
+    suspend fun getDownloadTranscriptUrl(@Header("x-bot-ref-id") botRefId: String,
+                                         @Header("x-conversation-id") conversationId: String
+                                         ): Response<ChatTranscriptResponse>
 
 
 
