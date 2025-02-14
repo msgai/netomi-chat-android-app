@@ -58,9 +58,14 @@ object NCWMessageUtils {
 
         // Check if the file extension is supported
         if (fileExtension == null || !supportedExtensions.orEmpty().contains(fileExtension)) {
-            val message = context.getString(R.string.unsupported_file)
-            val description = "The selected file type is not supported. Please choose a supported file type such as: $supportedExtensions."
 
+            val message = NCWThemeUtils.getThemeData()?.otherlocalized?.unsupported_file_format ?:context.getString(R.string.unsupported_file)
+            val messageTemplate = NCWThemeUtils.getThemeData()?.otherlocalized?.selected_files_type_is_not_supported
+            val description = if (messageTemplate != null) {
+                String.format(messageTemplate, supportedExtensions)
+            } else {
+                context.getString(R.string.selected_files_type_is_not_supported, supportedExtensions)
+            }
             onValidationFailed(message, description)
             return false
         }
@@ -102,8 +107,14 @@ object NCWMessageUtils {
         // Check if the file extension is supported
         if (fileExtension == null || fileExtension !in supportedExtensions) {
             val message = context.getString(R.string.unsupported_file)
-            val description = "The selected file type is not supported. Please choose a supported file type such as: $supportedExtensions."
+           // val description = "The selected file type is not supported. Please choose a supported file type such as: $supportedExtensions."
 
+            val messageTemplate = NCWThemeUtils.getThemeData()?.otherlocalized?.selected_files_type_is_not_supported
+            val description = if (messageTemplate != null) {
+                String.format(messageTemplate, supportedExtensions)
+            } else {
+                context.getString(R.string.selected_files_type_is_not_supported, supportedExtensions)
+            }
             onValidationFailed(message, description)
             return false
         }
@@ -137,7 +148,13 @@ object NCWMessageUtils {
             mMultipleFile.let { NCWAppUtils.validateMultipleFormAttachment(formComponent, it) }
 
         if (!isValid) {
-            val messageIssue = context.getString(R.string.upload_files_max_size, maxUploadSizeAllowedMB)
+
+            val fileSizeMessage = NCWThemeUtils.getThemeData()?.otherlocalized?.upload_files_maximum_size
+            val messageIssue = if (fileSizeMessage != null) {
+                String.format(fileSizeMessage, maxUploadSizeAllowedMB)
+            } else {
+                context.getString(R.string.upload_files_max_size, maxUploadSizeAllowedMB)
+            }
             onValidationFailed(messageIssue)
             return false
         }

@@ -67,6 +67,8 @@ class NCWEndChatBottomSheet(
         val tvSendTranscript=view.findViewById<TextView>(R.id.tvSendTranscript)
         val tvDownload=view.findViewById<TextView>(R.id.tvDownload)
         val tvErrorEmail = view.findViewById<TextView>(R.id.tvErrorEmail)
+        val tvEmail = view.findViewById<TextView>(R.id.tvEmail)
+        tvEmail.text= NCWThemeUtils.getThemeData()?.otherlocalized?.email ?: getString(R.string.email)
 
         tvTitle.text= NCWThemeUtils.getThemeData()?.otherlocalized?.close_chat ?: getString(R.string.close_chat)
         rbReturnLater.text= NCWThemeUtils.getThemeData()?.otherlocalized?.return_later ?: getString(R.string.return_later)
@@ -111,7 +113,7 @@ class NCWEndChatBottomSheet(
                 } else {
                     NCWThemeUtils.createErrorDrawable(emailEditText)
                     tvErrorEmail.visibility = View.VISIBLE
-                    tvErrorEmail.text = getString(R.string.please_provide_valid_email)
+                    tvErrorEmail.text =  NCWThemeUtils.getThemeData()?.otherlocalized?.please_provide_valid_email ?:getString(R.string.please_provide_valid_email)
                     enableButton(btnConfirm, false)
                 }
             }

@@ -203,7 +203,7 @@ class NCWFormAdapter(
                             }
                         } else if (component.additionalSettings["Required"]?.value == true) {
                             updateErrorView(
-                                itemView.context.getString(R.string.field_required),
+                                NCWThemeUtils.getThemeData()?.otherlocalized?.this_field_is_required ?:itemView.context.getString(R.string.field_required),
                                 true,
                                 editText
                             )
@@ -312,7 +312,7 @@ class NCWFormAdapter(
                         } else if (component.additionalSettings["Required"]?.value == true) {
                             if (errorTextView.text.isEmpty()) {
                                 updateErrorView(
-                                    itemView.context.getString(R.string.field_required),
+                                    NCWThemeUtils.getThemeData()?.otherlocalized?.this_field_is_required ?:itemView.context.getString(R.string.field_required),
                                     true,
                                     editText
                                 )
@@ -575,8 +575,19 @@ class NCWFormAdapter(
                                 selectedItems.remove(option)
                             }
                             selectedText.text = when (selectedItems.size) {
-                                0 -> "Select"
-                                else -> "${selectedItems.size} items selected"
+                                0 -> NCWThemeUtils.getThemeData()?.otherlocalized?.select
+                                    ?: itemView.context.getString(R.string.select)
+                                else -> {
+                                    val itemSelectedTemplate = NCWThemeUtils.getThemeData()?.otherlocalized?._item_selected
+                                    if (itemSelectedTemplate != null) {
+                                        String.format(itemSelectedTemplate.replace("%@", "%d"), selectedItems.size)
+                                    } else {
+                                        itemView.context.getString(
+                                            R.string.items_selected,
+                                            selectedItems.size
+                                        )
+                                    }
+                                }
                             }
                             NCWThemeUtils.setBotTextColor(selectedText)
                             inputValues[component.id] =
@@ -615,7 +626,7 @@ class NCWFormAdapter(
             }
 
             selectedDropDown?.let { value ->
-                if (component.subType == "checkbox") {
+               /* if (component.subType == "checkbox") {
                     val selectedCount = value.split(",").count { it.isNotBlank() }
                     selectedText.text = if (selectedCount > 0) {
                         "$selectedCount items selected"
@@ -624,7 +635,26 @@ class NCWFormAdapter(
                     }
                 } else {
                     selectedText.text = value
+                }*/
+                if (component.subType == "checkbox") {
+                    val selectedCount = value?.split(",")?.count { it.isNotBlank() } ?: 0
+
+                    val itemSelectedTemplate = NCWThemeUtils.getThemeData()?.otherlocalized?._item_selected
+                    val selectedMessage = if (selectedCount > 0) {
+                        if (itemSelectedTemplate != null) {
+                            String.format(itemSelectedTemplate.replace("%@", "%d"), selectedCount)
+                        } else {
+                            itemView.context.getString(R.string.items_selected, selectedCount)
+                        }
+                    } else {
+                        itemView.context.getString(R.string.select)
+                    }
+
+                    selectedText.text = selectedMessage
+                } else {
+                    selectedText.text = value
                 }
+
             }
 
 
@@ -1118,7 +1148,7 @@ class NCWFormAdapter(
         ) {
             addSpaceToContainer(5)
             val btnSubmit = TextView(context).apply {
-                text = "Submit"
+                text = NCWThemeUtils.getThemeData()?.otherlocalized?.submit ?:itemView.context.getString(R.string.submit)
                 id = View.generateViewId()
                 gravity = Gravity.CENTER
                 setPadding(0, 30, 0, 30)
@@ -1521,7 +1551,7 @@ class NCWFormAdapter(
                                     if (editText.text.isNullOrBlank()) {
                                         createErrorDrawable(editText)
                                         errorTextView.visibility = View.VISIBLE
-                                        errorTextView.text = "This field is required"
+                                        errorTextView.text = NCWThemeUtils.getThemeData()?.otherlocalized?.this_field_is_required ?:itemView.context.getString(R.string.field_required)
                                         isValid = false
                                     } else {
 
@@ -1547,7 +1577,7 @@ class NCWFormAdapter(
                                     val errorTextView = value.errorTextView
                                     if (editText.text.isNullOrEmpty()) {
                                         errorTextView.visibility = View.VISIBLE
-                                        errorTextView.text = "This field is required"
+                                        errorTextView.text = NCWThemeUtils.getThemeData()?.otherlocalized?.this_field_is_required ?:itemView.context.getString(R.string.field_required)
                                         createErrorDrawable(value.container)
                                         isValid = false // Set to false only if there's an error
                                     } else {
@@ -1571,7 +1601,7 @@ class NCWFormAdapter(
 
                                     if (radioGroup.checkedRadioButtonId == -1) {
                                         errorTextView.visibility = View.VISIBLE
-                                        errorTextView.text = "This field is required"
+                                        errorTextView.text = NCWThemeUtils.getThemeData()?.otherlocalized?.this_field_is_required ?:itemView.context.getString(R.string.field_required)
                                         isValid = false
                                     } else {
                                         errorTextView.visibility = View.GONE
@@ -1613,7 +1643,7 @@ class NCWFormAdapter(
                                     val errorTextView = value.errorTextView
                                     if (selectedValue.isBlank()) {
                                         errorTextView.visibility = View.VISIBLE
-                                        errorTextView.text = "This field is mandatory"
+                                        errorTextView.text = NCWThemeUtils.getThemeData()?.otherlocalized?.this_field_is_required ?:itemView.context.getString(R.string.field_required)
                                         isValid = false
                                     } else {
                                         errorTextView.visibility = View.GONE

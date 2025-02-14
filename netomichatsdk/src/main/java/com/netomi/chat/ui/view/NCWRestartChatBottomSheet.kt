@@ -71,6 +71,9 @@ class NCWRestartChatBottomSheet(
         val tvSendTranscript = dialogView.findViewById<TextView>(R.id.tvSendTranscript)
         val tvDownload = dialogView.findViewById<TextView>(R.id.tvDownload)
         val tvErrorEmail = dialogView.findViewById<TextView>(R.id.tvErrorEmail)
+        val tvEmail = dialogView.findViewById<TextView>(R.id.tvEmail)
+
+
 
         emailEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -86,7 +89,7 @@ class NCWRestartChatBottomSheet(
                 } else {
                     createErrorDrawable(emailEditText)
                     tvErrorEmail.visibility = View.VISIBLE
-                    tvErrorEmail.text = getString(R.string.please_provide_valid_email)
+                    tvErrorEmail.text =  NCWThemeUtils.getThemeData()?.otherlocalized?.please_provide_valid_email ?:getString(R.string.please_provide_valid_email)
                     enableButton(btnConfirm, false)
                 }
             }
@@ -117,7 +120,8 @@ class NCWRestartChatBottomSheet(
         tvSubtitle.text = ncwShowWarning.warningText ?: getString(R.string.confirm_restart_chat)
         btnConfirm.text = ncwShowWarning.restartButtonText ?: getString(R.string.restart_chat)
         btnCancel.text = ncwShowWarning.cancelButtonText ?: getString(R.string.cancel)
-
+        tvEmail.text= NCWThemeUtils.getThemeData()?.otherlocalized?.email ?: getString(R.string.email)
+        tvDownload.text= NCWThemeUtils.getThemeData()?.otherlocalized?.download ?: getString(R.string.download)
 
 
         NCWThemeUtils.createRoundedDrawable(btnConfirm)

@@ -179,7 +179,7 @@ class NCWSurveyBottomSheet(
 
         view?.findViewById<TextView>(R.id.closeButton)?.let { closeButton ->
             NCWThemeUtils.createRoundedDrawableClose(closeButton)
-            closeButton.text = if (from == TYPE_SUBMITTED_SURVEY) "Close" else "Skip"
+            closeButton.text = if (from == TYPE_SUBMITTED_SURVEY) NCWThemeUtils.getThemeData()?.otherlocalized?.close ?:getString(R.string.close) else NCWThemeUtils.getThemeData()?.otherlocalized?.skip ?:getString(R.string.skip)
 
             closeButton.setOnClickListener {
                 if (from == TYPE_SUBMITTED_SURVEY) {

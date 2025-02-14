@@ -42,6 +42,7 @@ val not_sent_tap_to_retry: String = "Not sent, Tap to retry",
 val thank_you: String = "Thank You",
 val for_completing_the_survey: String = "for completing the survey",
 val view_response: String = "View response",
+
 val click_to_upload: String = "Click to upload",
 val format: String = "Format: %@",
 val this_field_is_required: String = "This field is required",

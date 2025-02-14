@@ -346,9 +346,9 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                 idleTimeoutMillis = it,
                 onTimeout = {
                     handleSessionTimeout(
-                        getString(R.string.session_timeout),
-                        getString(R.string.your_session_has_expired_due_to_inactivity),
-                        getString(R.string.ok),
+                        NCWThemeUtils.getThemeData()?.otherlocalized?.session_timeout ?:getString(R.string.session_timeout),
+                        NCWThemeUtils.getThemeData()?.otherlocalized?.your_session_has_expired_due_to_inactivity?:getString(R.string.your_session_has_expired_due_to_inactivity),
+                        NCWThemeUtils.getThemeData()?.otherlocalized?.okay ?:getString(R.string.ok),
                         SESSION
                     )
                 }
@@ -726,9 +726,9 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         themeData?.OAUTH2?.logoutActionKeys?.let { logoutActionKeys ->
             if (logoutActionKeys.any { key -> content?.contains(key, ignoreCase = true) == true }) {
                 handleSessionTimeout(
-                    getString(R.string.logout),
-                    getString(R.string.you_have_been_logged_out),
-                    getString(R.string.ok),
+                    NCWThemeUtils.getThemeData()?.otherlocalized?.logout ?:getString(R.string.logout),
+                    NCWThemeUtils.getThemeData()?.otherlocalized?.you_have_been_logged_out ?:getString(R.string.you_have_been_logged_out),
+                    NCWThemeUtils.getThemeData()?.otherlocalized?.okay ?:getString(R.string.ok),
                     LOGOUT
                 )
                 return true
@@ -1302,7 +1302,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             when (status) {
 
                 NCWConnectionStatus.CONNECTING.toString() -> {
-                    connectionHeader.text = getString(R.string.connecting)
+                    connectionHeader.text = NCWThemeUtils.getThemeData()?.otherlocalized?.connecting
+                        ?:getString(R.string.connecting)
                     connectionHeader.setBackgroundColor(Color.YELLOW)
                     connectionHeader.setTextColor(Color.BLACK)
                     connectionHeader.visibility = View.VISIBLE
@@ -1310,7 +1311,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                 }
 
                 NCWConnectionStatus.CONNECTED.toString() -> {
-                    connectionHeader.text = getString(R.string.connected)
+                    connectionHeader.text = NCWThemeUtils.getThemeData()?.otherlocalized?.connected
+                        ?:getString(R.string.connected)
                     connectionHeader.setBackgroundColor(Color.GREEN)
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
@@ -2346,9 +2348,9 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     private fun showLimitExceedPopup(messageIssue: String) {
 
         handleSessionTimeout(
-            getString(R.string.limit_exceed),
+            NCWThemeUtils.getThemeData()?.otherlocalized?.limit_exceed ?: getString(R.string.limit_exceed),
             messageIssue,
-            getString(R.string.okay),
+            NCWThemeUtils.getThemeData()?.otherlocalized?.okay ?:getString(R.string.okay),
             SIZE_LIMIT
         )
     }
