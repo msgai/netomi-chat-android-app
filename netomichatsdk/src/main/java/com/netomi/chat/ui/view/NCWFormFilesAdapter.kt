@@ -1,5 +1,8 @@
 package com.netomi.chat.ui.view
 
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.UnderlineSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -31,6 +34,8 @@ class NCWFormFilesAdapter(
         val progressBar: ProgressBar = itemView.findViewById(R.id.progress_loader)
         val constRetry: ConstraintLayout = itemView.findViewById(R.id.constRetry)
         val txtCancel: TextView = itemView.findViewById(R.id.txtCancel)
+        val tvConnectionError: TextView = itemView.findViewById(R.id.tvConnectionError)
+        val tvRetry: TextView = itemView.findViewById(R.id.tvRetry)
 
 
     }
@@ -48,6 +53,18 @@ class NCWFormFilesAdapter(
         NCWThemeUtils.setUserConfigTextColor(holder.tvDocName)
         NCWThemeUtils.setTimeStampColor(holder.tvDocType)
         NCWThemeUtils.createStrokeDrawable(holder.txtCancel)
+        val retryText = NCWThemeUtils.getThemeData()?.otherlocalized?.retry
+            ?: holder.itemView.context.getString(R.string.retry)
+        val spannableString = SpannableString(retryText)
+        spannableString.setSpan(UnderlineSpan(), 0, retryText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        holder.tvRetry.text = spannableString
+
+
+
+        holder.tvConnectionError.text=NCWThemeUtils.getThemeData()?.otherlocalized?.connection_error ?:holder.itemView.context.getString(R.string.connection_error)
+        holder.txtCancel.text=NCWThemeUtils.getThemeData()?.otherlocalized?.cancel ?:holder.itemView.context.getString(R.string.cancel)
+
         with(holder) {
             if (item.fileUrl != null) {
                 icDelete.visibility = if (isClickable) View.VISIBLE else View.GONE

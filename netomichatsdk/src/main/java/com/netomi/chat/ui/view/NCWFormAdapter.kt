@@ -584,7 +584,7 @@ class NCWFormAdapter(
                                     } else {
                                         itemView.context.getString(
                                             R.string.items_selected,
-                                            selectedItems.size
+                                            selectedItems.size.toString()
                                         )
                                     }
                                 }
@@ -644,7 +644,7 @@ class NCWFormAdapter(
                         if (itemSelectedTemplate != null) {
                             String.format(itemSelectedTemplate.replace("%@", "%d"), selectedCount)
                         } else {
-                            itemView.context.getString(R.string.items_selected, selectedCount)
+                            itemView.context.getString(R.string.items_selected, selectedCount.toString())
                         }
                     } else {
                         itemView.context.getString(R.string.select)
@@ -951,8 +951,16 @@ class NCWFormAdapter(
             NCWThemeUtils.setTimeStampColor(formatHint)
             if (component.config?.isShowAttachmentTypesEnabled == true) {
                 formatHint.visibility = View.VISIBLE
-                formatHint.text =
-                    "Format: ${component.config?.attachmentTypes?.joinToString(", ") ?: ""}"
+                val formatTemplate = NCWThemeUtils.getThemeData()?.otherlocalized?.format
+                val formatText = if (formatTemplate != null) {
+                    String.format(formatTemplate.replace("%@", "%s"), component.config?.attachmentTypes?.joinToString(", ") ?: "")
+                } else {
+                    itemView.context.getString(
+                        R.string.format,
+                        component.config?.attachmentTypes?.joinToString(", ") ?: ""
+                    )
+                }
+                formatHint.text = formatText
             } else {
                 formatHint.visibility = View.GONE
             }
@@ -1376,7 +1384,7 @@ class NCWFormAdapter(
 
 
             val successMessage = TextView(context).apply {
-                text = "Submitted"
+                text =  NCWThemeUtils.getThemeData()?.otherlocalized?.connecting?:context.getString(R.string.submitted)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
                 setTextColor(ContextCompat.getColor(context, R.color.black))
                 gravity = Gravity.CENTER_VERTICAL
