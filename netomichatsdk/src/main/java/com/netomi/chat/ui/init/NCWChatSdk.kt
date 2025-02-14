@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.netomi.chat.R
+import com.netomi.chat.model.language.NCWOtherLocalized
 import com.netomi.chat.model.theme.light_theme.NCWBotConfig
 import com.netomi.chat.model.theme.light_theme.NCWBubbleConfig
 import com.netomi.chat.model.theme.light_theme.NCWChatWindowConfig
@@ -102,6 +103,9 @@ object NCWChatSdk {
             botRefId,
             onThemeReceived = { themeResponse ->
                 themeResponse?.let {
+                    if (it.otherlocalized == null) {
+                        it.otherlocalized = NCWOtherLocalized()
+                    }
                     NCWThemeUtils.setThemeData(it)
                     Log.d("NCWChatSdk", "Theme data stored: $it")
                     onComplete?.invoke()

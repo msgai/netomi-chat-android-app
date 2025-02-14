@@ -143,6 +143,7 @@ class NCWChatAdapter(
           senderVideoCard.setOnClickListener { chatActionCallback.onMediaClick(message) }
           requestDocCard.setOnClickListener { chatActionCallback.onMediaClick(message) }
           tvRetry.visibility=if(message.isRetry) View.VISIBLE else View.GONE
+          tvRetry.text=NCWThemeUtils.getThemeData()?.otherlocalized?.not_sent_tap_to_retry ?:itemView.context.getString(R.string.not_sent_tap_to_retry)
           tvRetry.setOnClickListener { chatActionCallback.onRetryClicked(message) }
 
       }
@@ -307,6 +308,10 @@ class NCWChatAdapter(
             NCWThemeUtils.setBotTextColor(tvComplete)
             NCWThemeUtils.setBotTextColor(tvThank)
             NCWThemeUtils.setBotTextColor(tvViewResponse)
+
+            tvThank.text=NCWThemeUtils.getThemeData()?.otherlocalized?.thank_you ?:itemView.context.getString(R.string.thank_you)
+            tvComplete.text=NCWThemeUtils.getThemeData()?.otherlocalized?.for_completing_the_survey ?:itemView.context.getString(R.string.for_completing_the_survey)
+            tvViewResponse.text=NCWThemeUtils.getThemeData()?.otherlocalized?.view_response ?:itemView.context.getString(R.string.view_response)
             constRowEvent.setOnClickListener {
                 callBackSurvey(message)
             }

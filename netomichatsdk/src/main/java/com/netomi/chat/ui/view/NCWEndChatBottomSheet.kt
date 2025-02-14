@@ -67,6 +67,19 @@ class NCWEndChatBottomSheet(
         val tvSendTranscript=view.findViewById<TextView>(R.id.tvSendTranscript)
         val tvDownload=view.findViewById<TextView>(R.id.tvDownload)
         val tvErrorEmail = view.findViewById<TextView>(R.id.tvErrorEmail)
+        val tvEmail = view.findViewById<TextView>(R.id.tvEmail)
+        tvEmail.text= NCWThemeUtils.getThemeData()?.otherlocalized?.email ?: getString(R.string.email)
+
+        tvTitle.text= NCWThemeUtils.getThemeData()?.otherlocalized?.close_chat ?: getString(R.string.close_chat)
+        rbReturnLater.text= NCWThemeUtils.getThemeData()?.otherlocalized?.return_later ?: getString(R.string.return_later)
+        tvSubTxtReturn.text= NCWThemeUtils.getThemeData()?.otherlocalized?.chat_session_will_be_saved ?: getString(R.string.chat_session_will_be_saved)
+        rbEndChat.text= NCWThemeUtils.getThemeData()?.otherlocalized?.end_chat ?: getString(R.string.end_chat)
+        tvSubTxtEnd.text= NCWThemeUtils.getThemeData()?.otherlocalized?.chat_will_end_you_wont_able_to_resume_later ?: getString(R.string.chat_will_end_you_wont_able_to_resume_later)
+        tvTranscript.text= NCWThemeUtils.getThemeData()?.otherlocalized?.transcripts ?: getString(R.string.transcripts)
+        tvSendTranscript.text= NCWThemeUtils.getThemeData()?.otherlocalized?.send_transcript ?: getString(R.string.send_transcript)
+        tvDownload.text= NCWThemeUtils.getThemeData()?.otherlocalized?.download ?: getString(R.string.download)
+        btnConfirm.text= NCWThemeUtils.getThemeData()?.otherlocalized?.confirm ?: getString(R.string.confirm)
+
 
         NCWThemeUtils.setCheckBoxColor(checkboxTranscript)
         NCWThemeUtils.applyButtonBackgroundWithCorners(btnConfirm, isSelected = true)
@@ -100,7 +113,7 @@ class NCWEndChatBottomSheet(
                 } else {
                     NCWThemeUtils.createErrorDrawable(emailEditText)
                     tvErrorEmail.visibility = View.VISIBLE
-                    tvErrorEmail.text = getString(R.string.please_provide_valid_email)
+                    tvErrorEmail.text =  NCWThemeUtils.getThemeData()?.otherlocalized?.please_provide_valid_email ?:getString(R.string.please_provide_valid_email)
                     enableButton(btnConfirm, false)
                 }
             }

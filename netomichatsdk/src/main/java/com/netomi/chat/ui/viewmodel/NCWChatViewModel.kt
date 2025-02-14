@@ -3,8 +3,6 @@ package com.netomi.chat.ui.viewmodel
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.netomi.chat.data.repository.NCWChatRepository
 import com.netomi.chat.model.GetConversationPayload
@@ -20,6 +18,7 @@ import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEndChatResponse
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackResponse
+import com.netomi.chat.model.language.LanguageResponse
 import com.netomi.chat.model.media_payload.MultiFileModel
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.NCWWebhookPayload
@@ -118,6 +117,10 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
 
     private val _errorFile = NCWSingleLiveEvent<NCWSignedUrlPayload?>()
     val errorFile get() = _errorFile
+
+    private val _getLanguage = NCWSingleLiveEvent<NCWState<LanguageResponse>>()
+    val getLanguage get() = _getLanguage
+
     init {
         loadChatHistory()
     }
@@ -433,6 +436,19 @@ Log.e("DataaResposne","response"+response)
         }
 
     }
+
+    fun getLanguageStrings(botRefId: String,code:String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = chatRepository.getLanguageStrings(botRefId,code)
+
+            withContext(Dispatchers.Main) {
+                _getLanguage.value = response
+            }
+        }
+
+    }
+
+
 
 
 

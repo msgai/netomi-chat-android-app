@@ -124,7 +124,7 @@
                 android:id="@+id/tvEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Email"
+                android:text="@string/email"
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
                 android:textStyle="bold"

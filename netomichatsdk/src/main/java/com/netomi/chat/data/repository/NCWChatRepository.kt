@@ -17,6 +17,7 @@ import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEndChatResponse
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackResponse
+import com.netomi.chat.model.language.LanguageResponse
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.NCWWebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
@@ -379,6 +380,30 @@ class NCWChatRepository(private val context: Context) : NCWBaseService() {
 
         }
     }
+
+    suspend fun getLanguageStrings(botRefId: String,code:String): NCWState<LanguageResponse> {
+        return try {
+            val response = apiInterface.getLanguageStrings(botRefId,code)
+            if (response.isSuccessful && response.body() != null) {
+                NCWState.success(data = response.body()!!, NCWRoutes.ROUTE_GET_LANGUAGE)
+            } else {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
+                    NCWState.error(parseError(errorBody), code = response.code())
+
+
+                } else {
+                    NCWState.error(mapApiException(response.code()), code = response.code())
+
+                }
+            }
+        } catch (e: Exception) {
+            NCWState.error(e.message.toString(), code = 500)
+
+        }
+    }
+
+
 }
 
 

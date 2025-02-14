@@ -11,6 +11,7 @@ import com.netomi.chat.model.endchat.NCWEndChatRequest
 import com.netomi.chat.model.endchat.NCWEndChatResponse
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest
 import com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackResponse
+import com.netomi.chat.model.language.LanguageResponse
 import com.netomi.chat.model.media_payload.NCWSignedUrlPayload
 import com.netomi.chat.model.messages.NCWWebhookPayload
 import com.netomi.chat.model.mqtt.MQTTCredentialsResponse
@@ -25,6 +26,7 @@ import com.netomi.chat.utils.NCWRoutes.ROUTE_END_CHAT
 
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_CHAT
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_CONVERSATION_ID
+import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_LANGUAGE
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_MQTT_CREDENTIALS
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_PRESIGNED_URL
 import com.netomi.chat.utils.NCWRoutes.ROUTE_GET_SURVEY_RULE
@@ -190,6 +192,19 @@ interface NCWApiInterface {
 
     @POST(ROUTE_SEND_TRANSCRIPT)
     suspend fun sendTranscript(@Body payload: NCWEmailRequest): Response<NCWSendMessageResponse>
+
+
+
+    @GET(ROUTE_GET_LANGUAGE)
+    suspend fun getLanguageStrings(
+        @Path("botRefId") botRefId: String,
+        @Path("code") code: String,
+        @Header("Origin") origin: String="https://aistudio-qa.netomi.com",
+        @Header("Referer") referer: String="https://aistudio-qa.netomi.com",
+    ): Response<LanguageResponse>
+
+
+
 
 
 

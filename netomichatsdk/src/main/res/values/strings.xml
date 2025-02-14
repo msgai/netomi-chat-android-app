@@ -17,6 +17,9 @@
     <string name="okay">Okay</string>
     <string name="upload_file_max_size">Upload a file (maximum size: %1$s)</string>
     <string name="upload_files_max_size">Upload a file(s) (maximum size: %1$s)</string>
+    <string name="selected_files_type_is_not_supported">The selected file type is not supported. Please choose a supported file type such as: %1$s.</string>
+
+
     <string name="select">Select</string>
     <string name="start_typing">Start Typing</string>
     <string name="additional_feedback">Additional Feedback</string>
@@ -52,6 +55,15 @@
     <string name="download">Download</string>
     <string name="please_provide_valid_email">Please provide valid email</string>
     <string name="send_transcript">Send Transcript</string>
-
+    <string name="camera">Camera</string>
+    <string name="upload_from_gallery">Upload from Gallery</string>
+    <string name="attach_from_device">Attach from device</string>
+    <string name="chat_session_will_be_saved">Chat session will be saved and you can continue the conversation from where you left.</string>
+    <string name="chat_will_end_you_wont_able_to_resume_later">Chat will end and you won\'t be able to resume later.</string>
+    <string name="close">Close</string>
+    <string name="thank_you">Thank You</string>
+    <string name="for_completing_the_survey">for completing the survey</string>
+    <string name="items_selected">%1$s items selected</string>
+    <string name="email">Email</string>
 
 </resources>
