@@ -147,6 +147,8 @@ class NCWSurveyBottomSheet(
 
             }
         })
+        edtAdditionalFeedback.hint=NCWThemeUtils.getThemeData()?.otherlocalized?.start_typing?:getString(R.string.start_typing)
+
     }
 
     private fun setupRadioGroup() {

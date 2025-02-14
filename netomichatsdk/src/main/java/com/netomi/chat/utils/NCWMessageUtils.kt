@@ -106,7 +106,7 @@ object NCWMessageUtils {
 
         // Check if the file extension is supported
         if (fileExtension == null || fileExtension !in supportedExtensions) {
-            val message = context.getString(R.string.unsupported_file)
+            val message =NCWThemeUtils.getThemeData()?.otherlocalized?.unsupported_file_format ?:context.getString(R.string.unsupported_file)
            // val description = "The selected file type is not supported. Please choose a supported file type such as: $supportedExtensions."
 
             val messageTemplate = NCWThemeUtils.getThemeData()?.otherlocalized?.selected_files_type_is_not_supported
