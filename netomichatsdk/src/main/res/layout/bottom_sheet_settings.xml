@@ -161,48 +161,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constSound" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constDownload"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="8dp"
-        android:layout_marginTop="10dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/viewLineSound">
 
-        <ImageView
-            android:id="@+id/icon_download"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="@string/download_transcript"
-            android:src="@drawable/ic_download"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tvDownload"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="@string/download_transcript"
-            android:textSize="14sp"
-            android:textColor="@color/black"
-            app:layout_constraintBottom_toBottomOf="@id/icon_download"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/icon_download"
-            app:layout_constraintTop_toTopOf="@id/icon_download" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <View
-        android:id="@+id/viewLineDownload"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginHorizontal="8dp"
-        android:background="@color/view_line_color"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constDownload" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constRestart"
@@ -211,7 +170,7 @@
         android:layout_marginHorizontal="8dp"
         android:layout_marginTop="10dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/viewLineDownload">
+        app:layout_constraintTop_toBottomOf="@id/viewLineSound">
 
         <ImageView
             android:id="@+id/icon_restart"
@@ -237,5 +196,10 @@
             app:layout_constraintStart_toEndOf="@id/icon_restart"
             app:layout_constraintTop_toTopOf="@id/icon_restart" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        app:layout_constraintTop_toBottomOf="@+id/constRestart" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
