@@ -2,6 +2,7 @@ package com.netomi.chat.ui.view
 
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,11 +14,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
 import com.netomi.chat.model.theme.NCWLanguage
+import com.netomi.chat.model.theme.NCWMultilingual
 import com.netomi.chat.model.theme.NCWQuickMenuOption
 import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWLanguageBottomSheet(
-    private val languageMenuOptions: List<NCWLanguage>,
+    private val languageMenuOptions: NCWMultilingual,
     private val onLanguageClicked: (NCWLanguage) -> Unit,
 ) : BottomSheetDialogFragment() {
 
@@ -53,8 +55,17 @@ class NCWLanguageBottomSheet(
         recyclerLanguageMenu.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        val carouselAdapter = NCWLanguageAdapter(languageMenuOptions) {
+        if (languageMenuOptions.selectedCode==null){
+            languageMenuOptions.selectedCode="en"
+        }
+       val languageOptionList= languageMenuOptions.languages
+        languageOptionList.forEach {
+            it.isSelected = it.code == languageMenuOptions.selectedCode
+        }
+
+        val carouselAdapter = NCWLanguageAdapter(languageOptionList) {
             if (it != null) {
+
                 onLanguageClicked(it)
                 dismiss()
             }

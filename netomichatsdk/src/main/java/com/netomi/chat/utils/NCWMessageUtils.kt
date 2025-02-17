@@ -62,7 +62,7 @@ object NCWMessageUtils {
             val message = NCWThemeUtils.getThemeData()?.otherlocalized?.unsupported_file_format ?:context.getString(R.string.unsupported_file)
             val messageTemplate = NCWThemeUtils.getThemeData()?.otherlocalized?.selected_files_type_is_not_supported
             val description = if (messageTemplate != null) {
-                String.format(messageTemplate, supportedExtensions)
+                String.format(messageTemplate.replace("%@", "%s"), supportedExtensions)
             } else {
                 context.getString(R.string.selected_files_type_is_not_supported, supportedExtensions)
             }
@@ -110,11 +110,14 @@ object NCWMessageUtils {
            // val description = "The selected file type is not supported. Please choose a supported file type such as: $supportedExtensions."
 
             val messageTemplate = NCWThemeUtils.getThemeData()?.otherlocalized?.selected_files_type_is_not_supported
-            val description = if (messageTemplate != null) {
-                String.format(messageTemplate, supportedExtensions)
+            val formattedTemplate = messageTemplate?.replace("%@", "%s")
+
+            val description = if (formattedTemplate != null) {
+                String.format(formattedTemplate, supportedExtensions)
             } else {
                 context.getString(R.string.selected_files_type_is_not_supported, supportedExtensions)
             }
+
             onValidationFailed(message, description)
             return false
         }
@@ -148,13 +151,14 @@ object NCWMessageUtils {
             mMultipleFile.let { NCWAppUtils.validateMultipleFormAttachment(formComponent, it) }
 
         if (!isValid) {
-
             val fileSizeMessage = NCWThemeUtils.getThemeData()?.otherlocalized?.upload_files_maximum_size
-            val messageIssue = if (fileSizeMessage != null) {
-                String.format(fileSizeMessage, maxUploadSizeAllowedMB)
+            val formattedFileSizeMessage = fileSizeMessage?.replace("%@", "%s")
+            val messageIssue = if (formattedFileSizeMessage != null) {
+                String.format(formattedFileSizeMessage, maxUploadSizeAllowedMB)
             } else {
                 context.getString(R.string.upload_files_max_size, maxUploadSizeAllowedMB)
             }
+
             onValidationFailed(messageIssue)
             return false
         }
