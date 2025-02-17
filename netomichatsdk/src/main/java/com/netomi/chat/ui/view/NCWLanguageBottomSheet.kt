@@ -62,7 +62,6 @@ class NCWLanguageBottomSheet(
         languageOptionList.forEach {
             it.isSelected = it.code == languageMenuOptions.selectedCode
         }
-        Log.e("languageMenuOptions","languageOptionList "+languageOptionList)
 
         val carouselAdapter = NCWLanguageAdapter(languageOptionList) {
             if (it != null) {
