@@ -1262,7 +1262,7 @@ class NCWFormAdapter(
                     }
 
                     item.isCheckboxGroup() -> {
-                        val value = if (item.selectedCheckboxes.isNotEmpty()) {
+                        val value = if (item.selectedCheckboxes != null &&item.selectedCheckboxes.isNotEmpty()) {
                             item.selectedCheckboxes.joinToString(",")
                         } else ""
 
