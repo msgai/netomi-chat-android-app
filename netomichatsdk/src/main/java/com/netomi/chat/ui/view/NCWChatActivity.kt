@@ -1173,9 +1173,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             }
 
             CarouselButtonType.POST_BACK -> {
-                Log.e("NCWCarouselButton","NCWCarouselButton "+it)
-               //it?.payload?.let { it1 -> sendMessage(it1) }
-
+                //it?.payload?.let { it1 -> sendMessage(it1) }
                 if (it != null) {
                     onPostBackClicked(it)
                 }
