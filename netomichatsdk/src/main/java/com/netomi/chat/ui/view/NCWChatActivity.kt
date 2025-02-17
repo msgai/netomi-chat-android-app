@@ -1173,7 +1173,12 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             }
 
             CarouselButtonType.POST_BACK -> {
-                it?.payload?.let { it1 -> sendMessage(it1) }
+                Log.e("NCWCarouselButton","NCWCarouselButton "+it)
+               //it?.payload?.let { it1 -> sendMessage(it1) }
+
+                if (it != null) {
+                    onPostBackClicked(it)
+                }
             }
 
             else -> {
@@ -1182,6 +1187,22 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             }
         }
 
+    }
+
+    private fun onPostBackClicked(option: NCWCarouselButton) {
+
+        if (checkForLogoutAction(option.payload)) return
+
+        val timeStamp = System.currentTimeMillis()
+            val payload = option.payload?.let {
+                checkForInitialMessage()
+                createPayload(it,option.title?:it, timeStamp)
+            }
+        option.title?.let { chatViewModel.sendMessage(it, timeStamp) }
+            if (payload != null) {
+                sendMessageToBot(payload)
+            }
+            messageInputField.text.clear()
     }
 
     /**
