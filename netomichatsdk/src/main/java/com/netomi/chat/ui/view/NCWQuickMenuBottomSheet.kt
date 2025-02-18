@@ -48,7 +48,10 @@ class NCWQuickMenuBottomSheet(
         val recyclerQuickMenu = view.findViewById<RecyclerView>(R.id.recyclerQuickMenu)
         val ivClose = view.findViewById<ImageView>(R.id.ivClose)
         val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
+        tvTitle.text=NCWThemeUtils.getThemeData()?.otherlocalized?.quick_menu ?: getString(R.string.quick_menu)
+
         NCWThemeUtils.setTitleColor(tvTitle)
+
         recyclerQuickMenu.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 

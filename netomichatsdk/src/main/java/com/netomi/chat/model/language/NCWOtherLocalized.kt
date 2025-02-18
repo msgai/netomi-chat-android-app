@@ -61,7 +61,27 @@ val send_transcript: String = "Send Transcript",
 val download: String = "Download",
 val email: String = "Email",
 val enter_email: String = "Enter Email",
-val please_provide_valid_email: String = "Please provide valid email"
+val please_provide_valid_email: String = "Please provide valid email",
+
+val today: String = "Today",
+val yesterday: String = "Yesterday",
+val no_network_connection: String = "No Network Connection",
+val please_check_your_network: String = "Please check your network and try again.",
+val connection_lost: String = "Connection lost",
+val reconnecting: String = "Reconnecting",
+val unknown: String = "Unknown",
+val sources: String = "Sources",
+val has_transfered_the_chat_to: String = "has transferred the chat to",
+val has_joined_the_chat: String = "has joined the chat",
+val has_left_the_chat: String = "has left the chat",
+val service_unavailable: String = "Service unavailable.",
+val request_timed_out: String = "Request timed out.",
+val settings: String = "Settings",
+val quick_menu: String = "Quick Menu",
+val successfully_signed_in: String = "Successfully Signed In!",
+val queue_position: String = "Queue Position",
+
+
 )
 
 

@@ -583,7 +583,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
     private fun hitEndChatAPI() {
         if (!NCWAppUtils.isNetworkAvailable(this)) {
-            NCWAppUtils.showToast(this, getString(R.string.please_check_your_network_and_try_again))
+            NCWAppUtils.showToast(this, NCWThemeUtils.getThemeData()?.otherlocalized?.please_check_your_network ?:getString(R.string.please_check_your_network_and_try_again))
             return
         }
         showProgressBar()
@@ -613,7 +613,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
     private fun hitFeedbackAPI(requestId: String, feedbackValue: String, attachmentIndex: Int) {
         if (!NCWAppUtils.isNetworkAvailable(this)) {
-            NCWAppUtils.showToast(this, getString(R.string.please_check_your_network_and_try_again))
+            NCWAppUtils.showToast(this, NCWThemeUtils.getThemeData()?.otherlocalized?.please_check_your_network ?:getString(R.string.please_check_your_network_and_try_again))
             return
         }
         //showProgressBar()
@@ -708,7 +708,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
      */
     private fun sendMessage(messageContent: String) {
         if (!NCWAppUtils.isNetworkAvailable(this)) {
-            NCWAppUtils.showToast(this, getString(R.string.please_check_your_network_and_try_again))
+            NCWAppUtils.showToast(this, NCWThemeUtils.getThemeData()?.otherlocalized?.please_check_your_network ?:getString(R.string.please_check_your_network_and_try_again))
             return
         }
 
@@ -949,6 +949,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         progressBar = findViewById(R.id.progress_loader)
         cardViewInputBox = findViewById(R.id.cardView)
         cardToday = findViewById(R.id.cardToday)
+        val tvToday= findViewById<TextView>(R.id.tvToday)
+        tvToday.text= NCWThemeUtils.getThemeData()?.otherlocalized?.today ?: getString(R.string.today)
 
         messageInputField.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -1383,7 +1385,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                 }
 
                 NCWConnectionStatus.CONNECTION_LOST.toString() -> {
-                    connectionHeader.text = getString(R.string.connection_lost)
+                    connectionHeader.text =  NCWThemeUtils.getThemeData()?.otherlocalized?.connection_lost ?:getString(R.string.connection_lost)
                     connectionHeader.setBackgroundColor(Color.RED)
                     connectionHeader.setTextColor(Color.WHITE)
                     connectionHeader.visibility = View.VISIBLE
@@ -1392,7 +1394,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                         ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)
                     }
                     else{
-                        NCWAppUtils.showToast(this, getString(R.string.please_check_your_network_and_try_again))
+                        NCWAppUtils.showToast(this, NCWThemeUtils.getThemeData()?.otherlocalized?.please_check_your_network ?:getString(R.string.please_check_your_network_and_try_again))
                     }
                 }
 
@@ -1480,25 +1482,25 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     private fun renderPillsMessage(eventData: EventData?, timestamp: Long) {
         val messagePill = when {
             eventData?.eventType == TYPE_QUEUE_POSITION && eventData.subType == SUB_TYPE_WAIT -> {
-                "Queue Position: ${eventData.eventInfo.queuePosition}"
+                "${NCWThemeUtils.getThemeData()?.otherlocalized?.queue_position}: ${eventData.eventInfo.queuePosition}"
             }
 
             eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_JOIN -> {
                 agentName = eventData.eventInfo?.agentName
                 agentAvatar = eventData.eventInfo?.agentAvatar
                 ownerType = TYPE_AGENT
-                "$agentName has joined the chat"
+                "$agentName ${NCWThemeUtils.getThemeData()?.otherlocalized?.has_joined_the_chat}"
 
             }
 
             eventData?.eventType == TYPE_AGENT_EVENT && eventData.subType == SUB_TYPE_LEAVE -> {
                 agentAvatar = null
                 ownerType = TYPE_BOT
-                "$agentName has left the chat"
+                "$agentName ${NCWThemeUtils.getThemeData()?.otherlocalized?.has_left_the_chat}"
             }
 
             eventData?.eventType == OAUTH && eventData.subType == SUB_TYPE_OAUTH -> {
-                "Successfully Signed In!"
+                NCWThemeUtils.getThemeData()?.otherlocalized?.successfully_signed_in?: getString(R.string.successfully_signed_in)
             }
 
             else -> ""
@@ -1518,14 +1520,14 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             val newAgentName = eventData.eventInfo?.agentName
             val newAgentAvatar = eventData.eventInfo?.agentAvatar
             val message = createPillsMessage(
-                "$agentName has transferred the chat to $newAgentName",
+                "$agentName ${NCWThemeUtils.getThemeData()?.otherlocalized?.has_transfered_the_chat_to} $newAgentName",
                 timestamp
             )
             messageList.add(message)
             agentName = newAgentName
             agentAvatar = newAgentAvatar
             ownerType = TYPE_AGENT
-            val joinMessage = createPillsMessage("$agentName has joined the chat", timestamp)
+            val joinMessage = createPillsMessage("$agentName ${NCWThemeUtils.getThemeData()?.otherlocalized?.has_joined_the_chat}", timestamp)
             messageList.add(joinMessage)
             messageAdapter.notifyDataSetChanged()
             chatRecyclerView.post {
