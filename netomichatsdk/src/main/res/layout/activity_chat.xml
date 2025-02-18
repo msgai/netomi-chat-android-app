@@ -108,7 +108,7 @@
             android:layout_height="wrap_content"
             android:paddingHorizontal="15dp"
             android:paddingVertical="5dp"
-            android:text="Today"
+            android:text="@string/today"
             android:textColor="#859397"
             android:textSize="14sp" />
 

@@ -68,5 +68,7 @@
     <string name="format">Format: %1$s</string>
     <string name="submitted">Submitted</string>
     <string name="unable_to_open_the_link">Unable to open the link: %1$s</string>
+    <string name="today">Today</string>
+    <string name="successfully_signed_in">Successfully Signed In!</string>
 
 </resources>

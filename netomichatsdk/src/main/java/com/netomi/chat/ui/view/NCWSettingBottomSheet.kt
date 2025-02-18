@@ -65,7 +65,7 @@ class NCWSettingBottomSheet(
         val tvSound = view.findViewById<TextView>(R.id.tvSound)
         val textRestart = view.findViewById<TextView>(R.id.text_restart)
 
-        //tvTitle.text= NCWThemeUtils.getThemeData()?.otherlocalized?.se ?: getString(R.string.setting)
+        tvTitle.text= NCWThemeUtils.getThemeData()?.otherlocalized?.settings ?: getString(R.string.setting)
         tvLanguage.text= NCWThemeUtils.getThemeData()?.otherlocalized?.language ?: getString(R.string.language_en)
         tvSound.text= NCWThemeUtils.getThemeData()?.otherlocalized?.sound ?: getString(R.string.sound)
         textRestart.text= NCWThemeUtils.getThemeData()?.otherlocalized?.restart_chat ?: getString(R.string.restart_chat)
