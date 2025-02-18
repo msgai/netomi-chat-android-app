@@ -42,6 +42,7 @@ object NCWThemeUtils
     private var conversationID : String? = null
     private var jwtToken : String? = null
     var userDetails: NCWSignInUserDetails? = null
+    private var deviceToken : String? = null
 
     fun setConversationID(id: String?) {
         conversationID = id
@@ -727,6 +728,15 @@ object NCWThemeUtils
     view.background = drawable
 
 }
+
+    fun setDeviceToken(fireBaseToken: String) {
+         deviceToken=fireBaseToken
+    }
+
+    fun getDeviceToken():String?{
+        return deviceToken
+    }
+
 
 
 }

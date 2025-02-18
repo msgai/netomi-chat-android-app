@@ -25,7 +25,8 @@ object DeviceInfoUtil {
             deviceWidth = displayMetrics.widthPixels,
             deviceHeight = displayMetrics.heightPixels,
             scale = displayMetrics.density,
-            ipAddress=NCWAppUtils.getIPAddress(context)
+            ipAddress=NCWAppUtils.getIPAddress(context),
+            deviceToken = NCWThemeUtils.getDeviceToken()
         )
     }
 
@@ -61,5 +62,6 @@ data class DeviceInfo(
     val deviceWidth: Int,
     val deviceHeight: Int,
     val scale: Float,
-    val ipAddress :String
+    val ipAddress :String,
+    val deviceToken: String?=null,
 )

@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.messaging.FirebaseMessaging
+import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.sampleapplication.R
 import com.netomi.sampleapplication.constant.SharePreferenceConstant
 import com.netomi.sampleapplication.model.Bot
@@ -139,6 +140,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
 
             // Get new FCM registration token
             val token = task.result
+            NCWChatSdk.setDeviceToken(token)
 
             // Log and toast
             //val msg = getString("Token", token)
