@@ -39,6 +39,15 @@
                     android:host="app"
                     android:pathPrefix="/" />
             </intent-filter>
+
+            <intent-filter >
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                    android:host="chatwidget-plugin-dev1.s3.us-east-1.amazonaws.com"
+                    android:pathPrefix="/dev1/app" />
+            </intent-filter>
         </activity>
 
 

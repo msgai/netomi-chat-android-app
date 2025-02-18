@@ -2,6 +2,7 @@ package com.netomi.chat.ui.init
 
 import android.content.Context
 import android.content.Intent
+import android.util.JsonToken
 import android.util.Log
 import com.netomi.chat.R
 import com.netomi.chat.model.language.NCWOtherLocalized
@@ -326,6 +327,10 @@ object NCWChatSdk {
             titleColor = newConfig.titleColor ?: this.titleColor,
             descriptionColor = newConfig.descriptionColor ?: this.descriptionColor,
         )
+    }
+
+    fun setDeviceToken(fireBaseToken: String){
+        NCWThemeUtils.setDeviceToken(fireBaseToken)
     }
 
 
