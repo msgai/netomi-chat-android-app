@@ -422,9 +422,12 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
     private fun setUpLanguageOption() {
         val bottomSheet = themeData?.let {
-            NCWLanguageBottomSheet(it.multilingual.languages) { options ->
+            NCWLanguageBottomSheet(it.multilingual) { options ->
                 Log.e("Option","optyui"+options.code)
-                botRefId?.let { chatViewModel.getLanguageStrings(it,options.code) }
+                botRefId?.let {
+                    themeData?.multilingual?.selectedCode=options.code
+                    chatViewModel.getLanguageStrings(it,options.code)
+                }
             }
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
@@ -1173,7 +1176,10 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             }
 
             CarouselButtonType.POST_BACK -> {
-                it?.payload?.let { it1 -> sendMessage(it1) }
+                //it?.payload?.let { it1 -> sendMessage(it1) }
+                if (it != null) {
+                    onPostBackClicked(it)
+                }
             }
 
             else -> {
@@ -1182,6 +1188,22 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             }
         }
 
+    }
+
+    private fun onPostBackClicked(option: NCWCarouselButton) {
+
+        if (checkForLogoutAction(option.payload)) return
+
+        val timeStamp = System.currentTimeMillis()
+            val payload = option.payload?.let {
+                checkForInitialMessage()
+                createPayload(it,option.title?:it, timeStamp)
+            }
+        option.title?.let { chatViewModel.sendMessage(it, timeStamp) }
+            if (payload != null) {
+                sendMessageToBot(payload)
+            }
+            messageInputField.text.clear()
     }
 
     /**
@@ -2685,7 +2707,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         if (unsupportedFiles.isNotEmpty()) {
             val messageTemplate = NCWThemeUtils.getThemeData()?.otherlocalized?.selected_files_type_is_not_supported
             val subtitle = if (messageTemplate != null) {
-                String.format(messageTemplate, formComponent?.config?.attachmentTypes)
+                String.format(messageTemplate.replace("%@", "%s"), formComponent?.config?.attachmentTypes)
             } else {
                 getString(R.string.selected_files_type_is_not_supported, formComponent?.config?.attachmentTypes)
             }
@@ -3505,10 +3527,11 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
             themeData.initialFlows=languageResponse.initialFlows
             themeData.restartChat=languageResponse.restartChat
             themeData.otherlocalized=languageResponse.otherlocalized
+            themeData.title=languageResponse.title
         }
         languageResponse.otherlocalized?.let { otherlocalized->
             tvBrandName.text=otherlocalized.powered_by_netomi
-
+             headerTextView.text=languageResponse.title
         }
 
 

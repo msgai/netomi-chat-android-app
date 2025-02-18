@@ -31,7 +31,8 @@ class NCWLanguageAdapter(
         val item = items[position]
         holder.tvTitle.text = item.label
         holder.radio.visibility = View.VISIBLE
-        holder.radio.isChecked = (position == 0)
+        holder.radio.isChecked = item.isSelected
+
         NCWThemeUtils.setRadioButtonColor(holder.radio)
         NCWThemeUtils.setTitleColor(holder.tvTitle)
         holder.itemView.setOnClickListener {
