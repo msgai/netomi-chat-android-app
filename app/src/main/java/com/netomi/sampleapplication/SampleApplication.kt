@@ -1,13 +1,21 @@
 package com.netomi.sampleapplication
 
 import android.app.Application
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.netomi.chat.ui.init.NCWChatSdk
+import com.netomi.sampleapplication.utils.AppLifecycleObserver
 
 
 class SampleApplication: Application() {
 
+    companion object{
+        lateinit var appLifecycleObserver: AppLifecycleObserver
+    }
+
     override fun onCreate() {
         super.onCreate()
+        appLifecycleObserver= AppLifecycleObserver()
+        ProcessLifecycleOwner.get().lifecycle.addObserver(appLifecycleObserver)
         //Appinventiv BOT
         //NCWChatSdk.initialize(this,"60e915d0-3eda-4fda-8c50-2da9dc036edf")
 
