@@ -83,20 +83,20 @@ class NCWSettingBottomSheet(
 
 
         val greyColor =
-            context?.let { ContextCompat.getColor(it, R.color.gray) } // Replace with your green color resource
+            context?.let { ContextCompat.getColor(it, R.color.gray) }
         val greenColor =
             context?.let { ContextCompat.getColor(it, R.color.green) }
 
 
         NCWThemeUtils.setTitleColor(tvTitle)
-        switchSound.isChecked=themeData.sound.defaultSound
+        switchSound.isChecked= themeData.sound.isSound == true
 
-        val trackColor = if (themeData.sound.defaultSound) greenColor else greyColor
+        val trackColor = if (themeData.sound.isSound == true) greenColor else greyColor
         switchSound.trackTintList = trackColor?.let { ColorStateList.valueOf(it) }
 
         switchSound.setOnCheckedChangeListener { button, isChecked ->
             if (button.isPressed){
-                themeData.sound.defaultSound=isChecked
+                themeData.sound.isSound=isChecked
                 val trackColor = if (isChecked) greenColor else greyColor
                 switchSound.trackTintList = trackColor?.let { ColorStateList.valueOf(it) }
 

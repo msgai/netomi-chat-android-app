@@ -105,6 +105,7 @@ import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHANNEL_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
 import com.netomi.chat.utils.NCWAppConstant.DATE_FORMAT
+import com.netomi.chat.utils.NCWAppConstant.ENABLED
 import com.netomi.chat.utils.NCWAppConstant.EVENT_WIDGET
 import com.netomi.chat.utils.NCWAppConstant.INFO_EVENT
 import com.netomi.chat.utils.NCWAppConstant.LOGOUT
@@ -270,6 +271,9 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
         // Load theme and config
         themeData = NCWThemeUtils.getThemeData()
+        if (themeData?.sound?.status== ENABLED && themeData?.sound?.isSound == null) {
+            themeData?.sound?.isSound=true
+            }
         agentAvatar = themeData?.mobileConfig?.lightTheme?.botConfig?.botImage
         NCWChatSdk.getUpdateHeaderConfiguration()
         NCWChatSdk.getUpdatedFooterConfiguration()
@@ -3503,13 +3507,12 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
 
 
     private fun playUserSound() {
-        if (themeData?.sound?.defaultSound == true) {
+        if (themeData?.sound?.status== ENABLED && themeData?.sound?.isSound == true) {
             messageSoundPlayer?.playUserSound()
         }
     }
     private fun playBotSound() {
-
-        if (themeData?.sound?.defaultSound == true) {
+        if (themeData?.sound?.status== ENABLED && themeData?.sound?.isSound == true) {
             messageSoundPlayer?.playBotSound()
         }
     }
