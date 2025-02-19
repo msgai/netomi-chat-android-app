@@ -17,39 +17,32 @@
         tools:replace="android:name"
         tools:targetApi="31">
 
-        <activity android:name=".ui.activity.DeepLinkingActivity"
-            android:exported="true"> <!-- Should be true if you want it to handle external intents -->
+        <activity
+            android:name=".ui.activity.DeepLinkingActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
 
-            <!-- Intent filter for handling Universal Link -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https"
                     android:host="demo.netomi.com"
-                    android:pathPrefix="/web/" />
+                    android:pathPrefix="/web" />
             </intent-filter>
 
-            <!-- Intent filter for handling Custom Deep Link -->
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="netomisampleapp"
+
+                <data
+                    android:scheme="netomisampleapp"
                     android:host="app"
                     android:pathPrefix="/" />
             </intent-filter>
-
-            <intent-filter >
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https"
-                    android:host="chatwidget-plugin-dev1.s3.us-east-1.amazonaws.com"
-                    android:pathPrefix="/dev1/app" />
-            </intent-filter>
         </activity>
-
 
 
         <activity
