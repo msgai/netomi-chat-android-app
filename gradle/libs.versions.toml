@@ -16,6 +16,7 @@ retrofit = "2.9.0"
 okhttp = "4.9.3"
 browser = "1.8.0"
 firebaseMessagingKtx = "24.1.0"
+lifecycleProcess = "2.8.7"
 
 [libraries]
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity" }
@@ -39,6 +40,7 @@ retrofit_converter_gson = { group = "com.squareup.retrofit2", name = "converter-
 okhttp_logging_interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
+androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
