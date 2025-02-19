@@ -36,7 +36,7 @@
     <string name="restart">Restart Chat</string>
     <string name="sound">Sound</string>
     <string name="download_transcript">Download Transcript</string>
-    <string name="language_en">Language - EN</string>
+    <string name="language">Language</string>
     <string name="restart_chat">Restart Chat</string>
     <string name="confirm_restart_chat">Are you sure you want to restart the chat? This will clear your conversation and start a new chat.</string>
     <string name="confirm">Confirm</string>
@@ -70,5 +70,8 @@
     <string name="unable_to_open_the_link">Unable to open the link: %1$s</string>
     <string name="today">Today</string>
     <string name="successfully_signed_in">Successfully Signed In!</string>
+    <string name="add">Add</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
 </resources>

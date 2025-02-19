@@ -58,6 +58,7 @@ class NCWLanguageBottomSheet(
         if (languageMenuOptions.selectedCode==null){
             languageMenuOptions.selectedCode="en"
         }
+
        val languageOptionList= languageMenuOptions.languages
         languageOptionList.forEach {
             it.isSelected = it.code == languageMenuOptions.selectedCode

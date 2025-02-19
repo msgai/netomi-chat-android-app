@@ -94,9 +94,12 @@ class NCWSurveyBottomSheet(
         edtAdditionalFeedback = findViewById(R.id.edtAdditionFeedback)
         val tvFeedbackCount = findViewById<TextView>(R.id.tvFeedbackCount)
         val constAdd = findViewById<ConstraintLayout>(R.id.constAdd)
+        val tvAdd = findViewById<TextView>(R.id.tvAdd)
+        tvAdd.text=NCWThemeUtils.getThemeData()?.otherlocalized?.add ?:getString(R.string.add)
         val tvFeedbackTitle = findViewById<TextView>(R.id.tvFeedbackTitle)
         viewSpace = findViewById(R.id.space)
         tvFeedbackCount.visibility = View.GONE
+        tvFeedbackTitle.text=NCWThemeUtils.getThemeData()?.otherlocalized?.add_additional_feedback?:getString(R.string.add_additional_feedback)
 
         if (from == TYPE_SUBMITTED_SURVEY) {
             constAdd.visibility = View.GONE
@@ -158,11 +161,14 @@ class NCWSurveyBottomSheet(
         val radioYes = view?.findViewById<RadioButton>(R.id.radioYes)
         val radioNo = view?.findViewById<RadioButton>(R.id.radioNo)
 
+
         if (radioYes != null) {
             NCWThemeUtils.setRadioButtonUserConfig(radioYes)
+            radioYes.text=NCWThemeUtils.getThemeData()?.otherlocalized?.yes?:getString(R.string.yes)
         }
         if (radioNo != null) {
             NCWThemeUtils.setRadioButtonUserConfig(radioNo)
+            radioNo.text=NCWThemeUtils.getThemeData()?.otherlocalized?.no?:getString(R.string.no)
         }
 
         if (from == TYPE_SUBMITTED_SURVEY) {
@@ -178,6 +184,8 @@ class NCWSurveyBottomSheet(
         NCWThemeUtils.createRoundedDrawableSubmit(submitButton)
         submitButton.setOnClickListener { handleSubmitClick() }
         submitButton.visibility = if (from == TYPE_SUBMITTED_SURVEY) View.GONE else View.VISIBLE
+
+        submitButton.text=NCWThemeUtils.getThemeData()?.otherlocalized?.submit ?:getString(R.string.submit)
 
         view?.findViewById<TextView>(R.id.closeButton)?.let { closeButton ->
             NCWThemeUtils.createRoundedDrawableClose(closeButton)

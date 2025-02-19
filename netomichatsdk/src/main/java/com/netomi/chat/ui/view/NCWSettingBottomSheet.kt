@@ -16,6 +16,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
 import com.netomi.chat.model.theme.NCWShowWarning
 import com.netomi.chat.model.theme.NCWThemeResponse
+import com.netomi.chat.utils.NCWAppConstant.EN
 import com.netomi.chat.utils.NCWAppConstant.ENABLED
 import com.netomi.chat.utils.NCWThemeUtils
 
@@ -66,7 +67,10 @@ class NCWSettingBottomSheet(
         val textRestart = view.findViewById<TextView>(R.id.text_restart)
 
         tvTitle.text= NCWThemeUtils.getThemeData()?.otherlocalized?.settings ?: getString(R.string.setting)
-        tvLanguage.text= NCWThemeUtils.getThemeData()?.otherlocalized?.language ?: getString(R.string.language_en)
+        val languageCode = themeData?.multilingual?.selectedCode?.uppercase() ?: EN
+        val languageText = NCWThemeUtils.getThemeData()?.otherlocalized?.language ?: getString(R.string.language)
+        tvLanguage.text = "$languageText - $languageCode"
+
         tvSound.text= NCWThemeUtils.getThemeData()?.otherlocalized?.sound ?: getString(R.string.sound)
         textRestart.text= NCWThemeUtils.getThemeData()?.otherlocalized?.restart_chat ?: getString(R.string.restart_chat)
 

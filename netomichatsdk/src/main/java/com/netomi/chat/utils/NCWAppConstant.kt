@@ -87,6 +87,9 @@ object NCWAppConstant {
     const val MESSAGE_BACK_TO_BOT="back to bot"
     const val ENABLED="enabled"
     const val BACK_TO_BOT_SYSTEM_EVENT="BACK_TO_BOT_SYSTEM_EVENT"
+    const val EN="EN"
+
+
 
     object RatingType {
         const val STAR = "STAR"
