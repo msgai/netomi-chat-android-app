@@ -212,6 +212,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     private lateinit var connectionHeader: TextView
     private lateinit var progressBar: ProgressBar
     private lateinit var cardToday: ConstraintLayout
+    private lateinit var tvToday:TextView
     private var photoUri: Uri? = null
     private var ncwSdkConfig: NCWHeaderConfig? = null
     private var themeData: NCWThemeResponse? = null
@@ -950,7 +951,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         progressBar = findViewById(R.id.progress_loader)
         cardViewInputBox = findViewById(R.id.cardView)
         cardToday = findViewById(R.id.cardToday)
-        val tvToday= findViewById<TextView>(R.id.tvToday)
+         tvToday= findViewById(R.id.tvToday)
         tvToday.text= NCWThemeUtils.getThemeData()?.otherlocalized?.today ?: getString(R.string.today)
 
         messageInputField.setOnFocusChangeListener { _, hasFocus ->
@@ -3506,7 +3507,6 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
             messageSoundPlayer?.playUserSound()
         }
     }
-
     private fun playBotSound() {
 
         if (themeData?.sound?.defaultSound == true) {
@@ -3535,6 +3535,7 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
         languageResponse.otherlocalized?.let { otherlocalized->
             tvBrandName.text=otherlocalized.powered_by_netomi
              headerTextView.text=languageResponse.title
+            tvToday.text= otherlocalized.today
         }
 
 

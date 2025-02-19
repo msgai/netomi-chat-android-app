@@ -87,14 +87,14 @@
                     android:id="@+id/radioYes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Yes" />
+                    android:text="@string/yes" />
 
                 <RadioButton
                     android:id="@+id/radioNo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:text="No" />
+                    android:text="@string/no" />
             </RadioGroup>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -182,7 +182,7 @@
                 android:id="@+id/tvAdd"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Add"
+                android:text="@string/add"
                 android:textColor="#374E57"
                 android:textSize="14sp"
                 app:layout_constraintStart_toEndOf="@+id/imgAdd"
