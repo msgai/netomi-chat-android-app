@@ -100,6 +100,7 @@ import com.netomi.chat.utils.DownloadHelper
 import com.netomi.chat.utils.MessageSoundPlayer
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppConstant.ARG_MEDIA_URL
+import com.netomi.chat.utils.NCWAppConstant.BACK_TO_BOT_SYSTEM_EVENT
 import com.netomi.chat.utils.NCWAppConstant.BOT_REFERENCE_ID
 import com.netomi.chat.utils.NCWAppConstant.CHANNEL_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
@@ -570,7 +571,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     private fun callBackToBot() {
         if (ownerType== TYPE_AGENT){
             val timeStamp = System.currentTimeMillis()
-            val payload = createPayload(MESSAGE_BACK_TO_BOT, MESSAGE_BACK_TO_BOT, timeStamp)
+            val payload = createPayload(MESSAGE_BACK_TO_BOT, BACK_TO_BOT_SYSTEM_EVENT, timeStamp)
             sendMessageToBot(payload)
 
         }
