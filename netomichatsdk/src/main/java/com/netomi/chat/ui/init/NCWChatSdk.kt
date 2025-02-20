@@ -18,6 +18,9 @@ import com.netomi.chat.utils.Environment
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWThemeUtils
+import com.netomi.chat.utils.analyticsManager.AnalyticsEvents
+import com.netomi.chat.utils.analyticsManager.EventTracker
+import org.json.JSONObject
 
 
 object NCWChatSdk {
@@ -40,6 +43,14 @@ object NCWChatSdk {
             setThemeData()
             fetchAndStoreTheme(context, newBotRefId)
             setConversationEmpty()
+            EventTracker.apply {
+                initMix(context , true)
+                val properties = JSONObject().apply {
+                    put(AnalyticsEvents.BOT_REF_ID, newBotRefId)
+                }
+                trackEvent(AnalyticsEvents.CHAT_SDK_INITIALIZED , properties)
+            }
+
         } else {
             Log.e("NCWChatSdk", "No network available during initialization.")
         }
