@@ -3539,6 +3539,7 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
             tvBrandName.text=otherlocalized.powered_by_netomi
              headerTextView.text=languageResponse.title
             tvToday.text= otherlocalized.today
+            messageInputField.hint=otherlocalized.ask_a_question
         }
 
 
