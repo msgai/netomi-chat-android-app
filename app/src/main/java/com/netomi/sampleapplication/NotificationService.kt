@@ -38,12 +38,12 @@ class NotificationService : FirebaseMessagingService() {
         val htmlBody = remoteMessage.data["body"]
 
         // Convert HTML body to formatted text
-        val formattedText: Spanned = HtmlCompat.fromHtml(htmlBody!!, HtmlCompat.FROM_HTML_MODE_LEGACY)
+        val formattedText: Spanned = HtmlCompat.fromHtml(htmlBody?:"", HtmlCompat.FROM_HTML_MODE_LEGACY)
 
         Log.d(TAG, "Received Notification: Title=$title, Body=$htmlBody")
 
         // Show the notification
-        if (title != null) {
+        if (title != null && !SampleApplication.appLifecycleObserver.isAppInForeground) {
             showNotification(title, formattedText)
         }
     }
