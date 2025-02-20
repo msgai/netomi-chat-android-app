@@ -1384,7 +1384,7 @@ class NCWFormAdapter(
 
 
             val successMessage = TextView(context).apply {
-                text =  NCWThemeUtils.getThemeData()?.otherlocalized?.connecting?:context.getString(R.string.submitted)
+                text =  NCWThemeUtils.getThemeData()?.otherlocalized?.submitted?:context.getString(R.string.submitted)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
                 setTextColor(ContextCompat.getColor(context, R.color.black))
                 gravity = Gravity.CENTER_VERTICAL
