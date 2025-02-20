@@ -109,6 +109,7 @@ dependencies {
     implementation ("com.airbnb.android:lottie:6.6.0")
 
 
+    implementation ("com.mixpanel.android:mixpanel-android:7.+")
 
 
 }

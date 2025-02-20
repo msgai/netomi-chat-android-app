@@ -15,6 +15,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import android.Manifest
 import android.os.Environment
+import com.netomi.chat.utils.analyticsManager.AnalyticsEvents
+import com.netomi.chat.utils.analyticsManager.EventTracker
 
 
 object DownloadHelper {
@@ -37,6 +39,7 @@ object DownloadHelper {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                 if (id == downloadId) {
+                    EventTracker.trackEvent(AnalyticsEvents.TRANSCRIPT_DOWNLOADED)
                     showDownloadNotification(context!!, fileName)
                     context.unregisterReceiver(this) // Unregister receiver
                 }

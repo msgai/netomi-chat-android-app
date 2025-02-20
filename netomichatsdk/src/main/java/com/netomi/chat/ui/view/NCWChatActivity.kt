@@ -158,6 +158,9 @@ import com.netomi.chat.utils.NCWRoutes
 import com.netomi.chat.utils.NCWSingleAlertDialog
 import com.netomi.chat.utils.NCWState
 import com.netomi.chat.utils.NCWThemeUtils
+import com.netomi.chat.utils.analyticsManager.AnalyticsEvents
+import com.netomi.chat.utils.analyticsManager.EventTracker
+import com.netomi.chat.utils.analyticsManager.EventTracker.Companion.createJsonObject
 import com.netomi.chat.utils.toNCWCustomAttributes
 import com.netomi.chat.utils.toNCWUserDetailAttribute
 import kotlinx.coroutines.CoroutineScope
@@ -419,6 +422,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             })
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
+        trackEvent(AnalyticsEvents.QUICK_MENU_OPENED)
     }
 
     private fun setUpLanguageOption() {
@@ -429,6 +433,10 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                     themeData?.multilingual?.selectedCode=options.code
                     chatViewModel.getLanguageStrings(it,options.code)
                 }
+                trackEvent(
+                    AnalyticsEvents.LANGUAGE_CHANGED,
+                    AnalyticsEvents.SELECTED_LANGUAGE to options.label
+                )
             }
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
@@ -450,6 +458,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             })
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
+        trackEvent(AnalyticsEvents.SETTINGS_OPENED)
     }
 
     private fun setIdealSurveyAgain() {
@@ -461,7 +470,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
     private fun showRestartPopUp(ncwShowWarning: NCWShowWarning) {
         handler.removeCallbacks(idleRunnable)
-
+        trackEvent(AnalyticsEvents.RESTART_CHAT_POPUP_SHOWN)
         val bottomSheet=  NCWRestartChatBottomSheet(themeData,ncwShowWarning ,{
                 onRestartAction()
             },{ from,mail->
@@ -480,6 +489,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
 
     private fun onRestartAction() {
+        trackEvent(AnalyticsEvents.RESTART_CHAT_CONFIRMED)
         onRestart = true
         isHistoryChatAvialbale = false
         if (topic != null) {
@@ -546,6 +556,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                      hitEndChatAPI()
                  }*/
     private fun backClicked() {
+          trackEvent(AnalyticsEvents.END_CHAT_POPUP_SHOWN)
         val bottomSheet = NCWEndChatBottomSheet(
             themeData,
             { isEndChat ->
@@ -553,6 +564,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                     callBackToBot()
                     hitEndChatAPI()
                 } else {
+                    trackEvent(AnalyticsEvents.RESUME_LATER_CONFIRMED)
                     NCWThemeUtils.setJwtToken(null)
                     finish()
                 }
@@ -609,6 +621,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             ),
 
             )
+        trackEvent(AnalyticsEvents.END_CHAT_CONFIRMED)
+
     }
 
 
@@ -985,6 +999,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                 chatViewModel.sendMessageAPI(createPayload)
                 addLoader()
                 playUserSound()
+                trackEvent(AnalyticsEvents.FORM_SUBMITTED)
             }
 
         }, {
@@ -1156,6 +1171,10 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
         when (CarouselButtonType.fromValue(it?.type)) {
             CarouselButtonType.WEB -> {
+                trackEvent(
+                    AnalyticsEvents.LAUNCHED_URL,
+                    AnalyticsEvents.LAUNCHED_URL to it?.url.toString()
+                )
                 if (it?.title.equals("Sign In", ignoreCase = false)) {
                     launchCustomChromeTab(it?.url.toString())
                 } else {
@@ -1175,6 +1194,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             }
 
             CarouselButtonType.CALL -> {
+                trackEvent(AnalyticsEvents.REDIRECT_DIALER)
                 makePhoneCall(it?.payload)
             }
 
@@ -1186,6 +1206,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             }
 
             else -> {
+                trackEvent(AnalyticsEvents.ERROR, AnalyticsEvents.ERROR_DETAILS to it)
                 // Handle unknown type (optional)
                 Log.e("Carousel", "Unknown button type: ${it?.type}")
             }
@@ -1559,7 +1580,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                     surveyField = surveyField,
                     TYPE_SHOW_SURVEY,
                     onSubmit = { submitSurvey ->
-
+                        trackEvent(AnalyticsEvents.SURVEY_SUBMITTED)
                         val submitSurveyInfo =
                             submitSurvey.requestBody.eventData.eventInfo.submitSurveyInfo
                         val newMessage = NCWMessage(
@@ -1593,6 +1614,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                         val textSkip =
                             "event://;SKIP_EVENT;resumeWorkflow::value=${isSkipValue}^$^requestId::value=${requestId}"
                         val payload = createPayload(textSkip, label, timeStamp)
+
+                        trackEvent(AnalyticsEvents.SURVEY_SKIPPED)
                        if(isSkipValue) { addLoader() }
                         sendMessageToBot(payload)
                     }
@@ -2221,6 +2244,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
             is NCWState.Error -> {
                 hideProgressBar()
+                trackEvent(AnalyticsEvents.ERROR, AnalyticsEvents.ERROR_DETAILS to response.message)
             }
 
             is NCWState.SendMessageError<*, *> -> {
@@ -2283,7 +2307,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
     // Function to show camera and gallery options
     override fun showMediaOptions() {
-
+        trackEvent(AnalyticsEvents.ATTACHMENT_CLICKED)
         checkNetworkAndExecute {
             val supportedExtensions = when (attachmentType) {
                 TYPE_ATTACHMENT -> themeData?.fileSharing?.list?.map { it.removePrefix(".") }
@@ -3089,6 +3113,11 @@ if (isUpdated) {
 
                 }
 
+                trackEvent(
+                    AnalyticsEvents.ATTACHMENT_UPLOADED,
+                    AnalyticsEvents.ATTACHMENT_URL to response.url,
+                    AnalyticsEvents.ATTACHMENT_TYPE to response.type
+                )
             }
 
             NCWRoutes.ROUTE_END_CHAT -> {
@@ -3206,8 +3235,6 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
         }
 
     }
-
-
 
 
     private fun parseHistoryItems(responses: ArrayList<NCWGenericChannelResponse>) {
@@ -3492,12 +3519,14 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
         Log.e("RequestId ThumbUp", requestId)
         messageAdapter.notifyItemChanged(position)
         hitFeedbackAPI(requestId, "POSITIVE", attachmentIndex)
+        trackEvent(AnalyticsEvents.THUMBS_UP_CLICKED)
     }
 
     override fun onThumbDownClick(requestId: String, position: Int, attachmentIndex: Int) {
         Log.e("RequestId ThumbDown", requestId)
         messageAdapter.notifyItemChanged(position)
         hitFeedbackAPI(requestId, "NEGATIVE", attachmentIndex)
+        trackEvent(AnalyticsEvents.THUMBS_DOWN_CLICKED)
     }
 
 
@@ -3520,6 +3549,7 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
             mail = email,
             from = from
         )
+        trackEvent(AnalyticsEvents.TRANSCRIPT_EMAIL_SENT)
         chatViewModel.sendTranscript(payload)
     }
 
@@ -3556,5 +3586,21 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
                 it1
             )
         } }
+    }
+
+    /**
+     * Tracks an event with optional properties.
+     * @param eventName Name of the event to track.
+     * @param pairs Optional key-value pairs for additional event properties.
+     */
+    private fun trackEvent(eventName: String, vararg pairs: Pair<String, Any?>) {
+        EventTracker.trackEvent(
+            eventName,
+            createJsonObject(
+                conversationID = conversationID.toString(),
+                botRefId = botRefId.toString(),
+                *pairs
+            )
+        )
     }
 }
