@@ -86,7 +86,7 @@ class NCWMessageUtilsTest {
             file,
             listOf("png"),
             context,
-            onValidationFailed = { message, description ->
+            onValidationFailed = { _, _ ->
 
             })
         Assert.assertEquals(true, result)

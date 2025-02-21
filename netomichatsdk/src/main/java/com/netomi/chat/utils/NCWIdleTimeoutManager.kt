@@ -1,7 +1,7 @@
 import android.os.SystemClock
 import android.util.Log
 
-class NCWIdleTimeoutManager(private val idleTimeoutMillis: Long, private val onTimeout: () -> Unit) {
+class NCWIdleTimeoutManager(val idleTimeoutMillis: Long, private val onTimeout: () -> Unit) {
 
     private var lastActiveTime: Long = SystemClock.elapsedRealtime()
 

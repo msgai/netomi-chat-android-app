@@ -2,7 +2,10 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+    id("kotlin-android")
+    id("jacoco")
 }
+
 
 
 android {
@@ -25,6 +28,7 @@ android {
         unitTests.all {
             // Allow mocking final classes
             it.useJUnitPlatform()
+            it.enabled = true
         }
     }
 
@@ -34,6 +38,12 @@ android {
 
 
     buildTypes {
+
+
+        debug {
+            enableAndroidTestCoverage = true
+            enableUnitTestCoverage = true
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -41,6 +51,9 @@ android {
                 "proguard-rules.pro"
             )
         }
+
+
+
     }
     externalNativeBuild {
         cmake {
@@ -57,6 +70,9 @@ android {
     }
 
 
+
+
+
 }
 
 dependencies {
@@ -67,18 +83,32 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.browser)
     //implementation(libs.core.ktx)
-    // Unit Test cases
-    androidTestImplementation ("org.mockito:mockito-android:2.24.5")
-    testImplementation ("junit:junit:4.13.2")
-    androidTestImplementation ("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation ("androidx.test.espresso:espresso-core:3.6.1")
-    testImplementation ("org.mockito:mockito-core:3.4.0")
-    testImplementation ("org.mockito.kotlin:mockito-kotlin:4.0.0")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0")
-    // AndroidX Core Testing for LiveData and InstantTaskExecutorRule
-    testImplementation ("androidx.arch.core:core-testing:2.1.0")
-    testImplementation("org.mockito:mockito-inline:5.2.0")
 
+    // Unit Test cases
+    //  JUnit 5 API (for writing tests)
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
+
+    //  JUnit 5 Engine (to execute tests)
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
+
+    // JUnit Platform Launcher (fixes "Cannot create Launcher" issue)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.9.2")
+
+    // Ensure JUnit 4 is compatible with JUnit 5
+    testImplementation("org.junit.vintage:junit-vintage-engine:5.9.2") {
+        exclude(group = "junit", module = "junit") // Prevents JUnit 4 conflicts
+    }
+
+    androidTestImplementation("org.mockito:mockito-android:2.24.5")
+    testImplementation("junit:junit:4.13.2") // ⚠️ Needed if some tests still use JUnit 4
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    testImplementation("org.mockito:mockito-core:3.4.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0")
+    testImplementation("androidx.arch.core:core-testing:2.1.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+    testImplementation("org.robolectric:robolectric:4.10.1")
 
 
     // ViewModel and LiveData
@@ -113,3 +143,55 @@ dependencies {
 
 
 }
+// JaCoCo Configuration
+jacoco {
+    toolVersion = "0.8.7"
+}
+
+// Exclusion List (Outside android { } block)
+val exclusions = listOf(
+    "**/R.class",
+    "**/R\$*.class",
+    "**/BuildConfig.*",
+    "**/Manifest*.*",
+    "**/*Test*.*",
+    "android/**/*.*"
+)
+
+// Configure JaCoCo for Unit Tests & Android UI Tests
+tasks.withType<Test>().configureEach {
+    extensions.configure(JacocoTaskExtension::class) {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
+// Generate JaCoCo report for both `test` & `androidTest`
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest", "connectedDebugAndroidTest") // Run both tests before report
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val coverageSourceDirs = listOf("src/main/java", "src/main/kotlin")
+
+    sourceDirectories.setFrom(files(coverageSourceDirs))
+
+    classDirectories.setFrom(files(
+        fileTree("${layout.buildDirectory}/intermediates/javac/debug") {
+            exclude(exclusions)
+        },
+        fileTree("${layout.buildDirectory}/tmp/kotlin-classes/debug") {
+            exclude(exclusions)
+        }
+    ))
+
+    executionData.setFrom(
+        fileTree(layout.buildDirectory) {
+            include("**/*.exec", "**/*.ec")
+        }
+    )
+}
+

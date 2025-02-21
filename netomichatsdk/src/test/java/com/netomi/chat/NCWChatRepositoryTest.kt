@@ -15,10 +15,12 @@ import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+import org.robolectric.RobolectricTestRunner
 import retrofit2.Response
-
+@RunWith(RobolectricTestRunner::class)
 class NCWChatRepositoryTest {
     private lateinit var repository: NCWChatRepository
     private lateinit var apiInterface: NCWApiInterface
