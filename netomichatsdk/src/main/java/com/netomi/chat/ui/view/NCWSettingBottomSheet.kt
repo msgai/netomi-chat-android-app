@@ -65,13 +65,25 @@ class NCWSettingBottomSheet(
 
 
         val tvLanguage = view.findViewById<TextView>(R.id.tvLanguage)
+        val viewLineLang = view.findViewById<View>(R.id.viewLineLang)
+
         val tvSound = view.findViewById<TextView>(R.id.tvSound)
         val textRestart = view.findViewById<TextView>(R.id.text_restart)
 
         tvTitle.text= NCWThemeUtils.getThemeData()?.otherlocalized?.settings ?: getString(R.string.setting)
-        val languageCode = themeData?.multilingual?.selectedCode?.uppercase() ?: EN
-        val languageText = NCWThemeUtils.getThemeData()?.otherlocalized?.language ?: getString(R.string.language)
-        tvLanguage.text = "$languageText - $languageCode"
+
+        if (themeData?.multilingual?.enabled == true) {
+            constLang.visibility=View.VISIBLE
+            viewLineLang.visibility=View.VISIBLE
+            val languageCode = themeData?.multilingual?.selectedCode?.uppercase() ?: EN
+            val languageText = NCWThemeUtils.getThemeData()?.otherlocalized?.language
+                ?: getString(R.string.language)
+            tvLanguage.text = "$languageText - $languageCode"
+        }
+        else{
+            constLang.visibility=View.GONE
+            viewLineLang.visibility=View.GONE
+        }
 
         tvSound.text= NCWThemeUtils.getThemeData()?.otherlocalized?.sound ?: getString(R.string.sound)
         textRestart.text= NCWThemeUtils.getThemeData()?.otherlocalized?.restart_chat ?: getString(R.string.restart_chat)
