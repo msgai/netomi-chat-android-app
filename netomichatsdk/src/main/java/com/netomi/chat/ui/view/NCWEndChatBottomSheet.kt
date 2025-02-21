@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +30,12 @@ class NCWEndChatBottomSheet(
 ) : BottomSheetDialogFragment() {
 
     private var isEndChat:Boolean=false
+
+    lateinit var tvTranscript:TextView
+    lateinit var tvSendTranscript:TextView
+    lateinit var tvDownload:TextView
+    lateinit var constDownload:ConstraintLayout
+    lateinit var checkboxTranscript:CheckBox
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
@@ -60,14 +67,15 @@ class NCWEndChatBottomSheet(
         val tvSubTxtReturn=view.findViewById<TextView>(R.id.subtextReturnLater)
         val tvSubTxtEnd=view.findViewById<TextView>(R.id.subtextEndChat)
         val tvTitle=view.findViewById<TextView>(R.id.title)
-        val checkboxTranscript=view.findViewById<CheckBox>(R.id.checkboxTranscript)
+
         val emailTextInputLayout=view.findViewById<ConstraintLayout>(R.id.emailTextInputLayout)
         val constTranscript=view.findViewById<ConstraintLayout>(R.id.constTranscript)
         val emailEditText=view.findViewById<EditText>(R.id.emailEditText)
-        val tvTranscript=view.findViewById<TextView>(R.id.tvTranscript)
-        val tvSendTranscript=view.findViewById<TextView>(R.id.tvSendTranscript)
-        val tvDownload=view.findViewById<TextView>(R.id.tvDownload)
-        val constDownload=view.findViewById<ConstraintLayout>(R.id.constDownload)
+        checkboxTranscript=view.findViewById(R.id.checkboxTranscript)
+         tvTranscript=view.findViewById(R.id.tvTranscript)
+        tvSendTranscript=view.findViewById(R.id.tvSendTranscript)
+         tvDownload=view.findViewById(R.id.tvDownload)
+        constDownload=view.findViewById(R.id.constDownload)
 
         val tvErrorEmail = view.findViewById<TextView>(R.id.tvErrorEmail)
         val tvEmail = view.findViewById<TextView>(R.id.tvEmail)
@@ -82,7 +90,11 @@ class NCWEndChatBottomSheet(
         tvSendTranscript.text= NCWThemeUtils.getThemeData()?.otherlocalized?.send_transcript ?: getString(R.string.send_transcript)
         tvDownload.text= NCWThemeUtils.getThemeData()?.otherlocalized?.download ?: getString(R.string.download)
         btnConfirm.text= NCWThemeUtils.getThemeData()?.otherlocalized?.confirm ?: getString(R.string.confirm)
-
+        val transcriptVisibility = if (themeData?.endChat?.isSendTranscriptEnabled == true) View.VISIBLE else View.INVISIBLE
+        tvTranscript.visibility = transcriptVisibility
+        checkboxTranscript.visibility = transcriptVisibility
+        tvSendTranscript.visibility = transcriptVisibility
+        constDownload.visibility = if (themeData?.endChat?.downloadTranscript == true) View.VISIBLE else View.GONE
 
         NCWThemeUtils.setCheckBoxColor(checkboxTranscript)
         NCWThemeUtils.applyButtonBackgroundWithCorners(btnConfirm, isSelected = true)
@@ -139,7 +151,7 @@ class NCWEndChatBottomSheet(
                 isEndChat=true
               //  NCWThemeUtils.applyButtonBackgroundWithCorners(btnConfirm, isSelected = true)
                 rbReturnLater.isChecked = false // Ensure the other radio button is unchecked
-                transcriptVisibility(constTranscript)
+                transcriptVisibility(constTranscript,transcriptVisibility)
 
                 val isEmailValid = emailEditText.text.toString().isNotEmpty() && NCWAppUtils.isValidEmail(emailEditText.text.toString())
 
@@ -176,13 +188,22 @@ class NCWEndChatBottomSheet(
     }
 
 
-    private fun transcriptVisibility(constTranscript :ConstraintLayout){
-        if (themeData?.sendTranscriptEmailSetup?.enable==true){
-            constTranscript.visibility=View.VISIBLE
+    private fun transcriptVisibility(constTranscript: ConstraintLayout, transcriptVisibility: Int){
+
+        constTranscript.visibility = if (themeData?.endChat?.isSendTranscriptEnabled == false && themeData.endChat?.downloadTranscript == false)
+            View.GONE
+        else
+            View.VISIBLE
+
+        if (constTranscript.visibility==View.VISIBLE){
+            tvTranscript.visibility = transcriptVisibility
+            checkboxTranscript.visibility = transcriptVisibility
+            tvSendTranscript.visibility = transcriptVisibility
+            constDownload.visibility = if (themeData?.endChat?.downloadTranscript == true) View.VISIBLE else View.GONE
         }
-        else{
-            constTranscript.visibility=View.GONE
-        }
+
+
+
     }
 
     private fun enableButton(view: TextView, value: Boolean) {

@@ -77,6 +77,9 @@ class NCWRestartChatBottomSheet(
         val constDownload = dialogView.findViewById<ConstraintLayout>(R.id.constDownload)
 
 
+
+
+
         emailEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -104,6 +107,11 @@ class NCWRestartChatBottomSheet(
         } else {
             constTranscript.visibility = View.GONE
         }
+        val transcriptVisibility = if (ncwShowWarning.isSendTranscriptEnabled) View.VISIBLE else View.INVISIBLE
+        tvTranscript.visibility = transcriptVisibility
+        checkboxTranscript.visibility = transcriptVisibility
+        tvSendTranscript.visibility = transcriptVisibility
+        constDownload.visibility = if (ncwShowWarning.isSendTranscriptEnabled) View.VISIBLE else View.GONE
 
         NCWThemeUtils.setCheckBoxColor(checkboxTranscript)
 
@@ -151,6 +159,7 @@ class NCWRestartChatBottomSheet(
             onCrossClick()
             dismiss()
         }
+
 
 
     }
