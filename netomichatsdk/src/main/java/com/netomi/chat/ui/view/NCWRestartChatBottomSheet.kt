@@ -74,7 +74,7 @@ class NCWRestartChatBottomSheet(
         val tvDownload = dialogView.findViewById<TextView>(R.id.tvDownload)
         val tvErrorEmail = dialogView.findViewById<TextView>(R.id.tvErrorEmail)
         val tvEmail = dialogView.findViewById<TextView>(R.id.tvEmail)
-
+        val constDownload = dialogView.findViewById<ConstraintLayout>(R.id.constDownload)
 
 
         emailEditText.addTextChangedListener(object : TextWatcher {
@@ -143,7 +143,7 @@ class NCWRestartChatBottomSheet(
             }
             dismiss()
         }
-        tvDownload.setOnClickListener {
+        constDownload.setOnClickListener {
             onDownloadClick()
 
         }

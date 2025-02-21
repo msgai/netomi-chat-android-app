@@ -67,6 +67,8 @@ class NCWEndChatBottomSheet(
         val tvTranscript=view.findViewById<TextView>(R.id.tvTranscript)
         val tvSendTranscript=view.findViewById<TextView>(R.id.tvSendTranscript)
         val tvDownload=view.findViewById<TextView>(R.id.tvDownload)
+        val constDownload=view.findViewById<ConstraintLayout>(R.id.constDownload)
+
         val tvErrorEmail = view.findViewById<TextView>(R.id.tvErrorEmail)
         val tvEmail = view.findViewById<TextView>(R.id.tvEmail)
         tvEmail.text= NCWThemeUtils.getThemeData()?.otherlocalized?.email ?: getString(R.string.email)
@@ -166,7 +168,7 @@ class NCWEndChatBottomSheet(
             dismiss()
         }
 
-        tvDownload.setOnClickListener {
+        constDownload.setOnClickListener {
             onDownloadClick()
 
         }

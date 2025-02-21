@@ -267,6 +267,9 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     private var isMultipleFile: Boolean = false
     private var mMultipleFile: ArrayList<MultiFileModel> = arrayListOf()
 
+
+    private var sendTranscriptMail: String? = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
@@ -3153,6 +3156,8 @@ if (isUpdated) {
             NCWRoutes.ROUTE_SEND_TRANSCRIPT -> {
 Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
 
+NCWAppUtils.showToast(this, getString(R.string.transcript_sent_to_successfully, sendTranscriptMail))
+
             }
 
             NCWRoutes.WEBHOOK_EVENT -> {
@@ -3553,6 +3558,7 @@ Log.e("ROUTE_SEND_TRANSCRIPT","Successss")
             from = from
         )
         trackEvent(AnalyticsEvents.TRANSCRIPT_EMAIL_SENT)
+        sendTranscriptMail=email
         chatViewModel.sendTranscript(payload)
     }
 
