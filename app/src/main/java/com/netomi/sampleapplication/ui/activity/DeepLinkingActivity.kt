@@ -1,10 +1,13 @@
 package com.netomi.sampleapplication.ui.activity
 
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.netomi.sampleapplication.R
 
 class DeepLinkingActivity : AppCompatActivity() {
@@ -14,6 +17,10 @@ class DeepLinkingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_deep_linking)
+
+        window.apply {
+            statusBarColor = ContextCompat.getColor(this@DeepLinkingActivity, R.color.deep_link_header)
+        }
 
         ivBack = findViewById(R.id.ivBack)
         tvTitle = findViewById(R.id.tvTitle)
