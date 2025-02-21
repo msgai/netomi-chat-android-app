@@ -15,6 +15,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import android.Manifest
 import android.os.Environment
+import com.netomi.chat.R
 import com.netomi.chat.utils.analyticsManager.AnalyticsEvents
 import com.netomi.chat.utils.analyticsManager.EventTracker
 
@@ -24,8 +25,10 @@ object DownloadHelper {
     private const val CHANNEL_ID = "DownloadChannel"
 
     fun downloadFile(context: Context, url: String, fileName: String) {
+        NCWAppUtils.showToast(context,context.getString(R.string.downloading_file))
+
         val request = DownloadManager.Request(Uri.parse(url))
-            .setTitle("Downloading File")
+            .setTitle(context.getString(R.string.downloading_file))
             .setDescription("Downloading $fileName...")
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
@@ -34,6 +37,8 @@ object DownloadHelper {
 
         val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val downloadId = downloadManager.enqueue(request)
+        
+
 
         val onCompleteReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
@@ -61,11 +66,13 @@ object DownloadHelper {
     }
 
     private fun showDownloadNotification(context: Context, fileName: String) {
+
+        NCWAppUtils.showToast(context,context.getString(R.string.download_complete))
         createNotificationChannel(context)
 
         val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.stat_sys_download_done)
-            .setContentTitle("Download Complete")
+            .setContentTitle(context.getString(R.string.download_complete))
             .setContentText("$fileName has been downloaded successfully")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
