@@ -270,6 +270,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
     private var sendTranscriptMail: String? = ""
 
+    private var isStreamingText: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
@@ -1680,7 +1682,11 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     }
 
     private fun renderTheNormalMessage(response: NCWGenericChannelResponse) {
-        playBotSound()
+        Log.e("isStreamingText","isStreamingText "+isStreamingText)
+      if (!isStreamingText) {
+          isStreamingText=true
+          playBotSound()
+      }
         var type: String = ""
         if (response?.customPayload?.CHUNK_INDEX != null &&
             (
@@ -1698,6 +1704,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         } else {
             type = NCWAppConstant.NORMAL
         }
+        handleSoundStreaming(response)
+
         val newMessages =
             response.attachments?.mapIndexedNotNull { index, attachment ->
                 mapAttachmentToMessage(
@@ -1714,6 +1722,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                 message.isSameTimeMessage = index == 0
             }
             val customPayload = response.customPayload
+
             if (customPayload?.CHUNK_INDEX != null && customPayload.CHUNK_INDEX.toInt() == 0 && customPayload.CHUNK_STATUS.equals(
                     "IN-PROGRESS")) {
                 Log.e("Streaming Chunk", "Streaming Chunk")
@@ -1725,10 +1734,9 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                     )
                 }
             } else if (customPayload?.CHUNK_INDEX != null && customPayload.CHUNK_INDEX.toInt() > 0 && (customPayload.CHUNK_STATUS.equals(
-                    "SUCCESS"
-                ) || customPayload.CHUNK_STATUS.equals("IN-PROGRESS"))
+                    "SUCCESS") || customPayload.CHUNK_STATUS.equals("IN-PROGRESS"))
             ) {
-                Log.e("Streaming Chunk", "Streaming Chunk")
+                Log.e("Streaming Chunk", "Streaming Chunk else if" )
                 for (i in newMessages.indices) {
                     updateStreamMessage(
                         newMessages[i],
@@ -1736,16 +1744,21 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                         chunkStatus = customPayload.CHUNK_STATUS ?: ""
                     )
                 }
+
+
+
+
+
             } else if (customPayload?.CHUNK_INDEX != null && customPayload.CHUNK_INDEX.toInt() == 0 && customPayload.CHUNK_STATUS.equals(
                     "SUCCESS"
                 )
             ) {
-                Log.e("Streaming Chunk", "Streaming Chunk Not")
+                Log.e("Streaming Chunk", "Streaming Chunk Not esle if successs")
                 CoroutineScope(Dispatchers.Main).launch {
                     updateMessageList(newMessages, response)
                 }
             } else {
-                Log.e("Streaming Chunk", "Streaming Chunk Not")
+                Log.e("Streaming Chunk", "Streaming Chunk Not normal")
                 CoroutineScope(Dispatchers.Main).launch {
                     updateMessageList(newMessages, response)
                 }
@@ -1807,6 +1820,14 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             }
         } else {
         }*/
+    }
+
+    private fun handleSoundStreaming(response: NCWGenericChannelResponse) {
+        val customPayload = response.customPayload
+        if (customPayload?.CHUNK_INDEX != null &&  customPayload.CHUNK_INDEX.toInt() >= 0 && customPayload.CHUNK_STATUS.equals(
+                "SUCCESS")){
+            isStreamingText=false
+        }
     }
 
     private fun renderEventAndCustomFields(response: NCWGenericChannelResponse) {
@@ -1987,7 +2008,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                     }
                 }
             }
-        } else {
+        }
+        else {
             val typingIndicatorEnabled = themeData?.typingIndicator?.enabled ?: false
             if (!typingIndicatorEnabled) {
                 addMessages(newMessages)
@@ -2016,6 +2038,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             }
         }
         renderEventAndCustomFields(response)
+        isStreamingText=false
     }
 
    /*private fun smoothScrollToBottom() {
