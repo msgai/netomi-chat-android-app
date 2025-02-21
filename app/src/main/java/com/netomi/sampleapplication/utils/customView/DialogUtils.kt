@@ -25,7 +25,7 @@ class DialogUtils(context: Context) {
         val tvDesc: AppCompatTextView = dialog.findViewById(R.id.tvDesc)
         val yesBtn: AppCompatTextView = dialog.findViewById(R.id.btnAction)
         val noBtn: AppCompatTextView = dialog.findViewById(R.id.btnCancel)
-        val viewDivider: View = dialog.findViewById(R.id.viewDivider)
+
 
         tvTitle.text = dialogModel.title
 

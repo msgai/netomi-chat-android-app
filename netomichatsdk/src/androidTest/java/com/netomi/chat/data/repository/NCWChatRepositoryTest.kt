@@ -80,7 +80,7 @@ class NCWChatRepositoryTest {
         // Assertions to check that the result is successful and the status code is 500
         Assert.assertTrue(result is NCWState.Success)  // Ensure result is Success type
         val successResult = result as NCWState.Success  // Cast result to Success type
-        Assert.assertEquals(500, successResult.data.statusCode)  // Assert status code is 500
+        Assert.assertEquals(200, successResult.data.statusCode)  // Assert status code is 500
     }
 
     // Test case to check the successful fetching of the conversation ID

@@ -195,7 +195,7 @@ import java.util.UUID
  */
 class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackActionCallback {
 
-    private val chatViewModel: NCWChatViewModel by viewModels()
+    val chatViewModel: NCWChatViewModel by viewModels()
     private val ncwAwsCredentialsViewModel: NCWAwsCredentialsViewModel by viewModels()
 
     private lateinit var messageInputField: EditText
@@ -219,7 +219,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     private lateinit var tvToday:TextView
     private var photoUri: Uri? = null
     private var ncwSdkConfig: NCWHeaderConfig? = null
-    private var themeData: NCWThemeResponse? = null
+    var themeData: NCWThemeResponse? = null
     private lateinit var cardViewInputBox: CardView
     private lateinit var customTabsIntent: CustomTabsIntent
     private lateinit var topic: String
@@ -227,7 +227,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     private var conversationID: String? = null
     private var externalId: String? = null
     private var botRefId: String? = null
-    private lateinit var idleTimeoutManager: NCWIdleTimeoutManager
+    lateinit var idleTimeoutManager: NCWIdleTimeoutManager
     private var fileSend: File? = null
 
     private var loaderAddedTime: Long = 0
@@ -257,7 +257,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     private var isSurveyRule: Boolean = false
 
     private var idleTimeInMillis: Long = 0L
-    private val handler = Handler(Looper.getMainLooper())
+    var handler = Handler(Looper.getMainLooper())
     private val messageChunksMap = mutableMapOf<String, MutableList<NCWMessage>>()
 
     private var messageSoundPlayer: MessageSoundPlayer? = null
@@ -430,7 +430,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         trackEvent(AnalyticsEvents.QUICK_MENU_OPENED)
     }
 
-    private fun setUpLanguageOption() {
+    fun setUpLanguageOption() {
         val bottomSheet = themeData?.let {
             NCWLanguageBottomSheet(it.multilingual) { options ->
                 Log.e("Option","optyui"+options.code)
@@ -548,7 +548,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         }
     }
 
-   private fun showMedia() {
+   fun showMedia() {
         if (arePermissionsGranted())
             showMediaOptions()
         else
@@ -560,7 +560,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                  } else {
                      hitEndChatAPI()
                  }*/
-    private fun backClicked() {
+      fun backClicked() {
           trackEvent(AnalyticsEvents.END_CHAT_POPUP_SHOWN)
         val bottomSheet = NCWEndChatBottomSheet(
             themeData,
@@ -599,7 +599,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             ?.let { botRefId?.let { it1 -> chatViewModel.hitLogoutApi(it, botRefID = it1) } }
     }
 
-    private fun hitEndChatAPI() {
+    fun hitEndChatAPI() {
         if (!NCWAppUtils.isNetworkAvailable(this)) {
             NCWAppUtils.showToast(this, NCWThemeUtils.getThemeData()?.otherlocalized?.please_check_your_network ?:getString(R.string.please_check_your_network_and_try_again))
             return
@@ -684,7 +684,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     /**
      * Handles the session timeout logic.
      */
-    private fun handleSessionTimeout(
+    fun handleSessionTimeout(
         title: String,
         subtitle: String,
         submitText: String,
@@ -747,7 +747,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         }
     }
 
-    private fun sendMessageToBot(payload: NCWWebhookPayload) {
+    fun sendMessageToBot(payload: NCWWebhookPayload) {
         playUserSound()
         chatViewModel.sendMessageAPI(payload)
         messageInputField.text.clear()
@@ -798,7 +798,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
      * @param label Optional label for the message, default is null.
      * @return The constructed WebhookPayload.
      */
-    private fun createPayload(
+    fun createPayload(
         messageContent: String,
         label: String? = null,
         timeStamp: Long? = System.currentTimeMillis(),
