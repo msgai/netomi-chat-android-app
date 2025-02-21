@@ -85,21 +85,20 @@ dependencies {
     //implementation(libs.core.ktx)
 
     // Unit Test cases
-    // ✅ JUnit 5 API (for writing tests)
+    //  JUnit 5 API (for writing tests)
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
 
-    // ✅ JUnit 5 Engine (to execute tests)
+    //  JUnit 5 Engine (to execute tests)
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
 
-    // ✅ JUnit Platform Launcher (fixes "Cannot create Launcher" issue)
+    // JUnit Platform Launcher (fixes "Cannot create Launcher" issue)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.9.2")
 
-    // ✅ Ensure JUnit 4 is compatible with JUnit 5
+    // Ensure JUnit 4 is compatible with JUnit 5
     testImplementation("org.junit.vintage:junit-vintage-engine:5.9.2") {
         exclude(group = "junit", module = "junit") // Prevents JUnit 4 conflicts
     }
 
-    // ✅ Existing Dependencies
     androidTestImplementation("org.mockito:mockito-android:2.24.5")
     testImplementation("junit:junit:4.13.2") // ⚠️ Needed if some tests still use JUnit 4
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
