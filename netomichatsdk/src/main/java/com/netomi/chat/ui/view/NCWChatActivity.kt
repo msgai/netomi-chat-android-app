@@ -1682,7 +1682,6 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     }
 
     private fun renderTheNormalMessage(response: NCWGenericChannelResponse) {
-        Log.e("isStreamingText","isStreamingText "+isStreamingText)
       if (!isStreamingText) {
           isStreamingText=true
           playBotSound()
@@ -1736,7 +1735,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             } else if (customPayload?.CHUNK_INDEX != null && customPayload.CHUNK_INDEX.toInt() > 0 && (customPayload.CHUNK_STATUS.equals(
                     "SUCCESS") || customPayload.CHUNK_STATUS.equals("IN-PROGRESS"))
             ) {
-                Log.e("Streaming Chunk", "Streaming Chunk else if" )
+                Log.e("Streaming Chunk", "Streaming Chunk" )
                 for (i in newMessages.indices) {
                     updateStreamMessage(
                         newMessages[i],
@@ -1753,12 +1752,12 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                     "SUCCESS"
                 )
             ) {
-                Log.e("Streaming Chunk", "Streaming Chunk Not esle if successs")
+                Log.e("Streaming Chunk", "Streaming Chunk Not")
                 CoroutineScope(Dispatchers.Main).launch {
                     updateMessageList(newMessages, response)
                 }
             } else {
-                Log.e("Streaming Chunk", "Streaming Chunk Not normal")
+                Log.e("Streaming Chunk", "Streaming Chunk Not")
                 CoroutineScope(Dispatchers.Main).launch {
                     updateMessageList(newMessages, response)
                 }
