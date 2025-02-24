@@ -3397,7 +3397,8 @@ NCWAppUtils.showToast(this, getString(R.string.transcript_sent_to_successfully, 
                                         customField.values[0],
                                         object : TypeToken<SurveyField>() {}.type
                                     )
-                                       if (!surveyField.isSurveySkipped) {
+
+                                       if (!surveyField.isSurveySkipped && surveyField.submitSurveyInfo!=null) {
                                            val newMessage = NCWMessage(
                                                 sender = TYPE_EVENT,
                                                 timestamp = response.timestamp
