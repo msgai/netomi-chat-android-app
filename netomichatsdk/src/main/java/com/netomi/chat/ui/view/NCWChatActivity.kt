@@ -746,6 +746,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             checkForPreviousQuickReply()
             chatViewModel.sendMessage(messageContent, timeStamp)
             sendMessageToBot(payload)
+            messageInputField.text.clear()
+
         }
         if (::idleTimeoutManager.isInitialized) {
             idleTimeoutManager.checkForTimeout()
@@ -755,7 +757,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     fun sendMessageToBot(payload: NCWWebhookPayload) {
         playUserSound()
         chatViewModel.sendMessageAPI(payload)
-        messageInputField.text.clear()
+
 
     }
 
@@ -1162,6 +1164,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             message.attachmentList
         )
         sendMessageToBot(payload)
+        messageInputField.text.clear()
     }
 
     private fun handleMediaMessage(message: NCWMessage) {
