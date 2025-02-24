@@ -169,7 +169,10 @@ class NCWEndChatBottomSheet(
 
             if (isEndChat) {
                 if (checkboxTranscript.isChecked && emailEditText.text.toString().isNotEmpty()) {
-                    onSendTranscript(themeData?.sendTranscriptEmailSetup?.email, emailEditText.text.toString())
+                    if (themeData?.sendTranscriptEmailSetup?.enable == false)
+                        onSendTranscript(themeData.sendTranscriptEmailSetup.email, emailEditText.text.toString())
+                    else
+                        onSendTranscript(null, emailEditText.text.toString())
                 } else {
                     onConfirmClick.invoke(isEndChat)
                 }
