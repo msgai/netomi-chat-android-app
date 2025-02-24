@@ -4,11 +4,13 @@ package com.netomi.chat.utils
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.netomi.chat.model.NCWMessage
+import com.netomi.chat.model.language.NCWOtherLocalized
 import com.netomi.chat.model.messages.Component
 import com.netomi.chat.model.messages.FileConfig
 import com.netomi.chat.model.messages.FileUploadData
 import com.netomi.chat.utils.NCWMessageUtils.mergeChunks
 import com.netomi.chat.utils.NCWMessageUtils.validateFileAttachment
+import com.netomi.chat.utils.analyticsManager.EventTracker.Companion.createJsonObject
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -147,5 +149,24 @@ class NCWMessageUtilsTest {
         return file
     }
 
+    @Test
+    fun createJsonObject() {
+        val jsonObject = createJsonObject(
+            "12345",
+            "bot123",
+            "key1" to "value1",
+            "key2" to 2
+        )
+        val expectedJson = "{\"conversationId\":\"12345\",\"botRefID\":\"bot123\",\"key1\":\"value1\",\"key2\":2}"
+        assertEquals(expectedJson, jsonObject.toString())
+    }
 
+    @Test
+    fun jsonModel() {
+        val localized = NCWOtherLocalized()
+        assertEquals("Powered by Netomi", localized.powered_by_netomi)
+        assertEquals("Ask a question...", localized.ask_a_question)
+        assertEquals("Ai Bot", localized.ai_bot)
+        // Add more assertions for other properties
+    }
 }

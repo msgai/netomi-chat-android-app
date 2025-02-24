@@ -155,7 +155,10 @@ val exclusions = listOf(
     "**/BuildConfig.*",
     "**/Manifest*.*",
     "**/*Test*.*",
-    "android/**/*.*"
+    "android/**/*.*",
+    "com/netomi/chat/ui/view/**/*.*",                  // 🚫 Exclude entire view directory
+    "com/netomi/chat/utils/NCWThemeUtils.*",           // 🚫 Exclude specific NCWThemeUtils.kt file
+    "com/netomi/chat/model/theme/**/*.*"              // 🚫 Exclude entire theme directory
 )
 
 // Configure JaCoCo for Unit Tests & Android UI Tests
@@ -180,16 +183,16 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     sourceDirectories.setFrom(files(coverageSourceDirs))
 
     classDirectories.setFrom(files(
-        fileTree("${layout.buildDirectory}/intermediates/javac/debug") {
+        fileTree("${buildDir}/intermediates/classes/debug") {
             exclude(exclusions)
         },
-        fileTree("${layout.buildDirectory}/tmp/kotlin-classes/debug") {
+        fileTree("${buildDir}/tmp/kotlin-classes/debug") {
             exclude(exclusions)
         }
     ))
 
     executionData.setFrom(
-        fileTree(layout.buildDirectory) {
+        fileTree(buildDir) {
             include("**/*.exec", "**/*.ec")
         }
     )

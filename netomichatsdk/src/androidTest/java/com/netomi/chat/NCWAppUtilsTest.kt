@@ -7,6 +7,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.netomi.chat.model.messages.Component
 import com.netomi.chat.model.messages.FileConfig
 import com.netomi.chat.model.messages.FileUploadData
+import com.netomi.chat.model.transcript.NCWEmailRequest
 import com.netomi.chat.utils.NCWAppUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -179,6 +180,20 @@ class NCWAppUtilsTest {
     }
 
 
+    @Test
+    fun nCWEmailRequest() {
+        val request = NCWEmailRequest(
+            botRefId = "bot123",
+            conversationId = "conv456",
+            mail = "example@test.com",
+            from = "sender@test.com"
+        )
+
+        assertEquals("bot123", request.botRefId)
+        assertEquals("conv456", request.conversationId)
+        assertEquals("example@test.com", request.mail)
+        assertEquals("sender@test.com", request.from)
+    }
 
 }
 
