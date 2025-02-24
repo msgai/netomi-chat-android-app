@@ -174,8 +174,8 @@
             android:layout_height="wrap_content"
             android:textSize="12sp"
             android:textColor="#374E57"
-            app:layout_constraintTop_toBottomOf="@+id/tvDocName"
-            app:layout_constraintStart_toStartOf="@+id/tvDocName"
+            app:layout_constraintTop_toBottomOf="@+id/tvFileName"
+            app:layout_constraintStart_toStartOf="@+id/tvFileName"
             />
 
         <ImageView
