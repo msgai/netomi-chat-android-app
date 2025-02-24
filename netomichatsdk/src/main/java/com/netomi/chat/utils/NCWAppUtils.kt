@@ -10,6 +10,7 @@ import android.text.method.LinkMovementMethod
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.text.HtmlCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.netomi.chat.model.media_payload.MultiFileModel
 import com.netomi.chat.model.messages.Component
@@ -60,7 +61,8 @@ object NCWAppUtils {
     }
 
     fun setHtmlText(textView: TextView, input: String) {
-        val formattedText = Html.fromHtml(input, Html.FROM_HTML_MODE_LEGACY)
+        val htmlText = input.replace("\\\"", "'")
+        val formattedText = HtmlCompat.fromHtml(htmlText, HtmlCompat.FROM_HTML_MODE_LEGACY)
         textView.text = formattedText.trim()
 
         textView.movementMethod= LinkMovementMethod.getInstance()
