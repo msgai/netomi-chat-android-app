@@ -44,13 +44,15 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/logoImageView"
-        android:layout_width="0dp"
-        android:layout_height="220dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_marginTop="15dp"
         android:contentDescription="@string/login"
         android:layout_marginHorizontal="5dp"
         app:layout_constraintStart_toStartOf="parent"
-        android:src="@drawable/ic_deep_link_dummy"
+        android:src="@drawable/ic_place_holder"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/constHeader" />
 
 
@@ -61,6 +63,7 @@
         android:layout_height="wrap_content"
         android:text="@string/deep_linking_example"
         android:textSize="14sp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
          android:layout_marginTop="10dp"
         android:textColor="@color/black"
