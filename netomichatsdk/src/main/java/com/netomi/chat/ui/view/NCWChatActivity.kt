@@ -1977,6 +1977,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         chunkStatus: String
     ) {
         addStreamMessages(streamMessage, chunkIndex = chunkIndex, chunkStatus = chunkStatus)
+
     }
 
     private suspend fun updateMessageList(newMessages: List<NCWMessage>, response: NCWGenericChannelResponse) {
@@ -2042,8 +2043,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         renderEventAndCustomFields(response)
         isStreamingText=false
     }
-
-   /*private fun smoothScrollToBottom() {
+  /*  private fun smoothScrollToBottom() {
         val layoutManager = chatRecyclerView.layoutManager as LinearLayoutManager
         val smoothScroller = object : LinearSmoothScroller(chatRecyclerView.context) {
             override fun getVerticalSnapPreference(): Int = SNAP_TO_END
@@ -2181,6 +2181,9 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             }*/
         }else{
             messageAdapter.updateOrAppendMessage(newMessages, false)
+        }
+        if (shouldAutoScroll()) {
+            chatRecyclerView.postDelayed({ smoothScrollToBottom() }, 400)
         }
 
         /* chatRecyclerView.post {
