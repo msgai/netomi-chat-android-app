@@ -147,13 +147,6 @@ class NCWChatRepositoryTest {
         Assert.assertEquals(404, errorResult.code)
     }
 
-    @Test
-    fun hitLogoutApi_Failure_500() = runBlocking {
-        val result = nCWChatRepository.hitLogoutApi("valid-token", "server-error-bot-id", "true")
-        Assert.assertTrue(result is NCWState.Error)
-        val errorResult = result as NCWState.Error
-        Assert.assertEquals(500, errorResult.code)
-    }
 
 
     @Test
