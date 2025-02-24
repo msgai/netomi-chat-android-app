@@ -76,5 +76,6 @@
     <string name="transcript_sent_to_successfully">Transcript sent to %1$s successfully</string>
     <string name="downloading_file">Downloading File</string>
     <string name="download_complete">Download Complete</string>
+    <string name="enter_email">Enter Email</string>
 
 </resources>

@@ -90,6 +90,8 @@ class NCWEndChatBottomSheet(
         tvSendTranscript.text= NCWThemeUtils.getThemeData()?.otherlocalized?.send_transcript ?: getString(R.string.send_transcript)
         tvDownload.text= NCWThemeUtils.getThemeData()?.otherlocalized?.download ?: getString(R.string.download)
         btnConfirm.text= NCWThemeUtils.getThemeData()?.otherlocalized?.confirm ?: getString(R.string.confirm)
+
+        emailEditText.hint= NCWThemeUtils.getThemeData()?.otherlocalized?.enter_email ?: getString(R.string.enter_email)
         val transcriptVisibility = if (themeData?.endChat?.isSendTranscriptEnabled == true) View.VISIBLE else View.INVISIBLE
         tvTranscript.visibility = transcriptVisibility
         checkboxTranscript.visibility = transcriptVisibility

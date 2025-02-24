@@ -134,7 +134,7 @@ class NCWRestartChatBottomSheet(
         tvEmail.text= NCWThemeUtils.getThemeData()?.otherlocalized?.email ?: getString(R.string.email)
         tvDownload.text= NCWThemeUtils.getThemeData()?.otherlocalized?.download ?: getString(R.string.download)
 
-
+        emailEditText.hint= NCWThemeUtils.getThemeData()?.otherlocalized?.enter_email ?: getString(R.string.enter_email)
         NCWThemeUtils.createRoundedDrawable(btnConfirm)
         NCWThemeUtils.createRoundedDrawableClose(btnCancel)
 
