@@ -1,5 +1,11 @@
 package com.netomi.chat.data.network
 
+import com.netomi.chat.data.apiconstant.NCWApiConstant.BOT_REF_ID
+import com.netomi.chat.data.apiconstant.NCWApiConstant.CODE
+import com.netomi.chat.data.apiconstant.NCWApiConstant.X_AUTH_ENABLE
+import com.netomi.chat.data.apiconstant.NCWApiConstant.X_AUTH_TOKEN
+import com.netomi.chat.data.apiconstant.NCWApiConstant.X_BOT_REF_ID
+import com.netomi.chat.data.apiconstant.NCWApiConstant.X_CONVERSATION_ID
 import com.netomi.chat.model.ChatTranscriptResponse
 import com.netomi.chat.model.GetConversationPayload
 import com.netomi.chat.model.NCWGetChatHistoryResponse
@@ -102,7 +108,7 @@ interface NCWApiInterface {
      */
     @GET("json-config-mobile/{botRefId}.json")
     suspend fun getSdkTheme(
-        @Path("botRefId") botRefId: String
+        @Path(BOT_REF_ID) botRefId: String
     ): Response<NCWThemeResponse>
 
     /**
@@ -132,7 +138,7 @@ interface NCWApiInterface {
      * @return A `Response` object wrapping a Object of `MQTTCredentialsResponse` objects.
      */
     @GET(ROUTE_GET_MQTT_CREDENTIALS)
-    suspend fun getAWSMQTTCredentials(@Query("botRef") botRef: String?): Response<MQTTCredentialsResponse>
+    suspend fun getAWSMQTTCredentials(@Header(X_BOT_REF_ID) botRefId: String?): Response<MQTTCredentialsResponse>
 
 
 
@@ -175,20 +181,20 @@ interface NCWApiInterface {
 
     @POST(LOGIN)
     suspend fun hitAuthenticateUserApi(
-        @Header("x-bot-ref-id") botRefId: String,
-        @Header("x-auth-enabled") authEnabled: String,
-        @Header("x-auth-token") authToken: String,
+        @Header(X_BOT_REF_ID) botRefId: String,
+        @Header(X_AUTH_ENABLE) authEnabled: String,
+        @Header(X_AUTH_TOKEN) authToken: String,
     ): Response<LoginResponse>
 
     @POST(LOGOUT)
     suspend fun hitLogoutAPI(
-        @Header("x-bot-ref-id") botRefId: String,
-        @Header("x-auth-enabled") authEnabled: String,
-        @Header("x-auth-token") authToken: String,
+        @Header(X_BOT_REF_ID) botRefId: String,
+        @Header(X_AUTH_ENABLE) authEnabled: String,
+        @Header(X_AUTH_TOKEN) authToken: String,
     ): Response<LogoutResponse>
 
     @GET(ROUTE_GET_SURVEY_RULE)
-    suspend fun getSurveyRule( @Header("x-bot-ref-id") botRefId: String): Response<SurveyRuleResponse>
+    suspend fun getSurveyRule( @Header(X_BOT_REF_ID) botRefId: String): Response<SurveyRuleResponse>
 
 
 
@@ -199,8 +205,8 @@ interface NCWApiInterface {
 
     @GET(ROUTE_GET_LANGUAGE)
     suspend fun getLanguageStrings(
-        @Path("botRefId") botRefId: String,
-        @Path("code") code: String,
+        @Path(BOT_REF_ID) botRefId: String,
+        @Path(CODE) code: String,
         @Header("Origin") origin: String="https://aistudio-qa.netomi.com",
         @Header("Referer") referer: String="https://aistudio-qa.netomi.com",
     ): Response<LanguageResponse>
@@ -208,8 +214,8 @@ interface NCWApiInterface {
 
 
     @GET(ROUTE_DOWNLOAD_TRANSCRIPT)
-    suspend fun getDownloadTranscriptUrl(@Header("x-bot-ref-id") botRefId: String,
-                                         @Header("x-conversation-id") conversationId: String
+    suspend fun getDownloadTranscriptUrl(@Header(X_BOT_REF_ID) botRefId: String,
+                                         @Header(X_CONVERSATION_ID) conversationId: String
                                          ): Response<ChatTranscriptResponse>
 
 
