@@ -20,7 +20,7 @@ object NCWApiConstant {
     const val HEADER_AUTH = "Authorization"
     const val X_BOT_REF_ID = "x-bot-ref-id"
     const val X_AUTH_ENABLE= "x-auth-enabled"
-    const val X_AUTH_TOKEN= " x-auth-token"
+    const val X_AUTH_TOKEN= "x-auth-token"
     const val X_CONVERSATION_ID= "x-conversation-id"
     const val CODE = "code"
 

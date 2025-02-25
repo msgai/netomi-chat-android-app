@@ -111,7 +111,7 @@ class NCWRestartChatBottomSheet(
         tvTranscript.visibility = transcriptVisibility
         checkboxTranscript.visibility = transcriptVisibility
         tvSendTranscript.visibility = transcriptVisibility
-        constDownload.visibility = if (ncwShowWarning.isSendTranscriptEnabled) View.VISIBLE else View.GONE
+        constDownload.visibility = if (ncwShowWarning.downloadTranscript) View.VISIBLE else View.GONE
 
         NCWThemeUtils.setCheckBoxColor(checkboxTranscript)
 
