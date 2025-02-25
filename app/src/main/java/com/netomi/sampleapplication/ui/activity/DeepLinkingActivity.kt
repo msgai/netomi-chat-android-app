@@ -8,12 +8,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
 import com.netomi.sampleapplication.R
 
 class DeepLinkingActivity : AppCompatActivity() {
 
     private lateinit var ivBack: ImageView
     private lateinit var tvTitle: TextView
+    private lateinit var logoImage: ImageView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_deep_linking)
@@ -24,6 +26,7 @@ class DeepLinkingActivity : AppCompatActivity() {
 
         ivBack = findViewById(R.id.ivBack)
         tvTitle = findViewById(R.id.tvTitle)
+        logoImage= findViewById(R.id.logoImageView)
 
         val data: Uri? = intent?.data
         if (data != null) {
@@ -43,6 +46,9 @@ class DeepLinkingActivity : AppCompatActivity() {
                 tvTitle.text = screen
             }
         }
+val imageUrl="https://demo.netomi.com/images/deeplink1.png"
+    //  val imageUrl="https://demo.netomi.com/images/deeplink2.png"
+        Glide.with(this).load(imageUrl).into(logoImage)
 
 
         ivBack.setOnClickListener {
