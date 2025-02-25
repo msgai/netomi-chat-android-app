@@ -51,7 +51,7 @@ class NCWLanguageBottomSheet(
         val ivClose = view.findViewById<ImageView>(R.id.ivClose)
         val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
         NCWThemeUtils.setTitleColor(tvTitle)
-        tvTitle.text = getString(R.string.languages)
+        tvTitle.text = NCWThemeUtils.getThemeData()?.otherlocalized?.language ?: getString(R.string.languages)
         recyclerLanguageMenu.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 

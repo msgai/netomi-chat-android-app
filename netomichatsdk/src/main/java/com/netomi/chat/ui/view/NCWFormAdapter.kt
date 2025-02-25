@@ -948,6 +948,7 @@ class NCWFormAdapter(
             uploadDocTitle.text = label
             NCWThemeUtils.setUserConfigTextColor(uploadDocTitle)
             NCWThemeUtils.setUserConfigTextColor(uploadText)
+            uploadText.text= NCWThemeUtils.getThemeData()?.otherlocalized?.click_to_upload ?: itemView.context.getString(R.string.click_to_upload)
             NCWThemeUtils.setTimeStampColor(formatHint)
             if (component.config?.isShowAttachmentTypesEnabled == true) {
                 formatHint.visibility = View.VISIBLE

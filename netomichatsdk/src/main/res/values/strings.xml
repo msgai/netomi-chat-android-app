@@ -77,5 +77,6 @@
     <string name="downloading_file">Downloading File</string>
     <string name="download_complete">Download Complete</string>
     <string name="enter_email">Enter Email</string>
+    <string name="click_to_upload">Click to upload</string>
 
 </resources>
