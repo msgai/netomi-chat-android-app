@@ -40,7 +40,10 @@ object NCWAppConstant {
     const val NETOMI="NETOMI"
     const val EVENT_WIDGET="WIDGET_EVENT"
     const val WIDGET_EVENT_IDLE_USER="WIDGET_EVENT_IDLE_USER"
-
+    const val EVENT_CHAT_END="CHAT_END"
+    const val INFO_PILL="INFO_PILL"
+    const val EVENT="EVENT"
+    const val EVENT_SESSON_EXPIRE="SESSON_EXPIRE"
 
     const val SESSION="session"
     const val SIZE_LIMIT="limit"
