@@ -106,8 +106,12 @@ import com.netomi.chat.utils.NCWAppConstant.CHANNEL_ID
 import com.netomi.chat.utils.NCWAppConstant.CHAT_WIDGET
 import com.netomi.chat.utils.NCWAppConstant.DATE_FORMAT
 import com.netomi.chat.utils.NCWAppConstant.ENABLED
+import com.netomi.chat.utils.NCWAppConstant.EVENT
+import com.netomi.chat.utils.NCWAppConstant.EVENT_CHAT_END
+import com.netomi.chat.utils.NCWAppConstant.EVENT_SESSON_EXPIRE
 import com.netomi.chat.utils.NCWAppConstant.EVENT_WIDGET
 import com.netomi.chat.utils.NCWAppConstant.INFO_EVENT
+import com.netomi.chat.utils.NCWAppConstant.INFO_PILL
 import com.netomi.chat.utils.NCWAppConstant.LOGOUT
 import com.netomi.chat.utils.NCWAppConstant.MEDIA_TYPE
 import com.netomi.chat.utils.NCWAppConstant.MESSAGE_BACK_TO_BOT
@@ -349,8 +353,6 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         }
         ivMenu.setOnClickListener {
             setUpSettingOption()
-
-
         }
 
         closeIcon.setOnClickListener {
@@ -506,7 +508,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             NCWAwsIotManager.unsubscribeRestart(topic)
         }
         callBackToBot()
-        hitEndChatAPI()
+        hitEndChatAPI(EVENT_CHAT_END)
     }
 
 
@@ -572,7 +574,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             { isEndChat ->
                 if (isEndChat) {
                     callBackToBot()
-                    hitEndChatAPI()
+                    hitEndChatAPI(EVENT_CHAT_END)
                 } else {
                     trackEvent(AnalyticsEvents.RESUME_LATER_CONFIRMED)
                     NCWThemeUtils.setJwtToken(null)
@@ -581,7 +583,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             },{ from,mail->
               sendTranscriptApI(from,mail)
                 callBackToBot()
-                hitEndChatAPI()
+                hitEndChatAPI(EVENT_CHAT_END)
 
             },{
                 getTranscriptUrl()
@@ -604,7 +606,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             ?.let { botRefId?.let { it1 -> chatViewModel.hitLogoutApi(it, botRefID = it1) } }
     }
 
-    fun hitEndChatAPI() {
+    fun hitEndChatAPI(subType: String) {
         if (!NCWAppUtils.isNetworkAvailable(this)) {
             NCWAppUtils.showToast(this, NCWThemeUtils.getThemeData()?.otherlocalized?.please_check_your_network ?:getString(R.string.please_check_your_network_and_try_again))
             return
@@ -615,17 +617,17 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             NCWEndChatRequest(
                 botRefId = botRefId!!, com.netomi.chat.model.endchat.NCWRequestBody(
                     botReferenceId = botRefId!!,
-                    channelId = "NETOMI_WEB_WIDGET",
+                    channelId = CHANNEL_ID,
                     conversationId = conversationID ?: "",
                     eventData = NCWEventData(
-                        eventType = "WIDGET_EVENT",
-                        subType = "CHAT_END"
+                        eventType = EVENT_WIDGET,
+                        subType = subType
                     ),
-                    eventName = "INFO_PILL",
+                    eventName = INFO_PILL,
                     isPublishToMQTT = false,
-                    requestType = "NETOMI",
+                    requestType = NETOMI,
                     timestamp = System.currentTimeMillis(),
-                    triggerType = "EVENT"
+                    triggerType = EVENT
 
                 )
             ),
@@ -706,11 +708,12 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                     NCWThemeUtils.setSignInUserDetails(null)
                     NCWThemeUtils.setConversationID(null)
                     themeData?.isProActiveGreetings = false
-                    finish()
+                    hitEndChatAPI(EVENT_SESSON_EXPIRE)
+                   // finish()
                 }
                 else if (from == LOGOUT) {
                     NCWThemeUtils.setSignInUserDetails(null)
-                    hitEndChatAPI()
+                    hitEndChatAPI(EVENT_CHAT_END)
                 }
             },
         )
@@ -3217,7 +3220,7 @@ NCWAppUtils.showToast(this, getString(R.string.transcript_sent_to_successfully, 
             }
 
             NCWRoutes.LOGOUT -> {
-                hitEndChatAPI()
+                hitEndChatAPI(EVENT_CHAT_END)
             }
 
             NCWRoutes.ROUTE_SURVEY -> {
