@@ -171,7 +171,7 @@ class NCWEndChatBottomSheet(
 
             if (isEndChat) {
                 if (checkboxTranscript.isChecked && emailEditText.text.toString().isNotEmpty()) {
-                    if (themeData?.sendTranscriptEmailSetup?.enable == false)
+                    if (themeData?.sendTranscriptEmailSetup?.enable == true)
                         onSendTranscript(themeData.sendTranscriptEmailSetup.email, emailEditText.text.toString())
                     else
                         onSendTranscript(null, emailEditText.text.toString())
