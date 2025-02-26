@@ -1,9 +1,7 @@
 package com.netomi.sampleapplication.ui.activity
 
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -37,19 +35,24 @@ class DeepLinkingActivity : AppCompatActivity() {
 
                 val screen = path.substringAfterLast("/")
                 tvTitle.text = screen
+                val imageUrl = when {
+                    screen.contains("screen1") -> "https://demo.netomi.com/images/deeplink1.png"
+                    else -> "https://demo.netomi.com/images/deeplink2.png"
+                }
+                Glide.with(this).load(imageUrl).into(logoImage)
             }
-
             // Custom Deep Link (netomisampleapp://app/)
             else if (data.scheme == "netomisampleapp" && data.host == "app") {
 
                 val screen = path?.substringAfter("/")
                 tvTitle.text = screen
+                val imageUrl = when {
+                    screen?.contains("screen1") == true -> "https://demo.netomi.com/images/deeplink1.png"
+                    else -> "https://demo.netomi.com/images/deeplink2.png"
+                }
+                Glide.with(this).load(imageUrl).into(logoImage)
             }
         }
-val imageUrl="https://demo.netomi.com/images/deeplink1.png"
-    //  val imageUrl="https://demo.netomi.com/images/deeplink2.png"
-        Glide.with(this).load(imageUrl).into(logoImage)
-
 
         ivBack.setOnClickListener {
             finish()
