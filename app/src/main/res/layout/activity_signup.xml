@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
+    android:background="@color/white"
     tools:context=".ui.activity.SignupActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -117,6 +118,7 @@
                 android:hint="@string/enter_your_email"
                 android:inputType="textEmailAddress"
                 android:maxLength="50"
+                android:textColor="@color/black"
                 android:textColorHint="@color/charcoal_blue_50"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -185,6 +187,7 @@
                 android:gravity="center|start"
                 android:hint="@string/enter_your_name"
                 android:inputType="textPersonName"
+                android:textColor="@color/black"
                 android:textColorHint="@color/charcoal_blue_50"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -255,6 +258,7 @@
                 android:inputType="phone"
                 android:maxLength="10"
                 android:textColorHint="@color/charcoal_blue_50"
+                android:textColor="@color/black"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -322,6 +326,7 @@
                 android:hint="@string/enter_your_password"
                 android:inputType="textPassword"
                 android:textColorHint="@color/charcoal_blue_50"
+                android:textColor="@color/black"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/passwordToggle"
