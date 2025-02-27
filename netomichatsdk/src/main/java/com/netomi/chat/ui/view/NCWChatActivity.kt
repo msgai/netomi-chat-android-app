@@ -353,6 +353,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         }
         ivMenu.setOnClickListener {
             setUpSettingOption()
+
         }
 
         closeIcon.setOnClickListener {
@@ -1587,6 +1588,9 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     }
 
     private fun renderTheSurveyMessage(response: NCWGenericChannelResponse?) {
+
+
+        Log.e("renderTheSurveyMessage","Shownnn")
         val gson = Gson()
         response?.customFields?.forEach { customField ->
             if (!customField.values.isNullOrEmpty()) {
@@ -1647,6 +1651,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
 
     private fun createAndShowSurveyBottomSheet(
+
         requestId: String,
         surveyField: SurveyField?,
         from: String,
@@ -1865,6 +1870,9 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                     }
 
                     CustomFieldName.SURVEY_SCHEMA -> {
+                        if (isFinishing || isDestroyed || supportFragmentManager.isStateSaved) {
+                            return
+                        }
                         handler.removeCallbacks(idleRunnable)
                         renderTheSurveyMessage(response)
 
