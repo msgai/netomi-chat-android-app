@@ -90,6 +90,7 @@ class HomeFragment : Fragment() {
 
     private fun showLoader(show: Boolean) {
         progressOverlay.visibility = if (show) View.VISIBLE else View.GONE
+        progressOverlay.isClickable = show
     }
 
     private fun handleApiCallback(response: State<Any>) {

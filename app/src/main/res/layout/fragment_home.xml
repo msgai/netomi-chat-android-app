@@ -5,23 +5,7 @@
     android:layout_height="match_parent"
 
     android:orientation="vertical">
-    <!-- Main content -->
-    <FrameLayout
-        android:id="@+id/progress_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
 
-        <ProgressBar
-            android:id="@+id/fullscreen_progress_bar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center" />
-    </FrameLayout>
 
        <LinearLayout
            android:id="@+id/ll_parent"
@@ -76,5 +60,27 @@
             android:src="@drawable/ic_chat"
             android:layout_width="52dp"
             android:layout_height="52dp"/>
+
+
+    <!-- Main content -->
+    <FrameLayout
+        android:id="@+id/progress_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        android:clickable="true"
+        android:background="@android:color/transparent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ProgressBar
+            android:id="@+id/fullscreen_progress_bar"
+            android:layout_width="wrap_content"
+            android:visibility="gone"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+    </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
