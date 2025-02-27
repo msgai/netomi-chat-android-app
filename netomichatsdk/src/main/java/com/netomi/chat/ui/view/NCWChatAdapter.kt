@@ -536,6 +536,7 @@ class NCWChatAdapter(
                     NCWThemeUtils.setBotTextColor(cardTitle)
                     NCWThemeUtils.setTimeStampColor(cardMessage)
                     buttonRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
+                    Log.e(" message.quickReply?.options"," message.buttons"+ message.buttons)
                     val carouselAdapter = NCWCarouselButtonAdapter(message.buttons){
                         chatActionCallback.carouselButtonAction(it)
                     }
@@ -545,14 +546,15 @@ class NCWChatAdapter(
 
                 else -> {}
             }
-
+Log.e(" message.quickReply?.options"," message.quickReply?.options"+ message.quickReply?.options)
             // Quick Reply Handling
             if (message.isQuickReplyVisible && message.quickReply?.options != null) {
                 if (chipRecyclerViewGroup.adapter == null) {
                     chipRecyclerViewGroup.layoutManager =
                         LinearLayoutManager(itemView.context, LinearLayoutManager.VERTICAL, false)
                 }
-                val chipAdapter = NCWChipAdapter(message.quickReply.options) { selectedOption ->
+
+                val chipAdapter = NCWChipAdapter(message.quickReply?.options?: emptyList()) { selectedOption ->
                     chatActionCallback.onQuickReply(selectedOption, position)
                 }
                 chipRecyclerViewGroup.adapter = chipAdapter
@@ -642,12 +644,13 @@ class NCWChatAdapter(
             val existingMessage = messages[index]
             when (newMessage.type) {
                 MessageType.TEXT -> {
-                    Log.e("addStreamMessages","MessageType.TEXT")
                     existingMessage.message = if (customStreamType) {
                         existingMessage.message + newMessage.message
                     } else {
                         newMessage.message
                     }
+
+
                 }
                 else->{
                     messages.add(newMessage)
@@ -670,6 +673,11 @@ class NCWChatAdapter(
 
             if (!existingMessage.isReviewEnabled) {
                 existingMessage.isReviewEnabled = newMessage.isReviewEnabled
+            }
+            Log.e("newMessage.quickReply","newMessage.quickReply "+newMessage.quickReply)
+            if (newMessage.quickReply!=null){
+
+                existingMessage.quickReply = newMessage.quickReply
             }
             notifyItemChanged(index)
         } else {

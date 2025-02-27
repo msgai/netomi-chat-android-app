@@ -20,7 +20,7 @@ data class NCWMessage(
     val sender: String? = null,
     var largeImageUrl: String? = null,
     val carouselItems: List<NCWCarouselElement>? = null,
-    val quickReply: NCWQuickReply? = null,
+    var quickReply: NCWQuickReply? = null,
     var thumbnailUrl: String? = null,
     val title: String? = null,
     var buttons : ArrayList<NCWCarouselButton> = arrayListOf(),

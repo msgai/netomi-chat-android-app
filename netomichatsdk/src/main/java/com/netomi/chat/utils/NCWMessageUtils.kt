@@ -38,7 +38,8 @@ object NCWMessageUtils {
         val mergedText = chunkList.joinToString("") { it.message ?: "" }
         val firstChunk = chunkList.first()
         val isReviewEnabled = chunkList.any { it.isReviewEnabled }
-        return firstChunk.copy(message = mergedText, isReviewEnabled = isReviewEnabled)
+        val quickReply = chunkList.firstOrNull { it.quickReply != null }?.quickReply
+        return firstChunk.copy(message = mergedText, isReviewEnabled = isReviewEnabled, quickReply =quickReply)
     }
 
     fun validateFileAttachment(
