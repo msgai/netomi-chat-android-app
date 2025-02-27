@@ -764,6 +764,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     fun sendMessageToBot(payload: NCWWebhookPayload) {
         playUserSound()
         chatViewModel.sendMessageAPI(payload)
+        isStreamingText=false
 
 
     }
@@ -1621,6 +1622,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                             messageAdapter.notifyDataSetChanged()
                             onScrollToPosition(true)
                         }
+                        isStreamingText=false
                         chatViewModel.hitSubmitSurveyRequestAPI(submitSurvey)
                     }, { requestId, label ->
                         val timeStamp = System.currentTimeMillis()
@@ -1715,7 +1717,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         } else {
             type = NCWAppConstant.NORMAL
         }
-        handleSoundStreaming(response)
+        //handleSoundStreaming(response)
 
         val newMessages =
             response.attachments?.mapIndexedNotNull { index, attachment ->
@@ -3571,6 +3573,7 @@ NCWAppUtils.showToast(this, getString(R.string.transcript_sent_to_successfully, 
         messageAdapter.notifyItemChanged(position)
         hitFeedbackAPI(requestId, "POSITIVE", attachmentIndex)
         trackEvent(AnalyticsEvents.THUMBS_UP_CLICKED)
+        isStreamingText=false
     }
 
     override fun onThumbDownClick(requestId: String, position: Int, attachmentIndex: Int) {
@@ -3578,6 +3581,7 @@ NCWAppUtils.showToast(this, getString(R.string.transcript_sent_to_successfully, 
         messageAdapter.notifyItemChanged(position)
         hitFeedbackAPI(requestId, "NEGATIVE", attachmentIndex)
         trackEvent(AnalyticsEvents.THUMBS_DOWN_CLICKED)
+        isStreamingText=false
     }
 
 
