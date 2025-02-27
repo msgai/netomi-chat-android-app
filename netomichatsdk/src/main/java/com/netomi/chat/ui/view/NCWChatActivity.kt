@@ -360,10 +360,12 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                 backClicked() else finish()
         }
         // Initialize IdleTimeoutManager with a timeout and a callback for session timeout
-        themeData?.endChat?.idleTimeout?.let {
-            idleTimeoutManager = NCWIdleTimeoutManager(
+       themeData?.endChat?.idleTimeout?.let {
+
+           idleTimeoutManager = NCWIdleTimeoutManager(
                 idleTimeoutMillis = it,
                 onTimeout = {
+                     handler.removeCallbacks(idleRunnable)
                     handleSessionTimeout(
                         NCWThemeUtils.getThemeData()?.otherlocalized?.session_timeout ?:getString(R.string.session_timeout),
                         NCWThemeUtils.getThemeData()?.otherlocalized?.your_session_has_expired_due_to_inactivity?:getString(R.string.your_session_has_expired_due_to_inactivity),
@@ -708,6 +710,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                     NCWThemeUtils.setSignInUserDetails(null)
                     NCWThemeUtils.setConversationID(null)
                     themeData?.isProActiveGreetings = false
+
                     hitEndChatAPI(EVENT_SESSON_EXPIRE)
                    // finish()
                 }
