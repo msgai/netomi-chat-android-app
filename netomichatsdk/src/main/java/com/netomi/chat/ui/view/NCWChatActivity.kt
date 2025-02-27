@@ -1729,7 +1729,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                         response.customPayload
                     )
             } ?: emptyList()
-
+Log.e("sdanjjkdnjcncjkjndjds","dsasdcdcdf "+newMessages)
         if (newMessages.isNotEmpty()) {
             newMessages.forEachIndexed { index, message ->
                 message.isSameTimeMessage = index == 0
@@ -2178,7 +2178,6 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
 
     private fun addStreamMessages(newMessages: NCWMessage, chunkIndex: Int, chunkStatus: String) {
-        Log.e("NCWMessage111111", "Received Message: ${newMessages.message}, CHUNK_INDEX: $chunkIndex, CHUNK_STATUS: $chunkStatus")
         val messageId = newMessages.requestID ?: return
         if (chunkIndex != -1 && newMessages.type == MessageType.TEXT) {
             val chunkList = messageChunksMap.getOrPut(messageId) { mutableListOf() }
