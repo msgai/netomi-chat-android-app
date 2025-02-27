@@ -170,8 +170,10 @@ import com.netomi.chat.utils.toNCWCustomAttributes
 import com.netomi.chat.utils.toNCWUserDetailAttribute
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -275,6 +277,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     private var sendTranscriptMail: String? = ""
 
     private var isStreamingText: Boolean = false
+    private var streamingJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -1998,8 +2001,8 @@ Log.e("sdanjjkdnjcncjkjndjds","dsasdcdcdf "+newMessages)
 
         if (NCWThemeUtils.getThemeData()?.streamOnChatWidget?.enabled == true) {
             removeStreamLoader()
-
-            withContext(Dispatchers.Main) {
+            streamingJob?.cancel()
+            streamingJob = CoroutineScope(Dispatchers.Main).launch {
                 for (message in newMessages) {
                     if (message.type == MessageType.TEXT) {
                         message.message?.let { fullMessage ->
@@ -2008,6 +2011,8 @@ Log.e("sdanjjkdnjcncjkjndjds","dsasdcdcdf "+newMessages)
                                 NCWThemeUtils.getThemeData()?.streamOnChatWidget?.chunkSize ?: 8
                             )
                             for (chunk in chunks) {
+                                // Stop processing if the job is cancelled
+                                if (!isActive) return@launch
                                 val chunkMessage = message.copy(message = chunk)
                                 messageAdapter.updateOrAppendMessage(chunkMessage, true)
 
@@ -3177,6 +3182,7 @@ if (isUpdated) {
                     messageList.clear()
                     messageAdapter.notifyDataSetChanged()
                     loadInitialMessages()
+                    streamingJob?.cancel()
                     themeData?.isProActiveGreetings = false
                     chatViewModel.getConversationId(botRefId, externalId, onRestart)
                     onRestart = false

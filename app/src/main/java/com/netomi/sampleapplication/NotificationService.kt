@@ -36,6 +36,16 @@ class NotificationService : FirebaseMessagingService() {
 
         val title = remoteMessage.data["title"]
         val htmlBody = remoteMessage.data["body"]
+        // Extract data from notification payload
+        val botRefId = remoteMessage.data["botRefId"] ?: "No Bot Ref ID"
+        val env = remoteMessage.data["env"] ?: "No Env"
+
+
+        val intent = Intent(this, HomeActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP) // Ensures proper navigation
+            putExtra("botRefId", botRefId)
+            putExtra("env", env)
+        }
 
         // Convert HTML body to formatted text
         val formattedText: Spanned = HtmlCompat.fromHtml(htmlBody?:"", HtmlCompat.FROM_HTML_MODE_LEGACY)
@@ -44,18 +54,15 @@ class NotificationService : FirebaseMessagingService() {
 
         // Show the notification
         if (title != null && !SampleApplication.appLifecycleObserver.isAppInForeground) {
-            showNotification(title, formattedText)
+            showNotification(title, formattedText,intent)
         }
     }
 
-    private fun showNotification(title: String, body: Spanned) {
+    private fun showNotification(title: String, body: Spanned,intent: Intent) {
         // Create notification channel (for Android 8+)
         createNotificationChannel()
 
         // Intent to open MainActivity when user taps on notification
-        val intent = Intent(this, HomeActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
         val pendingIntent = PendingIntent.getActivity(
             this, 0, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE

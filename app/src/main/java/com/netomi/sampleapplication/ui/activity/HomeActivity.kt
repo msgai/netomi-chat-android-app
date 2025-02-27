@@ -65,6 +65,12 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         botList = mutableListOf()
         checkPermission()
         initView()
+
+        // Get the data from intent
+        val botRefId = intent.getStringExtra("botRefId")
+        val env = intent.getStringExtra("env")
+
+        Log.d("FCM_DATA", "BotRefId: $botRefId, Env: $env")
         val email = preferences.getString(SharePreferenceConstant.EMAIL)
         if (NetworkUtils.isNetworkAvailable(this))
         onboardingViewModel.getBotListing(email)
