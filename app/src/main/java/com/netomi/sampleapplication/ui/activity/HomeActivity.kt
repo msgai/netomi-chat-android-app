@@ -186,11 +186,16 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
 
             is State.Success -> {
                 val response= response.data as BotListingResponse
-                onboardingViewModel.updateBotList(response.bots[0])
-                botList.addAll(response.bots)
-                preferences.saveSelectedBot(botList[0])
-                preferences.put(SharePreferenceConstant.BOT_RESPONSE, response)
-                showLoader(false)
+                try {
+                    onboardingViewModel.updateBotList(response.bots[0])
+                    botList.addAll(response.bots)
+                    preferences.saveSelectedBot(botList[0])
+                    preferences.put(SharePreferenceConstant.BOT_RESPONSE, response)
+                    showLoader(false)
+                }catch (e:Exception){
+                    e.printStackTrace()
+                    showLoader(false)
+                }
             }
 
             is State.Error -> {
