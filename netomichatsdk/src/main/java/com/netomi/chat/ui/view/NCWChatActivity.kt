@@ -1589,8 +1589,6 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
     private fun renderTheSurveyMessage(response: NCWGenericChannelResponse?) {
 
-
-        Log.e("renderTheSurveyMessage","Shownnn")
         val gson = Gson()
         response?.customFields?.forEach { customField ->
             if (!customField.values.isNullOrEmpty()) {
