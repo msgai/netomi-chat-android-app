@@ -946,8 +946,8 @@ class NCWFormAdapter(
             val uploadDocTitle: TextView = fileInputView.findViewById(R.id.uploadDocTitle)
             val label = component.labels?.firstOrNull() ?: ""
             uploadDocTitle.text = label
-            NCWThemeUtils.setUserConfigTextColor(uploadDocTitle)
-            NCWThemeUtils.setUserConfigTextColor(uploadText)
+            NCWThemeUtils.setBotTextColor(uploadDocTitle)
+            NCWThemeUtils.setBotTextColor(uploadText)
             uploadText.text= NCWThemeUtils.getThemeData()?.otherlocalized?.click_to_upload ?: itemView.context.getString(R.string.click_to_upload)
             NCWThemeUtils.setTimeStampColor(formatHint)
             if (component.config?.isShowAttachmentTypesEnabled == true) {
