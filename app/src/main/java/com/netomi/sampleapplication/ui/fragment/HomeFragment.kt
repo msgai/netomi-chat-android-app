@@ -133,8 +133,10 @@ class HomeFragment : Fragment() {
             "externalId" to email
         )
         val jsonString = Gson().toJson(jsonMap)
-        if (NetworkUtils.isNetworkAvailable(requireActivity()))
+        if (NetworkUtils.isNetworkAvailable(requireActivity())){
+            showLoader(true)
             bot.botRefId.let { onboardingViewModel.fetchJwtToken(bot.botRefId,jsonString) }
+            }
         else
             Toast.makeText(requireContext(),
                 getString(R.string.please_check_your_network_and_try_again), Toast.LENGTH_SHORT).show()

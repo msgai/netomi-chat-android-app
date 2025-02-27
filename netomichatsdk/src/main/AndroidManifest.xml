@@ -15,7 +15,7 @@
 
     <application
         android:name=".ui.init.NCWApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:supportsRtl="true">
         <activity
             android:name=".ui.view.NCWBaseActivity"
