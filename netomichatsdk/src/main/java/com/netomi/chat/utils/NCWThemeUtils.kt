@@ -23,6 +23,7 @@ import androidx.core.widget.ImageViewCompat
 import com.bumptech.glide.Glide
 import com.netomi.chat.R
 import com.netomi.chat.model.theme.NCWThemeResponse
+import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
 import com.netomi.chat.survey.NCWSignInUserDetails
 import com.netomi.chat.ui.init.NCWChatSdk
 
@@ -78,7 +79,8 @@ object NCWThemeUtils
         progressBar: ProgressBar,
         logoIcon: ImageView
     ) {
-        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+       //  NCWChatSdk.getUpdateHeaderConfiguration()
+        NCWChatSdk.getUpdateHeaderConfiguration().let { headerConfig ->
             // Apply gradient or background color
             if (headerConfig.isGradientAppied) {
                 createGradientDrawable()?.let { gradientDrawable ->
@@ -91,16 +93,16 @@ object NCWThemeUtils
             // Set header text
             headerTextView.text = themeData?.title ?: ""
 
-            headerConfig.tintColor?.let { setTextColor(headerTextView, it) }
+            headerConfig.tintColor.let { setTextColor(headerTextView, it) }
             // Apply icon styles
-            headerConfig.iconBackgroundColor?.let { bgColor ->
+            headerConfig.iconBackgroundColor.let { bgColor ->
               val tintColor = headerConfig.tintColor
                 styleIcon(ivMenu, bgColor, tintColor)
                 styleIcon(closeIcon, bgColor, tintColor)
             }
-            val progressBarColor= headerConfig.backgroundColor?.let { parseColor(it) }
+            val progressBarColor= headerConfig.backgroundColor.let { parseColor(it) }
             progressBar.indeterminateDrawable.colorFilter =
-                progressBarColor?.let { PorterDuffColorFilter(it, PorterDuff.Mode.SRC_IN) }
+                progressBarColor.let { PorterDuffColorFilter(it, PorterDuff.Mode.SRC_IN) }
 
             headerConfig.logoImage?.takeIf { it.isNotEmpty() }?.let { logoUrl ->
                 Glide.with(context)
@@ -116,7 +118,7 @@ object NCWThemeUtils
     fun setHeader( headerContainer: ConstraintLayout,  window: Window,
                    rootLayout: View,context: Context,)
     {
-        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+         NCWChatSdk.getUpdateHeaderConfiguration().let { headerConfig ->
             // Apply gradient or background color
             if (headerConfig.isGradientAppied) {
                 createGradientDrawable()?.let { gradientDrawable ->
@@ -134,7 +136,7 @@ object NCWThemeUtils
     }
 
     fun setLogoIcon(logoIcon: ImageView,context: Context){
-        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+         NCWChatSdk.getUpdateHeaderConfiguration().let { headerConfig ->
             headerConfig.logoImage?.takeIf { it.isNotEmpty() }?.let { logoUrl ->
                 Glide.with(context)
                     .load(logoUrl)
@@ -153,11 +155,11 @@ object NCWThemeUtils
         cardViewInputBox: CardView,
         tvBrandName: TextView
     ) {
-        footerContainer.visibility = if (themeData?.mobileConfig?.lightTheme?.footerConfig?.isFooterHidden == true) View.GONE else View.VISIBLE
+        footerContainer.visibility = if (NCWChatSdk.getUpdatedFooterConfiguration().isFooterHidden == true) View.GONE else View.VISIBLE
 
-        themeData?.mobileConfig?.lightTheme?.footerConfig?.let { footerConfig ->
+        NCWChatSdk.getUpdatedFooterConfiguration().let { footerConfig ->
             // Set background color
-            footerConfig.backgroundColor?.let { color ->
+            footerConfig.backgroundColor.let { color ->
                 parseColor(color).let {
                     footerContainer.setBackgroundColor(it)
                     tvBrandName.setBackgroundColor(it)
@@ -165,8 +167,8 @@ object NCWThemeUtils
             }
 
             // Set icon styles and tints
-            footerConfig.tintColor?.let { tintColor ->
-                footerConfig.backgroundColor?.let { bgColor ->
+            footerConfig.tintColor.let { tintColor ->
+                footerConfig.backgroundColor.let { bgColor ->
                     styleIcon(ivMenuOption, bgColor, tintColor)
                 }
                 setTint(attachmentIcon, tintColor)
@@ -175,31 +177,31 @@ object NCWThemeUtils
             }
 
             // Set message input field text color
-            footerConfig.inputBoxTextColor?.let { textColor ->
-                parseColor(textColor)?.let { messageInputField.setTextColor(it) }
+            footerConfig.inputBoxTextColor.let { textColor ->
+                parseColor(textColor).let { messageInputField.setTextColor(it) }
             }
-            footerConfig.inputBoxBackgroundColor?.let { inputBoxBackgroundColor ->
-                parseColor(inputBoxBackgroundColor)?.let { cardViewInputBox.setCardBackgroundColor(it) }
+            footerConfig.inputBoxBackgroundColor.let { inputBoxBackgroundColor ->
+                parseColor(inputBoxBackgroundColor).let { cardViewInputBox.setCardBackgroundColor(it) }
             }
         }
     }
 
     fun setUserConfig(messageText: View) {
-        themeData?.mobileConfig?.lightTheme?.userConfig?.let { userConfig ->
-            val bubbleConfig = themeData?.mobileConfig?.lightTheme?.bubbleConfig
-            val borderRadius = bubbleConfig?.borderRadius?.toFloat() ?: 0f
+        NCWChatSdk.getUpdatedUserConfiguration().let { userConfig ->
+            val bubbleConfig = NCWChatSdk.getUpdatedBubbleConfiguration()
+            val borderRadius = bubbleConfig.borderRadius.toFloat() ?: 0f
             val cornerRadii = floatArrayOf(borderRadius, borderRadius, 0f, 0f, borderRadius, borderRadius, borderRadius, borderRadius)
 
             // Apply background with corner radii
             applyBackgroundWithCorners(messageText, userConfig.backgroundColor, cornerRadii)
               if (messageText is TextView)
-            userConfig.textColor?.let { color -> setTextColor(messageText, color) }
+            userConfig.textColor.let { color -> setTextColor(messageText, color) }
         }
     }
 
    fun setUserConfigTextColor(textView: TextView) {
-       themeData?.mobileConfig?.lightTheme?.userConfig?.let { userConfig ->
-           userConfig.textColor?.let { color ->
+       NCWChatSdk.getUpdatedUserConfiguration().let { userConfig ->
+           userConfig.textColor.let { color ->
                setTextColor(textView,color)
            }
        }
@@ -210,22 +212,22 @@ object NCWThemeUtils
     }
 
     fun setBotConfig(messageText: View) {
-        themeData?.mobileConfig?.lightTheme?.botConfig?.let { botConfig ->
-            val bubbleConfig = themeData?.mobileConfig?.lightTheme?.bubbleConfig
-            val borderRadius = bubbleConfig?.borderRadius?.toFloat() ?: 0f
+        NCWChatSdk.getUpdatedBotConfiguration().let { botConfig ->
+            val bubbleConfig = NCWChatSdk.getUpdatedBubbleConfiguration()
+            val borderRadius = bubbleConfig.borderRadius.toFloat() ?: 0f
             val cornerRadii = floatArrayOf(0f, 0f, borderRadius, borderRadius, borderRadius, borderRadius, borderRadius, borderRadius)
             // Apply background with corner radii
             applyBackgroundWithCorners(messageText, botConfig.backgroundColor, cornerRadii)
 
             // Set text color
             if (messageText is TextView)
-            botConfig.textColor?.let { color -> setTextColor(messageText, color) }
+            botConfig.textColor.let { color -> setTextColor(messageText, color) }
         }
     }
 
     fun setBotTextColor(textView: TextView) {
-        themeData?.mobileConfig?.lightTheme?.botConfig?.let { botConfig ->
-                botConfig.textColor?.let { color -> setTextColor(textView, color) }
+        NCWChatSdk.getUpdatedBotConfiguration().let { botConfig ->
+                botConfig.textColor.let { color -> setTextColor(textView, color) }
         }
     }
 
@@ -236,8 +238,8 @@ object NCWThemeUtils
      * @param cornerRadii Array of corner radii in the order of top-left, top-right, bottom-right, and bottom-left.
      */
     fun setQuickReply(quickReplyView: View,quickReplyTextView: TextView) {
-        themeData?.mobileConfig?.lightTheme?.botConfig?.let { botConfig ->
-            val borderRadius = themeData?.mobileConfig?.lightTheme?.bubbleConfig?.borderRadius?.toFloat() ?: 10f
+        NCWChatSdk.getUpdatedBotConfiguration().let { botConfig ->
+            val borderRadius = NCWChatSdk.getUpdatedBubbleConfiguration().borderRadius.toFloat() ?: 10f
             val cornerRadii = floatArrayOf(
                 0f, 0f, borderRadius, borderRadius,
                 borderRadius, borderRadius, borderRadius, borderRadius
@@ -252,7 +254,7 @@ object NCWThemeUtils
             )
 
             // Set text color
-            botConfig.quickReplyTextColor?.let { textColor ->
+            botConfig.quickReplyTextColor.let { textColor ->
                 setTextColor(quickReplyTextView, textColor)
             }
         }
@@ -284,7 +286,7 @@ object NCWThemeUtils
      */
      fun createRoundedDrawable(view: View) {
 
-        themeData?.mobileConfig?.lightTheme?.otherConfig?.let {
+        NCWChatSdk.getUpdatedOtherConfiguration().let {
             val parsedColor = Color.parseColor(it.backgroundColor)
             val backgroundDrawable = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
@@ -299,7 +301,7 @@ object NCWThemeUtils
     }
 
     fun createRoundedDrawableSubmit(view: View) {
-        themeData?.mobileConfig?.lightTheme?.otherConfig?.let { otherConfig ->
+        NCWChatSdk.getUpdatedOtherConfiguration().let { otherConfig ->
             val parsedColor = Color.parseColor( otherConfig.backgroundColor)
             val backgroundDrawable = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
@@ -309,12 +311,12 @@ object NCWThemeUtils
             view.background = backgroundDrawable
 
             if (view is TextView)
-                otherConfig.titleColor?.let { color -> setTextColor(view, color) }
+                otherConfig.titleColor.let { color -> setTextColor(view, color) }
         }
     }
 
     fun createRoundedDrawableClose(view: View) {
-        themeData?.mobileConfig?.lightTheme?.botConfig?.let { userConfig ->
+        NCWChatSdk.getUpdatedBotConfiguration().let { userConfig ->
             val parsedColor = Color.parseColor( userConfig.backgroundColor)
             val backgroundDrawable = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
@@ -329,14 +331,14 @@ object NCWThemeUtils
     }
 
     fun setTitleColor(textView: TextView){
-        themeData?.mobileConfig?.lightTheme?.otherConfig?.let { otherConfig ->
-            otherConfig.titleColor?.let { color -> setTextColor(textView, color) }
+        NCWChatSdk.getUpdatedOtherConfiguration().let { otherConfig ->
+            otherConfig.titleColor.let { color -> setTextColor(textView, color) }
         }
     }
 
     fun setDescriptionColor(textView: TextView){
-        themeData?.mobileConfig?.lightTheme?.otherConfig?.let { otherConfig ->
-            otherConfig.descriptionColor?.let { color -> setTextColor(textView, color) }
+        NCWChatSdk.getUpdatedOtherConfiguration().let { otherConfig ->
+            otherConfig.descriptionColor.let { color -> setTextColor(textView, color) }
         }
     }
 
@@ -345,8 +347,8 @@ object NCWThemeUtils
 
 
     fun setTimeStampColor(tvTimeStamp: TextView){
-         themeData?.mobileConfig?.lightTheme?.bubbleConfig?.let { bubbleConfig ->
-             bubbleConfig.timeStampColor?.let { color -> setTextColor(tvTimeStamp, color) }
+        NCWChatSdk.getUpdatedBubbleConfiguration().let { bubbleConfig ->
+             bubbleConfig.timeStampColor.let { color -> setTextColor(tvTimeStamp, color) }
          }
      }
 
@@ -364,7 +366,7 @@ object NCWThemeUtils
      */
     private fun setTint(imageView: ImageView, tintColor: String?) {
         tintColor?.let { color ->
-            parseColor(color)?.let { imageView.imageTintList = ColorStateList.valueOf(it) }
+            parseColor(color).let { imageView.imageTintList = ColorStateList.valueOf(it) }
         }
     }
 
@@ -435,12 +437,12 @@ object NCWThemeUtils
 
             // Ensure a valid gradient direction
             val direction = GradientDrawable.Orientation.values()
-                .getOrElse(themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientDirection ?: 0) {
+                .getOrElse( NCWChatSdk.getUpdateHeaderConfiguration().gradientDirection ?: 0) {
                     GradientDrawable.Orientation.LEFT_RIGHT
                 }
 
             // Parse and validate gradient colors
-            val gradientColors = themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientColors
+            val gradientColors =  NCWChatSdk.getUpdateHeaderConfiguration().gradientColors
                 ?.mapNotNull { color ->
                     try {
                         Color.parseColor(color)
@@ -468,8 +470,8 @@ object NCWThemeUtils
          try {
              Log.e("Hereee","adddddd "+themeData?.mobileConfig?.lightTheme)
              val direction = GradientDrawable.Orientation.values()
-                 .getOrElse(themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientDirection ?: 0) { GradientDrawable.Orientation.LEFT_RIGHT }
-             val gradientColors = themeData?.mobileConfig?.lightTheme?.headerConfig?.gradientColors?.map { Color.parseColor(it) }?.toIntArray()
+                 .getOrElse( NCWChatSdk.getUpdateHeaderConfiguration().gradientDirection ?: 0) { GradientDrawable.Orientation.LEFT_RIGHT }
+             val gradientColors =  NCWChatSdk.getUpdateHeaderConfiguration().gradientColors?.map { Color.parseColor(it) }?.toIntArray()
              return gradientColors?.let { GradientDrawable(direction, it) }
 
          }
@@ -642,7 +644,7 @@ object NCWThemeUtils
 
 
     fun createSelectedRoundedDrawable(view: View) {
-        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+         NCWChatSdk.getUpdateHeaderConfiguration().let { headerConfig ->
            // val parsedColor = Color.parseColor(headerConfig.backgroundColor)
             val parsedColor = Color.parseColor("#000000")
             val backgroundDrawable = GradientDrawable().apply {
@@ -667,7 +669,7 @@ object NCWThemeUtils
     }
 
     fun createStrokeDrawable(view: View) {
-        themeData?.mobileConfig?.lightTheme?.otherConfig?.let { otherConfig ->
+        NCWChatSdk.getUpdatedOtherConfiguration().let { otherConfig ->
             // val parsedColor = Color.parseColor(headerConfig.backgroundColor)
             val parsedColor = Color.parseColor(otherConfig.backgroundColor)
             val backgroundDrawable = GradientDrawable().apply {
@@ -684,7 +686,7 @@ object NCWThemeUtils
 
 
     fun setRadioButtonColor(radio: RadioButton) {
-        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+         NCWChatSdk.getUpdateHeaderConfiguration().let { headerConfig ->
             try {
                 val color = parseColor(headerConfig.backgroundColor)
                 radio.buttonTintList = ColorStateList.valueOf(color)
@@ -695,7 +697,7 @@ object NCWThemeUtils
     }
 
     fun setCheckBoxColor(checkBox: CheckBox) {
-        themeData?.mobileConfig?.lightTheme?.headerConfig?.let { headerConfig ->
+         NCWChatSdk.getUpdateHeaderConfiguration().let { headerConfig ->
             try {
                 val color = parseColor(headerConfig.backgroundColor)
                 checkBox.buttonTintList = ColorStateList.valueOf(color)

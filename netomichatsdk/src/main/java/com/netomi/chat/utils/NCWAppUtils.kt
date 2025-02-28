@@ -62,7 +62,8 @@ object NCWAppUtils {
 
     fun setHtmlText(textView: TextView, input: String) {
         val htmlText = input.replace("\\\"", "'")
-        val formattedText = HtmlCompat.fromHtml(htmlText, HtmlCompat.FROM_HTML_MODE_LEGACY)
+        val formattedHtml = htmlText.replace("<a class=", "&emsp;<a class=")
+        val formattedText = HtmlCompat.fromHtml(formattedHtml, HtmlCompat.FROM_HTML_MODE_LEGACY)
         textView.text = formattedText.trim()
 
         textView.movementMethod= LinkMovementMethod.getInstance()
