@@ -113,7 +113,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         }
 
 
-
+/*
         navView.setNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.itemHome -> {
@@ -129,7 +129,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
             // Close the drawer after an item is selected
             drawerLayout.closeDrawers()
             true
-        }
+        }*/
 
         supportFragmentManager.addOnBackStackChangedListener {
             val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
@@ -225,9 +225,24 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
         tvTitle = findViewById(R.id.tv_ai)
         tvWelcome = findViewById(R.id.tv_welcome)
         progressOverlay = findViewById(R.id.progress_overlay)
-        val headerView = navView.getHeaderView(0)
-        usernameProfile= headerView.findViewById(R.id.userName)
+//        val headerView = navView.getHeaderView(0)
+       usernameProfile= findViewById(R.id.userName)
         window.statusBarColor = ContextCompat.getColor(this, R.color.status_bar)
+
+        val tvHome=findViewById<TextView>(R.id.tvHome)
+        val tvAgent=findViewById<TextView>(R.id.tvAgent)
+
+        tvHome.setOnClickListener {
+            loadFragment(HomeFragment())
+            drawerLayout.closeDrawers()
+        }
+
+        tvAgent.setOnClickListener {
+            loadFragment(ChangeAiAgentFragment())
+            drawerLayout.closeDrawers()
+        }
+
+
     }
 
     fun loadFragment(fragment: Fragment) {
