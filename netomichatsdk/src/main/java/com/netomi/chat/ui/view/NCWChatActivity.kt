@@ -364,12 +364,12 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                 backClicked() else finish()
         }
         // Initialize IdleTimeoutManager with a timeout and a callback for session timeout
-       themeData?.endChat?.idleTimeout?.let {
+    /*   themeData?.endChat?.idleTimeout?.let {
 
            idleTimeoutManager = NCWIdleTimeoutManager(
                 idleTimeoutMillis = it,
                 onTimeout = {
-                     handler.removeCallbacks(idleRunnable)
+                    stopIdleSurvey()
                     handleSessionTimeout(
                         NCWThemeUtils.getThemeData()?.otherlocalized?.session_timeout ?:getString(R.string.session_timeout),
                         NCWThemeUtils.getThemeData()?.otherlocalized?.your_session_has_expired_due_to_inactivity?:getString(R.string.your_session_has_expired_due_to_inactivity),
@@ -379,7 +379,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                 }
             )
 
-        }
+        }*/
 
         // Add a custom back press callback
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -422,26 +422,28 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         }
     }
 
-    private fun setUpQuickReplyOption() {
-        handler.removeCallbacks(idleRunnable)
-        val bottomSheet = themeData?.let {
-            NCWQuickMenuBottomSheet(it.quickMenuOptions,{ options ->
-                val timeStamp = System.currentTimeMillis()
-                checkForInitialMessage()
-                checkForPreviousQuickReply()
-                val payload = createPayload(options.text, options.label, timeStamp)
-                chatViewModel.sendMessage(options.label, timeStamp)
-                if (payload != null) {
-                    sendMessageToBot(payload)
-                }
-                messageInputField.text.clear()
-            },{
-                setIdealSurveyAgain()
-            })
-        }
-        bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
-        trackEvent(AnalyticsEvents.QUICK_MENU_OPENED)
-    }
+   private fun setUpQuickReplyOption() {
+
+       themeData?.let { theme ->
+           if (theme.quickMenuOptions != null && theme.quickMenuOptions.isNotEmpty()) {
+               stopIdleSurvey()
+               val bottomSheet = NCWQuickMenuBottomSheet(theme.quickMenuOptions, { options ->
+                   val timeStamp = System.currentTimeMillis()
+                   checkForInitialMessage()
+                   checkForPreviousQuickReply()
+                   val payload = createPayload(options.text, options.label, timeStamp)
+                   chatViewModel.sendMessage(options.label, timeStamp)
+                   payload?.let { sendMessageToBot(it) }
+                   messageInputField.text.clear()
+               }, {
+                   setIdealSurveyAgain()
+               })
+               bottomSheet.show(supportFragmentManager, "QuickReplyOptionsBottomSheet")
+               trackEvent(AnalyticsEvents.QUICK_MENU_OPENED)
+           }
+       }
+   }
+
 
     fun setUpLanguageOption() {
         val bottomSheet = themeData?.let {
@@ -461,7 +463,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     }
 
     private fun setUpSettingOption() {
-        handler.removeCallbacks(idleRunnable)
+        stopIdleSurvey()
         val bottomSheet = themeData?.let {
             NCWSettingBottomSheet(it ,{showWarning->
                 if (showWarning!=null)
@@ -487,7 +489,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     }
 
     private fun showRestartPopUp(ncwShowWarning: NCWShowWarning) {
-        handler.removeCallbacks(idleRunnable)
+       stopIdleSurvey()
         trackEvent(AnalyticsEvents.RESTART_CHAT_POPUP_SHOWN)
         val bottomSheet=  NCWRestartChatBottomSheet(themeData,ncwShowWarning ,{
                 onRestartAction()
@@ -556,12 +558,19 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
     private fun resetIdleTimer() {
         handler.removeCallbacks(idleRunnable)
+
         if (idleTimeInMillis > 0) {
             handler.postDelayed(idleRunnable, idleTimeInMillis)
         }
     }
 
-   fun showMedia() {
+    private fun stopIdleSurvey() {
+        handler.removeCallbacks(idleRunnable)
+        handler.removeCallbacksAndMessages(null)
+    }
+
+
+    fun showMedia() {
         if (arePermissionsGranted())
             showMediaOptions()
         else
@@ -618,7 +627,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             return
         }
         showProgressBar()
-        handler.removeCallbacks(idleRunnable)
+        stopIdleSurvey()
         chatViewModel.hitEndChatAPI(
             NCWEndChatRequest(
                 botRefId = botRefId!!, com.netomi.chat.model.endchat.NCWRequestBody(
@@ -1511,7 +1520,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacks(idleRunnable)
+        stopIdleSurvey()
         messageSoundPlayer?.release()
         // Remove the observer to prevent memory leaks
        // chatViewModel.awsMessage.removeObserver(awsMessageObserver)
@@ -1875,7 +1884,8 @@ Log.e("sdanjjkdnjcncjkjndjds","dsasdcdcdf "+newMessages)
                 when (CustomFieldName.fromValue(customField.name)) {
                     CustomFieldName.FORM_SCHEMA -> {
                         removeLoader()
-                        handler.removeCallbacks(idleRunnable)
+                        Log.e("RenderCalal","ssss FORM_SCHEMA")
+                        stopIdleSurvey()
                         renderTheFormMessage(response)
                     }
 
@@ -1883,7 +1893,7 @@ Log.e("sdanjjkdnjcncjkjndjds","dsasdcdcdf "+newMessages)
                         if (isFinishing || isDestroyed || supportFragmentManager.isStateSaved) {
                             return
                         }
-                        handler.removeCallbacks(idleRunnable)
+                        stopIdleSurvey()
                         renderTheSurveyMessage(response)
 
                     }
