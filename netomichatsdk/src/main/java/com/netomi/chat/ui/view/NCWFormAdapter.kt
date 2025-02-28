@@ -261,6 +261,7 @@ class NCWFormAdapter(
                 layoutParams = defaultLayoutParams()
                 minLines = 4
                 isEnabled = isClickable
+                imeOptions = EditorInfo.IME_ACTION_DONE
                 NCWThemeUtils.setBotTextColor(this)
             }
 

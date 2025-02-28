@@ -681,6 +681,12 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         if (::idleTimeoutManager.isInitialized) {
             idleTimeoutManager.checkForTimeout()
         }
+        if (messageSoundPlayer == null) {
+            Log.e("Datttaa","dsdsdsdsdsdds")
+            messageSoundPlayer = MessageSoundPlayer(this)
+        }
+
+
     }
 
 
@@ -1019,6 +1025,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             val timeStamp = System.currentTimeMillis()
             val createPayload = payload?.let { createPayload(it, label, timeStamp, attachmentList) }
             if (createPayload != null) {
+
                 chatViewModel.sendMessageAPI(createPayload)
                 addLoader()
                 playUserSound()
@@ -1868,7 +1875,9 @@ Log.e("sdanjjkdnjcncjkjndjds","dsasdcdcdf "+newMessages)
             for (customField in response.customFields) {
                 when (CustomFieldName.fromValue(customField.name)) {
                     CustomFieldName.FORM_SCHEMA -> {
+                        Log.e("Teststs","assaassa")
                         removeLoader()
+                        handler.removeCallbacks(idleRunnable)
                         renderTheFormMessage(response)
                     }
 
@@ -3102,6 +3111,7 @@ Log.e("sdanjjkdnjcncjkjndjds","dsasdcdcdf "+newMessages)
                     sendMessageToBot(payload)
 
                 } else {
+                    hideKeyboard(this)
                     hideProgressBar()
                     val position = messageList.indexOfLast { it.sender == TYPE_FORM }
                     val item = messageList[position]
@@ -3264,7 +3274,8 @@ NCWAppUtils.showToast(this, getString(R.string.transcript_sent_to_successfully, 
                     }
 
                     if (matchedRule != null) {
-                       idleTimeInMillis = NCWAppUtils.parseIdleTimeFromExpression(matchedRule.expression) * 1000
+                      idleTimeInMillis = NCWAppUtils.parseIdleTimeFromExpression(matchedRule.expression) * 1000
+
                         resetIdleTimer()
                     }
                 }
