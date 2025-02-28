@@ -682,7 +682,6 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             idleTimeoutManager.checkForTimeout()
         }
         if (messageSoundPlayer == null) {
-            Log.e("Datttaa","dsdsdsdsdsdds")
             messageSoundPlayer = MessageSoundPlayer(this)
         }
 
@@ -1875,7 +1874,6 @@ Log.e("sdanjjkdnjcncjkjndjds","dsasdcdcdf "+newMessages)
             for (customField in response.customFields) {
                 when (CustomFieldName.fromValue(customField.name)) {
                     CustomFieldName.FORM_SCHEMA -> {
-                        Log.e("Teststs","assaassa")
                         removeLoader()
                         handler.removeCallbacks(idleRunnable)
                         renderTheFormMessage(response)
