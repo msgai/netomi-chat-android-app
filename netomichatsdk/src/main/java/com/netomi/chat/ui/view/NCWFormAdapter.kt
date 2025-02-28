@@ -18,6 +18,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
@@ -692,7 +693,15 @@ class NCWFormAdapter(
                 setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                 NCWThemeUtils.setBotTextColor(this)
+
+
+
+
                 container.setOnClickListener {
+                    clearFocus()
+                    container.requestFocus()
+                    val imm = itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(container.windowToken, 0)
                     val calendar = Calendar.getInstance()
                     DatePickerDialog(
                         context, AlertDialog.THEME_HOLO_LIGHT,
@@ -702,6 +711,11 @@ class NCWFormAdapter(
                             // val showSelectedDate = "$dayOfMonth/${month + 1}/$year"
                             val errorMessage = validateDate(selectedDate, component)
                             setText(showSelectedDate)
+
+                            clearFocus()
+                            container.requestFocus()
+                            isFocusableInTouchMode = false
+                            isFocusable = false
                             if (errorMessage == null) {
 
                                 inputValuesSelected[adapterPosition].dateInput = selectedDate
@@ -716,6 +730,7 @@ class NCWFormAdapter(
                                 createErrorDrawable(container)
                             }
                         },
+
                         calendar.get(Calendar.YEAR),
                         calendar.get(Calendar.MONTH),
                         calendar.get(Calendar.DAY_OF_MONTH)
@@ -1060,10 +1075,15 @@ class NCWFormAdapter(
 
 
             uploadMedia.setOnClickListener {
+
+                uploadMedia.requestFocus()
+                val imm = itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(uploadMedia.windowToken, 0)
                 val isMultipleUpload = component.config?.fileUploadType == NCWAppConstant.UPLOAD_FILE_MULTIPLE
                 val hasNoFiles = (component.fileUpload?.size ?: 0) < 1
 
                 if (isMultipleUpload || hasNoFiles) {
+
                     callBack(component)
 
                 }
