@@ -279,6 +279,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
     private var isStreamingText: Boolean = false
     private var streamingJob: Job? = null
 
+    private var isEventSessionExpire:Boolean=false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
@@ -364,12 +366,14 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                 backClicked() else finish()
         }
         // Initialize IdleTimeoutManager with a timeout and a callback for session timeout
-    /*   themeData?.endChat?.idleTimeout?.let {
+
+       themeData?.endChat?.idleTimeout?.let {
 
            idleTimeoutManager = NCWIdleTimeoutManager(
                 idleTimeoutMillis = it,
                 onTimeout = {
                     stopIdleSurvey()
+                    isEventSessionExpire=true
                     handleSessionTimeout(
                         NCWThemeUtils.getThemeData()?.otherlocalized?.session_timeout ?:getString(R.string.session_timeout),
                         NCWThemeUtils.getThemeData()?.otherlocalized?.your_session_has_expired_due_to_inactivity?:getString(R.string.your_session_has_expired_due_to_inactivity),
@@ -379,7 +383,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                 }
             )
 
-        }*/
+        }
 
         // Add a custom back press callback
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -973,6 +977,13 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         }
 
         setUIStrings()
+
+        if (themeData?.multilingual?.enabled == false && themeData.sound.status != ENABLED && themeData.restartChat?.isEnabled==false ){
+            ivMenu.visibility=View.GONE
+        }
+        else{
+            ivMenu.visibility=View.VISIBLE
+        }
 
     }
 
@@ -3206,7 +3217,7 @@ if (isUpdated) {
                     onRestart = false
                     return
                 }
-                if (mSurveyRule != null) {
+                if (mSurveyRule != null && !isEventSessionExpire) {
                     if (mSurveyRule?.any { key -> key.conversationTriggerType == RULE_EVENT_CHAT_END } == true) {
                         isSurveyRule = true
                         return
