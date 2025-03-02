@@ -45,6 +45,9 @@ object DownloadHelper {
                 val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                 if (id == downloadId) {
                     EventTracker.trackEvent(AnalyticsEvents.TRANSCRIPT_DOWNLOADED)
+                    if (context != null) {
+                        NCWAppUtils.showToast(context,context.getString(R.string.download_complete))
+                    }
                     showDownloadNotification(context!!, fileName)
                     context.unregisterReceiver(this) // Unregister receiver
                 }
@@ -67,7 +70,7 @@ object DownloadHelper {
 
     private fun showDownloadNotification(context: Context, fileName: String) {
 
-        NCWAppUtils.showToast(context,context.getString(R.string.download_complete))
+
         createNotificationChannel(context)
 
         val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
