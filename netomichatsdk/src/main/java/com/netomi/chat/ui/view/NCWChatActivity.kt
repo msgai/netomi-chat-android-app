@@ -863,7 +863,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                     label = label,
                     messageId = messageId,
                     timestamp = timeStamp,
-                    hideMessage = if (label == PROACTIVE_GREETING || label==SKIP_LABEL|| label== MESSAGE_BACK_TO_BOT) true else null
+                    hideMessage = if (label == PROACTIVE_GREETING || label==SKIP_LABEL|| label== MESSAGE_BACK_TO_BOT||label== BACK_TO_BOT_SYSTEM_EVENT) true else null
 
                 ),
                 attachmentList = attachmentList,
@@ -3464,6 +3464,13 @@ NCWAppUtils.showToast(this, getString(R.string.transcript_sent_to_successfully, 
                                             )
                                             messageList.add(newMessage)
                                         }
+                                    else if (surveyField.submitSurveyInfo!=null && !surveyField.isSurveySkipped){
+
+                                           stopIdleSurvey()
+                                           renderTheSurveyMessage(response)
+                                    }
+
+
                                    }
 
 
