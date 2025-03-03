@@ -8,7 +8,7 @@ data class SurveyField(
     val eventType: String?=null,
     val payload: Payload?=null,
     val triggerType: String?=null,
-    var submitSurveyInfo: SubmitSurveyInfo,
+    var submitSurveyInfo: SubmitSurveyInfo? = null,
     var isSurveySkipped:Boolean=false
 )
 

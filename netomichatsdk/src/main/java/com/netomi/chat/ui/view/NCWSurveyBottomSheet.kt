@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.method.ScrollingMovementMethod
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,6 +61,13 @@ class NCWSurveyBottomSheet(
 
         dialog.setCancelable(false)
         dialog.setCanceledOnTouchOutside(false)
+
+        dialog.setOnKeyListener { _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP) {
+                return@setOnKeyListener true
+            }
+            false
+        }
 
         dialog.setOnShowListener {
             dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.background =
