@@ -10,6 +10,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.RadioGroup
@@ -75,6 +76,10 @@ class NCWSurveyBottomSheet(
         }
 
         return dialog
+    }
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
     }
 
 
@@ -429,6 +434,18 @@ class NCWSurveyBottomSheet(
                             }
 
                         }
+                    }
+                    else{
+                        edtAdditionalFeedback.apply {
+                            isVerticalScrollBarEnabled = true
+                            movementMethod = ScrollingMovementMethod()
+                            setOnTouchListener { v, event ->
+                                v.parent.requestDisallowInterceptTouchEvent(true)
+                                false
+                            }
+
+                        }
+
                     }
 
                 }
