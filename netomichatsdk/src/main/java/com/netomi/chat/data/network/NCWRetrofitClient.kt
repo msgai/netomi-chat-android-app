@@ -1,10 +1,15 @@
 package com.netomi.chat.data.network
 
 import android.content.Context
+import android.os.Build
+import android.util.Log
 import com.netomi.chat.data.apiconstant.NCWApiConstant.HEADER_BEARER
 import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.utils.NCWAppSharedPreferences
 import com.netomi.chat.utils.NCWAppConstant
+import com.netomi.chat.utils.NCWAppUtils.getAppVersion
+import com.netomi.chat.utils.NCWAppUtils.getDeviceName
+import com.netomi.chat.utils.NCWAppUtils.getOSVersion
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -59,7 +64,12 @@ object NCWRetrofitClient {
             .readTimeout(60, TimeUnit.SECONDS)
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             .addInterceptor(AuthInterceptor(context))  // Adding the interceptor
+            .addInterceptor(logging)
             .build()
+    }
+
+    private val logging = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.HEADERS
     }
 
     /**
@@ -87,19 +97,25 @@ object NCWRetrofitClient {
      */
     class AuthInterceptor(private val context: Context) : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {
-            val sessionToken = NCWAppSharedPreferences(context).getString(NCWAppConstant.SESSION_TOKEN)
+           // val sessionToken = NCWAppSharedPreferences(context).getString(NCWAppConstant.SESSION_TOKEN)
 
-            // Start building the request
+            val headers = mapOf(
+                "App-Version" to  getAppVersion(context),
+                "Content-Type" to "application/json",
+                "Platform" to "android",
+                "Device" to getDeviceName(),
+                "OS" to getOSVersion()
+            )
             val requestBuilder = chain.request().newBuilder()
-                .header("Content-Type", "application/json")
-            if (sessionToken.isNotEmpty()) {
-                requestBuilder.header("Authorization", "$HEADER_BEARER $sessionToken")
+            for ((key, value) in headers) {
+                requestBuilder.header(key, value)
             }
-            // Build the request after all headers are set
             val request = requestBuilder.build()
+            Log.e("AuthInterceptor", "Final Headers: ${request.headers}")
             return chain.proceed(request)
         }
     }
+
 
 
 

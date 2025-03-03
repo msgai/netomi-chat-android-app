@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.Build
 import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.inputmethod.InputMethodManager
@@ -316,6 +317,23 @@ object NCWAppUtils {
             e.printStackTrace()
         }
         return ""
+    }
+
+     fun getDeviceName(): String {
+        return "${Build.MANUFACTURER} ${Build.MODEL}"
+    }
+
+     fun getOSVersion(): String {
+        return Build.VERSION.RELEASE
+    }
+
+     fun getAppVersion(context: Context): String {
+        return try {
+            val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+            packageInfo.versionName ?: "1.0"
+        } catch (e: Exception) {
+            "1.0"
+        }
     }
 
 
