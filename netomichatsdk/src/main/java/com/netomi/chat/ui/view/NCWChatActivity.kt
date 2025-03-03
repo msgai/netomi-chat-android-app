@@ -3362,42 +3362,6 @@ NCWAppUtils.showToast(this, getString(R.string.transcript_sent_to_successfully, 
                 if (response.customFields?.isNotEmpty() == true) {
                     for (customField in response.customFields) {
                         when (CustomFieldName.fromValue(customField.name)) {
-
-                    /*        CustomFieldName.FORM_SCHEMA -> {
-                                val formSchemas: List<FormSchema> = gson.fromJson(
-                                    customField.values?.get(0),
-                                    object : TypeToken<List<FormSchema>>() {}.type
-                                )
-                                val formSchemasModel = formSchemas.firstOrNull()
-
-                                formSchemasModel?.let { schema ->
-                                    val nextMessagePayload = responses.getOrNull(index + 1)
-                                        ?.requestPayload?.messagePayload?.text
-
-                                    val formData =
-                                        nextMessagePayload?.let { parsePayloadToFormData(it) }
-
-                                    Log.e(
-                                        "NextPayload",
-                                        "formData: $formData, size: ${formData?.size}"
-                                    )
-
-                                    if (!formData.isNullOrEmpty()) {
-                                        schema.formData = formData
-                                    }
-
-                                    // Create and add the new message
-                                    addSingleMessage(
-                                        NCWMessage(
-                                            sender = TYPE_FORM,
-                                            timestamp = System.currentTimeMillis(),
-                                            formSchema = schema
-                                        )
-                                    )
-                                }
-                            }*/
-
-
                             CustomFieldName.FORM_SCHEMA -> {
                                 val formSchemas: List<FormSchema> = gson.fromJson(
                                     customField.values?.get(0),
@@ -3453,7 +3417,7 @@ NCWAppUtils.showToast(this, getString(R.string.transcript_sent_to_successfully, 
                                         customField.values[0],
                                         object : TypeToken<SurveyField>() {}.type
                                     )
-
+                                    val isLastMessage = index == responses.lastIndex
                                        if (!surveyField.isSurveySkipped && surveyField.submitSurveyInfo!=null) {
                                            val newMessage = NCWMessage(
                                                 sender = TYPE_EVENT,
@@ -3464,8 +3428,8 @@ NCWAppUtils.showToast(this, getString(R.string.transcript_sent_to_successfully, 
                                             )
                                             messageList.add(newMessage)
                                         }
-                                    else if (surveyField.submitSurveyInfo!=null && !surveyField.isSurveySkipped){
 
+                                    else if (surveyField.submitSurveyInfo==null && !surveyField.isSurveySkipped && isLastMessage){
                                            stopIdleSurvey()
                                            renderTheSurveyMessage(response)
                                     }
