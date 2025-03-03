@@ -61,7 +61,7 @@ class HomeFragment : Fragment() {
         }
 
         onboardingViewModel.jwtToken.observe(viewLifecycleOwner) {
-            handleApiCallback(it as State<Any>)
+            //handleApiCallback(it as State<Any>)
         }
 
         imgButton.setOnClickListener {
@@ -89,8 +89,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun showLoader(show: Boolean) {
-        //progressOverlay.visibility = if (show) View.VISIBLE else View.GONE
-        //progressOverlay.isClickable = show
+        progressOverlay.visibility = if (show) View.VISIBLE else View.GONE
+        progressOverlay.isClickable = show
     }
 
     private fun handleApiCallback(response: State<Any>) {
@@ -126,6 +126,21 @@ class HomeFragment : Fragment() {
         tvBotName.text = bot.botName
         Glide.with(requireContext()).load(bot.logo).into(imgButton)
         imgButton.setBackgroundResource(R.drawable.float_button_gradient)
+  /*      val name= preferences.getString(SharePreferenceConstant.NAME)
+        val email=preferences.getString(SharePreferenceConstant.EMAIL)
+
+        val jsonMap = mapOf(
+            "name" to name,
+            "externalId" to email
+        )
+        val jsonString = Gson().toJson(jsonMap)
+        if (NetworkUtils.isNetworkAvailable(requireActivity())){
+            showLoader(true)
+            bot.botRefId.let { onboardingViewModel.fetchJwtToken(bot.botRefId,jsonString) }
+            }
+        else
+            Toast.makeText(requireContext(),
+                getString(R.string.please_check_your_network_and_try_again), Toast.LENGTH_SHORT).show()*/
 
         try {
             NCWChatSdk.setEnvironment(bot.env)
