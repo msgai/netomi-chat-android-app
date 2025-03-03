@@ -61,14 +61,14 @@ class HomeFragment : Fragment() {
         }
 
         onboardingViewModel.jwtToken.observe(viewLifecycleOwner) {
-            handleApiCallback(it as State<Any>)
+            //handleApiCallback(it as State<Any>)
         }
 
         imgButton.setOnClickListener {
             activity?.let { activityContext ->
                 if (isButtonClickable) {
                     avoidDoubleClick()
-                    NCWChatSdk.launch(activityContext, token, onError = {errorMessage->
+                    NCWChatSdk.launch(activityContext, onError = {errorMessage->
                         showErrorDialog(errorMessage)
                     })
                 }
@@ -126,7 +126,7 @@ class HomeFragment : Fragment() {
         tvBotName.text = bot.botName
         Glide.with(requireContext()).load(bot.logo).into(imgButton)
         imgButton.setBackgroundResource(R.drawable.float_button_gradient)
-        val name= preferences.getString(SharePreferenceConstant.NAME)
+  /*      val name= preferences.getString(SharePreferenceConstant.NAME)
         val email=preferences.getString(SharePreferenceConstant.EMAIL)
 
         val jsonMap = mapOf(
@@ -140,7 +140,7 @@ class HomeFragment : Fragment() {
             }
         else
             Toast.makeText(requireContext(),
-                getString(R.string.please_check_your_network_and_try_again), Toast.LENGTH_SHORT).show()
+                getString(R.string.please_check_your_network_and_try_again), Toast.LENGTH_SHORT).show()*/
 
         try {
             NCWChatSdk.setEnvironment(bot.env)
