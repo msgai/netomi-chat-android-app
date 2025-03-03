@@ -9,6 +9,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
         android:orientation="horizontal">
 
         <RadioButton
@@ -24,6 +25,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/proxima_nova_alt_semibold"
             android:text="Bot Name"
+         android:paddingVertical="4dp"
             android:textColor="@color/charcoal_blue"
             android:textSize="20sp" />
     </LinearLayout>
@@ -31,6 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:layout_marginTop="5dp"
         android:layout_marginStart="36dp">
 
         <TextView
