@@ -26,7 +26,7 @@ object DownloadHelper {
 
     fun downloadFile(context: Context, url: String, fileName: String) {
         NCWAppUtils.showToast(context,context.getString(R.string.downloading_file))
-
+        EventTracker.trackEvent(AnalyticsEvents.TRANSCRIPT_DOWNLOADED)
         val request = DownloadManager.Request(Uri.parse(url))
             .setTitle(context.getString(R.string.downloading_file))
             .setDescription("Downloading $fileName...")
@@ -44,7 +44,6 @@ object DownloadHelper {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                 if (id == downloadId) {
-                    EventTracker.trackEvent(AnalyticsEvents.TRANSCRIPT_DOWNLOADED)
                     if (context != null) {
                         NCWAppUtils.showToast(context,context.getString(R.string.download_complete))
                     }

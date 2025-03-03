@@ -1223,7 +1223,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         when (CarouselButtonType.fromValue(it?.type)) {
             CarouselButtonType.WEB -> {
                 trackEvent(
-                    AnalyticsEvents.LAUNCHED_URL,
+                    AnalyticsEvents.URL_LAUNCHED_BUTTON,
                     AnalyticsEvents.LAUNCHED_URL to it?.url.toString()
                 )
                 if (it?.title.equals("Sign In", ignoreCase = false)) {
