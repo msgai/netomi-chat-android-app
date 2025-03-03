@@ -1,17 +1,25 @@
 package com.netomi.chat.ui.view
 
 import android.app.Dialog
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.NestedScrollView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
 import com.netomi.chat.model.theme.NCWShowWarning
@@ -47,7 +55,10 @@ class NCWRestartChatBottomSheet(
 
         return dialog
     }
-
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -75,7 +86,7 @@ class NCWRestartChatBottomSheet(
         val tvErrorEmail = dialogView.findViewById<TextView>(R.id.tvErrorEmail)
         val tvEmail = dialogView.findViewById<TextView>(R.id.tvEmail)
         val constDownload = dialogView.findViewById<ConstraintLayout>(R.id.constDownload)
-
+        val nestedScrollView = dialogView.findViewById<NestedScrollView>(R.id.nestedScrollView)
 
 
 
@@ -95,6 +106,7 @@ class NCWRestartChatBottomSheet(
                     createErrorDrawable(emailEditText)
                     tvErrorEmail.visibility = View.VISIBLE
                     tvErrorEmail.text =  NCWThemeUtils.getThemeData()?.otherlocalized?.please_provide_valid_email ?:getString(R.string.please_provide_valid_email)
+                    nestedScrollView.smoothScrollTo(0, btnConfirm.bottom)
                     enableButton(btnConfirm, false)
                 }
             }

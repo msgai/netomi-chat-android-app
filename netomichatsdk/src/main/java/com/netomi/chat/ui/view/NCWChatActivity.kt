@@ -588,6 +588,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                  }*/
       fun backClicked() {
           trackEvent(AnalyticsEvents.END_CHAT_POPUP_SHOWN)
+          stopIdleSurvey()
         val bottomSheet = NCWEndChatBottomSheet(
             themeData,
             { isEndChat ->

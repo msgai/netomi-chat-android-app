@@ -4,10 +4,10 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
@@ -15,6 +15,7 @@ import android.widget.RadioButton
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.widget.NestedScrollView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
 import com.netomi.chat.model.theme.NCWThemeResponse
@@ -51,6 +52,10 @@ class NCWEndChatBottomSheet(
         return dialog
     }
 
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -79,6 +84,7 @@ class NCWEndChatBottomSheet(
 
         val tvErrorEmail = view.findViewById<TextView>(R.id.tvErrorEmail)
         val tvEmail = view.findViewById<TextView>(R.id.tvEmail)
+        val nestedScrollView = view.findViewById<NestedScrollView>(R.id.nestedScrollView)
         tvEmail.text= NCWThemeUtils.getThemeData()?.otherlocalized?.email ?: getString(R.string.email)
 
         tvTitle.text= NCWThemeUtils.getThemeData()?.otherlocalized?.close_chat ?: getString(R.string.close_chat)
@@ -131,7 +137,10 @@ class NCWEndChatBottomSheet(
                     NCWThemeUtils.createErrorDrawable(emailEditText)
                     tvErrorEmail.visibility = View.VISIBLE
                     tvErrorEmail.text =  NCWThemeUtils.getThemeData()?.otherlocalized?.please_provide_valid_email ?:getString(R.string.please_provide_valid_email)
+                    nestedScrollView.smoothScrollTo(0, btnConfirm.bottom)
                     enableButton(btnConfirm, false)
+
+
                 }
             }
         })
