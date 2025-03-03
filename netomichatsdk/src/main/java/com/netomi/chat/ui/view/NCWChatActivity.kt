@@ -308,7 +308,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         observeChatMessages()
 
         // Properly collect the streaming messages
-        lifecycleScope.launch {
+       /* lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 chatViewModel.awsMessage.collectLatest { message ->
                     message?.let {
@@ -318,7 +318,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                     }
                 }
             }
-        }
+        }*/
 
         botRefId = intent.getStringExtra(BOT_REFERENCE_ID)
         val device = DeviceInfoUtil.getDeviceInfo(this)
@@ -1412,7 +1412,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             handleApiCallback(it as NCWState<Any>)
         }
 
-        //chatViewModel.awsMessage.observeForever(awsMessageObserver)
+        chatViewModel.awsMessage.observeForever(awsMessageObserver)
 
         ncwAwsCredentialsViewModel.credentials.observe(this) {
             topic = "$CHAT_WIDGET/$botRefId/$conversationID"
@@ -1535,7 +1535,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         stopIdleSurvey()
         messageSoundPlayer?.release()
         // Remove the observer to prevent memory leaks
-       // chatViewModel.awsMessage.removeObserver(awsMessageObserver)
+       chatViewModel.awsMessage.removeObserver(awsMessageObserver)
 
     }
 
