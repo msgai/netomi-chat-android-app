@@ -457,10 +457,12 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                     themeData?.multilingual?.selectLanguageLabel = options.label
                     chatViewModel.getLanguageStrings(it,options.code)
                 }
-                trackEvent(
+                trackEvent(AnalyticsEvents.LANGUAGE_CHANGED)
+
+                /*trackEvent(
                     AnalyticsEvents.LANGUAGE_CHANGED,
                     AnalyticsEvents.SELECTED_LANGUAGE to options.label
-                )
+                )*/
             }
         }
         bottomSheet?.show(supportFragmentManager, "SurveyOptionsBottomSheet")
@@ -3671,7 +3673,7 @@ NCWAppUtils.showToast(this, getString(R.string.transcript_sent_to_successfully, 
      * @param pairs Optional key-value pairs for additional event properties.
      */
     private fun trackEvent(eventName: String, vararg pairs: Pair<String, Any?>) {
-        val selectedLanguage = themeData?.multilingual?.selectLanguageLabel?.takeIf { it.isNotBlank() } ?: "English"
+        val selectedLanguage = themeData?.multilingual?.selectedCode?.takeIf { it.isNotBlank() } ?: "en"
 
         EventTracker.trackEvent(
             eventName,
