@@ -139,7 +139,7 @@ class NCWRestartChatBottomSheet(
 
         tvSendTranscript.text=NCWThemeUtils.getThemeData()?.otherlocalized?.send_transcript ?: getString(R.string.send_transcript)
        tvDownload.text=NCWThemeUtils.getThemeData()?.otherlocalized?.download ?: getString(R.string.download)
-        tvTitle.text = ncwShowWarning.restartButtonText ?: getString(R.string.restart_chat)
+        tvTitle.text = NCWThemeUtils.getThemeData()?.otherlocalized?.restart_chat ?: getString(R.string.restart_chat)
         tvSubtitle.text = ncwShowWarning.warningText ?: getString(R.string.confirm_restart_chat)
         btnConfirm.text = ncwShowWarning.restartButtonText ?: getString(R.string.restart_chat)
         btnCancel.text = ncwShowWarning.cancelButtonText ?: getString(R.string.cancel)
