@@ -1531,7 +1531,6 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         try {
 
             val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
-            playBotSound()
             if (response!=null) {
                 renderTheNormalMessage(response)
             }
@@ -2114,14 +2113,16 @@ Log.e("sdanjjkdnjcncjkjndjds","dsasdcdcdf "+newMessages)
     }*/
   private fun smoothScrollToBottom() {
       val layoutManager = chatRecyclerView.layoutManager as LinearLayoutManager
-      val smoothScroller = object : LinearSmoothScroller(chatRecyclerView.context) {
-          override fun getVerticalSnapPreference(): Int = SNAP_TO_END
-          override fun calculateSpeedPerPixel(displayMetrics: DisplayMetrics): Float {
-              return 0.2f
+      if (messageAdapter.itemCount > 0) {
+          val smoothScroller = object : LinearSmoothScroller(chatRecyclerView.context) {
+              override fun getVerticalSnapPreference(): Int = SNAP_TO_END
+              override fun calculateSpeedPerPixel(displayMetrics: DisplayMetrics): Float {
+                  return 0.2f
+              }
           }
+          smoothScroller.targetPosition = messageAdapter.itemCount - 1
+          layoutManager.startSmoothScroll(smoothScroller)
       }
-      smoothScroller.targetPosition = messageAdapter.itemCount - 1
-      layoutManager.startSmoothScroll(smoothScroller)
   }
 
 
