@@ -10,6 +10,7 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
@@ -30,11 +31,9 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
@@ -98,6 +97,7 @@ import com.netomi.chat.ui.viewmodel.NCWChatViewModel
 import com.netomi.chat.utils.DeviceInfoUtil
 import com.netomi.chat.utils.DownloadHelper
 import com.netomi.chat.utils.MessageSoundPlayer
+import com.netomi.chat.utils.NCWService
 import com.netomi.chat.utils.NCWAppConstant
 import com.netomi.chat.utils.NCWAppConstant.ARG_MEDIA_URL
 import com.netomi.chat.utils.NCWAppConstant.BACK_TO_BOT_SYSTEM_EVENT
@@ -172,7 +172,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -1460,6 +1459,12 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                     }, 2000)
 
 
+                    val serviceIntent = Intent(this, NCWService::class.java)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        ContextCompat.startForegroundService(this, serviceIntent)
+                    } else {
+                        startService(serviceIntent)
+                    }
                 }
 
                 NCWConnectionStatus.CONNECTION_LOST.toString() -> {
@@ -1541,6 +1546,9 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         messageSoundPlayer?.release()
         // Remove the observer to prevent memory leaks
        chatViewModel.awsMessage.removeObserver(awsMessageObserver)
+
+        val serviceIntent = Intent(this, NCWService::class.java)
+        stopService(serviceIntent)
 
     }
 
