@@ -57,5 +57,6 @@ data class NCWThemeResponse(
     var proActiveGreetings: ArrayList<String> = arrayListOf(),
     var isProActiveGreetings:Boolean=false,
     var streamOnChatWidget:NCWStreamOnChatWidget,
-    var otherlocalized: NCWOtherLocalized=NCWOtherLocalized()
+    var otherlocalized: NCWOtherLocalized=NCWOtherLocalized(),
+    var eventAnalyticsMP:Boolean=true,
 )

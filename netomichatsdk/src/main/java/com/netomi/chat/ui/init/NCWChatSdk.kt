@@ -43,13 +43,7 @@ object NCWChatSdk {
             setThemeData()
             fetchAndStoreTheme(context, newBotRefId)
             setConversationEmpty()
-            EventTracker.apply {
-                initMix(context , true)
-                val properties = JSONObject().apply {
-                    put(AnalyticsEvents.BOT_REF_ID, newBotRefId)
-                }
-                trackEvent(AnalyticsEvents.CHAT_SDK_INITIALIZED , properties)
-            }
+
 
         } else {
             Log.e("NCWChatSdk", "No network available during initialization.")
@@ -119,6 +113,15 @@ object NCWChatSdk {
                         it.otherlocalized = NCWOtherLocalized()
                     }
                     NCWThemeUtils.setThemeData(it)
+                    if (it.eventAnalyticsMP) {
+                        EventTracker.apply {
+                            initMix(context, true)
+                            val properties = JSONObject().apply {
+                                put(AnalyticsEvents.BOT_REF_ID, botRefId)
+                            }
+                            trackEvent(AnalyticsEvents.CHAT_SDK_INITIALIZED, properties)
+                        }
+                    }
                     Log.d("NCWChatSdk", "Theme data stored: $it")
                     onComplete?.invoke()
                 } ?: run {
