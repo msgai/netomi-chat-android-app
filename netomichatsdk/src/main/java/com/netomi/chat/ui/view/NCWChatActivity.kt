@@ -455,6 +455,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
                 Log.e("Option","optyui"+options.code)
                 botRefId?.let {
                     themeData?.multilingual?.selectedCode=options.code
+                    themeData?.multilingual?.selectLanguageLabel = options.label
                     chatViewModel.getLanguageStrings(it,options.code)
                 }
                 trackEvent(
@@ -3657,11 +3658,14 @@ NCWAppUtils.showToast(this, getString(R.string.transcript_sent_to_successfully, 
      * @param pairs Optional key-value pairs for additional event properties.
      */
     private fun trackEvent(eventName: String, vararg pairs: Pair<String, Any?>) {
+        val selectedLanguage = themeData?.multilingual?.selectLanguageLabel?.takeIf { it.isNotBlank() } ?: "English"
+
         EventTracker.trackEvent(
             eventName,
             createJsonObject(
                 conversationID = conversationID.toString(),
                 botRefId = botRefId.toString(),
+                selectedLanguage = selectedLanguage ,
                 *pairs
             )
         )

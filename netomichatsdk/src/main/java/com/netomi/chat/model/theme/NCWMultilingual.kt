@@ -5,5 +5,6 @@ data class NCWMultilingual(
     val isAutoLocalisationEnabled: Boolean,
     val languages: List<NCWLanguage>,
     var selectedCode: String="en",
+    var selectLanguageLabel: String = "English",
 
 )

@@ -44,11 +44,13 @@ class EventTracker {
         fun createJsonObject(
             conversationID: String,
             botRefId: String,
+            selectedLanguage : String,
             vararg pairs: Pair<String, Any?>
         ): JSONObject {
             return JSONObject().apply {
                 put(AnalyticsEvents.CONVERSATION_ID, conversationID)
                 put(AnalyticsEvents.BOT_REF_ID, botRefId)
+                put(AnalyticsEvents.SELECTED_LANGUAGE, selectedLanguage)
                 pairs.forEach { (key, value) ->
                     put(key, value)
                 }
