@@ -25,7 +25,9 @@ object DownloadHelper {
     private const val CHANNEL_ID = "DownloadChannel"
 
     fun downloadFile(context: Context, url: String, fileName: String) {
-        NCWAppUtils.showToast(context,context.getString(R.string.downloading_file))
+        if (context != null) {
+            NCWAppUtils.showToast(context,context.getString(R.string.download_complete))
+        }
         EventTracker.trackEvent(AnalyticsEvents.TRANSCRIPT_DOWNLOADED)
         val request = DownloadManager.Request(Uri.parse(url))
             .setTitle(context.getString(R.string.downloading_file))
@@ -44,9 +46,7 @@ object DownloadHelper {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                 if (id == downloadId) {
-                    if (context != null) {
-                        NCWAppUtils.showToast(context,context.getString(R.string.download_complete))
-                    }
+
                     showDownloadNotification(context!!, fileName)
                     context.unregisterReceiver(this) // Unregister receiver
                 }
