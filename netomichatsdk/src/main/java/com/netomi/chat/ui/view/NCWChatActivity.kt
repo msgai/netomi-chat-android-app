@@ -980,11 +980,15 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
         setUIStrings()
 
-        if (themeData?.multilingual?.enabled == false && themeData.sound.status != ENABLED && themeData.restartChat?.isEnabled==false ){
-            ivMenu.visibility=View.GONE
-        }
-        else{
-            ivMenu.visibility=View.VISIBLE
+
+        val isMultilingualEnabled = themeData?.multilingual?.enabled ?: false
+        val isSoundEnabled = themeData?.sound?.status == ENABLED
+        val isRestartChatEnabled = themeData?.restartChat?.isEnabled ?: false
+
+        if (!isMultilingualEnabled && !isSoundEnabled && !isRestartChatEnabled) {
+            ivMenu.visibility = View.GONE
+        } else {
+            ivMenu.visibility = View.VISIBLE
         }
 
     }
