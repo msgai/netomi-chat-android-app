@@ -78,5 +78,6 @@
     <string name="download_complete">Download Complete</string>
     <string name="enter_email">Enter Email</string>
     <string name="click_to_upload">Click to upload</string>
+    <string name="ask_a_question">Ask a question...</string>
 
 </resources>

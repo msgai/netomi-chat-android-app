@@ -12,6 +12,7 @@
     <color name="view_line_color">#0F000000</color>
     <color name="green">#41887B</color>
     <color name="checkbox_tint">#000000</color>
+    <color name="disable_grey">#d3d3d3</color>
 
 
 </resources>

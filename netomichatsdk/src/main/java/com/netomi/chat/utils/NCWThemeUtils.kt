@@ -180,9 +180,9 @@ object NCWThemeUtils
             footerConfig.inputBoxTextColor.let { textColor ->
                 parseColor(textColor).let { messageInputField.setTextColor(it) }
             }
-            footerConfig.inputBoxBackgroundColor.let { inputBoxBackgroundColor ->
+            /*footerConfig.inputBoxBackgroundColor.let { inputBoxBackgroundColor ->
                 parseColor(inputBoxBackgroundColor).let { cardViewInputBox.setCardBackgroundColor(it) }
-            }
+            }*/
         }
     }
 
@@ -717,7 +717,14 @@ object NCWThemeUtils
         view.background = drawable
 
     }
+    fun setImageTint(imageView: ImageView) {
 
+        NCWChatSdk.getUpdatedOtherConfiguration().backgroundColor?.let {
+            val tintList = ColorStateList.valueOf(parseColor(it))
+            ImageViewCompat.setImageTintList(imageView, tintList)
+        } ?: ImageViewCompat.setImageTintList(imageView, null)
+
+    }
 
 
  fun createErrorDrawable(view: View) {
