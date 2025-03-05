@@ -143,9 +143,10 @@ class NCWChatAdapter(
           senderVideoCard.setOnClickListener { chatActionCallback.onMediaClick(message) }
           requestDocCard.setOnClickListener { chatActionCallback.onMediaClick(message) }
           tvRetry.visibility=if(message.isRetry) View.VISIBLE else View.GONE
-          tvRetry.text=NCWThemeUtils.getThemeData()?.otherlocalized?.not_sent_tap_to_retry ?:itemView.context.getString(R.string.not_sent_tap_to_retry)
-          tvRetry.setOnClickListener { chatActionCallback.onRetryClicked(message) }
+       //   tvRetry.text=NCWThemeUtils.getThemeData()?.otherlocalized?.not_sent_tap_to_retry ?:itemView.context.getString(R.string.not_sent_tap_to_retry)
+      //    tvRetry.setOnClickListener { chatActionCallback.onRetryClicked(message) }
 
+          tvRetry.text="Not sent"
       }
 
       private fun setupFileMessage(message: NCWMessage) {
