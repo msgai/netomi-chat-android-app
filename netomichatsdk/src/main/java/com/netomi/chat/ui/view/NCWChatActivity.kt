@@ -323,6 +323,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         val device = DeviceInfoUtil.getDeviceInfo(this)
         deviceInfo = device.toNCWCustomAttributes()
 
+
+
         val jwtToken = NCWThemeUtils.getJwtToken()
         if (jwtToken != null) {
             botRefId?.let { chatViewModel.hitAuthenticateUserApi(jwtToken, it) }
@@ -429,6 +431,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
        themeData?.let { theme ->
            if (theme.quickMenuOptions != null && theme.quickMenuOptions.isNotEmpty()) {
+
                stopIdleSurvey()
                val bottomSheet = NCWQuickMenuBottomSheet(theme.quickMenuOptions, { options ->
                    val timeStamp = System.currentTimeMillis()
@@ -990,6 +993,13 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             ivMenu.visibility = View.GONE
         } else {
             ivMenu.visibility = View.VISIBLE
+        }
+
+        if (themeData?.quickMenuOptions != null && themeData.quickMenuOptions.isNotEmpty()){
+            ivMenuOption.visibility=View.VISIBLE
+        }
+        else{
+            ivMenuOption.visibility=View.GONE
         }
 
     }
