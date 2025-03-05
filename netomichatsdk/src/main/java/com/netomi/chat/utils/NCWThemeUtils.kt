@@ -180,9 +180,9 @@ object NCWThemeUtils
             footerConfig.inputBoxTextColor.let { textColor ->
                 parseColor(textColor).let { messageInputField.setTextColor(it) }
             }
-            footerConfig.inputBoxBackgroundColor.let { inputBoxBackgroundColor ->
+            /*footerConfig.inputBoxBackgroundColor.let { inputBoxBackgroundColor ->
                 parseColor(inputBoxBackgroundColor).let { cardViewInputBox.setCardBackgroundColor(it) }
-            }
+            }*/
         }
     }
 

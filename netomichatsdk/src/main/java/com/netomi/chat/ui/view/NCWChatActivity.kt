@@ -951,8 +951,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         )
 
         // Set attachment icon visibility
-        attachmentIcon.visibility =
-            if (themeData?.fileSharing?.isEnabled == true) View.VISIBLE else View.GONE
+       /* attachmentIcon.visibility =
+            if (themeData?.fileSharing?.isEnabled == true) View.VISIBLE else View.GONE*/
 
         // Configure footer branding
         themeData?.mobileConfig?.lightTheme?.footerConfig?.let { footerConfig ->
@@ -979,7 +979,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             cardToday.setBackgroundColor(Color.parseColor(it.chatWindowBackgroundColor))
         }
 
-        setUIStrings()
+        //setUIStrings()
 
 
         val isMultilingualEnabled = themeData?.multilingual?.enabled ?: false
@@ -1956,15 +1956,24 @@ Log.e("sdanjjkdnjcncjkjndjds","dsasdcdcdf "+newMessages)
         sendMessageIcon.alpha = alphaValue
         messageInputField.alpha = alphaValue
         attachmentIcon.alpha = alphaValue
+//cardViewInputBox.alpha = alphaValue
+
         if (!enabled) {
             val colorFilter = PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN)
             sendMessageIcon.colorFilter = colorFilter
             attachmentIcon.colorFilter = colorFilter
             ivMenuOption.colorFilter = colorFilter
+            messageInputField.hint=""
+            cardViewInputBox.setCardBackgroundColor(ContextCompat.getColor(this, R.color.disable_grey))
+            attachmentIcon.visibility = View.GONE
+
         } else {
             sendMessageIcon.clearColorFilter()
             attachmentIcon.clearColorFilter()
             ivMenuOption.clearColorFilter()
+            messageInputField.hint= themeData?.otherlocalized?.ask_a_question ?:getString(R.string.ask_a_question)
+            cardViewInputBox.setCardBackgroundColor( Color.parseColor(NCWChatSdk.getUpdatedFooterConfiguration().inputBoxBackgroundColor))
+            attachmentIcon.visibility = if (themeData?.fileSharing?.isEnabled == true) View.VISIBLE else View.GONE
         }
 
     }
