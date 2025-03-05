@@ -11,6 +11,7 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.RadioButton
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -76,11 +77,14 @@ class NCWEndChatBottomSheet(
         val emailTextInputLayout=view.findViewById<ConstraintLayout>(R.id.emailTextInputLayout)
         val constTranscript=view.findViewById<ConstraintLayout>(R.id.constTranscript)
         val emailEditText=view.findViewById<EditText>(R.id.emailEditText)
+
+
         checkboxTranscript=view.findViewById(R.id.checkboxTranscript)
          tvTranscript=view.findViewById(R.id.tvTranscript)
         tvSendTranscript=view.findViewById(R.id.tvSendTranscript)
          tvDownload=view.findViewById(R.id.tvDownload)
         constDownload=view.findViewById(R.id.constDownload)
+        val ivDownload=view.findViewById<ImageView>(R.id.icon_download)
 
         val tvErrorEmail = view.findViewById<TextView>(R.id.tvErrorEmail)
         val tvEmail = view.findViewById<TextView>(R.id.tvEmail)
@@ -113,7 +117,8 @@ class NCWEndChatBottomSheet(
         tvTitle.setTextColor(Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().titleColor))
         tvTranscript.setTextColor(Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().titleColor))
         tvSendTranscript.setTextColor(Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().titleColor))
-        tvDownload.setTextColor(Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().titleColor))
+        tvDownload.setTextColor(Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().backgroundColor))
+        NCWThemeUtils.setImageTint(ivDownload)
         enableButton(btnConfirm,false)
 
         checkboxTranscript.setOnCheckedChangeListener { _, isChecked ->

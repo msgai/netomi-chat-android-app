@@ -1,6 +1,7 @@
 package com.netomi.chat.ui.view
 
 import android.app.Dialog
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -11,6 +12,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -24,6 +26,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
 import com.netomi.chat.model.theme.NCWShowWarning
 import com.netomi.chat.model.theme.NCWThemeResponse
+import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.utils.NCWAppUtils.isValidEmail
 import com.netomi.chat.utils.NCWThemeUtils
 import com.netomi.chat.utils.NCWThemeUtils.createErrorDrawable
@@ -87,7 +90,7 @@ class NCWRestartChatBottomSheet(
         val tvEmail = dialogView.findViewById<TextView>(R.id.tvEmail)
         val constDownload = dialogView.findViewById<ConstraintLayout>(R.id.constDownload)
         val nestedScrollView = dialogView.findViewById<NestedScrollView>(R.id.nestedScrollView)
-
+        val ivDownload=dialogView.findViewById<ImageView>(R.id.icon_download)
 
 
 
@@ -145,11 +148,13 @@ class NCWRestartChatBottomSheet(
         btnCancel.text = ncwShowWarning.cancelButtonText ?: getString(R.string.cancel)
         tvEmail.text= NCWThemeUtils.getThemeData()?.otherlocalized?.email ?: getString(R.string.email)
         tvDownload.text= NCWThemeUtils.getThemeData()?.otherlocalized?.download ?: getString(R.string.download)
+        tvDownload.setTextColor(Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().backgroundColor))
+        NCWThemeUtils.setImageTint(ivDownload)
 
         emailEditText.hint= NCWThemeUtils.getThemeData()?.otherlocalized?.enter_email ?: getString(R.string.enter_email)
         NCWThemeUtils.createRoundedDrawable(btnConfirm)
         NCWThemeUtils.createRoundedDrawableClose(btnCancel)
-
+        btnCancel.setTextColor(Color.parseColor(NCWChatSdk.getUpdatedOtherConfiguration().backgroundColor))
 
         btnConfirm.setOnClickListener {
 

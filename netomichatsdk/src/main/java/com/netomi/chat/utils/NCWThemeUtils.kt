@@ -717,7 +717,14 @@ object NCWThemeUtils
         view.background = drawable
 
     }
+    fun setImageTint(imageView: ImageView) {
 
+        NCWChatSdk.getUpdatedOtherConfiguration().backgroundColor?.let {
+            val tintList = ColorStateList.valueOf(parseColor(it))
+            ImageViewCompat.setImageTintList(imageView, tintList)
+        } ?: ImageViewCompat.setImageTintList(imageView, null)
+
+    }
 
 
  fun createErrorDrawable(view: View) {

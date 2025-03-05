@@ -93,7 +93,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:contentDescription="@string/download_transcript"
-                android:src="@drawable/ic_download"
+                app:tint="#ff0099cc"
+                android:src="@drawable/ic_file_download"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
