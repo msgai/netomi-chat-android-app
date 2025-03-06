@@ -502,7 +502,9 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         trackEvent(AnalyticsEvents.RESTART_CHAT_POPUP_SHOWN)
         val bottomSheet=  NCWRestartChatBottomSheet(themeData,ncwShowWarning ,{
                 onRestartAction()
-            },{ from,mail->
+            },{
+
+              from,mail->
               sendTranscriptApI(from,mail)
               onRestartAction()
               }, {
@@ -704,7 +706,28 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             messageSoundPlayer = MessageSoundPlayer(this)
         }
 
+/*try {
+    checkAndReconnect()
+}
+catch (ex:Exception){
+    ex.printStackTrace()
+}*/
 
+
+    }
+
+    private fun checkAndReconnect() {
+        // Ensure topic is initialized before calling connect
+        if (!::topic.isInitialized) {
+            Log.e("NCWChatActivity", "Topic is not initialized, skipping MQTT connection")
+            return
+        }
+        Log.d("NCWChatActivity", "Reconnecting MQTT..."+NCWAwsIotManager.callBackConnectLost())
+        if (NCWAwsIotManager.getConnectionStatus()==2 ||NCWAwsIotManager.callBackConnectLost()) {
+            Log.d("NCWChatActivity", "Reconnecting MQTT...")
+          //  ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)
+            chatViewModel.getAWSMQTTCredentials(botRefId)
+        }
     }
 
 

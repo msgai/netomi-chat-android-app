@@ -29,12 +29,12 @@ data class Properties(
     val skipEnabled: Boolean,
     val restartEnabled: Boolean,
     val isCustomReplyEnabled: Boolean,
-    val formSubmissionProperties: FormSubmissionProperties,
+    val formSubmissionProperties: FormSubmissionProperties?=null,
     val description: String?=null
 )
 
 data class FormSubmissionProperties(
-    val submitButtonText: String,
+    val submitButtonText: String?=null,
     val showSubmittedResponse: Boolean,
     val submissionText: String
 )
