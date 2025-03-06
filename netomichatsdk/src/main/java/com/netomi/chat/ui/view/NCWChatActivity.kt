@@ -706,13 +706,13 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             messageSoundPlayer = MessageSoundPlayer(this)
         }
 
-/*try {
-    Log.e("SERRRRRRR","asddsdsdsds ")
+try {
+
     checkAndReconnect()
 }
 catch (ex:Exception){
     ex.printStackTrace()
-}*/
+}
 
 
     }
@@ -723,12 +723,9 @@ catch (ex:Exception){
             Log.e("NCWChatActivity", "Topic is not initialized, skipping MQTT connection")
             return
         }
-        Log.d("SERRRRRRR", "Lost MQTT..."+NCWAwsIotManager.callBackConnectLost())
         Log.d("NCWChatActivity", "Reconnecting MQTT..."+NCWAwsIotManager.callBackConnectLost())
         if (NCWAwsIotManager.getConnectionStatus()==2 ||NCWAwsIotManager.callBackConnectLost()) {
             Log.d("NCWChatActivity", "Reconnecting MQTT...")
-            Log.e("SERRRRRRR","getConnectionStatus ")
-          //  ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)
             chatViewModel.getAWSMQTTCredentials(botRefId)
         }
     }
