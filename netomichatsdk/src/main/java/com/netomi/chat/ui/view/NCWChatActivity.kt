@@ -1200,6 +1200,10 @@ catch (ex:Exception){
 
     override fun onSourceClicked(multipleSourceDetail: MultipleSourceDetail) {
         try {
+            trackEvent(
+                AnalyticsEvents.URL_LAUNCHED_BUTTON,
+                AnalyticsEvents.LAUNCHED_URL to multipleSourceDetail.text
+            )
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(multipleSourceDetail.text))
             startActivity(intent)
         } catch (e: Exception) {
