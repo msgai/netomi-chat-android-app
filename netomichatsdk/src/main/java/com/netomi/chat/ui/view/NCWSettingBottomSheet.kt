@@ -18,6 +18,7 @@ import com.netomi.chat.model.theme.NCWShowWarning
 import com.netomi.chat.model.theme.NCWThemeResponse
 import com.netomi.chat.utils.NCWAppConstant.EN
 import com.netomi.chat.utils.NCWAppConstant.ENABLED
+import com.netomi.chat.utils.NCWAppUtils
 import com.netomi.chat.utils.NCWThemeUtils
 
 class NCWSettingBottomSheet(
@@ -136,6 +137,13 @@ class NCWSettingBottomSheet(
         }
 
         constLang.setOnClickListener {
+            context?.let {
+                if (!NCWAppUtils.isNetworkAvailable(it)) {
+                    NCWAppUtils.showToast(it, NCWThemeUtils.getThemeData()?.otherlocalized?.please_check_your_network ?:getString(R.string.please_check_your_network_and_try_again))
+                    return@setOnClickListener
+                }
+            }
+
             onLanguageClick()
             dismiss()
         }

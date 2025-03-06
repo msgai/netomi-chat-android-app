@@ -1178,7 +1178,8 @@ class NCWFormAdapter(
         ) {
             addSpaceToContainer(5)
             val btnSubmit = TextView(context).apply {
-                text = NCWThemeUtils.getThemeData()?.otherlocalized?.submit ?:itemView.context.getString(R.string.submit)
+              /*  text = NCWThemeUtils.getThemeData()?.otherlocalized?.submit ?:itemView.context.getString(R.string.submit)*/
+               text=formSchecma.properties.formSubmissionProperties?.submitButtonText?:NCWThemeUtils.getThemeData()?.otherlocalized?.submit ?:itemView.context.getString(R.string.submit)
                 id = View.generateViewId()
                 gravity = Gravity.CENTER
                 setPadding(0, 30, 0, 30)

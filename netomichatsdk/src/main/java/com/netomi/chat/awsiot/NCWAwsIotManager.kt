@@ -73,6 +73,7 @@ object NCWAwsIotManager {
                     connectionStatus = 2
                     Log.e("IoT", "Connection lost", throwable)
                     connectionStatusLiveData.postValue(NCWConnectionStatus.CONNECTION_LOST.toString())
+                    callBackConnectLost(true)
                 }
 
                 AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus.Reconnecting ->{
@@ -88,6 +89,10 @@ object NCWAwsIotManager {
                 }
             }
         }
+    }
+
+     fun callBackConnectLost(connectionStatus: Boolean = false): Boolean {
+              return connectionStatus
     }
 
     /**
@@ -159,4 +164,8 @@ object NCWAwsIotManager {
     fun getConnectionStatusLiveData(): NCWSingleLiveEvent<String> = connectionStatusLiveData
 
 
+    fun getConnectionStatus(): Int {
+
+        return connectionStatus
+    }
 }
