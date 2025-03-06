@@ -706,12 +706,13 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
             messageSoundPlayer = MessageSoundPlayer(this)
         }
 
-/*try {
+try {
+
     checkAndReconnect()
 }
 catch (ex:Exception){
     ex.printStackTrace()
-}*/
+}
 
 
     }
@@ -725,7 +726,6 @@ catch (ex:Exception){
         Log.d("NCWChatActivity", "Reconnecting MQTT..."+NCWAwsIotManager.callBackConnectLost())
         if (NCWAwsIotManager.getConnectionStatus()==2 ||NCWAwsIotManager.callBackConnectLost()) {
             Log.d("NCWChatActivity", "Reconnecting MQTT...")
-          //  ncwAwsCredentialsViewModel.initializeAwsIotManager(chatViewModel, topic)
             chatViewModel.getAWSMQTTCredentials(botRefId)
         }
     }

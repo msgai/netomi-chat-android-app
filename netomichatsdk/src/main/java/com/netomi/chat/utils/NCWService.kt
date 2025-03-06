@@ -22,7 +22,7 @@ class NCWService : Service() {
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
 
         return Notification.Builder(this, channelId)
-            .setContentTitle("Netomi")
+            .setContentTitle("Active Chat in Progress")
             .setContentText("Running in the background")
             .setSmallIcon(R.drawable.ic_bot_profile)
             .build()
