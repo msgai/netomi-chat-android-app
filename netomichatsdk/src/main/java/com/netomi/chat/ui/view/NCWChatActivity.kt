@@ -280,6 +280,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
 
     private var isEventSessionExpire:Boolean=false
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
@@ -1475,6 +1476,7 @@ catch (ex:Exception){
                 }
 
                 NCWConnectionStatus.CONNECTED.toString() -> {
+                    Log.e("isHistoryDisableInput","isHistoryDisableInput "+isHistoryDisableInput)
                     connectionHeader.text = NCWThemeUtils.getThemeData()?.otherlocalized?.connected
                         ?:getString(R.string.connected)
                     connectionHeader.setBackgroundColor(Color.GREEN)
@@ -1958,8 +1960,10 @@ Log.e("sdanjjkdnjcncjkjndjds","dsasdcdcdf "+newMessages)
                     }
 
                     CustomFieldName.DISABLE_INPUT_FIELD, CustomFieldName.DISABLE_CHAT_INPUT -> {
+
                         val isDisabled = customField.values?.get(0) == "true"
                         setUIState(!isDisabled)
+                        isHistoryDisableInput = !isDisabled
                         if (CustomFieldName.fromValue(customField.name) == CustomFieldName.DISABLE_INPUT_FIELD) {
                             isDisableInput = !isDisabled
                         }
