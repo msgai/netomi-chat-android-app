@@ -2296,7 +2296,7 @@ Log.e("sdanjjkdnjcncjkjndjds","dsasdcdcdf "+newMessages)
             messageAdapter.updateOrAppendMessage(newMessages, false)
         }
         if (shouldAutoScroll()) {
-            chatRecyclerView.postDelayed({ smoothScrollToBottom() }, 400)
+            chatRecyclerView.postDelayed({ smoothScrollToBottom() }, 600)
         }
 
         /* chatRecyclerView.post {
