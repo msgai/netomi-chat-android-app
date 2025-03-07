@@ -355,8 +355,7 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         }
 
         ivMenuOption.setOnClickListener {
-            setUpQuickReplyOption()
-
+           setUpQuickReplyOption()
         }
         ivMenu.setOnClickListener {
             setUpSettingOption()
@@ -708,8 +707,8 @@ class NCWChatActivity : NCWBaseActivity(), NCWChatActionCallback, NCWFeedbackAct
         }
 
 try {
-
     checkAndReconnect()
+
 }
 catch (ex:Exception){
     ex.printStackTrace()
@@ -719,15 +718,27 @@ catch (ex:Exception){
     }
 
     private fun checkAndReconnect() {
-        // Ensure topic is initialized before calling connect
         if (!::topic.isInitialized) {
             Log.e("NCWChatActivity", "Topic is not initialized, skipping MQTT connection")
             return
         }
-        Log.d("NCWChatActivity", "Reconnecting MQTT..."+NCWAwsIotManager.callBackConnectLost())
-        if (NCWAwsIotManager.getConnectionStatus()==2 ||NCWAwsIotManager.callBackConnectLost()) {
-            Log.d("NCWChatActivity", "Reconnecting MQTT...")
+
+        val expireTime = ncwAwsCredentialsViewModel.getAWSCredentialsExpiry()
+        val isConnectionLost = NCWAwsIotManager.callBackConnectLost()
+        val isDisconnected = NCWAwsIotManager.getConnectionStatus() == 2
+
+        if (isDisconnected || isConnectionLost) {
             chatViewModel.getAWSMQTTCredentials(botRefId)
+            return
+        }
+
+        // Check AWS credentials expiry
+        if (expireTime != null) {
+            Log.d("NCWChatActivity", "AWS credentials expire at: $expireTime")
+            if (NCWAppUtils.areAWSCredentialsExpired(expireTime)) {
+                Log.d("NCWChatActivity", "AWS credentials expired. Refreshing...")
+                chatViewModel.getAWSMQTTCredentials(botRefId)
+            }
         }
     }
 
@@ -1527,7 +1538,7 @@ catch (ex:Exception){
                     //connectionHeader.setBackgroundColor(Color.BLUE)
                     //connectionHeader.setTextColor(Color.WHITE)
                     //connectionHeader.visibility = View.VISIBLE
-                    setUIState(true)
+                    setUIState(isHistoryDisableInput)
                 }
 
                 else -> {
@@ -1572,6 +1583,7 @@ catch (ex:Exception){
         try {
 
             val response = Gson().fromJson(jsonMessage, NCWGenericChannelResponse::class.java)
+            Log.e(" awsMessageObserver ", " awsMessageObserver "+response)
             if (response!=null) {
                 renderTheNormalMessage(response)
             }

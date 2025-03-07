@@ -9,9 +9,9 @@ import androidx.lifecycle.viewModelScope
 import com.netomi.chat.data.repository.NCWChatRepository
 import com.netomi.chat.model.ChatTranscriptResponse
 import com.netomi.chat.model.GetConversationPayload
+import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWGetChatHistoryResponse
 import com.netomi.chat.model.NCWGetConversationIdResponse
-import com.netomi.chat.model.MessageType
 import com.netomi.chat.model.NCWMessage
 import com.netomi.chat.model.NCWSendMessageResponse
 import com.netomi.chat.model.auth.LoginResponse
@@ -36,8 +36,6 @@ import com.netomi.chat.utils.NCWBaseResponse
 import com.netomi.chat.utils.NCWState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -103,8 +101,11 @@ class NCWChatViewModel(application: Application) : AndroidViewModel(application)
     private var _getAWSMQTTCredentials= NCWSingleLiveEvent<NCWState<MQTTCredentialsResponse>>()
     val getAWSMQTTCredentials get()= _getAWSMQTTCredentials
 
-    private val _awsMessage = MutableLiveData<String>()
-    val awsMessage: LiveData<String> get() = _awsMessage
+      private val _awsMessage = MutableLiveData<String>()
+        val awsMessage: LiveData<String> get() = _awsMessage
+
+   /* private val _awsMessage = MutableLiveData<EventWrapper<String>>()
+    val awsMessage: LiveData<EventWrapper<String>> get() = _awsMessage*/
 
     /*private val _awsMessage = MutableStateFlow<String?>(null)
     val awsMessage = _awsMessage.asStateFlow()*/

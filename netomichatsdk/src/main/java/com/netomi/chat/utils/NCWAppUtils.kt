@@ -6,8 +6,8 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
-import android.text.Html
 import android.text.method.LinkMovementMethod
+import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
@@ -335,6 +335,19 @@ object NCWAppUtils {
             "1.0"
         }
     }
+
+    fun areAWSCredentialsExpired(expireTime: Long): Boolean {
+        val currentTime = System.currentTimeMillis()
+        val expireThreshold = 1 * 60 * 1000L // Ensure it’s a Long
+
+        val thresholdTime = currentTime + expireThreshold
+
+        Log.e("credentials + expireThreshold", "currentTime + expireThreshold: $thresholdTime")
+        Log.e("credentials expireTime", "expireTime: $expireTime")
+
+        return expireTime <= thresholdTime
+    }
+
 
 
 }

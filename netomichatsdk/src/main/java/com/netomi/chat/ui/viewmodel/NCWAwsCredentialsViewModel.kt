@@ -38,6 +38,13 @@ class NCWAwsCredentialsViewModel(application: Application) : AndroidViewModel(ap
 
     }
 
+    fun getAWSCredentialsExpiry(): Long? {
+        val expireTime = repository.getExpireTime()
+        return if (expireTime > 0) expireTime else null
+    }
+
+
+
     /**
      * Load AWS Credentials from repository
      */
