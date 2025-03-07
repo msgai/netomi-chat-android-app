@@ -1,6 +1,7 @@
 package com.netomi.chat.data.repository
 
 import android.content.Context
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.netomi.chat.model.awsmqtt.NCWAwsCredentials
@@ -52,8 +53,14 @@ class NCWAwsCredentialsRepository private constructor(context: Context) {
         }*/
     }
 
+
+
     fun clearCredentials() {
         sharedPreferences.edit().clear().apply()
+    }
+
+    fun getExpireTime(): Long {
+        return sharedPreferences.getLong(EXPIRE_TIME, 0)
     }
 
     companion object {

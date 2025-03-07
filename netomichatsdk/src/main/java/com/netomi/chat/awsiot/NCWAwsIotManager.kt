@@ -58,6 +58,7 @@ object NCWAwsIotManager {
                 AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus.Connecting ->{
                     connectionStatus = 0
                     Log.d("IoT", "Connecting to AWS IoT...")
+                    Log.e("mqttManager","\"Connecting to AWS IoT...")
                     connectionStatusLiveData.postValue(NCWConnectionStatus.CONNECTING.toString())
                 }
 
@@ -65,6 +66,7 @@ object NCWAwsIotManager {
                 AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus.Connected -> {
                     connectionStatus = 1
                     Log.d("IoT", "Connected to AWS IoT")
+                    Log.e("mqttManager","Connected to AWS IoT")
                     connectionStatusLiveData.postValue(NCWConnectionStatus.CONNECTED.toString())
                     subscribeToTopic(topic, chatViewModel)
                 }
@@ -72,6 +74,7 @@ object NCWAwsIotManager {
                 AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus.ConnectionLost -> {
                     connectionStatus = 2
                     Log.e("IoT", "Connection lost", throwable)
+                    Log.e("mqttManager","Connection lost")
                     connectionStatusLiveData.postValue(NCWConnectionStatus.CONNECTION_LOST.toString())
                     callBackConnectLost(true)
                 }
@@ -79,12 +82,14 @@ object NCWAwsIotManager {
                 AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus.Reconnecting ->{
                     connectionStatus = 3
                     Log.d("IoT", "Reconnecting to AWS IoT...")
+                    Log.e("mqttManager","Reconnecting to AWS IoT")
                     connectionStatusLiveData.postValue(NCWConnectionStatus.RE_CONNECTED.toString())
                     //chatViewModel.getAWSMQTTCredentials("")
                 }
 
                 else -> {
                     Log.e("IoT", "Unknown connection status: $status")
+                    Log.e("mqttManager","Unknown connection status")
                     connectionStatusLiveData.postValue(NCWConnectionStatus.UNKNOWN.toString())
                 }
             }
