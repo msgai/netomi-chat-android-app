@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -19,6 +20,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.netomi.chat.R
@@ -70,7 +72,21 @@ class NCWSurveyBottomSheet(
             false
         }
 
+        /*dialog.setOnShowListener {
+            dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.background =
+                ContextCompat.getDrawable(requireContext(), R.drawable.bg_bottom_sheet)
+            setOnShowListener
+        }*/
         dialog.setOnShowListener {
+            val bottomSheet =
+                dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout?
+            bottomSheet?.let {
+                val behavior = BottomSheetBehavior.from(it)
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED // Start in expanded state
+                behavior.skipCollapsed = false
+                behavior.isHideable = false
+            }
+
             dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.background =
                 ContextCompat.getDrawable(requireContext(), R.drawable.bg_bottom_sheet)
         }
