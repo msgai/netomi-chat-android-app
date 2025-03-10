@@ -66,7 +66,7 @@ class EventTracker {
         fun initMix(context: Context, isTrackEvent: Boolean) {
             if (isTrackEvent)
                 mixpanel =
-                    MixpanelAPI.getInstance(context, "2dddebeaf174bbf3d98301d2b428d63d", true)
+                    MixpanelAPI.getInstance(context, "c35045268c8c4242bb1fa4d40200181c", true)
         }
     }
 }

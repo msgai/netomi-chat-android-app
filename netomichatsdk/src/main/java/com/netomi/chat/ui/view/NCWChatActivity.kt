@@ -1347,10 +1347,9 @@ catch (ex:Exception){
         if (checkForLogoutAction(content)) return
         option?.label?.takeIf { it.isNotEmpty() }?.let { label ->
             val timeStamp = System.currentTimeMillis()
-            val payload = option.metadata?.let {
-                checkForInitialMessage()
-                createPayload(it, label, timeStamp)
-            }
+            checkForInitialMessage()
+            val metadata = option.metadata?.takeIf { it.isNotBlank() }
+            val payload = createPayload(metadata ?: label, label, timeStamp)
             chatViewModel.sendMessage(label, timeStamp)
             if (payload != null) {
                 sendMessageToBot(payload)
