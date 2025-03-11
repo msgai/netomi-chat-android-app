@@ -2295,9 +2295,9 @@ Log.e("sdanjjkdnjcncjkjndjds","dsasdcdcdf "+newMessages)
             chunkList.add(newMessages)
             chunkList.sortBy { it.customPayload?.CHUNK_INDEX?.toInt() ?: Int.MAX_VALUE}
             val partialMessage = mergeChunks(chunkList)
-            Handler(Looper.getMainLooper()).post {
+            //Handler(Looper.getMainLooper()).post {
                 messageAdapter.updateOrAppendMessage(partialMessage, false)
-            }
+            //}
 
             // If the chunk is the last one (CHUNK_STATUS = "COMPLETED"), remove stored chunks
            /* if (chunkStatus == "SUCCESS") {
@@ -2306,14 +2306,22 @@ Log.e("sdanjjkdnjcncjkjndjds","dsasdcdcdf "+newMessages)
         }else{
             messageAdapter.updateOrAppendMessage(newMessages, false)
         }
-        if (shouldAutoScroll()) {
-            chatRecyclerView.postDelayed({ smoothScrollToBottom() }, 600)
+        if (shouldAutoScroll() &&  !isRecyclerViewFull()) {
+            chatRecyclerView.postDelayed({ smoothScrollToBottom() }, 800)
         }
 
         /* chatRecyclerView.post {
              chatRecyclerView.post(messageList.size - 1)
          }*/
 
+    }
+
+    // Helper method to check if RecyclerView is full (no need to scroll)
+    private fun isRecyclerViewFull(): Boolean {
+        val layoutManager = chatRecyclerView.layoutManager as? LinearLayoutManager ?: return false
+        val lastVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition()
+        val totalItemCount = layoutManager.itemCount
+        return lastVisibleItemPosition == totalItemCount - 1
     }
 
     private fun safelyRemoveLoader(newMessages: List<NCWMessage>) {

@@ -32,7 +32,7 @@ object AnalyticsEvents {
 
     const val CONVERSATION_ID = "conversationId"
     const val BOT_ID = "botId"
-    const val BOT_REF_ID = "botRefID"
+    const val BOT_REF_ID = "botRefId"
     const val SELECTED_LANGUAGE = "selectedlanguage"
     const val LAUNCHED_URL = "launchedURL"
     const val ATTACHMENT_TYPE = "attachmentType"
