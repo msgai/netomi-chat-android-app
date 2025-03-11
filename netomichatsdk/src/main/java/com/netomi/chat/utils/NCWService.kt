@@ -22,8 +22,7 @@ class NCWService : Service() {
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
 
         return Notification.Builder(this, channelId)
-            .setContentTitle("Active Chat in Progress")
-            .setContentText("Running in the background")
+            .setContentTitle("Your chat session is expiring soon. Open the app to continue the conversation")
             .setSmallIcon(R.drawable.ic_bot_profile)
             .build()
     }
