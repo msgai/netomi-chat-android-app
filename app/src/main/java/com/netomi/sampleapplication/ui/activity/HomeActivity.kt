@@ -146,7 +146,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
 
             // Get new FCM registration token
             val token = task.result
-            NCWChatSdk.setDeviceToken(token)
+
 
             // Log and toast
             //val msg = getString("Token", token)

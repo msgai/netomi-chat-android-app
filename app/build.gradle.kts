@@ -48,7 +48,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(project(":netomichatsdk"))
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.retrofit)
@@ -66,6 +65,7 @@ dependencies {
     implementation (libs.androidx.fragment.ktx)
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
+    implementation("com.netomi.chat:-android:1.0.2")
 
 
 

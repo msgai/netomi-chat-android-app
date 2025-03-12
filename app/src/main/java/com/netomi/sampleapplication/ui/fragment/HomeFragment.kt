@@ -68,9 +68,7 @@ class HomeFragment : Fragment() {
             activity?.let { activityContext ->
                 if (isButtonClickable) {
                     avoidDoubleClick()
-                    NCWChatSdk.launch(activityContext, onError = {errorMessage->
-                        showErrorDialog(errorMessage)
-                    })
+                    NCWChatSdk.launch(activityContext)
                 }
             }
         }
@@ -144,7 +142,7 @@ class HomeFragment : Fragment() {
 
         try {
             NCWChatSdk.setEnvironment(bot.env)
-            bot.botRefId.let { NCWChatSdk.initialize(requireContext(), it) }
+            bot.botRefId.let { NCWChatSdk.initialize(requireContext(), it , bot.env) }
         } catch (e: Exception) {
             e.printStackTrace()
         }

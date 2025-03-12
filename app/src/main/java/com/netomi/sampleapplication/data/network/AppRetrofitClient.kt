@@ -1,9 +1,9 @@
 package com.netomi.sampleapplication.data.network
 
 import android.content.Context
-import com.netomi.sampleapplication.data.apiconstant.AppApiConstant.HEADER_BEARER
-import com.netomi.chat.utils.NCWAppSharedPreferences
 import com.netomi.chat.utils.NCWAppConstant
+import com.netomi.sampleapplication.data.apiconstant.AppApiConstant.HEADER_BEARER
+import com.netomi.sampleapplication.utils.AppSharedPreferences
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -11,7 +11,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-
 
 
 /**
@@ -97,7 +96,7 @@ object AppRetrofitClient {
      */
     class AuthInterceptor(private val context: Context) : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {
-            val sessionToken = NCWAppSharedPreferences(context).getString(NCWAppConstant.SESSION_TOKEN)
+            val sessionToken = AppSharedPreferences(context).getString(NCWAppConstant.SESSION_TOKEN)
 
             // Start building the request
             val requestBuilder = chain.request().newBuilder()

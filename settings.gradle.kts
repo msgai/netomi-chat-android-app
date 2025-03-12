@@ -20,5 +20,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "NetomiSampleApplication"
 include(":app")
-include(":netomichatsdk")
 
