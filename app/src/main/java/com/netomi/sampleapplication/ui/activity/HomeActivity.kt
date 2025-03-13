@@ -47,7 +47,6 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
-        checkPermission()
         initView()
 
         if (savedInstanceState == null) {
@@ -90,15 +89,15 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
             }
         }
 
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+     /*   FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
             if (!task.isSuccessful) {
                 Log.w("FCM Token", "Fetching FCM registration token failed", task.exception)
                 return@OnCompleteListener
             }
-        })
+        })*/
     }
 
-    private fun checkPermission() {
+ /*   private fun checkPermission() {
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.POST_NOTIFICATIONS
@@ -113,7 +112,7 @@ class HomeActivity : AppCompatActivity(), DialogUtils.DialogListener {
             )
         }
     }
-
+*/
     private fun initView() {
         preferences = AppSharedPreferences(this)
         drawerLayout = findViewById(R.id.drawerLayout)

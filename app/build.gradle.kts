@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("com.google.gms.google-services")
 
 }
 
@@ -56,7 +55,7 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation (libs.androidx.fragment.ktx)
     implementation ("com.github.bumptech.glide:glide:4.16.0")
-    implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
+    //implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
 
     implementation("com.netomi.chat:-android:1.0.2")
 
