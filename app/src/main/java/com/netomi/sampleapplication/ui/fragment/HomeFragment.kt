@@ -40,8 +40,8 @@ class HomeFragment : Fragment() {
         try {
             NCWChatSdk.initialize(
                 requireContext(),
-                "60e915d0-3eda-4fda-8c50-2da9dc036edf",
-                "qa"
+                requireContext().getString(R.string.bot_ref_id),
+                requireContext().getString(R.string.app_environment)
             )
         } catch (_: Exception) { }
 
