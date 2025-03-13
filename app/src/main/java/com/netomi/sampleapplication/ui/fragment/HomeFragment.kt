@@ -1,7 +1,5 @@
 package com.netomi.sampleapplication.ui.fragment
 
-import android.app.AlertDialog
-import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -10,38 +8,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import com.bumptech.glide.Glide
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.dialog.MaterialDialogs
-import com.google.gson.Gson
 import com.netomi.chat.ui.init.NCWChatSdk
-import com.netomi.chat.utils.NCWAppConstant.LOGOUT
-import com.netomi.chat.utils.NCWAppConstant.SESSION
-import com.netomi.chat.utils.NCWSingleAlertDialog
-import com.netomi.chat.utils.NCWThemeUtils
 import com.netomi.sampleapplication.R
-import com.netomi.sampleapplication.constant.SharePreferenceConstant
-import com.netomi.sampleapplication.model.Bot
-import com.netomi.sampleapplication.model.FetchJwtTokenResponse
 import com.netomi.sampleapplication.utils.AppSharedPreferences
-import com.netomi.sampleapplication.utils.NetworkUtils
-import com.netomi.sampleapplication.utils.SingleAlertDialog
-import com.netomi.sampleapplication.utils.State
-import com.netomi.sampleapplication.viewmodel.OnboardingViewModel
 
 class HomeFragment : Fragment() {
 
-    private val onboardingViewModel: OnboardingViewModel by activityViewModels()
     private lateinit var preferences: AppSharedPreferences
     private lateinit var tvBotName: TextView
     private var isButtonClickable = true
     private lateinit var imgButton: AppCompatImageButton
     private lateinit var progressOverlay: FrameLayout
-    private var token: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,13 +35,15 @@ class HomeFragment : Fragment() {
         imgButton = view.findViewById(R.id.img_chat)
         tvBotName = view.findViewById(R.id.tv_botName)
         progressOverlay = view.findViewById(R.id.progress_overlay)
-        onboardingViewModel.botList.observe(viewLifecycleOwner) {
-            updateBot(it)
-        }
 
-        onboardingViewModel.jwtToken.observe(viewLifecycleOwner) {
-            //handleApiCallback(it as State<Any>)
-        }
+
+        try {
+            NCWChatSdk.initialize(
+                requireContext(),
+                requireContext().getString(R.string.key),
+                requireContext().getString(R.string.env)
+            )
+        } catch (_: Exception) { }
 
         imgButton.setOnClickListener {
             activity?.let { activityContext ->
@@ -71,80 +52,6 @@ class HomeFragment : Fragment() {
                     NCWChatSdk.launch(activityContext)
                 }
             }
-        }
-    }
-
-    private fun showErrorDialog(message: String) {
-        SingleAlertDialog.showSingleButtonDialog(
-            context = requireContext()?:return,
-            title = "Error",
-            subtitle = message,
-            yesText = "Okay",
-            onYesClick = {
-            },
-        )
-
-    }
-
-    private fun showLoader(show: Boolean) {
-        progressOverlay.visibility = if (show) View.VISIBLE else View.GONE
-        progressOverlay.isClickable = show
-    }
-
-    private fun handleApiCallback(response: State<Any>) {
-        when (response) {
-            is State.Loading -> {
-                showLoader(true)
-            }
-
-            is State.Success -> {
-                val res = response.data as FetchJwtTokenResponse
-                if (res.token.isNotEmpty())
-                token = res.token
-
-                showLoader(false)
-
-            }
-
-            is State.Error -> {
-                showLoader(false)
-            }
-
-            else -> {
-                showLoader(false)
-                Toast.makeText(requireContext(), "Else..", Toast.LENGTH_SHORT).show()
-            }
-
-        }
-    }
-
-    private fun updateBot(bot: Bot) {
-        imgButton.visibility=View.VISIBLE
-        tvBotName.text=bot.botName
-        tvBotName.text = bot.botName
-        Glide.with(requireContext()).load(bot.logo).into(imgButton)
-        imgButton.setBackgroundResource(R.drawable.float_button_gradient)
-  /*      val name= preferences.getString(SharePreferenceConstant.NAME)
-        val email=preferences.getString(SharePreferenceConstant.EMAIL)
-
-        val jsonMap = mapOf(
-            "name" to name,
-            "externalId" to email
-        )
-        val jsonString = Gson().toJson(jsonMap)
-        if (NetworkUtils.isNetworkAvailable(requireActivity())){
-            showLoader(true)
-            bot.botRefId.let { onboardingViewModel.fetchJwtToken(bot.botRefId,jsonString) }
-            }
-        else
-            Toast.makeText(requireContext(),
-                getString(R.string.please_check_your_network_and_try_again), Toast.LENGTH_SHORT).show()*/
-
-        try {
-            NCWChatSdk.setEnvironment(bot.env)
-            bot.botRefId.let { NCWChatSdk.initialize(requireContext(), it , bot.env) }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 

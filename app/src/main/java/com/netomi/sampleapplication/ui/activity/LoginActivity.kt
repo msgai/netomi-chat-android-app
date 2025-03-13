@@ -166,31 +166,4 @@ class LoginActivity : AppCompatActivity() {
            passwordEditText.setSelection(passwordEditText.text?.length ?: 0) // Keep cursor at the end
         }
     }
-
-    // Set up the clickable "Create account" text
-    private fun spannableString() {
-        val text = getString(R.string.don_t_have_an_account_create_account)
-        val spannableString = SpannableString(text)
-
-        val clickableSpan = object : ClickableSpan() {
-            override fun onClick(widget: View) {
-                Toast.makeText(this@LoginActivity,
-                    getString(R.string.create_account_clicked), Toast.LENGTH_SHORT).show()
-            }
-
-            // Remove underline and set custom color for the clickable text
-            override fun updateDrawState(ds: TextPaint) {
-                super.updateDrawState(ds)
-                ds.color = ContextCompat.getColor(this@LoginActivity, R.color.black)
-                ds.isUnderlineText = false
-            }
-        }
-
-        // Make "Create account" bold
-        spannableString.setSpan(StyleSpan(Typeface.BOLD), 22, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        spannableString.setSpan(clickableSpan, 22, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-        signupTextView.text = spannableString
-        signupTextView.movementMethod = LinkMovementMethod.getInstance() // Enable clickable link behavior
-    }
 }

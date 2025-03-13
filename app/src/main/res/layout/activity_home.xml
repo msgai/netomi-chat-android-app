@@ -123,19 +123,6 @@
                 android:layout_marginTop="10dp"
                 android:layout_height="1dp" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tvAgent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Change AI Agent"
-                android:textSize="16sp"
-                android:paddingVertical="8dp"
-                android:layout_marginTop="10dp"
-                android:textColor="@color/colorPrimaryDark"
-                android:fontFamily="@font/proxima_nova_alt_semibold"
-                android:textAppearance="?attr/textAppearanceBody1"
-                android:gravity="start"
-                />
         </LinearLayout>
 
         </LinearLayout>

@@ -50,10 +50,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.retrofit)
-    implementation(libs.okhttp)
-    implementation(libs.retrofit.converter.gson)
-    implementation(libs.okhttp.logging.interceptor)
     implementation(libs.firebase.messaging.ktx)
     implementation(libs.androidx.lifecycle.process)
     testImplementation(libs.junit)
@@ -68,11 +64,5 @@ dependencies {
 
     implementation("com.netomi.chat:-android:1.0.2")
 
-
-
-
-    //Dagger
-    //implementation (libs.dagger.hilt)
-    //kapt(libs.dagger.kapt)
 
 }
