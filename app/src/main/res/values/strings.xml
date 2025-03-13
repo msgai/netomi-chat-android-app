@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">NetomiApp</string>
 
-    <string name="key"></string>
-    <string name="env"></string>
+    <string name="bot_ref_id">Replace your botRefId here</string>
+    <string name="app_environment">Select your bot environment</string>
 
     <string name="login">Login</string>
     <string name="email">Email</string>
