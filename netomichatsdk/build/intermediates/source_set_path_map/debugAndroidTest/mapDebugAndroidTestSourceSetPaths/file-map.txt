@@ -1,0 +1,48 @@
+com.netomi.chat.test.netomichatsdk-aws-android-sdk-iot-2.77.0-0 /Users/appinventiv/.gradle/caches/transforms-4/0f09af19520e7abda9ff0263509dd073/transformed/aws-android-sdk-iot-2.77.0/res
+com.netomi.chat.test.netomichatsdk-lifecycle-viewmodel-ktx-2.6.2-1 /Users/appinventiv/.gradle/caches/transforms-4/12885f88d8248bb4c72c95686d972c0a/transformed/lifecycle-viewmodel-ktx-2.6.2/res
+com.netomi.chat.test.netomichatsdk-core-1.13.1-2 /Users/appinventiv/.gradle/caches/transforms-4/2342b36a0a68f01d7e55588e86b7258e/transformed/core-1.13.1/res
+com.netomi.chat.test.netomichatsdk-appcompat-1.7.0-3 /Users/appinventiv/.gradle/caches/transforms-4/24323a3126c9fc9dff8b0029036e1881/transformed/appcompat-1.7.0/res
+com.netomi.chat.test.netomichatsdk-coordinatorlayout-1.1.0-4 /Users/appinventiv/.gradle/caches/transforms-4/3cc0393d987ee8e2f6992d2ed1e78748/transformed/coordinatorlayout-1.1.0/res
+com.netomi.chat.test.netomichatsdk-lifecycle-livedata-core-ktx-2.6.2-5 /Users/appinventiv/.gradle/caches/transforms-4/3dd5e0e844b2a31a217bf5ae6c9e1593/transformed/lifecycle-livedata-core-ktx-2.6.2/res
+com.netomi.chat.test.netomichatsdk-lifecycle-viewmodel-savedstate-2.6.2-6 /Users/appinventiv/.gradle/caches/transforms-4/401e5b3027154a11d29cadebaf2fc951/transformed/lifecycle-viewmodel-savedstate-2.6.2/res
+com.netomi.chat.test.netomichatsdk-datastore-preferences-release-7 /Users/appinventiv/.gradle/caches/transforms-4/404cd3cc6c6505e418d406ca4746affb/transformed/datastore-preferences-release/res
+com.netomi.chat.test.netomichatsdk-lifecycle-runtime-2.6.2-8 /Users/appinventiv/.gradle/caches/transforms-4/439cc06282e4fc1f2684707f771f4f4f/transformed/lifecycle-runtime-2.6.2/res
+com.netomi.chat.test.netomichatsdk-profileinstaller-1.3.1-9 /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/res
+com.netomi.chat.test.netomichatsdk-appcompat-resources-1.7.0-10 /Users/appinventiv/.gradle/caches/transforms-4/4a86e715097551fbbb892303cbb87dc6/transformed/appcompat-resources-1.7.0/res
+com.netomi.chat.test.netomichatsdk-emoji2-views-helper-1.3.0-11 /Users/appinventiv/.gradle/caches/transforms-4/4ce752113c42d3f1aa78765da0fd479e/transformed/emoji2-views-helper-1.3.0/res
+com.netomi.chat.test.netomichatsdk-lifecycle-process-2.6.2-12 /Users/appinventiv/.gradle/caches/transforms-4/4eb259fa705431264b179e7b76c491dc/transformed/lifecycle-process-2.6.2/res
+com.netomi.chat.test.netomichatsdk-activity-ktx-1.9.3-13 /Users/appinventiv/.gradle/caches/transforms-4/4f3bcad0c1f54f7f62aa4220e8bf7fea/transformed/activity-ktx-1.9.3/res
+com.netomi.chat.test.netomichatsdk-datastore-core-release-14 /Users/appinventiv/.gradle/caches/transforms-4/586be46a4828705edf0587e475d5be26/transformed/datastore-core-release/res
+com.netomi.chat.test.netomichatsdk-datastore-release-15 /Users/appinventiv/.gradle/caches/transforms-4/59be72c1cb5fc34f8fd1a693dae9e802/transformed/datastore-release/res
+com.netomi.chat.test.netomichatsdk-material-1.12.0-16 /Users/appinventiv/.gradle/caches/transforms-4/5b3915f96d6492ae1b170b5128f851c6/transformed/material-1.12.0/res
+com.netomi.chat.test.netomichatsdk-viewpager2-1.0.0-17 /Users/appinventiv/.gradle/caches/transforms-4/613916d99be935a691d1a40bb9790ef6/transformed/viewpager2-1.0.0/res
+com.netomi.chat.test.netomichatsdk-fragment-1.5.4-18 /Users/appinventiv/.gradle/caches/transforms-4/6142f56dbaf556b545eaa575fe960929/transformed/fragment-1.5.4/res
+com.netomi.chat.test.netomichatsdk-lifecycle-livedata-core-2.6.2-19 /Users/appinventiv/.gradle/caches/transforms-4/62ba033f6da1afd50b8a6be31b8af106/transformed/lifecycle-livedata-core-2.6.2/res
+com.netomi.chat.test.netomichatsdk-savedstate-ktx-1.2.1-20 /Users/appinventiv/.gradle/caches/transforms-4/6423b54fb33a8591034b3c0d9fc072a9/transformed/savedstate-ktx-1.2.1/res
+com.netomi.chat.test.netomichatsdk-core-runtime-2.2.0-21 /Users/appinventiv/.gradle/caches/transforms-4/6557956b336b9292a4114dd3bf4154d5/transformed/core-runtime-2.2.0/res
+com.netomi.chat.test.netomichatsdk-browser-1.8.0-22 /Users/appinventiv/.gradle/caches/transforms-4/70207ef1cd13fcaa79b2fec7625176c5/transformed/browser-1.8.0/res
+com.netomi.chat.test.netomichatsdk-tracing-1.1.0-23 /Users/appinventiv/.gradle/caches/transforms-4/85e797efe2a9e564d82f0a31e24956b9/transformed/tracing-1.1.0/res
+com.netomi.chat.test.netomichatsdk-lifecycle-viewmodel-2.6.2-24 /Users/appinventiv/.gradle/caches/transforms-4/8e7739cbebb13b2923f4c19c77c576af/transformed/lifecycle-viewmodel-2.6.2/res
+com.netomi.chat.test.netomichatsdk-constraintlayout-2.1.4-25 /Users/appinventiv/.gradle/caches/transforms-4/8fcbbc34cd070ad30525f6d2cd86c4c6/transformed/constraintlayout-2.1.4/res
+com.netomi.chat.test.netomichatsdk-cardview-1.0.0-26 /Users/appinventiv/.gradle/caches/transforms-4/90b0f5d2b7ab3e8188705249515ac115/transformed/cardview-1.0.0/res
+com.netomi.chat.test.netomichatsdk-transition-1.5.0-27 /Users/appinventiv/.gradle/caches/transforms-4/99b4aed2a6eacbc36d12d3ee6f9b5905/transformed/transition-1.5.0/res
+com.netomi.chat.test.netomichatsdk-annotation-experimental-1.4.0-28 /Users/appinventiv/.gradle/caches/transforms-4/b2dab7b969dbb80c8447923dd35d618c/transformed/annotation-experimental-1.4.0/res
+com.netomi.chat.test.netomichatsdk-glide-4.15.1-29 /Users/appinventiv/.gradle/caches/transforms-4/b5c67fd3b4edbd8967c0345a61cf6279/transformed/glide-4.15.1/res
+com.netomi.chat.test.netomichatsdk-startup-runtime-1.1.1-30 /Users/appinventiv/.gradle/caches/transforms-4/b63b8357bbcd51a5dbe47293b17f3e68/transformed/startup-runtime-1.1.1/res
+com.netomi.chat.test.netomichatsdk-lifecycle-livedata-2.6.2-31 /Users/appinventiv/.gradle/caches/transforms-4/bb15f3ac4b79d6bddf2838d1d49cbdf8/transformed/lifecycle-livedata-2.6.2/res
+com.netomi.chat.test.netomichatsdk-activity-1.9.3-32 /Users/appinventiv/.gradle/caches/transforms-4/cd1f1ef67b0886f97564e3852c16b571/transformed/activity-1.9.3/res
+com.netomi.chat.test.netomichatsdk-core-1.6.1-33 /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/res
+com.netomi.chat.test.netomichatsdk-lottie-6.6.0-34 /Users/appinventiv/.gradle/caches/transforms-4/d5d877210027a4127a8318f4a0219f82/transformed/lottie-6.6.0/res
+com.netomi.chat.test.netomichatsdk-lifecycle-runtime-ktx-2.6.2-35 /Users/appinventiv/.gradle/caches/transforms-4/da049cd09e362490e0be4d3de3474b28/transformed/lifecycle-runtime-ktx-2.6.2/res
+com.netomi.chat.test.netomichatsdk-lifecycle-livedata-ktx-2.6.2-36 /Users/appinventiv/.gradle/caches/transforms-4/e76ba8065ac29b4e55cc482cdd9b3854/transformed/lifecycle-livedata-ktx-2.6.2/res
+com.netomi.chat.test.netomichatsdk-emoji2-1.3.0-37 /Users/appinventiv/.gradle/caches/transforms-4/ec5edf1f74f6f2ba6d9d230c6f1fa99f/transformed/emoji2-1.3.0/res
+com.netomi.chat.test.netomichatsdk-savedstate-1.2.1-38 /Users/appinventiv/.gradle/caches/transforms-4/f14019c5c6e770e2ee681087dcfb7e6e/transformed/savedstate-1.2.1/res
+com.netomi.chat.test.netomichatsdk-security-crypto-1.1.0-alpha06-39 /Users/appinventiv/.gradle/caches/transforms-4/f3ca6f99e9701a1497a4281f3d54a4a6/transformed/security-crypto-1.1.0-alpha06/res
+com.netomi.chat.test.netomichatsdk-recyclerview-1.1.0-40 /Users/appinventiv/.gradle/caches/transforms-4/f4b4b326d97417fd11a9fb93f6e56103/transformed/recyclerview-1.1.0/res
+com.netomi.chat.test.netomichatsdk-core-ktx-1.13.1-41 /Users/appinventiv/.gradle/caches/transforms-4/f8d9ab8245fa0cc84273539cc8c62585/transformed/core-ktx-1.13.1/res
+com.netomi.chat.test.netomichatsdk-drawerlayout-1.1.1-42 /Users/appinventiv/.gradle/caches/transforms-4/fa2e87befbdaab56b4e508e175501891/transformed/drawerlayout-1.1.1/res
+com.netomi.chat.test.netomichatsdk-androidTest-43 /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/generated/res/resValues/androidTest/debug
+com.netomi.chat.test.netomichatsdk-mergeDebugAndroidTestResources-44 /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/merged.dir
+com.netomi.chat.test.netomichatsdk-mergeDebugAndroidTestResources-45 /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/stripped.dir
+com.netomi.chat.test.netomichatsdk-debugAndroidTest-46 /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_res/debugAndroidTest/mergeDebugAndroidTestResources
+com.netomi.chat.test.netomichatsdk-debug-47 /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/packaged_res/debug/packageDebugResources

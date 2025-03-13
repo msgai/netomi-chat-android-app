@@ -1,0 +1,4 @@
+/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/androidTest/java/com/netomi/chat/data/repository/NCWChatRepositoryTest.kt
+/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/androidTest/java/com/netomi/chat/NCWAppUtilsTest.kt
+/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/androidTest/java/com/netomi/chat/ExampleInstrumentedTest.kt
+/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/androidTest/java/com/netomi/chat/utils/NCWMessageUtilsTest.kt

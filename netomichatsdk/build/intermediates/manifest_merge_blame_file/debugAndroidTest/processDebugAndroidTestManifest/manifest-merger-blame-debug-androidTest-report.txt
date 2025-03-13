@@ -1,0 +1,277 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.netomi.chat.test" >
+4
+5    <uses-sdk
+5-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest15652380499842532263.xml:5:5-74
+6        android:minSdkVersion="26"
+6-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest15652380499842532263.xml:5:15-41
+7        android:targetSdkVersion="26" />
+7-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest15652380499842532263.xml:5:42-71
+8
+9    <instrumentation
+9-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest15652380499842532263.xml:11:5-15:70
+10        android:name="androidx.test.runner.AndroidJUnitRunner"
+10-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest15652380499842532263.xml:11:22-76
+11        android:functionalTest="false"
+11-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest15652380499842532263.xml:14:22-52
+12        android:handleProfiling="false"
+12-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest15652380499842532263.xml:13:22-53
+13        android:label="Tests for com.netomi.chat.test"
+13-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest15652380499842532263.xml:15:22-68
+14        android:targetPackage="com.netomi.chat.test" />
+14-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest15652380499842532263.xml:12:22-66
+15
+16    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+16-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:8:5-79
+16-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:8:22-76
+17    <uses-permission android:name="android.permission.INTERNET" />
+17-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:9:5-67
+17-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:9:22-64
+18    <uses-permission android:name="android.permission.CAMERA" />
+18-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:10:5-65
+18-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:10:22-62
+19    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+19-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:11:5-77
+19-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:11:22-74
+20    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+20-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:12:5-76
+20-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:12:22-73
+21    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+21-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:13:5-80
+21-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:13:22-77
+22    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+22-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:14:5-81
+22-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:14:22-78
+23    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+23-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:15:5-75
+23-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:15:22-72
+24    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+24-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:16:5-77
+24-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:16:22-74
+25    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+25-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:17:5-94
+25-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:17:22-91
+26    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+26-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:18:5-79
+26-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:18:22-76
+27    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+27-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:19:5-76
+27-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:19:22-73
+28
+29    <queries>
+29-->[androidx.test:runner:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/9f473d1aecae163b867d4fae07d63060/transformed/runner-1.6.1/AndroidManifest.xml:24:5-28:15
+30        <package android:name="androidx.test.orchestrator" />
+30-->[androidx.test:runner:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/9f473d1aecae163b867d4fae07d63060/transformed/runner-1.6.1/AndroidManifest.xml:25:9-62
+30-->[androidx.test:runner:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/9f473d1aecae163b867d4fae07d63060/transformed/runner-1.6.1/AndroidManifest.xml:25:18-59
+31        <package android:name="androidx.test.services" />
+31-->[androidx.test:runner:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/9f473d1aecae163b867d4fae07d63060/transformed/runner-1.6.1/AndroidManifest.xml:26:9-58
+31-->[androidx.test:runner:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/9f473d1aecae163b867d4fae07d63060/transformed/runner-1.6.1/AndroidManifest.xml:26:18-55
+32        <package android:name="com.google.android.apps.common.testing.services" />
+32-->[androidx.test:runner:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/9f473d1aecae163b867d4fae07d63060/transformed/runner-1.6.1/AndroidManifest.xml:27:9-83
+32-->[androidx.test:runner:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/9f473d1aecae163b867d4fae07d63060/transformed/runner-1.6.1/AndroidManifest.xml:27:18-80
+33    </queries>
+34
+35    <uses-permission android:name="android.permission.REORDER_TASKS" />
+35-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:24:5-72
+35-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:24:22-69
+36
+37    <permission
+37-->[androidx.core:core:1.13.1] /Users/appinventiv/.gradle/caches/transforms-4/2342b36a0a68f01d7e55588e86b7258e/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+38        android:name="com.netomi.chat.test.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+38-->[androidx.core:core:1.13.1] /Users/appinventiv/.gradle/caches/transforms-4/2342b36a0a68f01d7e55588e86b7258e/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+39        android:protectionLevel="signature" />
+39-->[androidx.core:core:1.13.1] /Users/appinventiv/.gradle/caches/transforms-4/2342b36a0a68f01d7e55588e86b7258e/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+40
+41    <uses-permission android:name="com.netomi.chat.test.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+41-->[androidx.core:core:1.13.1] /Users/appinventiv/.gradle/caches/transforms-4/2342b36a0a68f01d7e55588e86b7258e/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+41-->[androidx.core:core:1.13.1] /Users/appinventiv/.gradle/caches/transforms-4/2342b36a0a68f01d7e55588e86b7258e/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+42
+43    <application
+43-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest15652380499842532263.xml:7:5-9:19
+44        android:name="com.netomi.chat.ui.init.NCWApplication"
+44-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:22:9-62
+45        android:allowBackup="false"
+45-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:23:9-36
+46        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+46-->[androidx.core:core:1.13.1] /Users/appinventiv/.gradle/caches/transforms-4/2342b36a0a68f01d7e55588e86b7258e/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
+47        android:debuggable="true"
+48        android:extractNativeLibs="false"
+49        android:supportsRtl="true" >
+49-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:24:9-35
+50        <uses-library android:name="android.test.runner" />
+50-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest15652380499842532263.xml:8:9-60
+50-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest15652380499842532263.xml:8:23-57
+51
+52        <activity
+52-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:25:9-27:40
+53            android:name="com.netomi.chat.ui.view.NCWBaseActivity"
+53-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:26:13-67
+54            android:exported="false" />
+54-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:27:13-37
+55        <activity
+55-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:28:9-30:40
+56            android:name="com.netomi.chat.ui.view.NCWFullScreenMediaActivity"
+56-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:29:13-78
+57            android:exported="false" />
+57-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:30:13-37
+58        <activity
+58-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:31:9-34:58
+59            android:name="com.netomi.chat.ui.view.NCWChatActivity"
+59-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:32:13-67
+60            android:screenOrientation="portrait"
+60-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:33:13-49
+61            android:windowSoftInputMode="adjustResize" />
+61-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:34:13-55
+62
+63        <provider
+63-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:36:9-44:20
+64            android:name="androidx.core.content.FileProvider"
+64-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:37:13-62
+65            android:authorities="com.netomi.chat.test.fileprovider"
+65-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:38:13-64
+66            android:exported="false"
+66-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:39:13-37
+67            android:grantUriPermissions="true" >
+67-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:40:13-47
+68            <meta-data
+68-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:41:13-43:53
+69                android:name="android.support.FILE_PROVIDER_PATHS"
+69-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:42:17-67
+70                android:resource="@xml/filepaths" />
+70-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:43:17-50
+71        </provider>
+72
+73        <service
+73-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:46:9-49:63
+74            android:name="com.netomi.chat.utils.NCWService"
+74-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:47:13-60
+75            android:exported="false"
+75-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:48:13-37
+76            android:foregroundServiceType="connectedDevice" />
+76-->[:netomichatsdk] /Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:49:13-60
+77
+78        <activity
+78-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:27:9-34:20
+79            android:name="androidx.test.core.app.InstrumentationActivityInvoker$BootstrapActivity"
+79-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:28:13-99
+80            android:exported="true"
+80-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:29:13-36
+81            android:theme="@style/WhiteBackgroundTheme" >
+81-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:30:13-56
+82            <intent-filter android:priority="-100" >
+82-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:31:13-33:29
+82-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:31:28-51
+83                <category android:name="android.intent.category.LAUNCHER" />
+83-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:32:17-77
+83-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:32:27-74
+84            </intent-filter>
+85        </activity>
+86        <activity
+86-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:35:9-42:20
+87            android:name="androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity"
+87-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:36:13-95
+88            android:exported="true"
+88-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:37:13-36
+89            android:theme="@style/WhiteBackgroundTheme" >
+89-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:38:13-56
+90            <intent-filter android:priority="-100" >
+90-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:31:13-33:29
+90-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:31:28-51
+91                <category android:name="android.intent.category.LAUNCHER" />
+91-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:32:17-77
+91-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:32:27-74
+92            </intent-filter>
+93        </activity>
+94        <activity
+94-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:43:9-50:20
+95            android:name="androidx.test.core.app.InstrumentationActivityInvoker$EmptyFloatingActivity"
+95-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:44:13-103
+96            android:exported="true"
+96-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:45:13-36
+97            android:theme="@style/WhiteBackgroundDialogTheme" >
+97-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:46:13-62
+98            <intent-filter android:priority="-100" >
+98-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:31:13-33:29
+98-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:31:28-51
+99                <category android:name="android.intent.category.LAUNCHER" />
+99-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:32:17-77
+99-->[androidx.test:core:1.6.1] /Users/appinventiv/.gradle/caches/transforms-4/d13d00ee641d6be639053e7622af5f57/transformed/core-1.6.1/AndroidManifest.xml:32:27-74
+100            </intent-filter>
+101        </activity>
+102
+103        <provider
+103-->[androidx.emoji2:emoji2:1.3.0] /Users/appinventiv/.gradle/caches/transforms-4/ec5edf1f74f6f2ba6d9d230c6f1fa99f/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+104            android:name="androidx.startup.InitializationProvider"
+104-->[androidx.emoji2:emoji2:1.3.0] /Users/appinventiv/.gradle/caches/transforms-4/ec5edf1f74f6f2ba6d9d230c6f1fa99f/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+105            android:authorities="com.netomi.chat.test.androidx-startup"
+105-->[androidx.emoji2:emoji2:1.3.0] /Users/appinventiv/.gradle/caches/transforms-4/ec5edf1f74f6f2ba6d9d230c6f1fa99f/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+106            android:exported="false" >
+106-->[androidx.emoji2:emoji2:1.3.0] /Users/appinventiv/.gradle/caches/transforms-4/ec5edf1f74f6f2ba6d9d230c6f1fa99f/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+107            <meta-data
+107-->[androidx.emoji2:emoji2:1.3.0] /Users/appinventiv/.gradle/caches/transforms-4/ec5edf1f74f6f2ba6d9d230c6f1fa99f/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+108                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+108-->[androidx.emoji2:emoji2:1.3.0] /Users/appinventiv/.gradle/caches/transforms-4/ec5edf1f74f6f2ba6d9d230c6f1fa99f/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+109                android:value="androidx.startup" />
+109-->[androidx.emoji2:emoji2:1.3.0] /Users/appinventiv/.gradle/caches/transforms-4/ec5edf1f74f6f2ba6d9d230c6f1fa99f/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+110            <meta-data
+110-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/appinventiv/.gradle/caches/transforms-4/4eb259fa705431264b179e7b76c491dc/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:29:13-31:52
+111                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+111-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/appinventiv/.gradle/caches/transforms-4/4eb259fa705431264b179e7b76c491dc/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:30:17-78
+112                android:value="androidx.startup" />
+112-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/appinventiv/.gradle/caches/transforms-4/4eb259fa705431264b179e7b76c491dc/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:31:17-49
+113            <meta-data
+113-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+114                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+114-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+115                android:value="androidx.startup" />
+115-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+116        </provider>
+117
+118        <receiver
+118-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+119            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+119-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+120            android:directBootAware="false"
+120-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+121            android:enabled="true"
+121-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+122            android:exported="true"
+122-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+123            android:permission="android.permission.DUMP" >
+123-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+124            <intent-filter>
+124-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+125                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+125-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+125-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+126            </intent-filter>
+127            <intent-filter>
+127-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+128                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+128-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+128-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+129            </intent-filter>
+130            <intent-filter>
+130-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+131                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+131-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+131-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+132            </intent-filter>
+133            <intent-filter>
+133-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+134                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+134-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+134-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/appinventiv/.gradle/caches/transforms-4/472dd3ae98046df0d76cc69d7fdd65a1/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+135            </intent-filter>
+136        </receiver>
+137
+138        <uses-library
+138-->[com.amazonaws:aws-android-sdk-core:2.77.0] /Users/appinventiv/.gradle/caches/transforms-4/9768d99f15181fc3c346c2556b172c7b/transformed/aws-android-sdk-core-2.77.0/AndroidManifest.xml:11:9-13:40
+139            android:name="org.apache.http.legacy"
+139-->[com.amazonaws:aws-android-sdk-core:2.77.0] /Users/appinventiv/.gradle/caches/transforms-4/9768d99f15181fc3c346c2556b172c7b/transformed/aws-android-sdk-core-2.77.0/AndroidManifest.xml:12:13-50
+140            android:required="false" />
+140-->[com.amazonaws:aws-android-sdk-core:2.77.0] /Users/appinventiv/.gradle/caches/transforms-4/9768d99f15181fc3c346c2556b172c7b/transformed/aws-android-sdk-core-2.77.0/AndroidManifest.xml:13:13-37
+141    </application>
+142
+143</manifest>
