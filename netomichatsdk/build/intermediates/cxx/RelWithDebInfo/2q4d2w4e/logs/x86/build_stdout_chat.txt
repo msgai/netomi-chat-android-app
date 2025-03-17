@@ -1,0 +1,2 @@
+ninja: Entering directory `/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/.cxx/RelWithDebInfo/2q4d2w4e/x86'
+ninja: no work to do.

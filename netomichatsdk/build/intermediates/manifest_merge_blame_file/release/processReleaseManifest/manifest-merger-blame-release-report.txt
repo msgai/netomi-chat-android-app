@@ -1,0 +1,72 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    xmlns:tools="http://schemas.android.com/tools"
+4    package="com.netomi.chat" >
+5
+6    <uses-sdk android:minSdkVersion="26" />
+7
+8    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+8-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:5:5-79
+8-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:5:22-76
+9    <uses-permission android:name="android.permission.INTERNET" />
+9-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:6:5-67
+9-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:6:22-64
+10    <uses-permission android:name="android.permission.CAMERA" />
+10-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:7:5-65
+10-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:7:22-62
+11    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+11-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:8:5-76
+11-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:8:22-73
+12    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+12-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:9:5-80
+12-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:9:22-77
+13    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+13-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:10:5-81
+13-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:10:22-78
+14    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+14-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:11:5-75
+14-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:11:22-72
+15
+16    <application
+16-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:13:5-35:19
+17        android:name="com.netomi.chat.ui.init.NCWApplication"
+17-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:14:9-47
+18        android:allowBackup="true"
+18-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:15:9-35
+19        android:supportsRtl="true" >
+19-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:16:9-35
+20        <activity
+20-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:18:9-20:40
+21            android:name="com.netomi.chat.ui.view.NCWFullScreenMediaActivity"
+21-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:19:13-63
+22            android:exported="false" />
+22-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:20:13-37
+23        <activity
+23-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:21:9-24:58
+24            android:name="com.netomi.chat.ui.view.NCWChatActivity"
+24-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:22:13-52
+25            android:screenOrientation="portrait"
+25-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:23:13-49
+26            android:windowSoftInputMode="adjustResize" />
+26-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:24:13-55
+27
+28        <provider
+28-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:26:9-34:20
+29            android:name="androidx.core.content.FileProvider"
+29-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:27:13-62
+30            android:authorities="${applicationId}.fileprovider"
+30-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:28:13-64
+31            android:exported="false"
+31-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:29:13-37
+32            android:grantUriPermissions="true" >
+32-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:30:13-47
+33            <meta-data
+33-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:31:13-33:53
+34                android:name="android.support.FILE_PROVIDER_PATHS"
+34-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:32:17-67
+35                android:resource="@xml/filepaths" />
+35-->/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/src/main/AndroidManifest.xml:33:17-50
+36        </provider>
+37    </application>
+38
+39</manifest>

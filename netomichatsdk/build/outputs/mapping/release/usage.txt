@@ -1,0 +1,905 @@
+com.netomi.chat.BuildConfig
+com.netomi.chat.NativeLib$Companion
+com.netomi.chat.NativeLib
+com.netomi.chat.awsiot.NCWAwsIotManager:
+    public final void publishMessage(java.lang.String,java.lang.String)
+com.netomi.chat.data.apiconstant.NCWApiConstant
+com.netomi.chat.data.network.NCWApiInterface$DefaultImpls
+com.netomi.chat.data.network.NCWApiInterface:
+    public abstract java.lang.Object fetchJWT(java.lang.String,kotlin.coroutines.Continuation)
+    public abstract java.lang.Object hitLogoutAPI(java.lang.String,java.lang.String,java.lang.String,kotlin.coroutines.Continuation)
+com.netomi.chat.data.network.NCWBaseService$createCall$1
+com.netomi.chat.data.network.NCWBaseService:
+    protected final java.lang.Object createCall(java.lang.String,long,boolean,kotlin.jvm.functions.Function1,kotlin.coroutines.Continuation)
+    public static synthetic java.lang.Object createCall$default(com.netomi.chat.data.network.NCWBaseService,java.lang.String,long,boolean,kotlin.jvm.functions.Function1,kotlin.coroutines.Continuation,int,java.lang.Object)
+    private final java.lang.String mapToNetworkError(java.lang.Throwable)
+    public int parseErrorCode(okhttp3.ResponseBody)
+com.netomi.chat.data.repository.NCWAwsCredentialsRepository:
+    public final void clearCredentials()
+com.netomi.chat.data.repository.NCWChatRepository$hitLogoutApi$1
+com.netomi.chat.data.repository.NCWChatRepository:
+    public final java.lang.Object hitLogoutApi(java.lang.String,java.lang.String,java.lang.String,kotlin.coroutines.Continuation)
+com.netomi.chat.survey.EventData:
+    public final java.lang.String component1()
+    public final java.lang.String component2()
+    public final com.netomi.chat.survey.EventInfo component3()
+    public final java.lang.String component4()
+    public final com.netomi.chat.survey.NCWSignInUserDetails component5()
+    public final com.netomi.chat.survey.EventData copy(java.lang.String,java.lang.String,com.netomi.chat.survey.EventInfo,java.lang.String,com.netomi.chat.survey.NCWSignInUserDetails)
+    public static synthetic com.netomi.chat.survey.EventData copy$default(com.netomi.chat.survey.EventData,java.lang.String,java.lang.String,com.netomi.chat.survey.EventInfo,java.lang.String,com.netomi.chat.survey.NCWSignInUserDetails,int,java.lang.Object)
+    public final void setAuthenticatedConversationId(java.lang.String)
+    public final void setUserdetails(com.netomi.chat.survey.NCWSignInUserDetails)
+com.netomi.chat.survey.EventInfo:
+    public final java.lang.String component1()
+    public final java.lang.String component2()
+    public final java.lang.String component3()
+    public final com.netomi.chat.survey.SubmitSurveyInfo component4()
+    public final java.lang.String component5()
+    public final java.lang.String component6()
+    public final java.lang.String component7()
+    public final java.lang.String component8()
+    public final java.lang.String component9()
+    public final com.netomi.chat.survey.EventInfo copy(java.lang.String,java.lang.String,java.lang.String,com.netomi.chat.survey.SubmitSurveyInfo,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public static synthetic com.netomi.chat.survey.EventInfo copy$default(com.netomi.chat.survey.EventInfo,java.lang.String,java.lang.String,java.lang.String,com.netomi.chat.survey.SubmitSurveyInfo,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,java.lang.Object)
+    public final java.lang.String getAgentId()
+    public final java.lang.String getEstimatedWaitTime()
+    public final java.lang.String getFeedbackValue()
+    public final java.lang.String getRequestId()
+    public final java.lang.String getSurveyId()
+com.netomi.chat.survey.NCWSignInUserDetails:
+    private final java.lang.String email
+    private final java.lang.String name
+    private final java.lang.String userId
+    public void <init>()
+    public void <init>(java.lang.String,java.lang.String,java.lang.String)
+    public synthetic void <init>(java.lang.String,java.lang.String,java.lang.String,int,kotlin.jvm.internal.DefaultConstructorMarker)
+    public final java.lang.String component1()
+    public final java.lang.String component2()
+    public final java.lang.String component3()
+    public final com.netomi.chat.survey.NCWSignInUserDetails copy(java.lang.String,java.lang.String,java.lang.String)
+    public static synthetic com.netomi.chat.survey.NCWSignInUserDetails copy$default(com.netomi.chat.survey.NCWSignInUserDetails,java.lang.String,java.lang.String,java.lang.String,int,java.lang.Object)
+    public boolean equals(java.lang.Object)
+    public java.lang.String toString()
+com.netomi.chat.survey.RequestBody:
+    public final java.lang.String component1()
+    public final com.netomi.chat.survey.EventData component2()
+    public final java.lang.String component3()
+    public final java.lang.String component4()
+    public final java.lang.String component5()
+    public final java.lang.String component6()
+    public final java.lang.String component7()
+    public final long component8()
+    public final boolean component9()
+    public final com.netomi.chat.survey.RequestBody copy(java.lang.String,com.netomi.chat.survey.EventData,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,long,boolean)
+    public static synthetic com.netomi.chat.survey.RequestBody copy$default(com.netomi.chat.survey.RequestBody,java.lang.String,com.netomi.chat.survey.EventData,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,long,boolean,int,java.lang.Object)
+    public final java.lang.String getBotReferenceId()
+    public final java.lang.String getChannelId()
+    public final java.lang.String getConversationId()
+    public final java.lang.String getEventName()
+    public final java.lang.String getRequestType()
+    public final long getTimestamp()
+    public final java.lang.String getTriggerType()
+    public final boolean isPublishToMQTT()
+com.netomi.chat.survey.SubmitSurveyInfo:
+    public final int component1()
+    public final java.util.List component2()
+    public final java.lang.String component3()
+    public final java.lang.Boolean component4()
+    public final java.lang.String component5()
+    public final java.lang.String component6()
+    public final com.netomi.chat.survey.SubmitSurveyInfo copy(int,java.util.List,java.lang.String,java.lang.Boolean,java.lang.String,java.lang.String)
+    public static synthetic com.netomi.chat.survey.SubmitSurveyInfo copy$default(com.netomi.chat.survey.SubmitSurveyInfo,int,java.util.List,java.lang.String,java.lang.Boolean,java.lang.String,java.lang.String,int,java.lang.Object)
+    public final java.lang.String getSuggestionTitle()
+    public final java.lang.String getTriggerType()
+com.netomi.chat.survey.SubmitSurveyRequest:
+    public final java.lang.String component1()
+    public final com.netomi.chat.survey.RequestBody component2()
+    public final com.netomi.chat.survey.SubmitSurveyRequest copy(java.lang.String,com.netomi.chat.survey.RequestBody)
+    public static synthetic com.netomi.chat.survey.SubmitSurveyRequest copy$default(com.netomi.chat.survey.SubmitSurveyRequest,java.lang.String,com.netomi.chat.survey.RequestBody,int,java.lang.Object)
+    public final java.lang.String getBotRefId()
+com.netomi.chat.ui.init.NCWChatTheme:
+    public final android.content.Context getContext()
+com.netomi.chat.ui.view.CheckBoxField:
+    public final android.widget.CheckBox component1()
+    public final android.widget.TextView component2()
+    public final com.netomi.chat.ui.view.CheckBoxField copy(android.widget.CheckBox,android.widget.TextView)
+    public static synthetic com.netomi.chat.ui.view.CheckBoxField copy$default(com.netomi.chat.ui.view.CheckBoxField,android.widget.CheckBox,android.widget.TextView,int,java.lang.Object)
+com.netomi.chat.ui.view.DateField:
+    public final android.widget.EditText component1()
+    public final android.widget.TextView component2()
+    public final android.widget.RelativeLayout component3()
+    public final com.netomi.chat.ui.view.DateField copy(android.widget.EditText,android.widget.TextView,android.widget.RelativeLayout)
+    public static synthetic com.netomi.chat.ui.view.DateField copy$default(com.netomi.chat.ui.view.DateField,android.widget.EditText,android.widget.TextView,android.widget.RelativeLayout,int,java.lang.Object)
+com.netomi.chat.ui.view.DropdownField:
+    public final java.lang.String component1()
+    public final android.widget.TextView component2()
+    public final com.netomi.chat.ui.view.DropdownField copy(java.lang.String,android.widget.TextView)
+    public static synthetic com.netomi.chat.ui.view.DropdownField copy$default(com.netomi.chat.ui.view.DropdownField,java.lang.String,android.widget.TextView,int,java.lang.Object)
+com.netomi.chat.ui.view.FormData:
+    public void <init>()
+    public final java.lang.String component1()
+    public final java.lang.String component2()
+    public final java.lang.String component3()
+    public final java.util.List component4()
+    public final java.lang.String component5()
+    public final java.lang.String component6()
+    public final java.util.ArrayList component7()
+    public final com.netomi.chat.ui.view.FormData copy(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.lang.String,java.lang.String,java.util.ArrayList)
+    public static synthetic com.netomi.chat.ui.view.FormData copy$default(com.netomi.chat.ui.view.FormData,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.lang.String,java.lang.String,java.util.ArrayList,int,java.lang.Object)
+com.netomi.chat.ui.view.InputField:
+    public final android.widget.EditText component1()
+    public final android.widget.TextView component2()
+    public final com.netomi.chat.ui.view.InputField copy(android.widget.EditText,android.widget.TextView)
+    public static synthetic com.netomi.chat.ui.view.InputField copy$default(com.netomi.chat.ui.view.InputField,android.widget.EditText,android.widget.TextView,int,java.lang.Object)
+com.netomi.chat.ui.view.NCWChatActivity:
+    private com.netomi.chat.model.theme.light_theme.NCWHeaderConfig ncwSdkConfig
+    private final void hitLogoutAPI()
+    private final void updateLoaderTime()
+com.netomi.chat.ui.view.NCWChatAdapter:
+    private static final int VIEW_TYPE_EVENT
+    private static final int VIEW_TYPE_FORM
+    private static final int VIEW_TYPE_INDICATOR
+    private static final int VIEW_TYPE_PILLS
+    private static final int VIEW_TYPE_REQUEST
+    private static final int VIEW_TYPE_RESPONSE
+com.netomi.chat.ui.view.NCWCustomDividerItemDecoration
+com.netomi.chat.ui.view.NCWFormFilesAdapter$ViewHolder:
+    public final androidx.constraintlayout.widget.ConstraintLayout getRequestDocCard()
+com.netomi.chat.ui.view.NCWFormFilesAdapter:
+    public final boolean isClickable()
+com.netomi.chat.ui.view.NCWRatingAdapter:
+    public final int getSelectedRating()
+com.netomi.chat.ui.view.NCWSurveyBottomSheet:
+    public synthetic void <init>(java.lang.String,com.netomi.chat.model.messages.SurveyField,java.lang.String,java.lang.String,java.lang.String,kotlin.jvm.functions.Function1,kotlin.jvm.functions.Function2,int,kotlin.jvm.internal.DefaultConstructorMarker)
+com.netomi.chat.ui.view.RadioField:
+    public final android.widget.RadioGroup component1()
+    public final android.widget.TextView component2()
+    public final com.netomi.chat.ui.view.RadioField copy(android.widget.RadioGroup,android.widget.TextView)
+    public static synthetic com.netomi.chat.ui.view.RadioField copy$default(com.netomi.chat.ui.view.RadioField,android.widget.RadioGroup,android.widget.TextView,int,java.lang.Object)
+com.netomi.chat.ui.view.SuggestionAdapter$SuggestionViewHolder:
+    public final android.widget.TextView getTextView()
+com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel:
+    public final void clearCredentials()
+    public final void getAwsCredentials()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$hitLogoutApi$1$1
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$hitLogoutApi$1
+com.netomi.chat.ui.viewmodel.NCWChatViewModel:
+    public static final synthetic com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent access$get_logoutResponse$p(com.netomi.chat.ui.viewmodel.NCWChatViewModel)
+    public final com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getChatMessages()
+    public final void hitLogoutApi(java.lang.String,java.lang.String)
+com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent:
+    public final void call()
+com.netomi.chat.utils.CustomTypefaceSpan
+com.netomi.chat.utils.DeviceInfo:
+    public final java.lang.String component1()
+    public final java.lang.String component10()
+    public final java.lang.String component11()
+    public final java.lang.String component12()
+    public final int component13()
+    public final int component14()
+    public final float component15()
+    public final java.lang.String component2()
+    public final java.lang.String component3()
+    public final java.lang.String component4()
+    public final java.lang.String component5()
+    public final boolean component6()
+    public final int component7()
+    public final boolean component8()
+    public final java.lang.String component9()
+    public final com.netomi.chat.utils.DeviceInfo copy(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,boolean,int,boolean,java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int,float)
+    public static synthetic com.netomi.chat.utils.DeviceInfo copy$default(com.netomi.chat.utils.DeviceInfo,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,boolean,int,boolean,java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int,float,int,java.lang.Object)
+com.netomi.chat.utils.NCWAppConstant$RatingType
+com.netomi.chat.utils.NCWAppConstant
+com.netomi.chat.utils.NCWAppSharedPreferences:
+    public final void clearSharedPreference()
+    public final boolean getBoolean(java.lang.String)
+    public final int getInt(java.lang.String)
+    public final java.lang.String getString(java.lang.String,java.lang.String)
+    public final void setBoolean(java.lang.String,boolean)
+    public final void setInt(java.lang.String,int)
+    public final void setString(java.lang.String,java.lang.String)
+com.netomi.chat.utils.NCWAppUtils:
+    public final java.lang.String getMimeType(android.content.Context,android.net.Uri)
+    public final java.lang.String getPrefix(java.lang.String)
+    public final java.lang.String setHtmText(java.lang.String)
+    public final void showKeyboard(android.app.Activity)
+com.netomi.chat.utils.NCWBaseResponse
+com.netomi.chat.utils.NCWChatActionCallback$DefaultImpls
+com.netomi.chat.utils.NCWDatePickerUtil$showDatePicker$1
+com.netomi.chat.utils.NCWDatePickerUtil
+com.netomi.chat.utils.NCWDialogUtils:
+    private final android.graphics.drawable.GradientDrawable createRoundedDrawable(int)
+com.netomi.chat.utils.NCWFilePath:
+    private final java.lang.String getDataVideoColumn(android.content.Context,android.net.Uri,java.lang.String,java.lang.String[])
+    public final java.lang.String getVideoPath(android.content.Context,android.net.Uri)
+    private final boolean isGooglePhotosUri(android.net.Uri)
+com.netomi.chat.utils.NCWRootChecker$Companion:
+    public final boolean isDebuggable(android.content.Context)
+    public final boolean isEmulator()
+    public final boolean isUsingProxy()
+com.netomi.chat.utils.NCWRootChecker:
+    private static final java.lang.String TAG
+    public void <init>()
+com.netomi.chat.utils.NCWRoutes
+com.netomi.chat.utils.NCWSingleAlertDialog:
+    public static synthetic void showSingleButtonDialog$default(com.netomi.chat.utils.NCWSingleAlertDialog,android.content.Context,java.lang.String,java.lang.String,java.lang.String,kotlin.jvm.functions.Function0,int,java.lang.Object)
+com.netomi.chat.utils.NCWState$Companion:
+    public static synthetic com.netomi.chat.utils.NCWState$Error error$default(com.netomi.chat.utils.NCWState$Companion,java.lang.String,java.lang.Integer,int,java.lang.Object)
+    public final com.netomi.chat.utils.NCWState fromResource(com.netomi.chat.utils.NCWState$Resource,java.lang.String)
+    public static synthetic com.netomi.chat.utils.NCWState$SendMessageError sendMessageError$default(com.netomi.chat.utils.NCWState$Companion,java.lang.String,java.lang.Integer,java.lang.Object,int,java.lang.Object)
+    public final com.netomi.chat.utils.NCWState$UnAuthorized unAuthorized(java.lang.String)
+com.netomi.chat.utils.NCWState$Error:
+    public synthetic void <init>(java.lang.String,java.lang.Integer,int,kotlin.jvm.internal.DefaultConstructorMarker)
+    public final java.lang.String component1()
+    public final java.lang.Integer component2()
+    public final com.netomi.chat.utils.NCWState$Error copy(java.lang.String,java.lang.Integer)
+    public static synthetic com.netomi.chat.utils.NCWState$Error copy$default(com.netomi.chat.utils.NCWState$Error,java.lang.String,java.lang.Integer,int,java.lang.Object)
+    public final java.lang.Integer getCode()
+    public final java.lang.String getMessage()
+com.netomi.chat.utils.NCWState$Loading:
+    public synthetic void <init>(java.lang.String,java.lang.Enum,int,kotlin.jvm.internal.DefaultConstructorMarker)
+    public final java.lang.String getApiConstant()
+    public final java.lang.Enum getEnum()
+com.netomi.chat.utils.NCWState$Resource$Failed
+com.netomi.chat.utils.NCWState$Resource$Success
+com.netomi.chat.utils.NCWState$Resource$UnAuthorized
+com.netomi.chat.utils.NCWState$Resource
+com.netomi.chat.utils.NCWState$SendMessageError:
+    public synthetic void <init>(java.lang.String,java.lang.Integer,java.lang.Object,int,kotlin.jvm.internal.DefaultConstructorMarker)
+    public final java.lang.String component1()
+    public final java.lang.Integer component2()
+    public final java.lang.Object component3()
+    public final com.netomi.chat.utils.NCWState$SendMessageError copy(java.lang.String,java.lang.Integer,java.lang.Object)
+    public static synthetic com.netomi.chat.utils.NCWState$SendMessageError copy$default(com.netomi.chat.utils.NCWState$SendMessageError,java.lang.String,java.lang.Integer,java.lang.Object,int,java.lang.Object)
+    public final java.lang.Integer getCode()
+    public final java.lang.String getMessage()
+com.netomi.chat.utils.NCWState$Success:
+    public final java.lang.Object component1()
+    public final java.lang.String component2()
+    public final com.netomi.chat.utils.NCWState$Success copy(java.lang.Object,java.lang.String)
+    public static synthetic com.netomi.chat.utils.NCWState$Success copy$default(com.netomi.chat.utils.NCWState$Success,java.lang.Object,java.lang.String,int,java.lang.Object)
+com.netomi.chat.utils.NCWState$UnAuthorized
+com.netomi.chat.utils.NCWThemeUtils:
+    public final void applyBackgroundAndTint(android.widget.ImageView,java.lang.String,java.lang.String)
+    public static synthetic void applyBackgroundWithCorners$default(com.netomi.chat.utils.NCWThemeUtils,android.view.View,java.lang.String,float[],int,java.lang.Object)
+    static synthetic void applyBorderWithCorners$default(com.netomi.chat.utils.NCWThemeUtils,android.view.View,java.lang.String,java.lang.String,float[],int,java.lang.Object)
+    public final void applyChipBackgroundWithCorners(android.view.View,float[],int)
+    public final void applyChipBackgroundWithCorners(android.widget.TextView,float[],int)
+    public static synthetic void applyChipBackgroundWithCorners$default(com.netomi.chat.utils.NCWThemeUtils,android.view.View,float[],int,int,java.lang.Object)
+    public static synthetic void applyChipBackgroundWithCorners$default(com.netomi.chat.utils.NCWThemeUtils,android.widget.TextView,float[],int,int,java.lang.Object)
+    public final void applyCircularBackgroundAndTint(android.widget.ImageView,java.lang.String,boolean)
+    public final com.netomi.chat.survey.NCWSignInUserDetails getUserDetails()
+    private final void loadImageIntoView(android.widget.ImageView,java.lang.String)
+    public final void setUserDetails(com.netomi.chat.survey.NCWSignInUserDetails)
+NCWIdleTimeoutManager:
+    public static void updateLastActiveTime()
+com.netomi.chat.awsiot.NCWAwsIotManager$initialize$1:
+    public static com.amazonaws.auth.BasicSessionCredentials getCredentials()
+com.netomi.chat.awsiot.NCWAwsIotManager:
+    public static final com.netomi.chat.awsiot.NCWAwsIotManager INSTANCE
+    public void <init>()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getConnectionStatusLiveData()
+    public static void initialize()
+    public static void switchTopic()
+    public static void unsubscribeRestart()
+com.netomi.chat.data.network.NCWBaseService
+com.netomi.chat.data.network.NCWRetrofitClient
+com.netomi.chat.data.repository.NCWAwsCredentialsRepository$Companion:
+    public static com.netomi.chat.data.repository.NCWAwsCredentialsRepository getInstance()
+com.netomi.chat.data.repository.NCWAwsCredentialsRepository:
+    public static com.netomi.chat.model.awsmqtt.NCWAwsCredentials getAWSCredentials()
+com.netomi.chat.data.repository.NCWChatRepository:
+    public final android.content.Context context
+com.netomi.chat.survey.EventData:
+    public com.netomi.chat.survey.NCWSignInUserDetails userdetails
+    public static java.lang.String getAuthenticatedConversationId()
+    public static com.netomi.chat.survey.EventInfo getEventInfo()
+    public static java.lang.String getEventType()
+    public static java.lang.String getSubType()
+    public static void getUserdetails()
+com.netomi.chat.survey.EventInfo:
+    public static java.lang.String getAgentAvatar()
+    public static java.lang.String getAgentName()
+    public static java.lang.String getQueuePosition()
+    public static com.netomi.chat.survey.SubmitSurveyInfo getSubmitSurveyInfo()
+com.netomi.chat.survey.NCWSignInUserDetails:
+    public abstract java.lang.String getEmail()
+    public abstract java.lang.String getName()
+    public abstract java.lang.String getUserId()
+    public abstract int hashCode()
+com.netomi.chat.survey.RequestBody:
+    public static com.netomi.chat.survey.EventData getEventData()
+com.netomi.chat.survey.SubmitSurveyInfo:
+    public static java.lang.String getAdditionalFeedback()
+    public static java.lang.Boolean getIssueResolved()
+    public static int getRating()
+    public static java.util.List getSuggestions()
+com.netomi.chat.survey.SubmitSurveyRequest:
+    public static com.netomi.chat.survey.RequestBody getRequestBody()
+com.netomi.chat.ui.init.NCWChatSdk$fetchAndStoreTheme$1:
+    public static void invoke()
+com.netomi.chat.ui.init.NCWChatSdk$fetchAndStoreTheme$2:
+    public static void invoke()
+com.netomi.chat.ui.init.NCWChatSdk$launch$1$1:
+    public static void invoke()
+com.netomi.chat.ui.init.NCWChatTheme$fetchSdkTheme$1$1:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.init.NCWChatTheme$fetchSdkTheme$1$2:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.init.NCWChatTheme$fetchSdkTheme$1$3:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.init.NCWChatTheme$fetchSdkTheme$1:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.init.NCWChatTheme:
+    public final android.content.Context context
+    public static void fetchSdkTheme()
+com.netomi.chat.ui.view.CheckBoxField:
+    public static android.widget.CheckBox getCheckGroup()
+    public static android.widget.TextView getErrorTextView()
+com.netomi.chat.ui.view.DateField:
+    public static android.widget.RelativeLayout getContainer()
+    public static android.widget.EditText getDateField()
+    public static android.widget.TextView getErrorTextView()
+com.netomi.chat.ui.view.DropdownField:
+    public static android.widget.TextView getErrorTextView()
+    public static java.lang.String getSelectedValue()
+com.netomi.chat.ui.view.FormData:
+    public static java.lang.String getDateInput()
+    public static java.lang.String getDropdownSelection()
+    public static java.util.ArrayList getFileUpload()
+    public static java.util.List getSelectedCheckboxes()
+    public static java.lang.String getSelectedRadio()
+    public static java.lang.String getTextAreaInput()
+    public static java.lang.String getTextInput()
+    public static void setDateInput()
+    public static void setDropdownSelection()
+    public static void setFileUpload()
+    public static void setSelectedCheckboxes()
+    public static void setSelectedRadio()
+    public static void setTextAreaInput()
+    public static void setTextInput()
+com.netomi.chat.ui.view.InputField:
+    public static android.widget.EditText getEditText()
+    public static android.widget.TextView getErrorTextView()
+com.netomi.chat.ui.view.NCWCarouselAdapter$CarouselViewHolder:
+    public final synthetic com.netomi.chat.ui.view.NCWCarouselAdapter this$0
+    public static androidx.cardview.widget.CardView getCardImageCarousel()
+    public static android.widget.ImageView getImgCarousel()
+    public static androidx.recyclerview.widget.RecyclerView getRecyclerViewCarouselButton()
+    public static androidx.constraintlayout.widget.ConstraintLayout getRootLayout()
+    public static android.widget.TextView getTvDetail()
+    public static android.widget.TextView getTvHeading()
+com.netomi.chat.ui.view.NCWCarouselAdapter$onBindViewHolder$carouselAdapter$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWCarouselAdapter:
+    public static void onBindViewHolder()
+    public static com.netomi.chat.ui.view.NCWCarouselAdapter$CarouselViewHolder onCreateViewHolder()
+com.netomi.chat.ui.view.NCWCarouselButtonAdapter$ViewHolder:
+    public final synthetic com.netomi.chat.ui.view.NCWCarouselButtonAdapter this$0
+    public static android.widget.TextView getCarouselButton()
+    public static androidx.constraintlayout.widget.ConstraintLayout getConstRow()
+com.netomi.chat.ui.view.NCWCarouselButtonAdapter:
+    public static com.netomi.chat.ui.view.NCWCarouselButtonAdapter$ViewHolder onCreateViewHolder()
+com.netomi.chat.ui.view.NCWChatActivity$backClicked$bottomSheet$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$checkForInitialMessage$1:
+    public static java.lang.Boolean invoke()
+com.netomi.chat.ui.view.NCWChatActivity$handleSessionTimeout$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$mergeChunks$mergedText$1:
+    public static java.lang.CharSequence invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$10:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$11:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$12:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$13:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$15:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$16:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$2:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$3:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$4:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$5:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$6:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$7:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$8:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$observeChatMessages$9:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$onCreate$7$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$removeLoader$1:
+    public static java.lang.Boolean invoke()
+com.netomi.chat.ui.view.NCWChatActivity$renderTheNormalMessage$2:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.view.NCWChatActivity$renderTheNormalMessage$3:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.view.NCWChatActivity$renderTheSurveyMessage$1$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$renderTheSurveyMessage$1$2:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$setUpQuickReplyOption$bottomSheet$1$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$setUpSettingOption$bottomSheet$1$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$setupMessageList$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$setupMessageList$2:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$setupMessageList$3:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$setupMessageList$4:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$showCameraVideoOption$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$showCameraVideoOption$2:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$showMediaOptions$1$bottomSheet$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$showMediaOptions$1$bottomSheet$2:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$showMediaOptions$1$bottomSheet$3:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$showMediaOptions$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$showRestartPopUp$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$showSubmittedSurvey$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$showSubmittedSurvey$2:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatActivity$special$$inlined$viewModels$default$1:
+    public static androidx.lifecycle.ViewModelProvider$Factory invoke()
+com.netomi.chat.ui.view.NCWChatActivity$special$$inlined$viewModels$default$2:
+    public static androidx.lifecycle.ViewModelStore invoke()
+com.netomi.chat.ui.view.NCWChatActivity$special$$inlined$viewModels$default$3:
+    public final synthetic kotlin.jvm.functions.Function0 $extrasProducer
+    public static androidx.lifecycle.viewmodel.CreationExtras invoke()
+com.netomi.chat.ui.view.NCWChatActivity$special$$inlined$viewModels$default$4:
+    public static androidx.lifecycle.ViewModelProvider$Factory invoke()
+com.netomi.chat.ui.view.NCWChatActivity$special$$inlined$viewModels$default$5:
+    public static androidx.lifecycle.ViewModelStore invoke()
+com.netomi.chat.ui.view.NCWChatActivity$special$$inlined$viewModels$default$6:
+    public final synthetic kotlin.jvm.functions.Function0 $extrasProducer
+    public static androidx.lifecycle.viewmodel.CreationExtras invoke()
+com.netomi.chat.ui.view.NCWChatActivity$updateMessageList$2:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.view.NCWChatActivity$updateMessageList$3:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.view.NCWChatActivity:
+    public boolean isMultipleFile
+    public static final void access$callBackToBot(com.netomi.chat.ui.view.NCWChatActivity)
+    public static final com.netomi.chat.ui.viewmodel.NCWChatViewModel access$getChatViewModel(com.netomi.chat.ui.view.NCWChatActivity)
+    public static void addDocMessage()
+    public static void applyTheme()
+    public static boolean arePermissionsGranted()
+    public final void backClicked()
+    public static void callBackToBot()
+    public static boolean checkLoaderRunning()
+    public static void checkNetworkAndExecute()
+    public static boolean checkProactiveMessageAvailable()
+    public final void createAndShowSurveyBottomSheet(java.lang.String,com.netomi.chat.model.messages.SurveyField,java.lang.String,kotlin.jvm.functions.Function1,kotlin.jvm.functions.Function2)
+    public static java.io.File createImageFile()
+    public static synthetic com.netomi.chat.model.messages.NCWWebhookPayload createPayload$default(com.netomi.chat.ui.view.NCWChatActivity,java.lang.String,java.lang.String,java.lang.Long)
+    public static com.netomi.chat.ui.viewmodel.NCWChatViewModel getChatViewModel()
+    public static com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel getNcwAwsCredentialsViewModel()
+    public static void handleApiCallback()
+    public static void handleMediaMessage()
+    public static void handleSessionTimeout()
+    public static void hitIdealTimeOutEvent()
+    public static void launchCustomChromeTab()
+    public static void makePhoneCall()
+    public static com.netomi.chat.model.NCWMessage mergeChunks()
+    public static void observeChatMessages()
+    public final void onQuickReply()
+    public static void onQuickReplyClicked()
+    public final void onRetryClicked()
+    public final void onSourceClicked()
+    public final void onThumbDownClick()
+    public final void onThumbUpClick()
+    public static void openCamera()
+    public static void openFile()
+    public static void openFormPicker()
+    public static void openGallery()
+    public static void openVideoCamera()
+    public static void parseHistoryItems()
+    public static void playBotSound()
+    public final void playUserSound()
+    public static void refreshChat()
+    public final void removeLoader()
+    public static void renderTheFormMessage()
+    public static void renderTheSurveyMessage()
+    public static void requestPermissionsAndShowMediaOptions()
+    public static void retryAttachmentMessage()
+    public static void saveAwsCredentials()
+    public static void sendProactiveMessage()
+    public static void setUpQuickReplyOption()
+    public static void setUpSettingOption()
+    public static void setupMessageList()
+    public static void showCameraVideoOption()
+    public final void showLimitExceedPopup(java.lang.String)
+    public final void showMediaOptions()
+    public static void showRestartPopUp()
+    public static void showSubmittedSurvey()
+    public static java.util.List splitIntoChunks()
+    public static java.lang.Object updateMessageList()
+    public static void updateMessageList()
+    public static void updateStreamMessage()
+com.netomi.chat.ui.view.NCWChatAdapter$Companion
+com.netomi.chat.ui.view.NCWChatAdapter$FormViewHolder$bind$1$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatAdapter$FormViewHolder$bind$1$2:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatAdapter$FormViewHolder$bind$1$3:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatAdapter$FormViewHolder:
+    public static void bind()
+com.netomi.chat.ui.view.NCWChatAdapter$InitialViewHolder:
+    public static void bind()
+com.netomi.chat.ui.view.NCWChatAdapter$PillViewHolder:
+    public static void bind()
+com.netomi.chat.ui.view.NCWChatAdapter$RequestViewHolder:
+    public static void resetVisibility()
+    public static void setupFileMessage()
+    public static void setupImageMessage()
+    public static void setupTextMessage()
+    public static void setupVideoMessage()
+com.netomi.chat.ui.view.NCWChatAdapter$ResponseViewHolder$bind$adapter$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatAdapter$ResponseViewHolder$bind$carouselAdapter$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatAdapter$ResponseViewHolder$bind$carouselAdapter$2:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatAdapter$ResponseViewHolder$bind$chipAdapter$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWChatAdapter$ResponseViewHolder:
+    public static void updateFeedbackUI()
+com.netomi.chat.ui.view.NCWChatAdapter:
+    public static final com.netomi.chat.ui.view.NCWChatAdapter$Companion Companion
+    static void <clinit>()
+com.netomi.chat.ui.view.NCWChipAdapter$ViewHolder:
+    public final synthetic com.netomi.chat.ui.view.NCWChipAdapter this$0
+    public static android.widget.TextView getTvOption()
+com.netomi.chat.ui.view.NCWChipAdapter:
+    public static com.netomi.chat.ui.view.NCWChipAdapter$ViewHolder onCreateViewHolder()
+com.netomi.chat.ui.view.NCWFormAdapter$FormViewHolder$createFileInput$2:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWFormAdapter$FormViewHolder$createFileInput$3:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWFormAdapter$FormViewHolder$createFileInput$4$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWFormAdapter$FormViewHolder$createFileInput$4$2:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWFormAdapter$FormViewHolder$validateInputs$lambda$99$lambda$97$$inlined$filterIsInstance$1:
+    public static java.lang.Boolean invoke()
+com.netomi.chat.ui.view.NCWFormAdapter$FormViewHolder:
+    public static void addSubmitButtonDynamically()
+    public static java.lang.String createLabelResponse()
+    public static com.netomi.chat.model.messages.NCWAttachmentList createNCWAttachmentList()
+    public static java.lang.String createPayload()
+    public static void createTextArea()
+    public static synthetic void createTextArea$updateErrorView$5$default(android.widget.TextView,com.netomi.chat.ui.view.NCWFormAdapter,com.netomi.chat.ui.view.NCWFormAdapter$FormViewHolder,android.widget.EditText)
+    public static void createTextInput()
+    public static synthetic void createTextInput$updateErrorView$default(android.widget.TextView,com.netomi.chat.ui.view.NCWFormAdapter,com.netomi.chat.ui.view.NCWFormAdapter$FormViewHolder,android.widget.EditText)
+    public static int dpToPx()
+    public static java.lang.String inputFieldValidation()
+    public static boolean isCheckboxGroup(com.netomi.chat.model.messages.Component)
+    public static boolean isDateInput(com.netomi.chat.model.messages.Component)
+    public static boolean isDropdown(com.netomi.chat.model.messages.Component)
+    public static boolean isFileInput(com.netomi.chat.model.messages.Component)
+    public static boolean isRadioGroup(com.netomi.chat.model.messages.Component)
+    public static boolean isTextArea(com.netomi.chat.model.messages.Component)
+    public static boolean isTextInput(com.netomi.chat.model.messages.Component)
+    public static java.lang.String validateDate()
+    public static boolean validateInputs()
+com.netomi.chat.ui.view.NCWFormAdapter$onBindViewHolder$1:
+    public static java.lang.Boolean invoke()
+com.netomi.chat.ui.view.NCWFormAdapter:
+    public static void createErrorDrawable()
+    public static com.netomi.chat.model.messages.FormSchema getFormSchema()
+    public static boolean isClickable()
+    public static com.netomi.chat.ui.view.NCWFormAdapter$FormViewHolder onCreateViewHolder()
+    public static void setClickable()
+    public static void updateItem()
+com.netomi.chat.ui.view.NCWFormFilesAdapter$ViewHolder:
+    public final androidx.constraintlayout.widget.ConstraintLayout requestDocCard
+    public final synthetic com.netomi.chat.ui.view.NCWFormFilesAdapter this$0
+    public static androidx.constraintlayout.widget.ConstraintLayout getConstRetry()
+    public static android.widget.ImageView getIcDelete()
+    public static android.widget.ProgressBar getProgressBar()
+    public static android.widget.TextView getTvDocName()
+    public static android.widget.TextView getTvDocType()
+    public static android.widget.TextView getTxtCancel()
+com.netomi.chat.ui.view.NCWFormFilesAdapter$onBindViewHolder$4$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWFormFilesAdapter:
+    public static void itemRemoved()
+    public static com.netomi.chat.ui.view.NCWFormFilesAdapter$ViewHolder onCreateViewHolder()
+com.netomi.chat.ui.view.NCWFullScreenMediaActivity:
+    public static java.lang.String getRealPathFromURI()
+    public static void handleMedia()
+    public static void handleMediaFileUri()
+    public static void showImage()
+    public static void showImageURI()
+    public final void showUnsupportedMediaType()
+    public final void showVideo(java.lang.String)
+com.netomi.chat.ui.view.NCWQuickMenuAdapter$ViewHolder:
+    public final synthetic com.netomi.chat.ui.view.NCWQuickMenuAdapter this$0
+    public static android.widget.TextView getTvTitle()
+com.netomi.chat.ui.view.NCWQuickMenuAdapter:
+    public static com.netomi.chat.ui.view.NCWQuickMenuAdapter$ViewHolder onCreateViewHolder()
+com.netomi.chat.ui.view.NCWQuickMenuBottomSheet$onViewCreated$carouselAdapter$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWRatingAdapter$SmileyViewHolder:
+    public final synthetic com.netomi.chat.ui.view.NCWRatingAdapter this$0
+    public static void bind()
+com.netomi.chat.ui.view.NCWRatingAdapter$StarViewHolder:
+    public final synthetic com.netomi.chat.ui.view.NCWRatingAdapter this$0
+    public static void bind()
+com.netomi.chat.ui.view.NCWRatingAdapter$ThumbsViewHolder:
+    public final synthetic com.netomi.chat.ui.view.NCWRatingAdapter this$0
+    public static void bind()
+com.netomi.chat.ui.view.NCWRatingAdapter:
+    public static void setSelectedRating()
+com.netomi.chat.ui.view.NCWSourceLinksAdapter$ViewHolder:
+    public final synthetic com.netomi.chat.ui.view.NCWSourceLinksAdapter this$0
+    public static androidx.constraintlayout.widget.ConstraintLayout getConstRow()
+    public static android.widget.ImageView getImgSource()
+    public static android.widget.TextView getTvIndex()
+    public static android.widget.TextView getTvSourceLint()
+com.netomi.chat.ui.view.NCWSourceLinksAdapter:
+    public static com.netomi.chat.ui.view.NCWSourceLinksAdapter$ViewHolder onCreateViewHolder()
+com.netomi.chat.ui.view.NCWSurveyBottomSheet$configureRatingSection$ratingAdapter$1$1:
+    public static void invoke()
+com.netomi.chat.ui.view.NCWSurveyBottomSheet:
+    public static void configureRatingSection()
+    public static void handleSubmitClick()
+    public static void preSelectSuggestions()
+com.netomi.chat.ui.view.RadioField:
+    public static android.widget.TextView getErrorTextView()
+    public static android.widget.RadioGroup getRadioGroup()
+com.netomi.chat.ui.view.SuggestionAdapter:
+    public static java.util.List getSelectedOptions()
+    public static java.util.Set getSelectedOptions()
+    public static void onBindViewHolder()
+    public static com.netomi.chat.ui.view.SuggestionAdapter$SuggestionViewHolder onCreateViewHolder()
+com.netomi.chat.ui.viewmodel.NCWAwsCredentialsViewModel:
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getConnectionStatus()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getCredentials()
+    public static void initializeAwsIotManager()
+    public static void saveAwsCredentials()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$getAWSMQTTCredentials$1$1:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$getAWSMQTTCredentials$1:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$getChatHistory$1$1:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$getChatHistory$1:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$getConversationId$1$1:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$getConversationId$1:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$getPreSignedUrl$1$1:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$getPreSignedUrl$1:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$getSurveyRule$1$1:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$getSurveyRule$1:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$hitAuthenticateUserApi$1$1:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$hitAuthenticateUserApi$1:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$hitEndChatAPI$1$1:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$hitEndChatAPI$1:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$hitFeedbackAPI$1$1:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$hitFeedbackAPI$1:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$hitSubmitSurveyRequestAPI$1$1:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$hitSubmitSurveyRequestAPI$1:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$loadChatHistory$1:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$processNextFile$2:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$processNextFile$3:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$processNextFile$4:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$sendMessageAPI$1$1:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$sendMessageAPI$1:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$uploadFile$1$1:
+    public int label
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$uploadFile$1:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel$uploadFilesSequentially$1:
+    public static java.lang.Object invoke()
+com.netomi.chat.ui.viewmodel.NCWChatViewModel:
+    public final com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent _chatMessages
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getAwsMessage()
+    public static void getChatHistory()
+    public final void getConversationId(java.lang.String,java.lang.String,java.lang.Boolean)
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getEndChatResponse()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getErrorFile()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getFeedbackResponse()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getGetAWSMQTTCredentials()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getGetChatHistory()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getGetConversationId()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getGetSignedUrl()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getGetUploadedMediaUrl()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getLoginResponse()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getLogoutResponse()
+    public static void getPreSignedUrl()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getSendMessage()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getSendMessages()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getSurveyResponse()
+    public static void getSurveyRule()
+    public static com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent getSurveyRuleResponse()
+    public static void hitAuthenticateUserApi()
+    public static void hitEndChatAPI()
+    public final void hitFeedbackAPI(com.netomi.chat.model.feedback.feedbackrequest.NCWFeedbackRequest)
+    public static void hitSubmitSurveyRequestAPI()
+    public static void loadChatHistory()
+    public final void sendMessageAPI(com.netomi.chat.model.messages.NCWWebhookPayload)
+    public static void uploadFile()
+com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent$Companion
+com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent$observe$1:
+    public static void invoke()
+com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent:
+    public static final com.netomi.chat.ui.viewmodel.NCWSingleLiveEvent$Companion Companion
+    public static final java.lang.String TAG
+    static void <clinit>()
+com.netomi.chat.utils.DeviceInfo:
+    public final boolean debugMode
+    public final java.lang.String os
+    public static boolean getDebugMode()
+    public static int getDeviceHeight()
+    public static java.lang.String getDeviceId()
+    public static int getDeviceWidth()
+    public static java.lang.String getHostBuildNumber()
+    public static java.lang.String getHostPackageId()
+    public static java.lang.String getHostVersionNumber()
+    public static java.lang.String getLocale()
+    public static java.lang.String getManufacturer()
+    public static java.lang.String getModelName()
+    public static java.lang.String getOs()
+    public static float getScale()
+    public static int getTrackingSdkVersion()
+    public static java.lang.String getVersion()
+    public static boolean isRooted()
+com.netomi.chat.utils.DeviceInfoUtil:
+    public static final com.netomi.chat.utils.DeviceInfoUtil INSTANCE
+    static void <clinit>()
+    public void <init>()
+com.netomi.chat.utils.MessageSoundPlayer:
+    public final android.content.Context context
+    public static void release()
+com.netomi.chat.utils.NCWAppSharedPreferences
+com.netomi.chat.utils.NCWAppUtils:
+    public static final com.netomi.chat.utils.NCWAppUtils INSTANCE
+    public static okhttp3.RequestBody createRequestBody()
+    public static java.lang.String getDomainOutOfURL()
+    public static java.io.File getFileFromUri()
+    public static java.lang.String getTypeFromContent()
+    public static boolean isFileSizeValid()
+    public static boolean isFormSizeValid()
+    public static boolean isValidEmail()
+    public static boolean isValidUrl()
+    public static long parseIdleTimeFromExpression()
+    public static okhttp3.MultipartBody$Part prepareFilePart()
+    public static void setHtmlText()
+    public static void showToast()
+    public static boolean validateMultipleFormAttachment()
+com.netomi.chat.utils.NCWChatActionCallback:
+    public abstract void carouselButtonAction(com.netomi.chat.model.messages.NCWCarouselButton)
+    public abstract void onMediaClick(com.netomi.chat.model.NCWMessage)
+    public abstract void onQuickReply()
+    public abstract void onRetryClicked()
+    public abstract void onScrollToPosition()
+    public abstract void onSourceClicked()
+com.netomi.chat.utils.NCWDialogUtils:
+    public static final com.netomi.chat.utils.NCWDialogUtils INSTANCE
+    static void <clinit>()
+    public void <init>()
+com.netomi.chat.utils.NCWExtensionKt
+com.netomi.chat.utils.NCWFeedbackActionCallback:
+    public abstract void onThumbDownClick()
+    public abstract void onThumbUpClick()
+com.netomi.chat.utils.NCWFilePath:
+    public void <init>()
+    public static java.lang.String copyFileToInternalStorage()
+    public static java.lang.String getDriveFilePath()
+    public static java.lang.String getFilePathForWhatsApp()
+    public static boolean isDownloadsDocument()
+    public static boolean isExternalStorageDocument()
+    public static boolean isGoogleDriveUri()
+    public static boolean isMediaDocument()
+    public static boolean isWhatsAppFile()
+com.netomi.chat.utils.NCWImageUtils:
+    public static final com.netomi.chat.utils.NCWImageUtils INSTANCE
+    static void <clinit>()
+    public void <init>()
+    public static java.io.File getVideoFileFromUri()
+com.netomi.chat.utils.NCWParsingUtils:
+    public static final com.netomi.chat.utils.NCWParsingUtils INSTANCE
+    static void <clinit>()
+    public void <init>()
+com.netomi.chat.utils.NCWRootChecker$Companion
+com.netomi.chat.utils.NCWRootChecker
+com.netomi.chat.utils.NCWSingleAlertDialog:
+    public static final com.netomi.chat.utils.NCWSingleAlertDialog INSTANCE
+    static void <clinit>()
+    public void <init>()
+com.netomi.chat.utils.NCWState$Companion
+com.netomi.chat.utils.NCWState$Loading:
+    public final java.lang.String apiConstant
+    public final java.lang.Enum enum
+com.netomi.chat.utils.NCWState$SendMessageError:
+    public static java.lang.Object getPayload()
+com.netomi.chat.utils.NCWState$Success:
+    public static java.lang.String getApiConstant()
+    public static java.lang.Object getData()
+com.netomi.chat.utils.NCWState:
+    public static final com.netomi.chat.utils.NCWState$Companion Companion
+    static void <clinit>()
+com.netomi.chat.utils.NCWThemeUtils$setUserConfigTextColor$1$1:
+    public static kotlin.Unit invoke()
+com.netomi.chat.utils.NCWThemeUtils:
+    public static final com.netomi.chat.utils.NCWThemeUtils INSTANCE
+    public static com.netomi.chat.survey.NCWSignInUserDetails userDetails
+    public static void applyBorderWithCorners()
+    public static void applyButtonBackgroundWithCorners()
+    public static void configureHeader()
+    public static java.lang.String getConversationID()
+    public static java.lang.String getJwtToken()
+    public static void getSignInUserDetails()
+    public static com.netomi.chat.model.theme.NCWThemeResponse getThemeData()
+    public static void setCircularBackgroundAndTint()
+    public static void setConversationID()
+    public static void setDescriptionColor(android.widget.TextView)
+    public static void setHeader()
+    public static void setJwtToken()
+    public static void setLogoIcon()
+    public static void setRadioButtonUserConfig(android.widget.RadioButton)
+    public static void setSignInUserDetails()
+    public static void setTextColor()
+    public static void setThemeData()
+    public static void setTint()

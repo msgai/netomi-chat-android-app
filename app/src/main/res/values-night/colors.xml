@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#212121</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="charcoal_blue">#212121</color>
+    <color name="charcoal_blue_50">#80212121</color>
+    <color name="orange_error">#FF7661</color>
+    <color name="gray_black">#000000</color>
+    <color name="red">#DF1E00</color>
+    <color name="status_bar">#1A1A1A</color>
+    <color name="loader_background">#80FFFFFF</color>
+    <color name="deep_link_header">#F2DF82</color> <!-- Same as light mode -->
+</resources>

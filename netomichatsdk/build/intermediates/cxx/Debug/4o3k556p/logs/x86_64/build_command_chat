@@ -1,0 +1,4 @@
+/Users/appinventiv/Library/Android/sdk/cmake/3.22.1/bin/ninja \
+  -C \
+  "/Users/appinventiv/Downloads/Appinventiv Project/Netomi/netomichatsdk/.cxx/Debug/4o3k556p/x86_64" \
+  chat

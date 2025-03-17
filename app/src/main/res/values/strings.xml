@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">NetomiApp</string>
+
+    <string name="bot_ref_id">Replace your botRefId here</string>
+    <string name="app_environment">Select your bot environment</string>
+
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="don_t_have_an_account_create_account">Don’t have an account ?</string>
+    <string name="create_account"> Create account</string>
+    <string name="enter_your_email">Enter your email</string>
+
+    <string name="enter_your_password">Enter your password</string>
+    <string name="enter_your_name">Enter your name</string>
+
+    <string name="invalid_email_format">Invalid email format</string>
+    <string name="invalid_phone_format">Invalid phone format</string>
+    <string name="enter_valid_password">Enter valid password</string>
+    <string name="logout">Logout</string>
+    <string name="logout_subtitle">You\'re just a click away from logging out. Are you sure?</string>
+    <string name="create_account_clicked">Create Account Clicked</string>
+    <string name="cancel">Cancel</string>
+    <string name="existing_user">Existing user ?</string>
+    <string name="name">Name</string>
+    <string name="enter_your_number">Enter your number</string>
+    <string name="phone_number">Mobile Number</string>
+    <string name="sign_up">Create Account</string>
+    <string name="under_development">Under Development</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="please_check_your_network_and_try_again">Please check your network and try again.</string>
+    <string name="deep_linking_example">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</string>
+</resources>
