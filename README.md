@@ -6,16 +6,23 @@ This repository contains a sample Android application that demonstrates how to i
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
 - [Setup & Installation](#setup--installation)
-    - [Clone or Download the Sample](#clone-or-download-the-sample)
-    - [Configure the SDK](#configure-the-sdk)
-    - [Build & Run](#build--run)
+  - [Clone or Download the Sample](#clone-or-download-the-sample)
+  - [Configure the SDK](#configure-the-sdk)
+  - [Build & Run](#build--run)
 - [Sample Code Walkthrough](#sample-code-walkthrough)
-    - [Initialization](#initialization)
-    - [Launching the Chat](#launching-the-chat)
-    - [Sending Custom Parameters](#sending-custom-parameters)D
+  - [Initialization](#initialization)
+  - [Launching the Chat](#launching-the-chat)
+  - [Sending Custom Parameters](#sending-custom-parameters)
 - [Customization Examples](#customization-examples)
-    - [Header, Footer, and Bubble Styles](#header-footer-and-bubble-styles)
-    - [Pass FCM Token](#pass-fcm-token)
+  - [Header, Footer, and Bubble Styles](#header-footer-and-bubble-styles)
+  - [Push Notifications](#push-notifications)
+- [Public SDK Functions](#public-sdk-functions)
+  - [Initialization](#initialization)
+  - [Launch Chat](#launch-chat)
+  - [Custom Parameters](#custom-parameters)
+  - [Notifications](#notifications)
+  - [UI Customization](#ui-customization)
+  - [API Configuration](#api-configuration)
 - [License & Legal](#license--legal)
 - [Support](#support)
 
@@ -36,11 +43,10 @@ The Netomi Mobile Chat SDK lets you embed a fully interactive AI chatbot into yo
 ### Clone or Download the Sample
 
 ```bash
-git clone https://github.com/msgai/netomi-chat-android-app.git
+git clone https://github.com/<YourOrganization>/android-netomi-chat-sample.git
 ```
-Or download the ZIP and extract it.
 
-- Open the project in Android Studio.
+Or download the ZIP and extract it. Open the project in Android Studio.
 
 ### Configure the SDK
 
@@ -54,7 +60,7 @@ In the sample app’s `app/build.gradle`, ensure the following dependency is pre
 
 ```gradle
 dependencies {
-    implementation("com.netomi.chat:-android:1.0.2")
+    implementation("com.netomi.chat:-android:1.1.11")
     // ...other dependencies
 }
 ```
@@ -75,79 +81,165 @@ Store your `botRefId` and `env` in the sample app (e.g., in `local.properties`, 
 
 ## Sample Code Walkthrough
 
+In the sample `MainActivity` (or wherever you want to initialize the chat), you will see code like:
+
+
+## Public SDK Functions
+
 ### Initialization
 
-In the sample `MainActivity` (or wherever you want to initialize the chat), you will see code like:
+Initialize the SDK with your bot credentials:
 
 ```kotlin
 NCWChatSdk.initialize(
-    context = this,
-    botRefId = "YOUR_BOT_REF_ID",  // Usually retrieved from a secure store
-    env = "us"                     // Example environment
+  context = context,
+  botRefId = "YOUR_BOT_REF_ID",
+  env = "us"  // or "qa", "sg", etc.
 )
 ```
 
-### Launching the Chat
+### Launch Chat
 
-When the user taps the "Launch Chat" button:
+Launch the chat interface with optional JWT authentication and error handling:
 
 ```kotlin
-launchChatButton.setOnClickListener {
-    NCWChatSdk.launch(
-        jwt = null, // or supply a valid JWT if you have authenticated users
-        onError = { errorMsg ->
-            // Handle error, e.g., log or show a toast
-        }
-    )
+// Basic chat launch
+NCWChatSdk.launch(
+  activityContext,
+  jwt = null,  // Optional JWT token for authenticated users
+  onError = { errorMsg ->
+    // Handle any errors
+    Toast.makeText(activityContext, "Error: $errorMsg", Toast.LENGTH_SHORT).show()
+  }
+)
+
+// Launch with pre-filled query
+NCWChatSdk.launchWithQuery(
+  activityContext,
+  query = "Help with my order",
+  jwt = null,
+  onError = { errorMsg ->
+    // Handle any errors
+    Toast.makeText(activityContext, "Error: $errorMsg", Toast.LENGTH_SHORT).show()
+  }
+)
+```
+
+### Custom Parameters
+
+Send custom parameters to personalize the chat experience:
+
+```kotlin
+// Send single parameter
+NCWChatSdk.sendCustomParameter(
+  name = "userId",
+  value = "12345"
+)
+
+// Send multiple parameters
+val userParams = mutableMapOf(
+  "userId" to "12345",
+  "department" to "support",
+  "locale" to "en_US"
+)
+NCWChatSdk.setCustomParameter(userParams)
+```
+
+### Notifications
+
+Configure push notifications for your chat:
+
+```kotlin
+// Set FCM token for push notifications
+val fcmToken = "your_fcm_token_here"
+NCWChatSdk.setFCMToken(fcmToken)
+
+// Example of getting FCM token in your app
+FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+  NCWChatSdk.setFCMToken(token)
 }
 ```
 
-- `jwt` (optional): Include a valid JSON Web Token for authenticated user sessions.
-- `onError` (optional): Handle any issues that might occur.
+### UI Customization
 
-### Sending Custom Parameters
-
-If you want to pass extra user context (like department or user IDs):
+Customize the chat interface with various configuration options:
 
 ```kotlin
-NCWChatSdk.sendCustomParameter(name = "department", value = "marketing")
-```
-
-## Customization Examples
-
-### Header, Footer, and Bubble Styles
-
-Configure chat UI elements as shown below:
-
-```kotlin
+// Header configuration
 NCWChatSdk.updateHeaderConfiguration(
-    NCWHeaderConfig(
-        backgroundColor = "#FFFFFF",
-        tintColor = "#000000",
-        logoImage = "https://example.com/logo.png"
-    )
+  NCWHeaderConfig(
+    backgroundColor = "#FFFFFF",
+    tintColor = "#000000",
+    logoImage = "https://example.com/logo.png"
+  )
 )
 
+// Footer configuration
 NCWChatSdk.updateFooterConfiguration(
-    NCWFooterConfig(
-        backgroundColor = "#F8F8F8",
-        inputBoxBackgroundColor = "#FFFFFF",
-        isNetomiBrandingEnabled = true,
-        netomiBrandingText = "Powered by Netomi",
-        netomiBrandingTextColor = "#999999"
-    )
+  NCWFooterConfig(
+    backgroundColor = "#F8F8F8",
+    inputBoxBackgroundColor = "#FFFFFF",
+    isNetomiBrandingEnabled = true,
+    netomiBrandingText = "Powered by Netomi",
+    netomiBrandingTextColor = "#999999"
+  )
+)
+
+// Bot configuration
+NCWChatSdk.updateBotConfiguration(
+  NCWBotConfig(
+    bubbleBackgroundColor = "#008000",
+    textBubbleTextColor = "#FFFFFF",
+    quickReplyBackgroundColor = "#008000",
+    quickReplyTextColor = "#FFFFFF"
+  )
+)
+
+// User configuration
+NCWChatSdk.updateUserConfiguration(
+  NCWUserConfig(
+    bubbleBackgroundColor = "#4CAF50",
+    textBubbleTextColor = "#FFFFFF"
+  )
+)
+
+// Bubble configuration
+NCWChatSdk.updateBubbleConfiguration(
+  NCWBubbleConfig(
+    bubbleRadius = 12f,
+    timestampTextColor = "#666666"
+  )
+)
+
+// Chat window configuration
+NCWChatSdk.updateChatWindowConfiguration(
+  NCWChatWindowConfig(
+    backgroundColor = "#FFFFFF"
+  )
+)
+
+// Other configuration
+NCWChatSdk.updateOtherConfiguration(
+  NCWOtherConfig(
+    downloadTranscriptButtonColor = "#008000",
+    downloadTranscriptTextColor = "#FFFFFF"
+  )
 )
 ```
 
-### Pass FCM Token
+### API Configuration
 
-If your app demonstrates push notifications:
+Add custom headers to your API requests:
 
 ```kotlin
-NCWChatSdk.setFCMToken(fcmToken)
+// Add custom headers
+val customHeaders = mapOf(
+  "X-Api-Key" to "your_api_key_here",
+  "X-User-Id" to "12345",
+  "X-Session-Id" to "session_123"
+)
+NCWChatSdk.updateApiHeaderConfiguration(customHeaders)
 ```
-
-Ensure Firebase Cloud Messaging is properly configured in your app.
 
 ## License & Legal
 
