@@ -21,6 +21,7 @@ import com.netomi.chat.ui.init.NCWChatSdk
 import com.netomi.chat.ui.init.NCWChatSdk.setCustomParameter
 import com.netomi.sampleapplication.R
 import com.netomi.sampleapplication.utils.AppSharedPreferences
+import java.util.Locale
 
 class HomeFragment : Fragment() {
 
@@ -82,121 +83,123 @@ class HomeFragment : Fragment() {
         NCWChatSdk.launchWithQuery(requireContext(), "text")
     }
 
-    // Send a single custom parameter (dummy user ID)
+    // Send a single custom parameter
     private fun sendDummyCustomParameter() {
-        val name = "user_id"
-        val value = "12345"
+        val name = "user_id"                         // User ID key
+        val value = "12345"                          // user ID value
         NCWChatSdk.sendCustomParameter(name, value)
     }
 
-    // Set multiple custom parameters using a dummy map
+    // Set multiple custom parameters
     private fun setDummyCustomParameters() {
-        val dummyParams = mutableMapOf(
-            "session_id" to "abc123",
-            "user_type" to "guest",
-            "region" to "IN"
+        val userParams = mutableMapOf(
+            "user_id" to "12345",                  // Unique user identifier
+            "user_name" to "John Doe",             // Full name of the user
+            "membership_level" to "gold",          // Membership tier (e.g., gold, silver)
+            "app_version" to "7.2.0"               // App version for targeting or debugging
         )
-        NCWChatSdk.setCustomParameter(dummyParams)
+        NCWChatSdk.setCustomParameter(userParams)
     }
 
-    // Set a dummy Firebase Cloud Messaging token
+    // Set FCM Token (push notifications)
     private fun setFCMToken() {
-        NCWChatSdk.setFCMToken("firebase token")
+        NCWChatSdk.setFCMToken("your-fcm-token")     // Dummy FCM token
     }
 
-    // Update the header configuration using dummy data
+    // Header Configuration
     private fun updateHeaderConfigWithDummyData() {
         val dummyConfig = NCWHeaderConfig(
-            backgroundColor = "#FF5722",
-            gradientColors = listOf("#123456", "#654321"),
-            gradientDirection = 4,
-            iconBackgroundColor = "#EFEFEF",
-            isBackPressPopupEnabed = false,
-            isGradientAppied = true,
-            logoImage = "https://example.com/logo.png",
-            tintColor = "#FFFFFF"
+            backgroundColor = "#FF5722",             // Header background color
+            gradientColors = listOf("#123456", "#654321"), // Gradient colors
+            gradientDirection = 4,                   // Gradient direction
+            iconBackgroundColor = "#EFEFEF",         // Icon background color
+            isBackPressPopupEnabed = false,          // Disable back confirmation
+            isGradientAppied = true,                 // Enable gradient
+            logoImage = "https://example.com/logo.png", // Custom logo
+            tintColor = "#FFFFFF"                    // Header tint color
         )
         NCWChatSdk.updateHeaderConfiguration(dummyConfig)
     }
 
-    // Update the footer configuration using dummy data
+    // Footer Configuration
     private fun updateFooterConfigWithDummyData() {
         val dummyConfig = NCWFooterConfig(
-            backgroundColor = "#EEEEEE",
-            inputBoxBackgroundColor = "#FAFAFA",
-            inputBoxTextColor = "#333333",
-            isFooterHidden = false,
-            isNetomiBrandingEnabled = false,
-            netomiBrandingText = "Chat powered by Netomi",
-            netomiBrandingTextColor = "#FF5722",
-            tintColor = "#FF5722",
-            iconBackgroundColor = "#DDDDDD",
-            sendButtonBackgroundColor = "#FF5722",
-            sendButtonColor = "#FFFFFF"
+            backgroundColor = "#EEEEEE",             // Footer background color
+            inputBoxBackgroundColor = "#FAFAFA",     // Chat input field background
+            inputBoxTextColor = "#333333",           // Chat input text color
+            isFooterHidden = false,                  // Footer visibility
+            isNetomiBrandingEnabled = false,         // Show/hide Netomi branding
+            netomiBrandingText = "Chat powered by Netomi", // Branding text
+            netomiBrandingTextColor = "#FF5722",     // Branding text color
+            tintColor = "#FF5722",                   // Footer icon tint
+            iconBackgroundColor = "#DDDDDD",         // Icon background color
+            sendButtonBackgroundColor = "#FF5722",   // Send button background
+            sendButtonColor = "#FFFFFF"              // Send icon color
         )
         NCWChatSdk.updateFooterConfiguration(dummyConfig)
     }
 
-    // Update the bot configuration using dummy data
+    // Bot Bubble Configuration
     private fun updateBotConfigWithDummyData() {
         val dummyConfig = NCWBotConfig(
-            backgroundColor = "#E0F7FA",
-            botImage = "https://example.com/bot-avatar.png",
-            quickReplyBackgroundColor = "#4CAF50",
-            quickReplyBorderColor = "#388E3C",
-            quickReplyTextColor = "#FFFFFF",
-            textColor = "#212121"
+            backgroundColor = "#E0F7FA",             // Bot message bubble background
+            botImage = "https://example.com/bot-avatar.png", // Bot avatar image
+            quickReplyBackgroundColor = "#4CAF50",   // Quick reply button background
+            quickReplyBorderColor = "#388E3C",       // Quick reply border color
+            quickReplyTextColor = "#FFFFFF",         // Quick reply text color
+            textColor = "#212121"                    // Bot message text color
         )
         NCWChatSdk.updateBotConfiguration(dummyConfig)
     }
 
-    // Update the user configuration using dummy data
+    // User Bubble Configuration
     private fun updateUserConfigWithDummyData() {
         val dummyConfig = NCWUserConfig(
-            backgroundColor = "#FFD700",  // Gold color
-            textColor = "#1A237E"         // Indigo
+            backgroundColor = "#FFD700",             // User message bubble background (gold)
+            textColor = "#1A237E"                    // User message text color (indigo)
         )
         NCWChatSdk.updateUserConfiguration(dummyConfig)
-
-
     }
 
-    // Update the message bubble configuration using dummy data
+    // Chat Bubble Appearance
     private fun updateBubbleConfigWithDummyData() {
         val dummyConfig = NCWBubbleConfig(
-            borderRadius = "25f",
-            timeStampColor = "#FF5722" // Deep Orange
+            borderRadius = "25f",                    // Message bubble corner radius
+            timeStampColor = "#FF5722"               // Timestamp text color
         )
         NCWChatSdk.updateBubbleConfiguration(dummyConfig)
     }
 
-    // Update the chat window configuration using dummy data
+    // Chat Window Background
     private fun updateChatWindowConfigWithDummyData() {
         val dummyConfig = NCWChatWindowConfig(
-            chatWindowBackgroundColor = "#FFF8E1" // Light yellow tone
+            chatWindowBackgroundColor = "#FFF8E1"    // Chat screen background color
         )
         NCWChatSdk.updateChatWindowConfiguration(dummyConfig)
     }
 
-    // Update other visual/chat options using dummy data
+    // Miscellaneous Info Section Styling
     private fun updateOtherConfigWithDummyData() {
         val dummyConfig = NCWOtherConfig(
-            titleColor = "#1E88E5",                  // Blue
-            descriptionColor = "#757575",            // Grey
-            backgroundColor = "#FFFDE7",             // Light Yellow
+            titleColor = "#1E88E5",                  // Info title text color
+            descriptionColor = "#757575",            // Description/subtext color
+            backgroundColor = "#FFFDE7"              // Info section background
         )
         NCWChatSdk.updateOtherConfiguration(dummyConfig)
     }
 
-    // Update API header configuration using dummy headers (including extra headers)
+    // Custom API Header Configuration
     private fun updateApiHeaderConfigurationWithDummyData() {
-        val dummyHeaderMap = mapOf(
-            "Content-Type" to "application/json",
-            "x-platform" to "android",
-            "x-custom-token" to "ABC123",        // Extra (not a known key)
-            "x-session-id" to "SESSION_9999"     // Extra (not a known key)
+        val customHeaders = mapOf(
+            "X-App-Version" to "7.2.0",                         // Current app version
+            "X-Device-ID" to "device-98765",                    // Unique device identifier
+            "X-Platform" to "android",                          // OS platform
+            "X-User-Type" to "beta_tester",                     // User group/segment
+            "X-Experiment-Variant" to "A",                      // A/B test group
+            "X-Locale" to Locale.getDefault().toString()        // User locale (e.g., en_US)
         )
-        NCWChatSdk.updateApiHeaderConfiguration(dummyHeaderMap)
+        NCWChatSdk.updateApiHeaderConfiguration(customHeaders)
     }
+
 
 }
