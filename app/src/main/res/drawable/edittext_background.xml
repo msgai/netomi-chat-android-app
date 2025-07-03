@@ -1,0 +1,7 @@
+<!-- res/drawable/edittext_background.xml -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- State when the EditText is focused -->
+    <item android:state_focused="true" android:drawable="@drawable/rounded_active_edittext_background" />
+    <!-- Default state when the EditText is not focused -->
+    <item android:drawable="@drawable/rounded_edittext_background" />
+</selector>

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "777547862321",
+    "project_id": "chat-widget-mobile-sdk",
+    "storage_bucket": "chat-widget-mobile-sdk.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:777547862321:android:665c995ce06c43b03e6010",
+        "android_client_info": {
+          "package_name": "com.netomi.sampleapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhLex2ahwak3E-GwhKGHeUh9ysM7DXVpk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:777547862321:android:f7bf3c91af7e54313e6010",
+        "android_client_info": {
+          "package_name": "com.netomitest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhLex2ahwak3E-GwhKGHeUh9ysM7DXVpk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
