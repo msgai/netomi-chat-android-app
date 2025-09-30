@@ -13,20 +13,17 @@ It showcases:
 
 ## 📋 Table of Contents
 
-* [Overview](#overview)
+* [Overview](#-overview)
 * [Prerequisites](#prerequisites)
-* [Installation](#installation)
-* [Usage](#usage)
-
-  * [Initialize SDK](#initialize-sdk)
-  * [Launch Chat](#launch-chat)
-  * [Pass JWT Token](#pass-jwt-token)
-  * [Send Custom Parameters](#send-custom-parameters)
-  * [Pass Custom API Headers](#pass-custom-api-headers)
-  * [Apply UI Customization](#apply-ui-customization)
-  * [Set FCM Token](#set-fcm-token)
-* [Support](#support)
-* [License](#license)
+  * [Initialize SDK](#-initialize-sdk)
+  * [Launch Chat](#-launch-chat)
+  * [Pass JWT Token](#-pass-jwt-token-optional)
+  * [Send Custom Parameters](#-send-custom-parameters)
+  * [Pass Custom API Headers](#-pass-custom-api-headers-optional)
+  * [Apply UI Customization](#-apply-ui-customization-optional)
+  * [Set Push Token](#-set-push-token)
+* [Support](#-support)
+* [License](#-license)
 
 ---
 
@@ -44,7 +41,7 @@ This sample app demonstrates how to integrate, configure, and customize the SDK 
 
 ---
 
-## ✅ Prerequisites
+## Prerequisites
 
 * Android Studio (2022.2 or newer)
 * Android `minSdkVersion`: 26 or higher
@@ -70,8 +67,22 @@ Ensure `mavenCentral()` is included in your Gradle build files, then add:
 
 ```gradle
 dependencies {
-    implementation("com.netomi.chat:-android:1.1.11")
+    implementation("com.netomi.chat:chat-widget-android:1.9.0")
 }
+```
+
+> ⚠️ **Deprecation Notice**  
+> The old package `com.netomi.chat:-android` has been **deprecated**.  
+> Please use the new package `com.netomi.chat:chat-widget-android` instead.
+
+### Migration Example
+
+```gradle
+// ❌ Deprecated
+implementation("com.netomi.chat:-android:1.1.x")
+
+// ✅ Use this instead
+implementation("com.netomi.chat:chat-widget-android:1.9.0")
 ```
 
 ---
@@ -82,7 +93,27 @@ Click **Sync Project** in Android Studio to download the SDK and required depend
 
 ---
 
-## 🚀 Launch Chat
+## Quick Start
+
+### ✅ Initialize SDK
+
+```kotlin
+NCWChatSdk.initialize(
+    context,
+    newBotRefId: "YOUR_BOT_REF_ID",
+    environment: NCWEnvironment.us
+)
+```
+
+> Replace `YOUR_BOT_REF_ID` and choose the environment: `us`, `sg`, `eu`, `qa`, `qaint`, `dev`
+>
+> 🔹 Most visual styling can be configured via the Netomi Dashboard.  
+>
+> 🔹 If you'd like to customize it locally in code, see [Apply UI Customization](#-apply-ui-customization-optional)
+
+---
+
+### 🚀 Launch Chat
 
 ```kotlin
 NCWChatSdk.launch(
@@ -118,18 +149,26 @@ NCWChatSdk.launch(context, jwt = jwt)
 
 ---
 
-## 🧝‍♂️ Send Custom Parameters
+### 🧩 Clear Current Chat Session Manually
 
-You can pass custom parameters to personalize the chat experience or include session-specific metadata.
+```kotlin
+NCWChatSdk.clearChatSession(context)
+```
 
-### 🔹 Single Parameter
+---
+
+### 🧩 Send Custom Parameters
+
+You can pass custom parameters to personalize the chat experience or pass session-specific metadata to the AI backend.
+
+#### 🔹 To send a single key-value parameter
 
 ```kotlin
 // Example: Indicate that the current user is a premium member
 NCWChatSdk.sendCustomParameter("user_role", "premium_user") // User role info (e.g., premium, guest)
 ```
 
-### 🔹 Multiple Parameters
+#### 🔹 To set multiple custom parameters at once
 
 ```kotlin
 // Example: Pass user profile info during initialization
@@ -145,9 +184,14 @@ NCWChatSdk.setCustomParameter(userParams)
 
 ---
 
-## 📜 Pass Custom API Headers (Optional)
+### 🧾 Pass Custom API Headers (Optional)
 
-Send additional HTTP headers with every SDK request—for targeting, A/B testing, or tracking.
+> Send custom HTTP headers with each SDK API request — useful for:
+>
+> - Authentication tokens
+> - Versioning
+> - Experiment targeting
+> - Localization context
 
 ```kotlin
 val customHeaders = mapOf(
@@ -162,11 +206,12 @@ val customHeaders = mapOf(
 NCWChatSdk.updateApiHeaderConfiguration(customHeaders)
 ```
 
-> ⚠️ Avoid passing any sensitive tokens or credentials in custom headers.
+> ⚠️ These headers are automatically sent with each SDK API call.
+Avoid including any sensitive data like passwords or secrets.
 
 ---
 
-## 🎨 Apply UI Customization (Optional)
+### 🎨 Apply UI Customization (Optional)
 
 Customize the appearance of various chat components:
 
@@ -228,13 +273,13 @@ NCWChatSdk.updateOtherConfiguration(otherConfig)
 
 ---
 
-## 🔔 Set FCM Token
+### 🔔 Set Push Token
 
 To enable push notifications:
 
 ```kotlin
 val fcmToken = "your-fcm-token"
-NCWChatSdk.setFCMToken(fcmToken)
+NCWChatSdk.setPushToken(fcmToken)
 ```
 
 Or dynamically:
@@ -245,22 +290,24 @@ FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
 }
 ```
 
+> ⚠️ Deprecated: `setFCMToken(String)` is deprecated. Use `setPushToken(String)` instead.
+
 ---
 
-## 💠 Support
+
+## 🛠 Support
 
 For SDK issues or integration help:
 
-* 📘 [Netomi Documentation](https://www.netomi.com)
-* 📩 [support@netomi.com](mailto:support@netomi.com)
+- 📘 [Netomi Website](https://www.netomi.com)
+- 📩 [support@netomi.com](mailto\:support@netomi.com)
 
 ---
 
 ## 📄 License
 
-```
+```text
 © 2025 Netomi. All rights reserved.
-This sample app is for demonstration purposes only.
 The Netomi Mobile Chat SDK may include its own license terms.
 Refer to Netomi's official documentation for legal details.
 ```
