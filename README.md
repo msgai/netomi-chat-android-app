@@ -7,7 +7,7 @@ It showcases:
 * ✅ SDK initialization with `botRefId`
 * ✅ JWT-based chat launching
 * ✅ Runtime UI customization (header, footer, bubbles, etc.)
-* ✅ FCM token registration
+* ✅ Push token registration
 
 ---
 
@@ -22,6 +22,8 @@ It showcases:
   * [Pass Custom API Headers](#-pass-custom-api-headers-optional)
   * [Apply UI Customization](#-apply-ui-customization-optional)
   * [Set Push Token](#-set-push-token)
+  * [Event Handling](#-event-handling)
+  * [Manage Chat UI Visibility](#-manage-chat-ui-visibility)
 * [Support](#-support)
 * [License](#-license)
 
@@ -99,9 +101,9 @@ Click **Sync Project** in Android Studio to download the SDK and required depend
 
 ```kotlin
 NCWChatSdk.initialize(
-    context,
-    newBotRefId: "YOUR_BOT_REF_ID",
-    environment: NCWEnvironment.us
+    context = requireContext(),
+    newBotRefId = "YOUR_BOT_REF_ID",
+    environment = NCWEnvironment.us
 )
 ```
 
@@ -115,28 +117,57 @@ NCWChatSdk.initialize(
 
 ### 🚀 Launch Chat
 
+Open the chat directly or with an optional prefilled query. You can also customize the **animation style and duration** using `NCWAnimationConfig`.
+
+#### 🔹 Basic
+
 ```kotlin
 NCWChatSdk.launch(
-    context,
-    jwt = null,
+    context = requireContext(),
+    jwtToken = null,
     onError = { error ->
-        Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
+        Log.d("ChatSDK", "Launch failed: $error")
     }
 )
 ```
 
-With a search query:
+#### 🔹 With Initial Query
 
 ```kotlin
 NCWChatSdk.launchWithQuery(
-    context,
-    query = "Track my order",
-    jwt = null,
-    onError = { error ->
-        Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
-    }
+    context = requireContext(),
+    query = "Hello, I need help",
+    jwtToken = null
 )
 ```
+
+#### 🔹 With Custom Animation
+
+```kotlin
+val animation = NCWAnimationConfig(animationType = NCWAnimationType.FADE, duration = 3000L)
+NCWChatSdk.launch(context = requireContext(), jwtToken = "your-jwt-token" animationConfig = animation) { errorMessage ->
+    Log.d("ChatSDK", "Launch with animation failed: $errorMessage")
+}
+```
+
+#### 🔹 With Query + Custom Animation
+
+```kotlin
+val animation = NCWAnimationConfig(animationType = NCWAnimationType.FADE, duration = 3000L)
+
+NCWChatSdk.launchWithQuery(context = requireContext(), "Hello, I need help",
+ jwt = "your-jwt-token",
+ animationConfig = animation)
+```
+
+---
+
+### ⚙️ Animation Config
+
+| Option            | Description                                           | Default |
+|-------------------|-------------------------------------------------------|---------|
+| `NCWAnimationType`   | `SYSTEM` (slide), `FADE`, or other supported preset | `.SYSTEM` |
+| `duration`        | Duration of the animation in milliseconds                  | `3000L`   |
 
 ---
 
@@ -144,8 +175,20 @@ NCWChatSdk.launchWithQuery(
 
 ```kotlin
 val jwt = "your-jwt-token"
-NCWChatSdk.launch(context, jwt = jwt)
+NCWChatSdk.launch(context = requireContext(), jwtToken = jwt)
 ```
+
+---
+
+### 🔐 JWT Token Usage
+
+| Use Case                     | JWT Required | Notes                                                                 |
+|-------------------------------|--------------|-----------------------------------------------------------------------|
+| `launch(jwtToken)`                | ❌ Optional  | Use if your bot requires authentication; otherwise pass `nil`.        |
+| `launchWithQuery(jwtToken)`     | ❌ Optional  | Same as above.                                                        |
+| `NetomiEventType.REAUTHORIZATION_SUCCESS`     | ✅ Required  | Must provide a valid JWT if the session started with JWT.              |
+| `NetomiEventType.REAUTHORIZATION_FAILURE`     | ❌ Optional  | You can omit JWT here.                                                |
+| Other events                  | ❌ Optional  | JWT is ignored if provided.                                           |
 
 ---
 
@@ -278,15 +321,15 @@ NCWChatSdk.updateOtherConfiguration(otherConfig)
 To enable push notifications:
 
 ```kotlin
-val fcmToken = "your-fcm-token"
-NCWChatSdk.setPushToken(fcmToken)
+val pushToken = "your-push-token"
+NCWChatSdk.setPushToken(pushToken)
 ```
 
 Or dynamically:
 
 ```kotlin
 FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
-    NCWChatSdk.setFCMToken(token)
+    NCWChatSdk.setPushToken(token)
 }
 ```
 
@@ -294,13 +337,152 @@ FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
 
 ---
 
+## 🪟 Manage Chat UI Visibility
+
+You can programmatically check whether the chat UI is currently visible, resume a hidden chat, or hide/destroy it.
+
+### 🔹 Check if Chat is Visible
+
+```kotlin
+if (NCWChatSdk.isChatVisible()) {
+    Log.d("ChatSDK", "Chat is currently visible")
+}
+```
+
+### 🔹 Resume a Previously Hidden Chat
+
+```kotlin
+val wasResumed = NCWChatSdk.resumeChat(
+  animationConfig = NCWAnimationConfig(
+  duration = 3000L, animationType = NCWAnimationType.FADE
+), context= this)
+
+if (wasResumed) {
+    Log.d("ChatSDK", "Chat resumed successfully")
+} else {
+    Log.d("ChatSDK", "No hidden chat to resume")
+}
+```
+
+If there's no hidden chat to resume, this will return `false` and be a no-op. The default animation is `SYSTEM` with a 350ms duration.
+
+### 🔹 Hide or Destroy Chat
+
+```kotlin
+
+NCWChatSdk.hideChat(
+    dismissBehavior = NCWDismissBehavior.HIDE,
+    animationConfig = NCWAnimationConfig(
+        animationType = NCWAnimationType.FADE,
+        duration = 250L
+    )
+)
+```
+
+* `NCWDismissBehavior.DESTORY` → Tears down the UI so the next open starts fresh.  
+
+* `NCWDismissBehavior.HIDE` → Keeps the UI off-screen so it can be resumed later.  
+
+* `animationConfig` → Optional animation preset and duration.  
+
+---
+
+## 🔔 Event Handling
+
+The SDK provides a way for your app to receive event callbacks from the SDK as well as to send custom events into it.
+
+### Receive Events from SDK
+
+Set up a callback to receive events from the SDK:
+
+```kotlin
+NCWChatSdk.getEventUpdatesFromSDK = { eventJson ->
+    try {
+        val eventType = JSONObject(eventJson).optString("event_type")
+
+        when (eventType) {
+            NCWPublicEvent.CHAT_SDK_INITIALISED.value -> {
+                // Handle initialization event
+                Log.d("ChatSDK", "SDK initialized")
+            }
+
+            NCWPublicEvent.REAUTHORIZATION_REQUEST.value -> {
+                // Trigger reauthorization flow in your app
+                Log.d("ChatSDK", "Reauthorization requested")
+            }
+
+            NCWPublicEvent.CHAT_OPENED.value -> {
+                Log.d("ChatSDK", "Chat opened")
+            }
+
+            else -> {
+                Log.d("ChatSDK", "Event received: $eventType")
+            }
+        }
+    } catch (e: Exception) {
+        Log.e("ChatSDK", "Error parsing event: ${e.message}")
+    }
+}
+```
+
+**Important:** Set up the event callback **before** initializing the SDK to ensure you don't miss any events.
+
+### Send Events to SDK
+
+Send custom events to the SDK when needed:
+
+```kotlin
+// Send reauthorization success with JWT token
+NCWChatSdk.sendEventToSdk(
+    type = NetomiEventType.REAUTHORIZATION_SUCCESS,
+    jwtToken = "eyJhbGciOi...",  // Optional: JWT if required
+    data = mapOf("userId" to "1234")
+)
+
+// Send reauthorization failure
+NCWChatSdk.sendEventToSdk(
+    type = NetomiEventType.REAUTHORIZATION_FAILURE,
+    data = mapOf("reason" to "User cancelled")
+)
+```
+
+**Parameters:**
+
+* `type`: The event type to send (see [NetomiEventType](#event-types-you-can-send))
+
+* `jwtToken`: An optional JSON Web Token. Only required for certain events (e.g., `REAUTHORIZATION_SUCCESS`). Ignored if not applicable.
+
+* `data`: A map containing additional payload data. Defaults to empty map.
+
+### 📚 Supported Event Types
+
+#### Events Received from SDK
+
+| Event Type | Description |
+|------------|-------------|
+| `CHAT_SDK_INITIALISED` | SDK initialization completed successfully |
+| `CHAT_OPENED` | Chat interface was opened |
+| `REAUTHORIZATION_REQUEST` | SDK requesting reauthorization |
+| `END_CHAT_CONFIRMED` | User confirmed ending the chat |
+| `TRANSCRIPT_DOWNLOADED` | Chat transcript downloaded |
+
+#### Event Types You Can Send
+
+| Event Type | Description                            |
+|------------|----------------------------------------|
+| `REAUTHORIZATION_SUCCESS` | Reauthorization Completed Successfully |
+| `REAUTHORIZATION_FAILURE` | Reauthorization Failed                 |
+| `NONE` | Placeholder, No Event                  |
+
+---
 
 ## 🛠 Support
 
 For SDK issues or integration help:
 
-- 📘 [Netomi Website](https://www.netomi.com)
-- 📩 [support@netomi.com](mailto\:support@netomi.com)
+* 📘 [Netomi Website](https://www.netomi.com)
+
+* 📩 [support@netomi.com](mailto\:support@netomi.com)
 
 ---
 
