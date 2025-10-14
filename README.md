@@ -69,7 +69,7 @@ Ensure `mavenCentral()` is included in your Gradle build files, then add:
 
 ```gradle
 dependencies {
-    implementation("com.netomi.chat:chat-widget-android:1.9.0")
+    implementation("com.netomi.chat:chat-widget-android:1.10.0")
 }
 ```
 
@@ -473,6 +473,28 @@ NCWChatSdk.sendEventToSdk(
 | `REAUTHORIZATION_SUCCESS` | Reauthorization Completed Successfully |
 | `REAUTHORIZATION_FAILURE` | Reauthorization Failed                 |
 | `NONE` | Placeholder, No Event                  |
+
+---
+
+### 🔍 Enable Logging
+
+You can set the log level at any time during app runtime:
+
+```kotlin
+if (BuildConfig.DEBUG) {
+    NCWChatSdk.setupLogging(level = NetomiSDKLogLevel.INFO)
+}
+ ```
+
+### 📚 Available Log Levels
+
+| Level      | Description                                                                 |
+|------------|-----------------------------------------------------------------------------|
+| `NetomiSDKLogLevel.NONE`    | No logs will be printed (recommended for production).                   |
+| `NetomiSDKLogLevel.ERROR`   | Prints only SDK-related public error logs.                              |
+| `NetomiSDKLogLevel.INFO`    | Prints both public informational and error logs (ideal for development). |
+
+> **Default:** `NetomiSDKLogLevel.NONE`
 
 ---
 
