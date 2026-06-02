@@ -19,6 +19,7 @@ It showcases:
   * [Launch Chat](#-launch-chat)
   * [Pass JWT Token](#-pass-jwt-token-optional)
   * [Send Custom Parameters](#-send-custom-parameters)
+  * [Send Custom Initial_Menu](#-Configure-Initial-Menu)
   * [Pass Custom API Headers](#-pass-custom-api-headers-optional)
   * [Apply UI Customization](#-apply-ui-customization-optional)
   * [Set Push Token](#-set-push-token)
@@ -69,7 +70,7 @@ Ensure `mavenCentral()` is included in your Gradle build files, then add:
 
 ```gradle
 dependencies {
-    implementation("com.netomi.chat:chat-widget-android:1.23.3")
+    implementation("com.netomi.chat:chat-widget-android:1.24.0")
 }
 ```
 
@@ -84,7 +85,7 @@ dependencies {
 implementation("com.netomi.chat:-android:1.1.x")
 
 // ✅ Use this instead
-implementation("com.netomi.chat:chat-widget-android:1.23.3")
+implementation("com.netomi.chat:chat-widget-android:1.24.0")
 ```
 
 ---
@@ -98,6 +99,7 @@ Click **Sync Project** in Android Studio to download the SDK and required depend
 ## Quick Start
 
 ### ✅ Initialize SDK
+> Initialize the SDK once with your bot reference ID and environment before launching chat.
 
 ```kotlin
 NCWChatSdk.initialize(
@@ -107,17 +109,49 @@ NCWChatSdk.initialize(
 )
 ```
 
-> Replace `YOUR_BOT_REF_ID` and choose the environment: `us`, `sg`, `eu`, `qa`, `qaint`, `dev`
->
+- `newBotRefId`: Your Netomi bot reference ID.
+- `environment`: Netomi environment. Supported values: `.USProd`, `.SGProd`, `.EUProd`, `.QA`, `.QAInternal`, `.Development`.
+- `isDynamicEnv`: Optional. Pass `true` only when your bot is configured for dynamic SDK configuration.
+
+ 
+```kotlin
+NCWChatSdk.initialize(
+  context = requireContext(),
+  newBotRefId = "YOUR_BOT_REF_ID",
+  environment = NCWEnvironment.QA,
+  isDynamicEnv = true
+)
+```
+
+> The SDK safely ignores duplicate initialization calls for the same `botRefId`, `env`, and `isDynamicEnv`.
+> If any of these values change, the SDK resets the current SDK state and initializes for the new configuration.
+> 
 > 🔹 Most visual styling can be configured via the Netomi Dashboard.  
 >
 > 🔹 If you'd like to customize it locally in code, see [Apply UI Customization](#-apply-ui-customization-optional)
 
+### (Optional) Check Initialization State
+
+- Use `isInitialized(botRefId:environment:isDynamicEnv:)` only when your app needs to check whether the SDK is already initialized for a specific configuration.
+
+- For dynamic environment mode, pass the same `isDynamicEnv` value used during initialization:
+
+```kotlin
+var isReady = NCWChatSdk.isInitialized(
+    botRefId ="YOUR_BOT_REF_ID",
+    environment= NCWEnvironment.QA,
+    isDynamicEnv =  true
+)
+```
+
+- Returns `true` only when the SDK was initialized with the same `botRefId`, `environment`, and `isDynamicEnv`.
+- Returns `false` if any value is different. For example, if you initialized with `isDynamicEnv: false`, checking with `isDynamicEnv: true` returns `false`.
+- Do **not** gate `initialize()` or `launch()` based on this. The SDK safely handles repeated calls.
 ---
 
 ### 🚀 Launch Chat
 
-Open the chat directly or with an optional prefilled query. You can also customize the **animation style and duration** using `NCWAnimationConfig`.
+Open the chat directly or with an optional prefilled query. You can also customize the **animation style and duration** using `NCWAnimationConfig`. If using a custom initial menu, call `setInitialMenu(_:)` before launching the chat.
 
 #### 🔹 Basic
 
@@ -226,6 +260,52 @@ NCWChatSdk.setCustomParameter(userParams)
 ```
 
 ---
+
+### 🧩 Configure Initial Menu
+
+Use `setInitialMenu(_:)` when your app needs to override the server-configured initial menu at runtime.
+Call it before launching the chat.
+
+```kotlin
+
+val initialMenu = NCWInitialMenuConfiguration(
+  header = "How can we help you?",
+  menuItems = listOf(
+    NCWInitialMenuItem(
+      name = "track_order",
+      label = "Track Order"
+    ),
+    NCWInitialMenuItem(
+      name = "refund_order",
+      label = "Refund Order"
+    )
+  )
+)
+NCWChatSdk.setInitialMenu(initialMenu)
+
+NCWChatSdk.launch(
+    context = requireContext(),
+    jwtToken = null
+)
+
+```
+
+- `header`: Text displayed above the initial menu items.
+- `menuItems`: Menu items shown in the chat. Each item requires:
+  - `name`: Unique identifier or event name associated with the menu item.
+  - `label`: User-visible text displayed for the menu item.
+- The override is applied during chat launch and does not update an already visible chat session.
+- Pass `null` or call `clearInitialMenu()` to remove the override and fall back to the server configuration.
+
+```kotlin
+NCWChatSdk.clearInitialMenu()
+// or
+NCWChatSdk.setInitialMenu(null)
+```
+
+---
+
+
 
 ### 🧾 Pass Custom API Headers (Optional)
 
@@ -429,30 +509,72 @@ NCWChatSdk.getEventUpdatesFromSDK = { eventJson ->
 
 ### Send Events to SDK
 
-Send custom events to the SDK when needed:
+**Use `sendEventToSdk(type:eventName:jwt:data:)` when the SDK expects a response from the host app, such as JWT reauthorization, or when you need to send a supported custom event.**
+
+#### Reauthorization Success
 
 ```kotlin
 // Send reauthorization success with JWT token
-NCWChatSdk.sendEventToSdk(
+try {
+  NCWChatSdk.sendEventToSdk(
     type = NetomiEventType.REAUTHORIZATION_SUCCESS,
-    jwtToken = "eyJhbGciOi...",  // Optional: JWT if required
+    jwtToken = "eyJhbGciOi...",  //Required for reauthorization success
     data = mapOf("userId" to "1234")
-)
+  )
+}
+catch (e:Exception){
+  Log.e("ChatSDK", "Failed: ${e.message}", e)
+}
+```
 
+
+#### Reauthorization Failure
+
+```kotlin
 // Send reauthorization failure
-NCWChatSdk.sendEventToSdk(
+try {
+  NCWChatSdk.sendEventToSdk(
     type = NetomiEventType.REAUTHORIZATION_FAILURE,
     data = mapOf("reason" to "User cancelled")
-)
+  )
+}
+catch (e:Exception){
+  Log.e("ChatSDK", "Failed: ${e.message}", e)
+}
+```
+
+#### Custom Event
+
+```kotlin
+//Send Custom Event
+try {
+  NCWChatSdk.sendEventToSdk(
+    type = NetomiEventType.CUSTOM,
+    eventName = "html_state_update",
+    data = mapOf(
+      "status" to "submitted",
+      "custom_attributes" to mapOf(
+        "formId" to "feedback_form"
+      )
+    )
+  )
+} catch (e: Exception) {
+  Log.e("ChatSDK", "Failed: ${e.message}", e)
+}
 ```
 
 **Parameters:**
 
-* `type`: The event type to send (see [NetomiEventType](#event-types-you-can-send))
+* `type`: Event category sent to the SDK. (see [NetomiEventType](#event-types-you-can-send))
+
+* `eventName`: Required only when `type` is `.custom`.
+  - Must be non-empty.
+  - Must not use reserved SDK event names such as `reauthorization_success`, `reauthorization_failure`, or `custom`.
 
 * `jwtToken`: An optional JSON Web Token. Only required for certain events (e.g., `REAUTHORIZATION_SUCCESS`). Ignored if not applicable.
 
 * `data`: A map containing additional payload data. Defaults to empty map.
+  - Values must be compatible with JSON serialization.
 
 ### 📚 Supported Event Types
 
@@ -468,11 +590,12 @@ NCWChatSdk.sendEventToSdk(
 
 #### Event Types You Can Send
 
-| Event Type | Description                            |
-|------------|----------------------------------------|
-| `REAUTHORIZATION_SUCCESS` | Reauthorization Completed Successfully |
-| `REAUTHORIZATION_FAILURE` | Reauthorization Failed                 |
-| `NONE` | Placeholder, No Event                  |
+| Event Type                | Description                                    |
+|---------------------------|------------------------------------------------|
+| `REAUTHORIZATION_SUCCESS` | Reauthorization Completed Successfully         |
+| `REAUTHORIZATION_FAILURE` | Reauthorization Failed                         |
+| `CUSTOM`                  | Vendor/app-specific event.Requires `eventName` |
+| `NONE`                    | Placeholder, No Event                          |
 
 ---
 
