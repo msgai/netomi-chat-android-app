@@ -70,7 +70,7 @@ Ensure `mavenCentral()` is included in your Gradle build files, then add:
 
 ```gradle
 dependencies {
-    implementation("com.netomi.chat:chat-widget-android:1.24.0")
+    implementation("com.netomi.chat:chat-widget-android:1.25.0")
 }
 ```
 
@@ -85,7 +85,7 @@ dependencies {
 implementation("com.netomi.chat:-android:1.1.x")
 
 // ✅ Use this instead
-implementation("com.netomi.chat:chat-widget-android:1.24.0")
+implementation("com.netomi.chat:chat-widget-android:1.25.0")
 ```
 
 ---
