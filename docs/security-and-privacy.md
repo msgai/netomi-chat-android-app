@@ -44,7 +44,7 @@ When you publish your app, Google Play requires a **Data safety** declaration. Y
 
 - For bots configured for authenticated sessions, identity is established with a **JWT** you provide at launch and on reauthorization. See **[Events & Authentication](events-and-auth.md)**.
 - Treat JWTs as short-lived credentials: generate them server-side, scope them to the user, and refresh them through the reauthorization flow rather than embedding long-lived tokens in the app.
-- Use `clearChatSession(context)` when a user logs out or switches accounts so the next session starts clean.
+- Use `clearChatSession(context)` when a user logs out or switches accounts so the next session starts clean. It ends any active conversation, dismisses the chat UI if visible, and clears the stored session state.
 
 ---
 

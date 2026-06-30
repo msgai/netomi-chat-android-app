@@ -208,7 +208,7 @@ The `animationConfig` parameter sets the animation preset and duration.
 
 ## 🧩 Clear Current Chat Session Manually
 
-Resets the current conversation so the next launch starts clean. Use this, for example, after a user logs out.
+Logs out the user and resets the session so the next launch starts clean. Calling this **ends any active conversation**, **dismisses the chat UI if it is currently visible**, and clears the stored session state. Use this, for example, after a user logs out.
 
 ```kotlin
 NCWChatSdk.clearChatSession(context)

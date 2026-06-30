@@ -38,7 +38,7 @@ NCWChatSdk.setCustomParameter(
 
 ### Switching users / logging out
 
-When the signed-in user changes or logs out, clear the current conversation so the next launch starts clean:
+When the signed-in user changes or logs out, call `clearChatSession(context)` so the next launch starts clean. This ends any active conversation, dismisses the chat UI if it is visible, and clears the stored session state:
 
 ```kotlin
 NCWChatSdk.clearChatSession(context)

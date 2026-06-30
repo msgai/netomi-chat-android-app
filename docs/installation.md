@@ -37,11 +37,11 @@
    }
    ```
 
-2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.25.1`):
+2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.25.2`):
 
    ```kotlin
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.25.1")
+       implementation("com.netomi.chat:chat-widget-android:1.25.2")
    }
    ```
 
@@ -59,7 +59,7 @@
 implementation("com.netomi.chat:-android:1.1.x")
 
 // ✅ Use this instead
-implementation("com.netomi.chat:chat-widget-android:1.25.1")
+implementation("com.netomi.chat:chat-widget-android:1.25.2")
 ```
 
 ---

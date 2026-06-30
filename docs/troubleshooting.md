@@ -103,7 +103,7 @@ No. The SDK handles repeated calls and internal state. Use `isInitialized(...)` 
 Only if your bot is configured for authenticated sessions. Otherwise pass `null` (or omit it) for a guest session. A JWT passed to a non-authenticated bot is safely ignored. See [Events & Authentication](events-and-auth.md).
 
 **How do I switch users or handle logout?**
-Call `clearChatSession(context)` to reset the conversation, then launch again with the new user's JWT (authenticated) or without one (guest).
+Call `clearChatSession(context)` to end any active conversation, dismiss the chat UI if visible, and clear the stored session state. Then launch again with the new user's JWT (authenticated) or without one (guest).
 
 **Can I attach my own user attributes?**
 Yes, with `setCustomParameter(...)` / `sendCustomParameter(name, value)`. These are metadata only — they do not authenticate the user. Do not put secrets in custom parameters or API headers.
