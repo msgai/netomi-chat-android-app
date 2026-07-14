@@ -67,7 +67,7 @@ NCWChatSdk.launch(
 | `sendEventToSdk(...)` throws | Missing JWT, missing/reserved custom event name, or non-JSON payload | Provide a JWT for `REAUTHORIZATION_SUCCESS`, give a non-reserved `eventName` for `CUSTOM`, and ensure `data` is JSON-serializable. |
 | UI theming not applied | `update*Configuration(...)` called **after** `launch()` | Apply all theming overrides **before** `launch()`. See [UI Theming](ui-theming.md). |
 | Push notifications never arrive | Token not handed to the SDK, stale token, or bot not configured for push | Call `setPushToken(...)` after `initialize(...)` and on every token refresh. See [Push Notifications](push-notifications.md). |
-| Build error: duplicate classes / dependency conflict | A managed dependency was added manually | Remove manually added copies of AWS IoT, Datadog, Lottie, Mixpanel, etc. They resolve transitively from `chat-widget-android`. See [Installation](installation.md). |
+| Build error: duplicate classes / dependency conflict | A managed dependency was added manually | Remove manually added copies of AWS IoT, Lottie, Mixpanel, etc. They resolve transitively from `chat-widget-android`. See [Installation](installation.md). |
 | `Dependency not found` on sync | `mavenCentral()` missing, or wrong coordinate | Add `mavenCentral()` and use `com.netomi.chat:chat-widget-android:<version>` (not the deprecated `:-android`). |
 | `RELRO ... not 16 KB aligned` warning | A non-aligned native lib elsewhere in your app | The SDK ships 16 KB-aligned libraries; check other native dependencies in your app. |
 
@@ -80,7 +80,7 @@ NCWChatSdk.launch(
 **How do I add the SDK?**
 Add `mavenCentral()` to your repositories and `implementation("com.netomi.chat:chat-widget-android:<version>")` to your app module. See [Installation](installation.md).
 
-**Do I need to add AWS, Microsoft Speech, Datadog, Lottie, or Mixpanel myself?**
+**Do I need to add AWS, Microsoft Speech, Lottie, or Mixpanel myself?**
 No. `chat-widget-android` manages those dependencies for you. Adding them manually can cause duplicate-class build errors.
 
 **What is the minimum Android version?**
@@ -140,4 +140,4 @@ If logging and the steps above don't resolve the issue, contact Netomi support w
 - Core launch & lifecycle → **[Usage](usage.md)**
 - JWT auth and events → **[Events & Authentication](events-and-auth.md)**
 - Push notification setup → **[Push Notifications](push-notifications.md)**
-- Consent, privacy, secrets → **[Security & Privacy](security-and-privacy.md)**
+- Privacy and secrets → **[Security & Privacy](security-and-privacy.md)**

@@ -2,27 +2,11 @@
 
 [← Back to documentation index](../README.md)
 
-> **What this guide covers:** optional controls beyond the basic launch flow: tracking consent, custom menus, custom parameters, API headers, and logging.
+> **What this guide covers:** optional controls beyond the basic launch flow: custom menus, custom parameters, API headers, and logging.
 >
 > **Read this when:** the [Usage](usage.md) flow works, but you need extra control over a specific behavior.
 >
 > 💡 Each section below is **independent and optional**. Use only the sections relevant to your app. Looking for **push notifications**? See **[Push Notifications](push-notifications.md)**.
-
----
-
-## 🔒 Tracking Consent
-
-Use `setTrackingConsent(...)` when your app needs to control SDK observability consent at runtime. For example, use it to honor a user's privacy choice.
-
-```kotlin
-NCWChatSdk.setTrackingConsent(NCWTrackingConsent.granted)
-```
-
-Common values are `NCWTrackingConsent.granted`, `NCWTrackingConsent.notGranted`, and `NCWTrackingConsent.pending`.
-
-- `granted` — data is collected and uploaded to Datadog.
-- `pending` — data is collected locally but not sent until consent changes.
-- `notGranted` — collection stops and any stored data is discarded.
 
 ---
 

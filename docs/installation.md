@@ -17,7 +17,7 @@
 - Kotlin (the SDK is written in Kotlin; Java host apps are also supported)
 - Your Bot Credentials from Netomi (`botRefId`, `environment`)
 
-> **Important:** Do not add AWS IoT, Microsoft Speech, Datadog, Lottie, Mixpanel,
+> **Important:** Do not add AWS IoT, Microsoft Speech, Lottie, Mixpanel,
 > or any Netomi artifact manually. The `chat-widget-android` dependency manages
 > those for you and they resolve transitively.
 
@@ -37,11 +37,11 @@
    }
    ```
 
-2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.25.2`):
+2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.25.3`):
 
    ```kotlin
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.25.2")
+       implementation("com.netomi.chat:chat-widget-android:1.25.3")
    }
    ```
 
@@ -59,7 +59,7 @@
 implementation("com.netomi.chat:-android:1.1.x")
 
 // ✅ Use this instead
-implementation("com.netomi.chat:chat-widget-android:1.25.2")
+implementation("com.netomi.chat:chat-widget-android:1.25.3")
 ```
 
 ---
@@ -77,7 +77,6 @@ asks you to.
 | Glide | Image loading / caching |
 | Lottie | Animations |
 | Microsoft Cognitive Services Speech | Voice input/output |
-| Datadog (core + logs) | Observability (consent-gated) |
 | Mixpanel | Analytics (enabled by bot configuration) |
 | AndroidX DataStore / Security-Crypto | Local persistence |
 

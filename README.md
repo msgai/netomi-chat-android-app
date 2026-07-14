@@ -43,12 +43,12 @@ Use JWT auth, receive SDK events, send events back, and handle reauthorization.
 
 ### ⚙️ [Advanced](docs/advanced.md)
 
-Tracking consent, initial menus, custom parameters, custom API headers, and logging.
+Initial menus, custom parameters, custom API headers, and logging.
 **Read this when** you need finer control beyond the basic flow.
 
 ### 🔐 [Security & Privacy](docs/security-and-privacy.md)
 
-Tracking consent, Play Store Data safety, and guidance for keeping secrets and PII out of the SDK.
+Play Store Data safety and guidance for keeping secrets and PII out of the SDK.
 **Read this when** you are preparing a Play Store submission or a privacy review.
 
 ### 🛠️ [Troubleshooting & FAQ](docs/troubleshooting.md)
@@ -65,11 +65,11 @@ The three steps below get a basic chat running. See [Installation](docs/installa
 ### 1. Install
 
 Ensure `mavenCentral()` is in your Gradle repositories, then add the dependency
-(version `1.25.2`) in your app module's `build.gradle(.kts)`:
+(version `1.25.3`) in your app module's `build.gradle(.kts)`:
 
 ```kotlin
 dependencies {
-    implementation("com.netomi.chat:chat-widget-android:1.25.2")
+    implementation("com.netomi.chat:chat-widget-android:1.25.3")
 }
 ```
 

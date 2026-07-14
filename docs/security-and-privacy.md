@@ -2,31 +2,9 @@
 
 [← Back to documentation index](../README.md)
 
-> **What this guide covers:** how the SDK handles tracking consent and privacy, what it declares for the Play Store, and best practices for keeping sensitive data out of the SDK.
+> **What this guide covers:** how the SDK handles privacy, what it declares for the Play Store, and best practices for keeping sensitive data out of the SDK.
 >
 > **Read this when:** you are preparing a Play Store submission, completing a privacy review, or hardening your integration.
-
----
-
-## 🔒 Tracking consent
-
-The SDK exposes a runtime consent control so your app can honor a user's privacy choice. Set it whenever the user's consent state is known or changes.
-
-```kotlin
-NCWChatSdk.setTrackingConsent(NCWTrackingConsent.granted)
-```
-
-| Value | Meaning |
-| --- | --- |
-| `granted` | The user has consented to SDK observability. |
-| `notGranted` | The user has declined. |
-| `pending` | Consent has not been decided yet. |
-
-- Consent controls SDK observability (such as Datadog diagnostics) at runtime.
-- You can change the value at any time; the most recent value applies.
-- This is independent of any consent framework your wider app uses; manage your own app's consent separately.
-
-> See **[Advanced](advanced.md)** for where `setTrackingConsent(...)` fits alongside the other runtime controls.
 
 ---
 
@@ -34,7 +12,7 @@ NCWChatSdk.setTrackingConsent(NCWTrackingConsent.granted)
 
 When you publish your app, Google Play requires a **Data safety** declaration. You are responsible for declaring any data **your app** collects, including any user attributes you pass to the SDK.
 
-- The SDK communicates with Netomi services to deliver chat and (when enabled) observability/analytics.
+- The SDK communicates with Netomi services to deliver chat and (when enabled) diagnostics/analytics.
 - Any **custom parameters** or **custom API headers** you pass may be transmitted off-device (see below) — account for them in your declaration.
 - Keep your own privacy policy accurate for the data you forward to the SDK.
 
@@ -62,7 +40,6 @@ Some APIs forward data to the AI backend or attach it to network requests. Send 
 
 ## ✅ Pre-submission checklist
 
-- [ ] Set tracking consent (`setTrackingConsent(...)`) according to your consent UX.
 - [ ] Confirm your Play **Data safety** form declares any data **your app** collects, including attributes you pass to the SDK.
 - [ ] Generate JWTs server-side and refresh via the reauthorization flow.
 - [ ] Verify no secrets are passed via custom parameters or custom headers.
@@ -72,6 +49,6 @@ Some APIs forward data to the AI backend or attach it to network requests. Send 
 
 ### ➡️ Related
 
-- Runtime controls (consent, headers, logging) → **[Advanced](advanced.md)**
+- Runtime controls (headers, logging) → **[Advanced](advanced.md)**
 - JWT auth and reauthorization → **[Events & Authentication](events-and-auth.md)**
 - Something not working? → **[Troubleshooting & FAQ](troubleshooting.md)**
