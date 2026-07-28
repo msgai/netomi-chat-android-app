@@ -66,9 +66,11 @@ NCWChatSdk.launch(
 | Reauthorization keeps repeating | Missing or expired JWT on `REAUTHORIZATION_SUCCESS` | Respond to `REAUTHORIZATION_REQUEST` with a **fresh, valid** JWT via `sendEventToSdk(type = NetomiEventType.REAUTHORIZATION_SUCCESS, jwtToken = ...)`. See [Events & Authentication](events-and-auth.md). |
 | `sendEventToSdk(...)` throws | Missing JWT, missing/reserved custom event name, or non-JSON payload | Provide a JWT for `REAUTHORIZATION_SUCCESS`, give a non-reserved `eventName` for `CUSTOM`, and ensure `data` is JSON-serializable. |
 | UI theming not applied | `update*Configuration(...)` called **after** `launch()` | Apply all theming overrides **before** `launch()`. See [UI Theming](ui-theming.md). |
+| `themeMode: "auto"` (or `overrideThemeMode(AUTO)`) always shows light, or always shows dark, ignoring the device's Dark Mode setting | Your app is forcing a specific night mode (for example, by calling AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES) or MODE_NIGHT_NO), so the system theme is never propagated to the SDK. | Remove the forced night mode or use AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM if you want AUTO to follow the device theme. If your app intentionally always uses a single appearance, use the corresponding explicit LIGHT or DARK themeMode/overrideThemeMode instead of AUTO.. See [UI Theming](ui-theming.md#auto-requires-your-app-to-support-both-appearances). |
 | Push notifications never arrive | Token not handed to the SDK, stale token, or bot not configured for push | Call `setPushToken(...)` after `initialize(...)` and on every token refresh. See [Push Notifications](push-notifications.md). |
 | Build error: duplicate classes / dependency conflict | A managed dependency was added manually | Remove manually added copies of AWS IoT, Lottie, Mixpanel, etc. They resolve transitively from `chat-widget-android`. See [Installation](installation.md). |
 | `Dependency not found` on sync | `mavenCentral()` missing, or wrong coordinate | Add `mavenCentral()` and use `com.netomi.chat:chat-widget-android:<version>` (not the deprecated `:-android`). |
+| AAR metadata error: "requires core library desugaring to be enabled" | Core library desugaring is not enabled in your app | Enable desugaring in your app's `build.gradle(.kts)`: set `isCoreLibraryDesugaringEnabled = true` in `compileOptions` and add `coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")` to dependencies. See [Installation](installation.md). |
 | `RELRO ... not 16 KB aligned` warning | A non-aligned native lib elsewhere in your app | The SDK ships 16 KB-aligned libraries; check other native dependencies in your app. |
 
 ---
@@ -84,7 +86,7 @@ Add `mavenCentral()` to your repositories and `implementation("com.netomi.chat:c
 No. `chat-widget-android` manages those dependencies for you. Adding them manually can cause duplicate-class build errors.
 
 **What is the minimum Android version?**
-`minSdkVersion` 26 (Android 8.0). `compileSdk`/`targetSdk` 35 is recommended.
+`minSdkVersion` 26 (Android 8.0). `compileSdk`/`targetSdk` 36 is recommended.
 
 **Can I use the SDK from Java?**
 Yes. Public APIs are exposed as static methods (`@JvmStatic`), so they're Java-friendly.
@@ -115,6 +117,12 @@ Most often the token was not handed to the SDK, or it went stale. Call `setPushT
 
 **My theming changes don't show up. Why?**
 UI customization must be applied **before** `launch()`. Changes made while the chat is already visible are not guaranteed to take effect on the current session. See [UI Theming](ui-theming.md).
+
+**What's the difference between `theme(LIGHT)`, `theme(DARK)`, `theme(AUTO)`, and just calling `update*Configuration(...)` directly?**
+Only `theme(DARK)` is actually different. There are just two override buckets: a **default** bucket and a **dark-only** bucket. The unscoped call, `theme(LIGHT)`, and `theme(AUTO)` are all equivalent — they all write to the same default bucket (`AUTO` is a mode *selector* for which theme is active, not a separate bucket of overrides). `theme(DARK)` is the only one that writes to the dark-only bucket, and it only takes effect while the chat is in dark mode — any property you don't set there falls back to the default bucket. If you never call `theme(DARK)`, dark mode just reuses your default overrides, so existing integrations are unaffected. See [UI Theming](ui-theming.md#scoping-code-level-overrides-to-light-or-dark).
+
+**My app only supports light mode (or only dark) — does that break theming?**
+No. Explicit `themeMode`/`overrideThemeMode` values (`LIGHT` or `DARK`) always force the chat to that style regardless of how your app is configured. Only `AUTO` is affected — it requires your app to follow the system theme (for example, by using AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM rather than forcing MODE_NIGHT_YES or MODE_NIGHT_NO), since it inherits the app's appearance rather than polling it directly.. See [UI Theming](ui-theming.md#auto-requires-your-app-to-support-both-appearances).
 
 **Can I change the chat's language?**
 Localized strings are driven by your bot configuration in the Netomi Dashboard. The SDK renders the configured language; there is no separate string-override API in the app.

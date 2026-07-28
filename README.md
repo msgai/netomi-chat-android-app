@@ -65,11 +65,11 @@ The three steps below get a basic chat running. See [Installation](docs/installa
 ### 1. Install
 
 Ensure `mavenCentral()` is in your Gradle repositories, then add the dependency
-(version `1.25.3`) in your app module's `build.gradle(.kts)`:
+(version `1.26.0`) in your app module's `build.gradle(.kts)`:
 
 ```kotlin
 dependencies {
-    implementation("com.netomi.chat:chat-widget-android:1.25.3")
+    implementation("com.netomi.chat:chat-widget-android:1.26.0")
 }
 ```
 

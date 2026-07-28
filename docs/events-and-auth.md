@@ -89,7 +89,13 @@ as a JSON string.
 ```kotlin
 NCWChatSdk.getEventUpdatesFromSDK = { eventJson ->
     try {
-        val eventType = JSONObject(eventJson).optString("event_type")
+        val event = JSONObject(eventJson)
+        val eventType = event.optString("event_type")
+        val eventData = event.optJSONObject("event_data")
+
+        // For CUSTOM_EVENT, the actual bot-defined event name is nested inside
+        // event_data, under the same "event_type" key — not on the outer object.
+        val customEventName = eventData?.optString("event_type")
 
         when (eventType) {
             NCWPublicEvent.CHAT_SDK_INITIALISED.value ->
@@ -102,6 +108,11 @@ NCWChatSdk.getEventUpdatesFromSDK = { eventJson ->
                 // Trigger your app's reauthorization flow, then respond with
                 // sendEventToSdk(...) — see below.
                 Log.d("ChatSDK", "Reauthorization requested")
+            }
+
+            NCWPublicEvent.CUSTOM_EVENT.value -> {
+                // Bot-driven custom events (e.g. a CALLBACK_EVENT sent from your bot flow) arrive here.
+                Log.d("ChatSDK", "Custom event received: $customEventName — payload: $eventData")
             }
 
             else -> Log.d("ChatSDK", "Event received: $eventType")
@@ -185,6 +196,7 @@ try {
 | `REAUTHORIZATION_REQUEST` | SDK requesting reauthorization. |
 | `END_CHAT_CONFIRMED` | User confirmed ending the chat. |
 | `TRANSCRIPT_DOWNLOADED` | Chat transcript downloaded. |
+| `CUSTOM_EVENT` | Vendor/bot-defined callback event. The bot-defined name is nested under `event_data.event_type`, not the outer `event_type`. |
 
 #### Event types you can send
 

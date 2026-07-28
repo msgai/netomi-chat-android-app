@@ -2,23 +2,112 @@
 
 [← Back to documentation index](../README.md)
 
-> **What this guide covers:** how to override the chat's visual styling in code: colors, the header, footer, message bubbles, and other UI elements.
+> **What this guide covers:** how to override the chat's visual styling in code: colors, the header, footer, message bubbles, other UI elements and dark mode.
 >
 > **Read this when:** the Netomi Dashboard styling is not enough and you need code-level control.
 >
 > 🔹 **Prefer the Dashboard first.** Most visual styling can be configured via the Netomi Dashboard without any code. Use the APIs below only when you need to override styling locally in the app.
 
+## 🌗 Light & Dark Theme
+
+The Dashboard can configure two independent themes:
+
+```json
+{
+  "lightTheme": { /* same shape as today */ },
+  "darkTheme": { /* same shape — every option below is available for dark mode too */ },
+  "themeMode": "LIGHT"
+}
+```
+
+`themeMode` decides which theme is active by default:
+
+| Value   | Behavior |
+|---------| --- |
+| `LIGHT` | Always use `lightTheme`. |
+| `DARK`  | Always use `darkTheme`. |
+| `AUTO`  | Follow the device's system appearance (Light/Dark). |
+
+**Backward compatibility:** if `themeMode` is omitted (existing integrations that only configure `lightTheme`), the SDK defaults to `LIGHT` — behavior is unchanged.
+
+### Overriding the theme mode at runtime
+
+Use `overrideThemeMode(_:)` to force a theme mode from your app, regardless of what the Dashboard configured. Unlike the configuration APIs below, this applies **immediately** — it does not require calling before `launch()` and does not require reinitializing the SDK. In `AUTO`, the SDK keeps tracking system appearance changes live.
+
+```kotlin
+// Force dark mode, e.g. to match your app's own theme toggle
+NCWChatSdk.overrideThemeMode(NCWThemeMode.DARK)
+
+// Follow the system appearance again
+NCWChatSdk.overrideThemeMode(NCWThemeMode.AUTO)
+
+// Clear the override and fall back to the Dashboard-configured themeMode
+NCWChatSdk.overrideThemeMode(null)
+
+// Read the mode currently in effect (override if set, otherwise the configured value)
+val mode = NCWChatSdk.currentThemeMode()
+```
+
+### `AUTO` requires your app to support both appearances
+
+`LIGHT` and `DARK` always work, no matter how your app is configured — they force a concrete style on the chat regardless of anything else.
+
+`AUTO` is different: it does not poll the device directly. It inherits whatever appearance your app process is currently allowed to display. If your app forces a single night mode by calling::
+
+```kotlin
+AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+// or
+AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+```
+
+Android prevents that app — every window in it, including the chat's — from ever seeing the other style. The device's actual Light/Dark Mode setting never reaches your app, so `AUTO` will always resolve to whichever style is locked.
+
+|Your app's night mode| `theme(LIGHT)` / `overrideThemeMode(LIGHT)` | `theme(DARK)` / `overrideThemeMode(DARK)` | `AUTO`                   |
+| --- |---------------------------------------------|-------------------------------------------|--------------------------|
+| `MODE_NIGHT_NO` | ✅ works                                     | ✅ works                                   | always resolves to light |
+| `MODE_NIGHT_YES` | ✅ works                                     | ✅ works                                   | always resolves to dark  |
+| MODE_NIGHT_FOLLOW_SYSTEM (or no forced night mode) | ✅ works                                     | ✅ works                                   | ✅ tracks the device live |
+
+If your app only ever supports a single appearance, that's not an issue by itself — just use the matching explicit `themeMode` (or `overrideThemeMode`) instead of `AUTO`. `AUTO` specifically requires the host app to **not** force a fixed night mode, since it has nothing else to inherit from.
+
+### Scoping code-level overrides to light or dark
+
+There are only **two** override buckets, no matter how you call these APIs: a **default** bucket and a **dark-only** bucket. Where each call writes to, and when each bucket is used, is fixed:
+
+| Call | Writes to | Used when                                                                                     |
+| --- | --- |-----------------------------------------------------------------------------------------------|
+| `NCWChatSdk.updateBotConfiguration(config) (unscoped)` | **default** bucket | light mode — and dark mode too, *unless* you've also set a dark-specific override (see below) |
+| `NCWChatSdk.theme(LIGHT).updateBotConfiguration(config)` | **default** bucket (identical to the unscoped call above) | same as above                                                                                 |
+| `NCWChatSdk.theme(AUTO).updateBotConfiguration(config)` | **default** bucket (identical to the unscoped call above) | same as above — `AUTO` is a mode *selector*, not a separate bucket                            |
+| `NCWChatSdk.theme(DARK).updateBotConfiguration(config)` | **dark-only** bucket | dark mode only — takes priority over the default bucket for whichever properties it sets      |
+
+In other words: `theme(LIGHT)` and `theme(AUTO)` are just spellings of the same unscoped call — they all land in the one default bucket. The **only** call that behaves differently is `theme(DARK)`.
+
+If you never call `theme(DARK)`, dark mode silently reuses your default overrides — nothing changes for existing integrations. Call `theme(DARK)` only for the specific properties that should look different in dark mode; everything else still falls back to the default bucket.
+
+```kotlin
+// Default bucket — used in light mode, and as the dark-mode fallback
+NCWChatSdk.updateBotConfiguration(botConfig)
+
+// Dark-only bucket — wins over the default bucket, but only while the chat is in dark mode
+val darkBotConfig = NCWBotConfigOverride(
+    backgroundColor = "#000000",
+    textColor = "#FFFFFF"
+)
+NCWChatSdk.theme(NCWThemeMode.DARK).updateBotConfiguration(darkBotConfig)
+```
 ## When to apply theming
 
 Call all UI customization APIs **before `launch()`** so the overrides are applied when the chat opens. Changes made after the chat is visible are not guaranteed to take effect on the current session.
 
 > Each configuration object below is **independent**. Apply only the ones you need. You do not have to set every property; unspecified properties keep their default values. Colors are passed as hex strings (e.g. `"#2196F3"`).
-
+>⚠️ **`theme(LIGHT)` and `theme(AUTO)` are not separate buckets — they're the same call as the unscoped method shown below.** `NCWChatSdk.updateTermsConfiguration(config)`, `NCWChatSdk.theme(LIGHT).updateTermsConfiguration(config)`, and `NCWChatSdk.theme(AUTO).updateTermsConfiguration(config)` all write to the one **default** bucket — calling more than one of them just overwrites the same values again. The **only** call that writes somewhere different is `theme(DARK)`. Each section below shows the unscoped form + `theme(DARK)` for brevity; swap in `theme(LIGHT)`/`theme(AUTO)` if you prefer to be explicit, but don't call both the unscoped form *and* `theme(LIGHT)` expecting two different results. See [Scoping code-level overrides to light or dark](#scoping-code-level-overrides-to-light-or-dark) above.
 ---
 
 ## 🧩 Header
 
 The app bar at the top of the chat.
+**Default** — used in light mode, and as the dark-mode fallback for anything not set below:
 
 ```kotlin
 val headerConfig = NCWHeaderConfig(
@@ -28,6 +117,16 @@ val headerConfig = NCWHeaderConfig(
 )
 NCWChatSdk.updateHeaderConfiguration(headerConfig)
 ```
+
+**Dark mode override** — optional, wins over the default above only while the chat is in dark mode:
+
+```kotlin
+val darkHeader = NCWHeaderConfigOverride(
+    backgroundColor = "#000000"
+)
+NCWChatSdk.theme(NCWThemeMode.DARK).updateHeaderConfiguration(darkHeader)
+```
+
 
 ---
 
@@ -44,6 +143,15 @@ val footerConfig = NCWFooterConfig(
     netomiBrandingTextColor = "#999999"          // Branding text color
 )
 NCWChatSdk.updateFooterConfiguration(footerConfig)
+```
+**Dark mode override**:
+
+```kotlin
+val darkFooter = NCWFooterConfigOverride(
+    backgroundColor = "#000000",
+    inputBoxTextColor = "#FFFFFF"
+)
+NCWChatSdk.theme(NCWThemeMode.DARK).updateFooterConfiguration(darkFooter)
 ```
 
 ---
@@ -63,6 +171,16 @@ val botConfig = NCWBotConfig(
 NCWChatSdk.updateBotConfiguration(botConfig)
 ```
 
+**Dark mode override**:
+
+```kotlin
+val darkBotConfig = NCWBotConfigOverride(
+    backgroundColor = "#A9A9A9", 
+    textColor = "#FFFFFF"
+)
+
+NCWChatSdk.theme(NCWThemeMode.DARK).updateBotConfiguration(darkBotConfig)
+```
 ---
 
 ## 🧩 User Message Bubbles
@@ -75,6 +193,15 @@ val userConfig = NCWUserConfig(
     textColor = "#FFFFFF"                        // User message text color
 )
 NCWChatSdk.updateUserConfiguration(userConfig)
+```
+**Dark mode override**:
+
+```kotlin
+val darkUserConfig = NCWUserConfig(
+        backgroundColor = "#1976D2"
+        )
+
+NCWChatSdk.theme(NCWThemeMode.DARK).updateUserConfiguration(darkUserConfig)
 ```
 
 ---
@@ -90,6 +217,15 @@ val bubbleConfig = NCWBubbleConfig(
 )
 NCWChatSdk.updateBubbleConfiguration(bubbleConfig)
 ```
+**Dark mode override** — `borderRadius` isn't set here, so it still falls back to the default above:
+
+```kotlin
+val darkBubbleConfig = NCWBubbleConfig(
+    timeStampColor = "#D3D3D3"
+)
+
+NCWChatSdk.theme(NCWThemeMode.DARK).updateBubbleConfiguration(darkBubbleConfig)
+```
 
 ---
 
@@ -102,6 +238,15 @@ val windowConfig = NCWChatWindowConfig(
     chatWindowBackgroundColor = "#FFFFFF"        // Chat screen background
 )
 NCWChatSdk.updateChatWindowConfiguration(windowConfig)
+```
+**Dark mode override**:
+
+```kotlin
+val darkWindowConfig = NCWChatWindowConfig(
+    chatWindowBackgroundColor = "#000000"
+)
+
+NCWChatSdk.theme(NCWThemeMode.DARK).updateChatWindowConfiguration(darkWindowConfig)
 ```
 
 ---
@@ -120,6 +265,18 @@ val otherConfig = NCWOtherConfig(
 NCWChatSdk.updateOtherConfiguration(otherConfig)
 ```
 
+**Dark mode override**:
+
+```kotlin
+val darkOtherConfig = NCWOtherConfig(
+    backgroundColor = "#000000",
+    titleColor = "#FFFFFF",
+    descriptionColor = "#D3D3D3"
+)
+
+NCWChatSdk.theme(NCWThemeMode.DARK).updateOtherConfiguration(darkOtherConfig)
+```
+
 ---
 
 ## 🧩 Terms & Conditions
@@ -133,6 +290,17 @@ val termsConfig = NCWTermsThemeConfig(
 NCWChatSdk.updateTermsThemeConfiguration(termsConfig)
 ```
 
+**Dark mode override**:
+
+```kotlin
+val darkTermsConfig = NCWTermsThemeConfig(
+    backgroundColor = "#000000",
+    titleColor = "#FFFFFF"
+)
+
+NCWChatSdk.theme(NCWThemeMode.DARK).updateTermsConfiguration(darkTermsConfig)
+```
+
 ---
 
 ## 🧩 Alerts
@@ -144,6 +312,16 @@ val alertsConfig = NCWAlertThemeConfig(
     // set the properties you want to override
 )
 NCWChatSdk.updateAlertThemeConfiguration(alertsConfig)
+```
+**Dark mode override**:
+
+```kotlin
+val darkAlertsConfig = NCWAlertsConfig(
+    highAlert = NCWAlertConfig.defaultHigh()
+    // Customize colors for dark mode as needed
+)
+
+NCWChatSdk.theme(NCWThemeMode.DARK).updateAlertsConfiguration(darkAlertsConfig)
 ```
 
 ---

@@ -12,7 +12,7 @@
 
 - Android Studio 2022.2 (Flamingo) or newer
 - `minSdkVersion` 26 or higher
-- `compileSdk` / `targetSdk` 35 recommended
+- `compileSdk` / `targetSdk` 36 recommended
 - Gradle 8.6 or higher, JDK 17
 - Kotlin (the SDK is written in Kotlin; Java host apps are also supported)
 - Your Bot Credentials from Netomi (`botRefId`, `environment`)
@@ -37,15 +37,41 @@
    }
    ```
 
-2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.25.3`):
+2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.26.0`):
 
    ```kotlin
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.25.3")
+       implementation("com.netomi.chat:chat-widget-android:1.26.0")
    }
    ```
 
-3. Click **Sync Project** in Android Studio to download the SDK and its
+3. **Enable Core Library Desugaring** — the SDK requires this for Java 8+ API
+   support. Add to your app module `build.gradle(.kts)`:
+
+   ```kotlin
+   android {
+       compileOptions {
+           sourceCompatibility = JavaVersion.VERSION_1_8
+           targetCompatibility = JavaVersion.VERSION_1_8
+           isCoreLibraryDesugaringEnabled = true
+       }
+   }
+
+   dependencies {
+       implementation("com.netomi.chat:chat-widget-android:1.26.0")
+       coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+   }
+   ```
+
+   > **What is desugaring?**
+   > The SDK uses modern Java 8+ APIs (like `java.time`, `Optional`, streams, etc.)
+   > that aren't natively available on older Android versions. Desugaring is a
+   > build-time process that converts these modern APIs into equivalent code that
+   > works on Android 8.0+. The `desugar_jdk_libs` library provides these backported
+   > APIs at runtime. Without this, the app would crash with `NoClassDefFoundError`
+   > or `MethodNotFoundException` on older devices.
+
+4. Click **Sync Project** in Android Studio to download the SDK and its
    dependencies.
 
 > ⚠️ **Deprecation Notice**
@@ -59,7 +85,7 @@
 implementation("com.netomi.chat:-android:1.1.x")
 
 // ✅ Use this instead
-implementation("com.netomi.chat:chat-widget-android:1.25.3")
+implementation("com.netomi.chat:chat-widget-android:1.26.0")
 ```
 
 ---
@@ -72,7 +98,7 @@ asks you to.
 
 | Dependency | Used for |
 | --- | --- |
-| AWS Android SDK (IoT + Core) | Real-time messaging (MQTT) |
+| AWS IoT Device SDK for Android (v2, AWS CRT) | Real-time messaging (MQTT) |
 | Retrofit / OkHttp | REST networking |
 | Glide | Image loading / caching |
 | Lottie | Animations |
