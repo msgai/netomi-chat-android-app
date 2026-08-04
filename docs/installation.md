@@ -37,11 +37,11 @@
    }
    ```
 
-2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.26.0`):
+2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.26.1`):
 
    ```kotlin
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.26.0")
+       implementation("com.netomi.chat:chat-widget-android:1.26.1")
    }
    ```
 
@@ -58,7 +58,7 @@
    }
 
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.26.0")
+       implementation("com.netomi.chat:chat-widget-android:1.26.1")
        coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
    }
    ```
@@ -85,7 +85,7 @@
 implementation("com.netomi.chat:-android:1.1.x")
 
 // ✅ Use this instead
-implementation("com.netomi.chat:chat-widget-android:1.26.0")
+implementation("com.netomi.chat:chat-widget-android:1.26.1")
 ```
 
 ---
@@ -102,7 +102,6 @@ asks you to.
 | Retrofit / OkHttp | REST networking |
 | Glide | Image loading / caching |
 | Lottie | Animations |
-| Microsoft Cognitive Services Speech | Voice input/output |
 | Mixpanel | Analytics (enabled by bot configuration) |
 | AndroidX DataStore / Security-Crypto | Local persistence |
 
