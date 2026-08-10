@@ -37,11 +37,11 @@
    }
    ```
 
-2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.26.1`):
+2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.27.0`):
 
    ```kotlin
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.26.1")
+       implementation("com.netomi.chat:chat-widget-android:1.27.0")
    }
    ```
 
@@ -58,7 +58,7 @@
    }
 
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.26.1")
+       implementation("com.netomi.chat:chat-widget-android:1.27.0")
        coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
    }
    ```
@@ -85,7 +85,7 @@
 implementation("com.netomi.chat:-android:1.1.x")
 
 // ✅ Use this instead
-implementation("com.netomi.chat:chat-widget-android:1.26.1")
+implementation("com.netomi.chat:chat-widget-android:1.27.0")
 ```
 
 ---
