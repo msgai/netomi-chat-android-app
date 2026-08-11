@@ -17,9 +17,11 @@
 - Kotlin (the SDK is written in Kotlin; Java host apps are also supported)
 - Your Bot Credentials from Netomi (`botRefId`, `environment`)
 
-> **Important:** Do not add AWS IoT, Microsoft Speech, Lottie, Mixpanel,
-> or any Netomi artifact manually. The `chat-widget-android` dependency manages
-> those for you and they resolve transitively.
+> **Important:** Do not add AWS IoT, Microsoft Speech, or Lottie manually.
+> The `chat-widget-android` dependency manages those for you and they resolve
+> transitively. **Mixpanel is the one exception** — it is an **optional,
+> opt-in** artifact. See [Optional: Mixpanel analytics](#optional-mixpanel-analytics)
+> below.
 
 ---
 
@@ -37,11 +39,11 @@
    }
    ```
 
-2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.27.0`):
+2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.28.0`):
 
    ```kotlin
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.27.0")
+       implementation("com.netomi.chat:chat-widget-android:1.28.0")
    }
    ```
 
@@ -58,7 +60,7 @@
    }
 
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.27.0")
+       implementation("com.netomi.chat:chat-widget-android:1.28.0")
        coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
    }
    ```
@@ -85,7 +87,7 @@
 implementation("com.netomi.chat:-android:1.1.x")
 
 // ✅ Use this instead
-implementation("com.netomi.chat:chat-widget-android:1.27.0")
+implementation("com.netomi.chat:chat-widget-android:1.28.0")
 ```
 
 ---
@@ -102,12 +104,39 @@ asks you to.
 | Retrofit / OkHttp | REST networking |
 | Glide | Image loading / caching |
 | Lottie | Animations |
-| Mixpanel | Analytics (enabled by bot configuration) |
+| Microsoft Cognitive Services Speech | Voice input/output |
 | AndroidX DataStore / Security-Crypto | Local persistence |
+
+> Mixpanel is **not** in this list — it's an optional add-on, not bundled
+> by default. See [Optional: Mixpanel analytics](#optional-mixpanel-analytics)
+> below.
 
 > **16 KB page-size note:** the SDK ships native libraries that are 16 KB
 > page-size aligned (required by Google Play for apps targeting Android 15+).
 > No action is needed on your side.
+
+---
+
+## Optional: Mixpanel analytics
+
+By default, `chat-widget-android` does **not** include Mixpanel or any other
+analytics provider. Analytics events (e.g. `CHAT_SDK_INITIALIZED`, launch
+errors, terms accepted/declined) are routed through a pluggable
+`NCWAnalyticsTracker` interface, which is a no-op unless you register a
+tracker.
+
+If you want the SDK's analytics events sent to Mixpanel (as configured by
+your bot), add the optional `chat-widget-android-mixpanel` artifact:
+
+```kotlin
+dependencies {
+    implementation("com.netomi.chat:chat-widget-android:1.28.0")
+    implementation("com.netomi.chat:chat-widget-android-mixpanel:1.28.0")
+}
+```
+
+That's it — no application code required. If you don't add this module, no
+Mixpanel classes are pulled into your APK/AAR.
 
 ---
 
