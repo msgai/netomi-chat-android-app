@@ -20,7 +20,7 @@
 > **Important:** Do not add AWS IoT, Microsoft Speech, or Lottie manually.
 > The `chat-widget-android` dependency manages those for you and they resolve
 > transitively. **Mixpanel is the one exception** — it is an **optional,
-> opt-in** artifact. See [Optional: Mixpanel analytics](#optional-mixpanel-analytics)
+> opt-in** artifact. See [Optional: Mixpanel analytics](#optional-analytics)
 > below.
 
 ---
@@ -39,11 +39,11 @@
    }
    ```
 
-2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.28.1`):
+2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.28.2`):
 
    ```kotlin
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.28.1")
+       implementation("com.netomi.chat:chat-widget-android:1.28.2")
    }
    ```
 
@@ -60,7 +60,7 @@
    }
 
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.28.1")
+       implementation("com.netomi.chat:chat-widget-android:1.28.2")
        coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
    }
    ```
@@ -87,7 +87,7 @@
 implementation("com.netomi.chat:-android:1.1.x")
 
 // ✅ Use this instead
-implementation("com.netomi.chat:chat-widget-android:1.28.1")
+implementation("com.netomi.chat:chat-widget-android:1.28.2")
 ```
 
 ---
@@ -108,7 +108,7 @@ asks you to.
 | AndroidX DataStore / Security-Crypto | Local persistence |
 
 > Mixpanel is **not** in this list — it's an optional add-on, not bundled
-> by default. See [Optional: Mixpanel analytics](#optional-mixpanel-analytics)
+> by default. See [Optional: Mixpanel analytics](#optional-analytics)
 > below.
 
 > **16 KB page-size note:** the SDK ships native libraries that are 16 KB
@@ -117,7 +117,7 @@ asks you to.
 
 ---
 
-## Optional: Mixpanel analytics
+## Optional: Analytics
 
 By default, `chat-widget-android` does **not** include Mixpanel or any other
 analytics provider. Analytics events (e.g. `CHAT_SDK_INITIALIZED`, launch
@@ -126,12 +126,12 @@ errors, terms accepted/declined) are routed through a pluggable
 tracker.
 
 If you want the SDK's analytics events sent to Mixpanel (as configured by
-your bot), add the optional `chat-widget-android-mixpanel` artifact:
+your bot), add the optional `chat-widget-android-analytics` artifact:
 
 ```kotlin
 dependencies {
-    implementation("com.netomi.chat:chat-widget-android:1.28.1")
-    implementation("com.netomi.chat:chat-widget-android-mixpanel:1.28.1")
+    implementation("com.netomi.chat:chat-widget-android:1.28.2")
+    implementation("com.netomi.chat:chat-widget-android-analytics:1.28.2")
 }
 ```
 
