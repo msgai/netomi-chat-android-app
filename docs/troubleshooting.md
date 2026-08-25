@@ -68,7 +68,7 @@ NCWChatSdk.launch(
 | UI theming not applied | `update*Configuration(...)` called **after** `launch()` | Apply all theming overrides **before** `launch()`. See [UI Theming](ui-theming.md). |
 | `themeMode: "auto"` (or `overrideThemeMode(AUTO)`) always shows light, or always shows dark, ignoring the device's Dark Mode setting | Your app is forcing a specific night mode (for example, by calling AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES) or MODE_NIGHT_NO), so the system theme is never propagated to the SDK. | Remove the forced night mode or use AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM if you want AUTO to follow the device theme. If your app intentionally always uses a single appearance, use the corresponding explicit LIGHT or DARK themeMode/overrideThemeMode instead of AUTO.. See [UI Theming](ui-theming.md#auto-requires-your-app-to-support-both-appearances). |
 | Push notifications never arrive | Token not handed to the SDK, stale token, or bot not configured for push | Call `setPushToken(...)` after `initialize(...)` and on every token refresh. See [Push Notifications](push-notifications.md). |
-| Build error: duplicate classes / dependency conflict | A managed dependency was added manually | Remove manually added copies of AWS IoT, Lottie, etc. They resolve transitively from `chat-widget-android`. If the conflict is with Mixpanel, make sure only `chat-widget-android-analytics` provides it — don't also add `com.mixpanel.android:mixpanel-android` yourself. See [Installation](installation.md). |
+| Build error: duplicate classes / dependency conflict | A managed dependency was added manually | Remove manually added copies of AWS IoT, Lottie, etc. They resolve transitively from `chat-widget-android`. If the conflict is with Mixpanel, make sure only `chat-widget-android-analytics` provides it — don't also add `com.mixpanel.android:mixpanel-android` yourself. If the conflict is with the Microsoft Speech SDK, make sure only `chat-widget-android-voicestt` provides it. See [Installation](installation.md). |
 | `Dependency not found` on sync | `mavenCentral()` missing, or wrong coordinate | Add `mavenCentral()` and use `com.netomi.chat:chat-widget-android:<version>` (not the deprecated `:-android`). |
 | AAR metadata error: "requires core library desugaring to be enabled" | Core library desugaring is not enabled in your app | Enable desugaring in your app's `build.gradle(.kts)`: set `isCoreLibraryDesugaringEnabled = true` in `compileOptions` and add `coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")` to dependencies. See [Installation](installation.md). |
 | `RELRO ... not 16 KB aligned` warning | A non-aligned native lib elsewhere in your app | The SDK ships 16 KB-aligned libraries; check other native dependencies in your app. |
@@ -82,11 +82,14 @@ NCWChatSdk.launch(
 **How do I add the SDK?**
 Add `mavenCentral()` to your repositories and `implementation("com.netomi.chat:chat-widget-android:<version>")` to your app module. See [Installation](installation.md).
 
-**Do I need to add AWS, Microsoft Speech, or Lottie myself?**
+**Do I need to add AWS or Lottie myself?**
 No. `chat-widget-android` manages those dependencies for you. Adding them manually can cause duplicate-class build errors.
 
 **Do I need Mixpanel?**
 No — Mixpanel is **optional**. Adding the `com.netomi.chat:chat-widget-android-analytics` artifact automatically enables Mixpanel analytics, with no additional application code required. See [Installation](installation.md#optional-analytics).
+
+**Do I need the Microsoft Speech SDK / voice input?**
+No — voice input (Speech-to-Text) is **optional**. Adding the `com.netomi.chat:chat-widget-android-voicestt` artifact enables the mic button and the Microsoft Speech SDK, with no additional application code required. Without it, the core SDK has no Microsoft Speech SDK dependency and the mic button never appears. See [Installation](installation.md#optional-voice-stt).
 
 **What is the minimum Android version?**
 `minSdkVersion` 26 (Android 8.0). `compileSdk`/`targetSdk` 36 is recommended.

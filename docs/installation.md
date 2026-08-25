@@ -17,11 +17,12 @@
 - Kotlin (the SDK is written in Kotlin; Java host apps are also supported)
 - Your Bot Credentials from Netomi (`botRefId`, `environment`)
 
-> **Important:** Do not add AWS IoT, Microsoft Speech, or Lottie manually.
+> **Important:** Do not add AWS IoT or Lottie manually.
 > The `chat-widget-android` dependency manages those for you and they resolve
-> transitively. **Mixpanel is the one exception** — it is an **optional,
-> opt-in** artifact. See [Optional: Mixpanel analytics](#optional-analytics)
-> below.
+> transitively. **Mixpanel and voice input (Speech-to-Text) are the
+> exceptions** — both are **optional, opt-in** artifacts. See
+> [Optional: Mixpanel analytics](#optional-analytics) and
+> [Optional: Voice input (Speech-to-Text)](#optional-voice-stt) below.
 
 ---
 
@@ -39,11 +40,11 @@
    }
    ```
 
-2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.28.2`):
+2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.29.0`):
 
    ```kotlin
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.28.2")
+       implementation("com.netomi.chat:chat-widget-android:1.29.0")
    }
    ```
 
@@ -60,7 +61,7 @@
    }
 
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.28.2")
+       implementation("com.netomi.chat:chat-widget-android:1.29.0")
        coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
    }
    ```
@@ -87,7 +88,7 @@
 implementation("com.netomi.chat:-android:1.1.x")
 
 // ✅ Use this instead
-implementation("com.netomi.chat:chat-widget-android:1.28.2")
+implementation("com.netomi.chat:chat-widget-android:1.29.0")
 ```
 
 ---
@@ -104,12 +105,12 @@ asks you to.
 | Retrofit / OkHttp | REST networking |
 | Glide | Image loading / caching |
 | Lottie | Animations |
-| Microsoft Cognitive Services Speech | Voice input/output |
 | AndroidX DataStore / Security-Crypto | Local persistence |
 
-> Mixpanel is **not** in this list — it's an optional add-on, not bundled
-> by default. See [Optional: Mixpanel analytics](#optional-analytics)
-> below.
+> Mixpanel and the Microsoft Cognitive Services Speech SDK are **not** in
+> this list — both are optional add-ons, not bundled by default. See
+> [Optional: Mixpanel analytics](#optional-analytics) and
+> [Optional: Voice input (Speech-to-Text)](#optional-voice-stt) below.
 
 > **16 KB page-size note:** the SDK ships native libraries that are 16 KB
 > page-size aligned (required by Google Play for apps targeting Android 15+).
@@ -130,13 +131,39 @@ your bot), add the optional `chat-widget-android-analytics` artifact:
 
 ```kotlin
 dependencies {
-    implementation("com.netomi.chat:chat-widget-android:1.28.2")
-    implementation("com.netomi.chat:chat-widget-android-analytics:1.28.2")
+    implementation("com.netomi.chat:chat-widget-android:1.29.0")
+    implementation("com.netomi.chat:chat-widget-android-analytics:1.29.0")
 }
 ```
 
 That's it — no application code required. If you don't add this module, no
 Mixpanel classes are pulled into your APK/AAR.
+
+---
+
+## Optional: Voice input (Speech-to-Text) {#optional-voice-stt}
+
+By default, `chat-widget-android` does **not** include the Microsoft
+Cognitive Services Speech SDK or any voice-input (Speech-to-Text) capability.
+The chat UI's mic button stays hidden and voice input is unreachable unless
+you add the optional artifact below. (Voice **output** — the agent's spoken
+replies — has no Microsoft Speech dependency and works regardless.)
+
+If you want users to be able to speak their messages, add the optional
+`chat-widget-android-voicestt` artifact:
+
+```kotlin
+dependencies {
+    implementation("com.netomi.chat:chat-widget-android:1.29.0")
+    implementation("com.netomi.chat:chat-widget-android-voicestt:1.29.0")
+}
+```
+
+That's it — no application code required. Adding this module also declares
+the `RECORD_AUDIO` permission, requested at runtime the first time the user
+taps the mic button. If you don't add this module, no Microsoft Speech SDK
+classes or the `RECORD_AUDIO` permission are pulled into your APK/AAR, and
+the mic button never appears.
 
 ---
 

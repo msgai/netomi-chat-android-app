@@ -10,7 +10,7 @@ app. It supports:
 - 🔔 Push notifications (Firebase Cloud Messaging)
 - 🎨 Flexible UI styling (via the Netomi Dashboard or in code)
 - 🔐 Optional JWT-authenticated sessions
-- 🎙️ Voice input/output
+- 🎙️ Voice output (TTS), with optional voice input (Speech-to-Text add-on module)
 
 ---
 
@@ -65,11 +65,11 @@ The three steps below get a basic chat running. See [Installation](docs/installa
 ### 1. Install
 
 Ensure `mavenCentral()` is in your Gradle repositories, then add the dependency
-(version `1.28.2`) in your app module's `build.gradle(.kts)`:
+(version `1.29.0`) in your app module's `build.gradle(.kts)`:
 
 ```kotlin
 dependencies {
-    implementation("com.netomi.chat:chat-widget-android:1.28.2")
+    implementation("com.netomi.chat:chat-widget-android:1.29.0")
 }
 ```
 
