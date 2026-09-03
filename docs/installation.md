@@ -40,11 +40,11 @@
    }
    ```
 
-2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.29.1`):
+2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.29.2`):
 
    ```kotlin
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.29.1")
+       implementation("com.netomi.chat:chat-widget-android:1.29.2")
    }
    ```
 
@@ -61,7 +61,7 @@
    }
 
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.29.1")
+       implementation("com.netomi.chat:chat-widget-android:1.29.2")
        coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
    }
    ```
@@ -88,7 +88,7 @@
 implementation("com.netomi.chat:-android:1.1.x")
 
 // ✅ Use this instead
-implementation("com.netomi.chat:chat-widget-android:1.29.1")
+implementation("com.netomi.chat:chat-widget-android:1.29.2")
 ```
 
 ---
@@ -131,8 +131,8 @@ your bot), add the optional `chat-widget-android-analytics` artifact:
 
 ```kotlin
 dependencies {
-    implementation("com.netomi.chat:chat-widget-android:1.29.1")
-    implementation("com.netomi.chat:chat-widget-android-analytics:1.29.1")
+    implementation("com.netomi.chat:chat-widget-android:1.29.2")
+    implementation("com.netomi.chat:chat-widget-android-analytics:1.29.2")
 }
 ```
 
@@ -154,8 +154,8 @@ If you want users to be able to speak their messages, add the optional
 
 ```kotlin
 dependencies {
-    implementation("com.netomi.chat:chat-widget-android:1.29.1")
-    implementation("com.netomi.chat:chat-widget-android-voicestt:1.29.1")
+    implementation("com.netomi.chat:chat-widget-android:1.29.2")
+    implementation("com.netomi.chat:chat-widget-android-voicestt:1.29.2")
 }
 ```
 
