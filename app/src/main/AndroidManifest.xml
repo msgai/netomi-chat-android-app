@@ -18,34 +18,6 @@
         tools:targetApi="31">
 
         <activity
-            android:name=".ui.activity.DeepLinkingActivity"
-            android:exported="true"
-            android:launchMode="singleTask">
-
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https"
-                    android:host="demo.netomi.com"
-                    android:pathPrefix="/web" />
-            </intent-filter>
-
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:scheme="netomisampleapp"
-                    android:host="app"
-                    android:pathPrefix="/" />
-            </intent-filter>
-        </activity>
-
-
-        <activity
             android:name=".ui.activity.HomeActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
@@ -60,14 +32,6 @@
             </intent-filter>
 
         </activity>
-        <activity
-            android:name=".ui.activity.LoginActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ui.activity.SignupActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
 
         <service
             android:name=".NotificationService"
