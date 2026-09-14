@@ -3,22 +3,24 @@ package com.netomi.sampleapplication.ui.fragment
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.Toast
 import android.widget.TextView
-import androidx.appcompat.widget.AppCompatImageButton
 import androidx.fragment.app.Fragment
-import com.netomi.chat.model.theme.light_theme.NCWBotConfig
-import com.netomi.chat.model.theme.light_theme.NCWBubbleConfig
-import com.netomi.chat.model.theme.light_theme.NCWChatWindowConfig
-import com.netomi.chat.model.theme.light_theme.NCWFooterConfig
-import com.netomi.chat.model.theme.light_theme.NCWHeaderConfig
-import com.netomi.chat.model.theme.light_theme.NCWOtherConfig
-import com.netomi.chat.model.theme.light_theme.NCWUserConfig
+import com.netomi.chat.model.theme.light_theme.NCWBotConfigOverride
+import com.netomi.chat.model.theme.light_theme.NCWBubbleConfigOverride
+import com.netomi.chat.model.theme.light_theme.NCWChatWindowConfigOverride
+import com.netomi.chat.model.theme.light_theme.NCWFooterConfigOverride
+import com.netomi.chat.model.theme.light_theme.NCWHeaderConfigOverride
+import com.netomi.chat.model.theme.light_theme.NCWOtherConfigOverride
+import com.netomi.chat.model.theme.light_theme.NCWUserConfigOverride
 import com.netomi.chat.ui.init.NCWChatSdk
-import com.netomi.chat.ui.init.NCWChatSdk.setCustomParameter
+import com.netomi.chat.utils.NCWEnvironment
 import com.netomi.sampleapplication.R
 import com.netomi.sampleapplication.utils.AppSharedPreferences
 import java.util.Locale
@@ -28,7 +30,7 @@ class HomeFragment : Fragment() {
     private lateinit var preferences: AppSharedPreferences
     private lateinit var tvBotName: TextView
     private var isButtonClickable = true
-    private lateinit var imgButton: AppCompatImageButton
+    private lateinit var imgButton: LinearLayout
     private lateinit var progressOverlay: FrameLayout
 
     override fun onCreateView(
@@ -50,16 +52,24 @@ class HomeFragment : Fragment() {
             NCWChatSdk.initialize(
                 requireContext(),
                 requireContext().getString(R.string.bot_ref_id),
-                requireContext().getString(R.string.app_environment)
+                NCWEnvironment.us
             )
         } catch (_: Exception) { }
 
         imgButton.setOnClickListener {
-            activity?.let { activityContext ->
-                if (isButtonClickable) {
-                    avoidDoubleClick()
-                    NCWChatSdk.launch(activityContext)
-                }
+            launchChat()
+        }
+    }
+
+    private fun launchChat() {
+        activity?.let { activityContext ->
+            if (isButtonClickable) {
+                avoidDoubleClick()
+                NCWChatSdk.launch(activityContext,
+                    callback = { error ->
+                        Log.d("ChatSDK", "Chat launch failed: $error")
+                        Toast.makeText(requireContext(), "Chat launch failed: $error", Toast.LENGTH_SHORT).show()
+                    })
             }
         }
     }
@@ -108,13 +118,13 @@ class HomeFragment : Fragment() {
 
     // Header Configuration
     private fun updateHeaderConfigWithDummyData() {
-        val dummyConfig = NCWHeaderConfig(
+        val dummyConfig = NCWHeaderConfigOverride(
             backgroundColor = "#FF5722",             // Header background color
             gradientColors = listOf("#123456", "#654321"), // Gradient colors
             gradientDirection = 4,                   // Gradient direction
             iconBackgroundColor = "#EFEFEF",         // Icon background color
-            isBackPressPopupEnabed = false,          // Disable back confirmation
-            isGradientAppied = true,                 // Enable gradient
+            isBackPressPopupEnabled = false,          // Disable back confirmation
+            isGradientApplied = true,                 // Enable gradient
             logoImage = "https://example.com/logo.png", // Custom logo
             tintColor = "#FFFFFF"                    // Header tint color
         )
@@ -123,7 +133,7 @@ class HomeFragment : Fragment() {
 
     // Footer Configuration
     private fun updateFooterConfigWithDummyData() {
-        val dummyConfig = NCWFooterConfig(
+        val dummyConfig = NCWFooterConfigOverride(
             backgroundColor = "#EEEEEE",             // Footer background color
             inputBoxBackgroundColor = "#FAFAFA",     // Chat input field background
             inputBoxTextColor = "#333333",           // Chat input text color
@@ -141,7 +151,7 @@ class HomeFragment : Fragment() {
 
     // Bot Bubble Configuration
     private fun updateBotConfigWithDummyData() {
-        val dummyConfig = NCWBotConfig(
+        val dummyConfig = NCWBotConfigOverride(
             backgroundColor = "#E0F7FA",             // Bot message bubble background
             botImage = "https://example.com/bot-avatar.png", // Bot avatar image
             quickReplyBackgroundColor = "#4CAF50",   // Quick reply button background
@@ -154,7 +164,7 @@ class HomeFragment : Fragment() {
 
     // User Bubble Configuration
     private fun updateUserConfigWithDummyData() {
-        val dummyConfig = NCWUserConfig(
+        val dummyConfig = NCWUserConfigOverride(
             backgroundColor = "#FFD700",             // User message bubble background (gold)
             textColor = "#1A237E"                    // User message text color (indigo)
         )
@@ -163,7 +173,7 @@ class HomeFragment : Fragment() {
 
     // Chat Bubble Appearance
     private fun updateBubbleConfigWithDummyData() {
-        val dummyConfig = NCWBubbleConfig(
+        val dummyConfig = NCWBubbleConfigOverride(
             borderRadius = "25f",                    // Message bubble corner radius
             timeStampColor = "#FF5722"               // Timestamp text color
         )
@@ -172,7 +182,7 @@ class HomeFragment : Fragment() {
 
     // Chat Window Background
     private fun updateChatWindowConfigWithDummyData() {
-        val dummyConfig = NCWChatWindowConfig(
+        val dummyConfig = NCWChatWindowConfigOverride(
             chatWindowBackgroundColor = "#FFF8E1"    // Chat screen background color
         )
         NCWChatSdk.updateChatWindowConfiguration(dummyConfig)
@@ -180,7 +190,7 @@ class HomeFragment : Fragment() {
 
     // Miscellaneous Info Section Styling
     private fun updateOtherConfigWithDummyData() {
-        val dummyConfig = NCWOtherConfig(
+        val dummyConfig = NCWOtherConfigOverride(
             titleColor = "#1E88E5",                  // Info title text color
             descriptionColor = "#757575",            // Description/subtext color
             backgroundColor = "#FFFDE7"              // Info section background

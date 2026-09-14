@@ -27,7 +27,7 @@
                android:gravity="center_horizontal|center_vertical"
                android:text="Netomi Chat AI"
                android:alpha="0.4"
-               android:fontFamily="@font/proxima_nova_bold"/>
+               android:fontFamily="sans-serif-medium"/>
 
            <androidx.appcompat.widget.AppCompatTextView
                android:id="@+id/tv_botName"
@@ -36,7 +36,7 @@
                android:layout_alignParentTop="true"
                android:layout_centerHorizontal="true"
                android:alpha="0.4"
-               android:fontFamily="@font/proxima_nova_alt_semibold"
+               android:fontFamily="sans-serif-medium"
                android:gravity="center_horizontal|center_vertical"
                android:text="Netomi Chat AI"
                android:textColor="@color/charcoal_blue"
@@ -50,15 +50,36 @@
                android:src="@drawable/bot_new" />
        </LinearLayout>
 
-        <androidx.appcompat.widget.AppCompatImageButton
+        <LinearLayout
             android:id="@+id/img_chat"
+            android:layout_width="wrap_content"
+            android:layout_height="52dp"
             android:layout_margin="40dp"
-            android:background="@drawable/float_button_gradient"
+            android:background="@drawable/chat_pill_background"
+            android:foreground="@drawable/chat_pill_ripple"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:clickable="true"
+            android:focusable="true"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:src="@drawable/ic_chat"
-            android:layout_width="52dp"
-            android:layout_height="52dp"/>
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_chat" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_chat_us"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Chat Us"
+                android:textSize="14sp"
+                android:textColor="@color/charcoal_blue"
+                android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
 
 
     <!-- Main content -->

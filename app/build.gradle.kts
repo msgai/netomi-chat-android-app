@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.netomi.sampleapplication"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.netomi.sampleapplication"
@@ -35,6 +35,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -60,5 +61,5 @@ dependencies {
 
     implementation("com.netomi.chat:chat-widget-android:1.29.3")
 
-
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
 }

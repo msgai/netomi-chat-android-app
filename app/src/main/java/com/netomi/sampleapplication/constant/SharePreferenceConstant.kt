@@ -16,9 +16,5 @@ package com.netomi.sampleapplication.constant
  * The **`NCWApiConstant`** object is accessed directly since it is declared as an `object`.
  */
 object SharePreferenceConstant {
-    const val LOGIN = "login"
     const val NAME = "name"
-    const val EMAIL = "email"
-
-
 }
