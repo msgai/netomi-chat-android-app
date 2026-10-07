@@ -96,9 +96,31 @@ val darkBotConfig = NCWBotConfigOverride(
 )
 NCWChatSdk.theme(NCWThemeMode.DARK).updateBotConfiguration(darkBotConfig)
 ```
+
+### Clearing code-level overrides at runtime
+
+Use `clearUIConfigurationOverrides()` to drop every code-level override your app has applied and go back to the Dashboard-configured styling. Like `overrideThemeMode(_:)`, this applies **immediately** — no reinitialization, and the current chat session is kept.
+
+It empties **both** buckets at once — the default one and the dark-only one — for every configuration type (header, footer, bot, user, bubble, chat window, other, terms, alerts). There is no way to clear a single bucket or a single configuration type; to change one value, just call the relevant `update*Configuration` again.
+
+```kotlin
+
+NCWChatSdk.clearUIConfigurationOverrides()
+
+```
+
+Calling it when no overrides are set is safe — it does nothing.
+
+| Cleared | Left untouched |
+| --- | --- |
+| The default bucket (`update*Configuration`, `theme(LIGHT)`, `theme(AUTO)`) | The theme mode — both `overrideThemeMode(_:)` and the Dashboard-configured `themeMode` |
+| The dark-only bucket (`theme(DARK)`) | The Dashboard theme payload itself — it is what the chat falls back to |
+
+> ⚠️ **If your Dashboard has no `darkTheme` configured**, a dark-scoped override is what lets the chat render in dark mode at all. Clearing the overrides removes that, so dark mode falls back to the light values until you set a dark override again or configure `darkTheme` in the Dashboard.
+
 ## When to apply theming
 
-Call all UI customization APIs **before `launch()`** so the overrides are applied when the chat opens. Changes made after the chat is visible are not guaranteed to take effect on the current session.
+Call all UI customization APIs **before `launch()`** so the overrides are applied when the chat opens. Changes made after the chat is visible are not guaranteed to take effect on the current session. (The two exceptions are `overrideThemeMode(_:)` and `clearUIConfigurationOverrides()`, which apply immediately — see above.)
 
 > Each configuration object below is **independent**. Apply only the ones you need. You do not have to set every property; unspecified properties keep their default values. Colors are passed as hex strings (e.g. `"#2196F3"`).
 >⚠️ **`theme(LIGHT)` and `theme(AUTO)` are not separate buckets — they're the same call as the unscoped method shown below.** `NCWChatSdk.updateTermsConfiguration(config)`, `NCWChatSdk.theme(LIGHT).updateTermsConfiguration(config)`, and `NCWChatSdk.theme(AUTO).updateTermsConfiguration(config)` all write to the one **default** bucket — calling more than one of them just overwrites the same values again. The **only** call that writes somewhere different is `theme(DARK)`. Each section below shows the unscoped form + `theme(DARK)` for brevity; swap in `theme(LIGHT)`/`theme(AUTO)` if you prefer to be explicit, but don't call both the unscoped form *and* `theme(LIGHT)` expecting two different results. See [Scoping code-level overrides to light or dark](#scoping-code-level-overrides-to-light-or-dark) above.

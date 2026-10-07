@@ -103,6 +103,9 @@ NCWChatSdk.getEventUpdatesFromSDK = { eventJson ->
 
             NCWPublicEvent.CHAT_OPENED.value ->
                 Log.d("ChatSDK", "Chat opened")
+            NCWPublicEvent.CHAT_CLOSED.value ->
+                Log.d("ChatSDK", "Chat closed")
+          
 
             NCWPublicEvent.REAUTHORIZATION_REQUEST.value -> {
                 // Trigger your app's reauthorization flow, then respond with
