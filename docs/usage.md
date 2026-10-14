@@ -25,7 +25,9 @@ NCWChatSdk.initialize(
 - `newBotRefId`: Your Netomi bot reference ID.
 - `environment`: Netomi environment. Supported values are `NCWEnvironment.us`, `NCWEnvironment.sg`, `NCWEnvironment.eu`, `NCWEnvironment.qa`, `NCWEnvironment.qaint`, and `NCWEnvironment.dev`.
 - `isDynamicEnv`: Optional. Pass `true` only when your bot is configured for
-  dynamic SDK configuration.
+  dynamic SDK configuration. If no dynamic configuration is available for the bot, the SDK
+  does **not** fall back to the default configuration. It reports an initialization error with
+  `DYNAMIC_CONFIG_NOT_AVAILABLE` instead (see [Handle Initialization Errors](#optional-handle-initialization-errors)).
 
 ```kotlin
 NCWChatSdk.initialize(
@@ -40,6 +42,74 @@ NCWChatSdk.initialize(
 >
 > 🔹 Most visual styling can be configured via the Netomi Dashboard.
 > To customize it locally in code, see [UI Theming](ui-theming.md).
+
+### (Optional) Handle Initialization Errors
+
+`initialize(...)` accepts an optional `errorHandler`. It runs on the main thread, once per failure, when initialization can't succeed. Existing calls without a handler keep working unchanged.
+
+```kotlin
+NCWChatSdk.initialize(
+    context = applicationContext,
+    newBotRefId = "YOUR_BOT_REF_ID",
+    environment = NCWEnvironment.us,
+    errorHandler = { error ->
+        Log.e("ChatSDK", "Initialization failed: ${error.errorDescription}")
+        Log.e("ChatSDK", "Type: ${error.type}, Code: ${error.exceptionCode}")
+        Log.e("ChatSDK", "Status: ${error.statusCode}, Message: ${error.statusMessage}")
+    }
+)
+```
+
+The handler also works with `isDynamicEnv`:
+
+```kotlin
+NCWChatSdk.initialize(
+    context = applicationContext,
+    newBotRefId = "YOUR_BOT_REF_ID",
+    environment = NCWEnvironment.us,
+    isDynamicEnv = true
+) { error ->
+    Log.e("ChatSDK", "Initialization error: $error")
+}
+```
+
+From Java, pass `isDynamicEnv` and then the handler as a lambda:
+
+```java
+NCWChatSdk.initialize(
+    getApplicationContext(),
+    "YOUR_BOT_REF_ID",
+    NCWEnvironment.us,
+    false,
+    error -> Log.e("ChatSDK", "Initialization failed: " + error.getErrorDescription())
+);
+```
+
+Fields are available through getters such as `error.getExceptionCode()` and `error.getStatusCode()`.
+
+> ⚠️ **Callback lifetime:** the SDK keeps `errorHandler` until the configuration fetch finishes, so it can run after the `Activity` or `Fragment` that called `initialize` has been destroyed. Prefer calling `initialize` from your `Application` with an app-scoped handler. If the handler touches UI, check that the component is still alive first (for example `isAdded` in a Fragment) and avoid holding the `Activity` or `Fragment` beyond its lifecycle.
+
+The same error is also delivered as an `error` event through `getEventUpdatesFromSDK`, whether or not you pass a handler. See [Events & Authentication](events-and-auth.md#initialization-error-events).
+
+| Situation | `type` | `exceptionCode` | `statusCode` | `statusMessage` |
+| --- | --- | --- | --- | --- |
+| `botRefId` is empty or blank. Reported before `initialize` returns. | `invalid_state` | `REQUIRED_BOT_REFERENCE_ID` | none | `Bot reference ID is required to launch the SDK.` |
+| `botRefId` is invalid or unknown | `invalid_state` | `INVALID_BOT_REFERENCE_ID` | `403` | `Bot reference ID is invalid or not found.` |
+| `isDynamicEnv = true`, but dynamic configuration is not enabled or is incomplete for the bot | `invalid_state` | `DYNAMIC_CONFIG_NOT_AVAILABLE` | none | `Dynamic bot configuration is not enabled or properly configured for the current bot.` |
+| No internet connection | `network_unavailable` | `NO_NETWORK` | `-1009` | `Please check your network and try again.` |
+| Request timed out | `config_fetch_failed` | `BOT_CONFIG_FETCH_FAILED` | `-1001` | `Request timed out.` |
+| Connection lost | `config_fetch_failed` | `BOT_CONFIG_FETCH_FAILED` | `-1005` | `Connection lost` |
+| Any other failure loading the bot configuration | `config_fetch_failed` | `BOT_CONFIG_FETCH_FAILED` | HTTP status, or `-1` | Server or system message |
+
+If the server returns its own `type` or `exceptionCode`, those values are passed through unchanged. The status codes match the iOS SDK, so one handler can serve both platforms.
+
+- **Timing:** an empty `botRefId` and a missing network connection are reported before `initialize` returns. Configuration-fetch errors arrive shortly afterwards.
+- **Non-fatal fetch errors:** no network, and any other configuration-fetch error, don't fail initialization. The SDK stays initialized (`isInitialized(...)` returns `true` and `CHAT_SDK_INITIALISED` is still emitted). The `error` event is emitted and `errorHandler` is invoked to tell you the bot configuration wasn't loaded. The event is emitted even when you don't pass an `errorHandler`. `launch()` fetches the configuration again when called.
+- **Fatal error:** an empty `botRefId` stops initialization. The SDK isn't initialized and `CHAT_SDK_INITIALISED` isn't emitted.
+- **Once per failure:** each failure is reported once. Repeating `initialize` with the same values does nothing, and a fetch replaced by a newer `initialize` call never reports.
+- **Unknown environment code:** the deprecated `String` overload still throws `IllegalArgumentException`. Use the `NCWEnvironment` overload to avoid this.
+- **`launch()`:** works as before. It retries the configuration fetch and reports its own errors through its `callback`.
+- **Upgrading:** existing source compiles unchanged, and Java code calling `initialize(context, botRefId, environment, isDynamicEnv)` keeps working without a rebuild. Kotlin code compiled against an earlier SDK version that relied on the default `isDynamicEnv` (for example a prebuilt library) must be recompiled against this version. Otherwise it fails at runtime with `NoSuchMethodError`.
 
 ### (Optional) Check Initialization State
 

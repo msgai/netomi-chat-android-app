@@ -118,6 +118,12 @@ NCWChatSdk.getEventUpdatesFromSDK = { eventJson ->
                 Log.d("ChatSDK", "Custom event received: $customEventName — payload: $eventData")
             }
 
+            NCWPublicEventKeys.ERROR.key -> {
+                // Initialization failures carry event_sub_type "initialization_error".
+                // See "Initialization error events" below.
+                Log.e("ChatSDK", "SDK error: ${eventData?.optString("error_details")}")
+            }
+
             else -> Log.d("ChatSDK", "Event received: $eventType")
         }
     } catch (e: Exception) {
@@ -125,6 +131,27 @@ NCWChatSdk.getEventUpdatesFromSDK = { eventJson ->
     }
 }
 ```
+
+### Initialization error events
+
+When `initialize(...)` fails, the SDK emits an `error` event even if you didn't pass an `errorHandler`. The event carries the same values the handler receives:
+
+```kotlin
+if (eventType == NCWPublicEventKeys.ERROR.key &&
+    eventData?.optString("event_sub_type") == "initialization_error"
+) {
+    val details = eventData.optJSONObject("event_payload")
+    Log.e("ChatSDK", "Initialization failed: ${details?.optString("exceptionCode")} ${details?.optString("statusMessage")}")
+}
+```
+
+| Key (inside `event_data`) | Description |
+| --- | --- |
+| `event_sub_type` | Always `initialization_error` for these events. Other `error` events don't carry this key. |
+| `event_payload` | Object with `type`, `statusCode`, `statusMessage`, `error` and `exceptionCode` (plus `message` when the server sends one). Fields without a value are omitted. |
+| `error_details` | One readable summary string, for example `Code: 403 \| Bot reference ID is invalid or not found. \| Access Denied \| Exception: INVALID_BOT_REFERENCE_ID`. |
+
+Each initialization failure produces exactly one `error` event. The possible values are listed in [Usage](usage.md#optional-handle-initialization-errors).
 
 ### Send Events to SDK
 
@@ -200,6 +227,7 @@ try {
 | `END_CHAT_CONFIRMED` | User confirmed ending the chat. |
 | `TRANSCRIPT_DOWNLOADED` | Chat transcript downloaded. |
 | `CUSTOM_EVENT` | Vendor/bot-defined callback event. The bot-defined name is nested under `event_data.event_type`, not the outer `event_type`. |
+| `error` | An SDK error. Details are in `event_data.error_details`. Initialization failures also carry `event_sub_type` and `event_payload`; see [Initialization error events](#initialization-error-events). |
 
 #### Event types you can send
 

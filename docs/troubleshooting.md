@@ -59,7 +59,7 @@ NCWChatSdk.launch(
 
 | Symptom | Likely cause | Resolution |
 | --- | --- | --- |
-| Chat won't launch / `callback` fires | SDK not initialized, invalid/blank `botRefId`, no network, or bot config could not be fetched | Confirm `initialize(...)` ran with valid credentials before `launch()`. Pass a `callback` and inspect the message. Set log level to `INFO`. |
+| Chat won't launch / `callback` fires | SDK not initialized, invalid/blank `botRefId`, no network, or bot config could not be fetched | Pass an `errorHandler` to `initialize(...)` and inspect the `NCWErrorData`. For example, `REQUIRED_BOT_REFERENCE_ID` or `INVALID_BOT_REFERENCE_ID` means the `botRefId` is wrong. See [Usage](usage.md#optional-handle-initialization-errors). Also pass a `callback` to `launch(...)` and inspect its message. Set log level to `INFO`. |
 | "Bot reference ID is not initialized" | `launch`/`resumeChat` called before `initialize` | Call `initialize(...)` first. |
 | "Context must be FragmentActivity" | Terms/alerts are enabled but a non-`FragmentActivity` context was passed | Launch from a `FragmentActivity` so terms/alert bottom sheets can show. |
 | No bot messages arrive | Real-time connection or session not established (network/auth) | Check device connectivity. For authenticated bots, confirm the JWT flow. Watch the SDK events and `INFO` logs. |
