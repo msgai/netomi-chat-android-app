@@ -56,6 +56,11 @@ Play Store Data safety and guidance for keeping secrets and PII out of the SDK.
 Common issues, debugging guidance, and frequently asked questions.
 **Read this when** something isn't working or you want a quick answer.
 
+### 🔄 [Migration Guide](docs/migration.md)
+
+Breaking changes between major versions and how to update your code.
+**Read this when** you are upgrading to a new major version, or your build fails after upgrading.
+
 ---
 
 ## ⚡ Quick Start
@@ -65,11 +70,11 @@ The three steps below get a basic chat running. See [Installation](docs/installa
 ### 1. Install
 
 Ensure `mavenCentral()` is in your Gradle repositories, then add the dependency
-(version `1.31.0`) in your app module's `build.gradle(.kts)`:
+(version `2.0.0`) in your app module's `build.gradle(.kts)`:
 
 ```kotlin
 dependencies {
-    implementation("com.netomi.chat:chat-widget-android:1.31.0")
+    implementation("com.netomi.chat:chat-widget-android:2.0.0")
 }
 ```
 

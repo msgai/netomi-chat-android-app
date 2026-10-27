@@ -325,6 +325,39 @@ NCWChatSdk.theme(NCWThemeMode.DARK).updateTermsConfiguration(darkTermsConfig)
 
 ---
 
+## 🧩 Connection Status Banner
+
+Styling for the banner shown while the chat is connecting, connected, or has lost its connection. Each
+state has its own background and text color. The banner text itself comes from the localized
+connection-status strings, which are unchanged.
+
+```kotlin
+val otherConfig = NCWOtherConfiguration()
+otherConfig.connectionStatusConfig.warningColor = Color.parseColor("#FFCC00")   // "Connecting" background
+otherConfig.connectionStatusConfig.successColor = Color.parseColor("#34C759")   // "Connected" background
+otherConfig.connectionStatusConfig.errorColor = Color.parseColor("#FF3B30")     // "Connection lost" background
+otherConfig.connectionStatusConfig.warningTextColor = Color.WHITE
+otherConfig.connectionStatusConfig.successTextColor = Color.WHITE
+otherConfig.connectionStatusConfig.errorTextColor = Color.WHITE
+NCWChatSDK.updateOtherConfiguration(config = otherConfig)
+```
+
+You only need to set the colors you want to change; everything else keeps its default.
+
+> 🔹 Colors configured through the Dashboard accept standard 6-digit (`RRGGBB`) hex as well as 8-digit
+> (`RRGGBBAA`) hex for colors that need transparency. The alpha channel is the last two digits.
+
+**Dark mode override**:
+
+```kotlin
+val darkOtherConfig = NCWOtherConfiguration()
+darkOtherConfig.connectionStatusConfig.errorColor = Color.argb(255, 255, 138, 117)
+NCWChatSDK.theme(Theme.DARK).updateOtherConfiguration(config = darkOtherConfig)
+```
+
+---
+
+
 ## 🧩 Alerts
 
 Styling for alert banners shown in the chat (when enabled for your bot).

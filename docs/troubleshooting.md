@@ -41,14 +41,14 @@ NCWChatSdk.getEventUpdatesFromSDK = { eventJson ->
 
 ### 3. Inspect launch failures
 
-`launch(...)` accepts an optional `callback` that is invoked **only when the chat cannot be shown**. It receives an error message string.
+`launch(...)` accepts an optional `callback` that is invoked **only when the chat cannot be shown**. It receives an `NCWErrorData` on the main thread.
 
 ```kotlin
 NCWChatSdk.launch(
     context = this,
     jwtToken = null,
     callback = { error ->
-        Log.d("ChatSDK", "Chat launch failed: $error")
+        Log.d("ChatSDK", "Chat launch failed: ${error.exceptionCode} ${error.errorDescription}")
     }
 )
 ```
@@ -59,9 +59,10 @@ NCWChatSdk.launch(
 
 | Symptom | Likely cause | Resolution |
 | --- | --- | --- |
-| Chat won't launch / `callback` fires | SDK not initialized, invalid/blank `botRefId`, no network, or bot config could not be fetched | Pass an `errorHandler` to `initialize(...)` and inspect the `NCWErrorData`. For example, `REQUIRED_BOT_REFERENCE_ID` or `INVALID_BOT_REFERENCE_ID` means the `botRefId` is wrong. See [Usage](usage.md#optional-handle-initialization-errors). Also pass a `callback` to `launch(...)` and inspect its message. Set log level to `INFO`. |
-| "Bot reference ID is not initialized" | `launch`/`resumeChat` called before `initialize` | Call `initialize(...)` first. |
-| "Context must be FragmentActivity" | Terms/alerts are enabled but a non-`FragmentActivity` context was passed | Launch from a `FragmentActivity` so terms/alert bottom sheets can show. |
+| Chat won't launch / `callback` fires | SDK not initialized, invalid/blank `botRefId`, no network, or bot config could not be fetched | Pass an `errorHandler` to `initialize(...)` and inspect the `NCWErrorData`. For example, `REQUIRED_BOT_REFERENCE_ID` or `INVALID_BOT_REFERENCE_ID` means the `botRefId` is wrong. See [Usage](usage.md#optional-handle-initialization-errors). Also pass a `callback` to `launch(...)` and inspect its `NCWErrorData`. Set log level to `INFO`. |
+| `REQUIRED_BOT_REFERENCE_ID` from `launch(...)` | `launch`/`resumeChat` called before `initialize` | Call `initialize(...)` first. |
+| `FRAGMENT_ACTIVITY_REQUIRED` from `launch(...)` | Terms/alerts are enabled but a non-`FragmentActivity` context was passed | Launch from a `FragmentActivity` so terms/alert bottom sheets can show. |
+| Build fails after upgrading, with a `NCWErrorData` / `String` type mismatch in the `launch(...)` callback | Since 2.x, `NCWLaunchCallback.onError` receives `NCWErrorData` instead of a `String` | Update the callback as shown in the [Migration Guide](migration.md#launch-error-callback-now-receives-ncwerrordata). |
 | No bot messages arrive | Real-time connection or session not established (network/auth) | Check device connectivity. For authenticated bots, confirm the JWT flow. Watch the SDK events and `INFO` logs. |
 | Reauthorization keeps repeating | Missing or expired JWT on `REAUTHORIZATION_SUCCESS` | Respond to `REAUTHORIZATION_REQUEST` with a **fresh, valid** JWT via `sendEventToSdk(type = NetomiEventType.REAUTHORIZATION_SUCCESS, jwtToken = ...)`. See [Events & Authentication](events-and-auth.md). |
 | `sendEventToSdk(...)` throws | Missing JWT, missing/reserved custom event name, or non-JSON payload | Provide a JWT for `REAUTHORIZATION_SUCCESS`, give a non-reserved `eventName` for `CUSTOM`, and ensure `data` is JSON-serializable. |
@@ -155,3 +156,4 @@ If logging and the steps above don't resolve the issue, contact Netomi support w
 - JWT auth and events → **[Events & Authentication](events-and-auth.md)**
 - Push notification setup → **[Push Notifications](push-notifications.md)**
 - Privacy and secrets → **[Security & Privacy](security-and-privacy.md)**
+- Upgrading and breaking changes → **[Migration Guide](migration.md)**

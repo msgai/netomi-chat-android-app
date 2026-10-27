@@ -59,7 +59,7 @@ dependencies {
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
 
-    implementation("com.netomi.chat:chat-widget-android:1.31.0")
+    implementation("com.netomi.chat:chat-widget-android:2.0.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
 }

@@ -5,6 +5,8 @@
 > **What this guide covers:** how to add the SDK to your project, the supported installation method, and the third-party dependencies managed by the SDK.
 >
 > **Read this when:** you are integrating the SDK for the first time, or upgrading to a new version.
+>
+> **Upgrading to a new major version?** Also read the [Migration Guide](migration.md) for the code changes it needs.
 
 ---
 
@@ -40,11 +42,11 @@
    }
    ```
 
-2. Add the SDK to your **app module** `build.gradle(.kts)` (version `1.31.0`):
+2. Add the SDK to your **app module** `build.gradle(.kts)` (version `2.0.0`):
 
    ```kotlin
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.31.0")
+       implementation("com.netomi.chat:chat-widget-android:2.0.0")
    }
    ```
 
@@ -61,7 +63,7 @@
    }
 
    dependencies {
-       implementation("com.netomi.chat:chat-widget-android:1.31.0")
+       implementation("com.netomi.chat:chat-widget-android:2.0.0")
        coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
    }
    ```
@@ -88,7 +90,7 @@
 implementation("com.netomi.chat:-android:1.1.x")
 
 // ✅ Use this instead
-implementation("com.netomi.chat:chat-widget-android:1.31.0")
+implementation("com.netomi.chat:chat-widget-android:2.0.0")
 ```
 
 ---
@@ -131,8 +133,8 @@ your bot), add the optional `chat-widget-android-analytics` artifact:
 
 ```kotlin
 dependencies {
-    implementation("com.netomi.chat:chat-widget-android:1.31.0")
-    implementation("com.netomi.chat:chat-widget-android-analytics:1.31.0")
+    implementation("com.netomi.chat:chat-widget-android:2.0.0")
+    implementation("com.netomi.chat:chat-widget-android-analytics:2.0.0")
 }
 ```
 
@@ -154,8 +156,8 @@ If you want users to be able to speak their messages, add the optional
 
 ```kotlin
 dependencies {
-    implementation("com.netomi.chat:chat-widget-android:1.31.0")
-    implementation("com.netomi.chat:chat-widget-android-voicestt:1.31.0")
+    implementation("com.netomi.chat:chat-widget-android:2.0.0")
+    implementation("com.netomi.chat:chat-widget-android-voicestt:2.0.0")
 }
 ```
 

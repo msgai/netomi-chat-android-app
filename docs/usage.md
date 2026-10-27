@@ -166,13 +166,24 @@ NCWChatSdk.launch(
     context = this,
     jwtToken = null,
     callback = { error ->
-        Log.d("ChatSDK", "Chat launch failed: $error")
+        Log.e("ChatSDK", "Chat launch failed: ${error.errorDescription}")
+        Log.e("ChatSDK", "Type: ${error.type}, Code: ${error.exceptionCode}, Status: ${error.statusCode}")
     }
 )
 ```
 
 - `callback` is invoked **only if the chat cannot be shown**.
 - It is **not** a completion callback.
+- It always runs on the **main thread** and receives the same `NCWErrorData` type as the `initialize(...)` error handler.
+
+| Situation | `type` | `exceptionCode` | `statusCode` | `statusMessage` |
+| --- | --- | --- | --- | --- |
+| No internet connection when `launch` is called | `network_unavailable` | `NO_NETWORK` | none | `No internet connection` |
+| SDK not initialized (no `botRefId`) | `invalid_state` | `REQUIRED_BOT_REFERENCE_ID` | none | `Bot reference ID is required to launch the SDK.` |
+| Terms are enabled but `context` is not a `FragmentActivity` | `invalid_state` | `FRAGMENT_ACTIVITY_REQUIRED` | none | `Context must be FragmentActivity to show terms dialog when terms configuration is enabled` |
+| Bot configuration, JWT login, or conversation request failed | Server value, if any | Server value, if any | HTTP status, or `-1009` / `-1001` / `-1005` / `-1` for network failures | Server or system message |
+
+> **Upgrading from 1.x:** `NCWLaunchCallback.onError` now receives `NCWErrorData` instead of a `String`. See the [Migration Guide](migration.md#launch-error-callback-now-receives-ncwerrordata) for before/after code in Kotlin and Java.
 
 ### 🔹 With Initial Query
 
