@@ -33,7 +33,7 @@ Customize colors, headers, footers, message bubbles, and other visual styling in
 
 ### 🔔 [Push Notifications](docs/push-notifications.md)
 
-Register a device push token, handle token refresh, and migrate from the deprecated FCM API.
+Register a device push token and handle token refresh.
 **Read this when** chat replies should arrive as push notifications.
 
 ### 🔐 [Events & Authentication](docs/events-and-auth.md)
@@ -70,11 +70,11 @@ The three steps below get a basic chat running. See [Installation](docs/installa
 ### 1. Install
 
 Ensure `mavenCentral()` is in your Gradle repositories, then add the dependency
-(version `2.0.1`) in your app module's `build.gradle(.kts)`:
+(version `3.0.0`) in your app module's `build.gradle(.kts)`:
 
 ```kotlin
 dependencies {
-    implementation("com.netomi.chat:chat-widget-android:2.0.1")
+    implementation("com.netomi.chat:chat-widget-android:3.0.0")
 }
 ```
 

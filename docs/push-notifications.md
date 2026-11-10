@@ -55,8 +55,6 @@ class MyMessagingService : FirebaseMessagingService() {
 }
 ```
 
-> ✅ `setPushToken(...)` is the preferred API for FCM tokens.
-
 ---
 
 ## Handling token refresh
@@ -64,18 +62,6 @@ class MyMessagingService : FirebaseMessagingService() {
 Push tokens can change after an app reinstall, restored backup, or FCM rotation. `onNewToken(...)` fires automatically whenever the token changes — forward the new value to `setPushToken(...)` so notifications keep working.
 
 There is no separate "update" call. Calling `setPushToken(...)` with the new value replaces the previous token.
-
----
-
-## Deprecated: setFCMToken
-
-```kotlin
-// ❌ Deprecated — do not use in new code.
-NCWChatSdk.setFCMToken("your-fcm-token")
-```
-
-> ⚠️ `setFCMToken(...)` is **deprecated** and forwards to `setPushToken(...)`. It exists for backward compatibility.
-> **Always use `setPushToken(...)` instead.**
 
 ---
 

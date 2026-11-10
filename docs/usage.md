@@ -107,7 +107,7 @@ If the server returns its own `type` or `exceptionCode`, those values are passed
 - **Non-fatal fetch errors:** no network, and any other configuration-fetch error, don't fail initialization. The SDK stays initialized (`isInitialized(...)` returns `true` and `CHAT_SDK_INITIALISED` is still emitted). The `error` event is emitted and `errorHandler` is invoked to tell you the bot configuration wasn't loaded. The event is emitted even when you don't pass an `errorHandler`. `launch()` fetches the configuration again when called.
 - **Fatal error:** an empty `botRefId` stops initialization. The SDK isn't initialized and `CHAT_SDK_INITIALISED` isn't emitted.
 - **Once per failure:** each failure is reported once. Repeating `initialize` with the same values does nothing, and a fetch replaced by a newer `initialize` call never reports.
-- **Unknown environment code:** the deprecated `String` overload still throws `IllegalArgumentException`. Use the `NCWEnvironment` overload to avoid this.
+- **Environment stored as a code string:** convert it with `NCWEnvironment.from(code)` (for example `"us"`). An unknown code throws `IllegalArgumentException` before `initialize` runs, and no error is reported.
 - **`launch()`:** works as before. It retries the configuration fetch and reports its own errors through its `callback`.
 - **Upgrading:** existing source compiles unchanged, and Java code calling `initialize(context, botRefId, environment, isDynamicEnv)` keeps working without a rebuild. Kotlin code compiled against an earlier SDK version that relied on the default `isDynamicEnv` (for example a prebuilt library) must be recompiled against this version. Otherwise it fails at runtime with `NoSuchMethodError`.
 
