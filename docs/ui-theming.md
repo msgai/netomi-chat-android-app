@@ -149,6 +149,54 @@ val darkHeader = NCWHeaderConfigOverride(
 NCWChatSdk.theme(NCWThemeMode.DARK).updateHeaderConfiguration(darkHeader)
 ```
 
+**Gradient header** — set `isGradientApplied = true` and list your `gradientColors`. `gradientDirection` uses the same index values as the web widget and iOS, so one config renders the same direction on every platform:
+
+| `gradientDirection` | Direction (start → end) |
+| --- | --- |
+| `0` | Bottom-right → top-left |
+| `1` | Bottom → top |
+| `2` | Bottom-left → top-right |
+| `3` | Right → left |
+| `4` | Not defined; uses the default (left → right) |
+| `5` (default) | Left → right |
+| `6` | Top-right → bottom-left |
+| `7` | Top → bottom |
+| `8` | Top-left → bottom-right |
+
+- If you leave `gradientDirection` unset, or pass `4` or any other value, the header uses left → right.
+- **One color:** the header blends that color into a 20% lighter shade at a fixed 114° angle, and `gradientDirection` is ignored.
+- **Two or more colors:** the gradient follows `gradientDirection`.
+- **No colors, or any invalid color in the list:** no gradient is drawn and the header uses `backgroundColor`. Use `#RRGGBB` or `#RRGGBBAA` for every entry.
+- When `isGradientApplied` is `false`, the header uses `backgroundColor`.
+
+> ⚠️ **Visual change in this release (Android only).** Earlier Android SDK versions read `gradientDirection` in Android's own order, which did not match web or iOS. If you set `gradientDirection` explicitly, your header now points a different way. Use the table below to keep your previous Android look, or keep the new value to match web and iOS.
+>
+> - An unset `gradientDirection`, or a value below `0` or above `8`, still renders left → right, the same as before.
+> - **One color:** previously a solid `backgroundColor`, now a 114° blend into a 20% lighter shade.
+> - **Invalid color in the list:** previously a gradient from the remaining valid colors (when two or more were valid), now the solid `backgroundColor`.
+
+| Your value | Previous Android direction | Value that gives the same direction now |
+| --- | --- | --- |
+| `0` | Top → bottom | `7` |
+| `1` | Top-right → bottom-left | `6` |
+| `2` | Right → left | `3` |
+| `3` | Bottom-right → top-left | `0` |
+| `4` | Bottom → top | `1` |
+| `5` | Bottom-left → top-right | `2` |
+| `6` | Left → right | `5` (or leave unset) |
+| `7` | Top-left → bottom-right | `8` |
+| `8` | Left → right | `5` (or leave unset) |
+
+```kotlin
+NCWChatSdk.updateHeaderConfiguration(
+    NCWHeaderConfigOverride(
+        isGradientApplied = true,
+        gradientColors = listOf("#2196F3", "#21CBF3"),
+        gradientDirection = 5                       // Left → right
+    )
+)
+```
+
 
 ---
 
@@ -210,18 +258,24 @@ NCWChatSdk.theme(NCWThemeMode.DARK).updateBotConfiguration(darkBotConfig)
 Styling for messages sent by the user.
 
 ```kotlin
-val userConfig = NCWUserConfig(
+val userConfig = NCWUserConfigOverride(
     backgroundColor = "#4CAF50",                 // User message bubble color
-    textColor = "#FFFFFF"                        // User message text color
+    textColor = "#FFFFFF",                       // User message text color
+    retryColor = "#D32F2F"                       // "Not sent" label (text and icon) on a failed message
 )
 NCWChatSdk.updateUserConfiguration(userConfig)
 ```
+
+
+`retryColor` is optional. When neither your app nor the bot configuration sets it — or the value is not a valid `#RRGGBB` / `#RRGGBBAA` color — the label keeps its existing color, `#FF7661`, in both light and dark mode.
+
 **Dark mode override**:
 
 ```kotlin
-val darkUserConfig = NCWUserConfig(
-        backgroundColor = "#1976D2"
-        )
+val darkUserConfig = NCWUserConfigOverride(
+    backgroundColor = "#1976D2",
+    retryColor = "#FF8A80"
+)
 
 NCWChatSdk.theme(NCWThemeMode.DARK).updateUserConfiguration(darkUserConfig)
 ```
@@ -298,6 +352,26 @@ val darkOtherConfig = NCWOtherConfig(
 
 NCWChatSdk.theme(NCWThemeMode.DARK).updateOtherConfiguration(darkOtherConfig)
 ```
+
+### Form bottom sheet: half or full view
+
+`showBottomSheetHalfView` controls how form (web URL) bottom sheets open:
+
+- `true`: the sheet opens half-expanded, and the user can drag it to full height.
+- `false`: the sheet opens fully expanded and can't be dragged.
+
+The SDK resolves the value in this order: your override, then the bot configuration, then
+`false` (full view, the existing behavior). If you don't set it, nothing changes.
+
+**Kotlin**:
+
+```kotlin
+NCWChatSdk.updateOtherConfiguration(
+    NCWOtherConfigOverride(showBottomSheetHalfView = true)
+)
+```
+
+The value is read when a sheet opens, so set it before the form is shown.
 
 ---
 
