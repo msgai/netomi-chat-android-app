@@ -8,107 +8,63 @@
 
 ---
 
-## Upgrading from 3.x
+## Upgrading from 4.0.0
 
-`sendEventToSdk(...)` now checks every value in `data`, including values inside nested maps and lists. It also compares custom event names with the reserved names exactly. The method signature hasn't changed, so your code still compiles, but a call that used to succeed can now throw.
+This release undoes the `sendEventToSdk(...)` changes that 4.0.0 made, so the method behaves like 3.x again. One of those changes can break code written for 4.0.0.
 
-| What changed | What you need to do |
-| --- | --- |
-| `sendEventToSdk(...)` throws `NCWEventError.InvalidPayload` when any value in `data`, at any level, isn't a JSON value | Convert those values to strings, numbers, booleans, maps or lists before you send them. See [`sendEventToSdk` rejects non-JSON values anywhere in `data`](#sendeventtosdk-rejects-non-json-values-anywhere-in-data). |
-| The `InvalidPayload` message is now `Payload must be JSON-serializable.` | If you compare the message text, check the exception type instead. |
-| Reserved custom event names are matched exactly, so names such as `Custom` and `none` are now accepted | No change needed, unless you relied on those names being rejected. See [Reserved custom event names are matched exactly](#reserved-custom-event-names-are-matched-exactly). |
+### Breaking: reserved custom event names ignore case again
 
-### `sendEventToSdk` rejects non-JSON values anywhere in `data`
-
-At every level, `data` can contain only:
-
-- `String`, `Boolean`, and numbers, including `Long` and `BigDecimal`. `Double` and `Float` values must be finite, so `NaN` and infinity are rejected.
-- `null`, including `JSONObject.NULL`.
-- Maps whose keys are all `String`.
-- Lists, sets and other collections, and arrays.
-- `JSONObject` and `JSONArray`.
-
-Anything else, such as an enum, a `Char`, a `Date`, a `UUID` or one of your own classes, makes the call throw `NCWEventError.InvalidPayload`. So does a map or list that contains itself, directly or through another map or list. 3.x did not reject most of these values.
-
-> ⚠️ **If the call isn't inside a `try`/`catch`, this exception crashes your app.** Code that worked in 3.x can crash after you upgrade, so check every `sendEventToSdk` call that sends one of these values, and wrap the call as shown in [Events & Authentication](events-and-auth.md#send-events-to-sdk).
+A `CUSTOM` event name is rejected when, ignoring case and leading and trailing spaces, it equals `custom`, `reauthorization_success`, `reauthorization_failure` or `none`. 4.0.0 rejected only the exact names `custom`, `reauthorization_success` and `reauthorization_failure`. So a name that 4.0.0 accepted, such as `Custom`, `CUSTOM` or `none`, now throws `NCWEventError.ReservedCustomEventName`, which crashes your app if you don't catch it. Rename the event:
 
 **Kotlin**
 
 ```kotlin
-val shippedAt = Date()
-
-// Before: accepted in 3.x, now throws NCWEventError.InvalidPayload
-NCWChatSdk.sendEventToSdk(
-    type = NetomiEventType.CUSTOM,
-    eventName = "order_update",
-    data = mapOf(
-        "status" to OrderStatus.SHIPPED,
-        "details" to mapOf("shippedAt" to shippedAt)
-    )
-)
+// Before (accepted by 4.0.0)
+NCWChatSdk.sendEventToSdk(type = NetomiEventType.CUSTOM, eventName = "Custom", data = emptyMap())
 
 // After
-NCWChatSdk.sendEventToSdk(
-    type = NetomiEventType.CUSTOM,
-    eventName = "order_update",
-    data = mapOf(
-        "status" to OrderStatus.SHIPPED.name,
-        "details" to mapOf("shippedAt" to shippedAt.time)
-    )
-)
+NCWChatSdk.sendEventToSdk(type = NetomiEventType.CUSTOM, eventName = "form_submitted", data = emptyMap())
 ```
 
 **Java**
 
 ```java
-Date shippedAt = new Date();
-Map<String, Object> details = new HashMap<>();
-Map<String, Object> data = new HashMap<>();
-
-// Before: accepted in 3.x, now throws NCWEventError.InvalidPayload
-details.put("shippedAt", shippedAt);
-data.put("status", OrderStatus.SHIPPED);
-data.put("details", details);
+// Before (accepted by 4.0.0)
+NCWChatSdk.sendEventToSdk(NetomiEventType.CUSTOM, "Custom", null, Collections.emptyMap());
 
 // After
-details.put("shippedAt", shippedAt.getTime());
-data.put("status", OrderStatus.SHIPPED.name());
-data.put("details", details);
-
-NCWChatSdk.sendEventToSdk(NetomiEventType.CUSTOM, "order_update", null, data);
+NCWChatSdk.sendEventToSdk(NetomiEventType.CUSTOM, "form_submitted", null, Collections.emptyMap());
 ```
 
-`sendEventToSdk` doesn't declare its exceptions for Java, so a Java `catch (NCWEventError e)` doesn't compile. Catch `Exception` and check the type:
+### Also changed since 4.0.0
 
-```java
-try {
-    NCWChatSdk.sendEventToSdk(NetomiEventType.CUSTOM, "order_update", null, data);
-} catch (Exception e) {
-    if (e instanceof NCWEventError.InvalidPayload) {
-        Log.e("ChatSDK", "Event payload has a non-JSON value", e);
-    }
-}
-```
+- **`NCWEventError.MissingJWT` is no longer thrown.** A `REAUTHORIZATION_SUCCESS` without a JWT emits an `error` event instead. See [`REAUTHORIZATION_SUCCESS` without a JWT](#reauthorization_success-without-a-jwt). A `try`/`catch` you added for it can stay; it never runs.
+- **`data` is checked as in 3.x.** A non-JSON value nested in `data` is accepted again, a `NaN` or `Infinity` number emits an `error` event with `event_sub_type` `invalid_payload`, and the `InvalidPayload` message is `Payload is not JSON serializable` again.
 
-### Reserved custom event names are matched exactly
+---
 
-For `NetomiEventType.CUSTOM`, `eventName` is trimmed and then compared with `custom`, `reauthorization_success` and `reauthorization_failure`, matching case. Only those exact names throw `NCWEventError.ReservedCustomEventName`.
+## Upgrading from 3.x
 
-In 3.x the comparison ignored case and also reserved `none`, so names such as `Custom`, `REAUTHORIZATION_SUCCESS` and `none` threw. They are now sent like any other custom event name.
+No code changes are needed. Upgrade to the latest release, not to 4.0.0.
 
-#### Also check
+4.0.0 changed `sendEventToSdk(...)` so that some calls that worked in 3.x threw an exception. Releases after 4.0.0 undo those changes and behave like 3.x again, except when you send `REAUTHORIZATION_SUCCESS` without a JWT. They also emit an `error` event when `data` has a `NaN` or `Infinity` number.
 
-- **Check the exception type, not the message.** The `InvalidPayload` message changed from `Payload is not JSON serializable` to `Payload must be JSON-serializable.`:
+| `sendEventToSdk(...)` | 3.x | 4.0.0 only | Later releases |
+| --- | --- | --- | --- |
+| `REAUTHORIZATION_SUCCESS` with a `null` or blank `jwtToken` | Accepted. The chat was told that reauthorization succeeded, although the user wasn't signed in again. | Throws `NCWEventError.MissingJWT` | Doesn't throw. The chat is told that reauthorization failed, and an `error` event is emitted. See [`REAUTHORIZATION_SUCCESS` without a JWT](#reauthorization_success-without-a-jwt). |
+| A value nested inside `data` that isn't valid JSON, such as an object that isn't a map, list, string, number or boolean | Accepted | Throws `NCWEventError.InvalidPayload` | Accepted, as in 3.x |
+| `NaN` or `Infinity` inside `data` | Accepted | Throws `NCWEventError.InvalidPayload` | Accepted, as in 3.x. An `error` event with `event_sub_type` `invalid_payload` is also emitted. |
+| `data` that contains itself | Crashes with `StackOverflowError` | Throws `NCWEventError.InvalidPayload` | Throws `NCWEventError.InvalidPayload` |
+| `InvalidPayload` message | `Payload is not JSON serializable` | `Payload must be JSON-serializable.` | `Payload is not JSON serializable`, as in 3.x |
+| `CUSTOM` event named `Custom`, `REAUTHORIZATION_SUCCESS`, `none` or another reserved name in any letter case | Throws `NCWEventError.ReservedCustomEventName` | Accepted, unless it is exactly `custom`, `reauthorization_success` or `reauthorization_failure` | Throws `NCWEventError.ReservedCustomEventName`, as in 3.x |
 
-  ```kotlin
-  // Before
-  if (e.message == "Payload is not JSON serializable") { /* ... */ }
+If you already moved to 4.0.0, see [Upgrading from 4.0.0](#upgrading-from-400).
 
-  // After
-  if (e is NCWEventError.InvalidPayload) { /* ... */ }
-  ```
+### `REAUTHORIZATION_SUCCESS` without a JWT
 
-- **Prebuilt libraries don't need to be recompiled.** The signature is unchanged, so a library built against 3.x keeps working, but its calls get the new checks.
+When `type` is `NetomiEventType.REAUTHORIZATION_SUCCESS` and `jwtToken` is `null`, empty or only whitespace, `sendEventToSdk(...)` doesn't throw. The SDK emits an `error` event with `event_sub_type` `missing_jwt`, and tells the chat that reauthorization failed, as if you had sent `REAUTHORIZATION_FAILURE`. If the chat session has already timed out from inactivity, only the `error` event is emitted.
+
+In 3.x the chat was told that reauthorization succeeded. If your bot flow continued as if the user were signed in, send a valid JWT instead. To find calls that send no JWT, listen for the `error` event as shown in [Events & Authentication → Reauthorization Success](events-and-auth.md#reauthorization-success).
 
 ---
 
@@ -121,8 +77,6 @@ Three methods that were deprecated in earlier releases have been removed. Each o
 | `initialize(context, newBotRefId, env: String, isDynamicEnv, errorHandler)` | `initialize(context, newBotRefId, environment: NCWEnvironment, isDynamicEnv, errorHandler)`. See [`initialize` with a `String` environment](#initialize-with-a-string-environment). |
 | `setFCMToken(token)` | `setPushToken(token)` |
 | `isInitialized()` | `isInitialized(botRefId, environment, isDynamicEnv)`. See [`isInitialized()` without arguments](#isinitialized-without-arguments). |
-
-`sendEventToSdk(...)` has also changed: it now throws when you send `REAUTHORIZATION_SUCCESS` without a JWT. See [`REAUTHORIZATION_SUCCESS` without a JWT now throws](#reauthorization_success-without-a-jwt-now-throws).
 
 ### `initialize` with a `String` environment
 
@@ -189,61 +143,6 @@ From Java, pass `isDynamicEnv` too: `NCWChatSdk.isInitialized("YOUR_BOT_REF_ID",
 
 - **`initialize` no longer drops analytics events that are waiting to be sent.** Until analytics finishes setting up, the SDK holds its analytics events in a queue. The removed `String` overload emptied that queue every time you called it. The `NCWEnvironment` overload has never done this. If you call `initialize` again before analytics has finished setting up, for example to switch bots, the earlier events are now sent to your [analytics tracker](installation.md#optional-analytics) once it is ready. No code change is needed. After analytics has finished setting up, events are sent straight away and this doesn't apply.
 - **Prebuilt libraries must be recompiled.** Code compiled against 2.x that calls a removed method, such as a wrapper library, fails at runtime with `NoSuchMethodError` until it is rebuilt against the new version.
-
-### `REAUTHORIZATION_SUCCESS` without a JWT now throws
-
-`sendEventToSdk(...)` with `type = NetomiEventType.REAUTHORIZATION_SUCCESS` now throws `NCWEventError.MissingJWT` when `jwtToken` is `null`, empty or only whitespace. In 2.x the SDK accepted the call and told your bot that reauthorization had succeeded, without signing the user in again.
-
-The method signature is unchanged, so your code still compiles. If the call isn't inside a `try`/`catch`, your app now crashes when there's no JWT to send.
-
-When the SDK throws, it sends nothing to the chat, and the chat keeps waiting for your response with the message input disabled. Catch the error, then either call again with a valid JWT or send `REAUTHORIZATION_FAILURE`.
-
-**Kotlin**
-
-```kotlin
-// Before
-NCWChatSdk.sendEventToSdk(
-    type = NetomiEventType.REAUTHORIZATION_SUCCESS,
-    jwtToken = newJwt,
-    data = mapOf("userId" to "1234")
-)
-
-// After
-try {
-    NCWChatSdk.sendEventToSdk(
-        type = NetomiEventType.REAUTHORIZATION_SUCCESS,
-        jwtToken = newJwt,
-        data = mapOf("userId" to "1234")
-    )
-} catch (e: NCWEventError.MissingJWT) {
-    NCWChatSdk.sendEventToSdk(
-        type = NetomiEventType.REAUTHORIZATION_FAILURE,
-        data = mapOf("reason" to "No JWT available")
-    )
-}
-```
-
-**Java**
-
-`sendEventToSdk` doesn't declare the exception for Java, so catch `Exception` and check its type:
-
-```java
-// Before
-NCWChatSdk.sendEventToSdk(NetomiEventType.REAUTHORIZATION_SUCCESS, null, newJwt, data);
-
-// After
-try {
-    NCWChatSdk.sendEventToSdk(NetomiEventType.REAUTHORIZATION_SUCCESS, null, newJwt, data);
-} catch (Exception e) {
-    if (e instanceof NCWEventError.MissingJWT) {
-        NCWChatSdk.sendEventToSdk(NetomiEventType.REAUTHORIZATION_FAILURE, null, null, failureData);
-    } else {
-        Log.e("ChatSDK", "Failed: " + e.getMessage(), e);
-    }
-}
-```
-
-The SDK checks the JWT before anything else, so the call throws even if the chat session has already timed out. See [Events & Authentication → Reauthorization Success](events-and-auth.md#reauthorization-success).
 
 ---
 
@@ -326,5 +225,4 @@ NCWChatSdk.launch(this, null, new NCWAnimationConfig(), new NCWLaunchCallback() 
 
 - Launch options and error codes → **[Usage](usage.md)**
 - Initialization errors (`NCWErrorData`) → **[Usage](usage.md#optional-handle-initialization-errors)**
-- Reauthorization and `sendEventToSdk` → **[Events & Authentication](events-and-auth.md#send-events-to-sdk)**
 - Something not working → **[Troubleshooting & FAQ](troubleshooting.md)**

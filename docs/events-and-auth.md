@@ -65,7 +65,7 @@ NCWChatSdk.launch(context = this, jwtToken = "your-jwt-token")
 | --- | --- | --- |
 | `launch(jwtToken)` | ❌ Optional | Use when your bot requires authentication; otherwise pass `null`. |
 | `launchWithQuery(jwtToken)` | ❌ Optional | Same as above. |
-| `NetomiEventType.REAUTHORIZATION_SUCCESS` | ✅ Required | Must provide a valid JWT if the session started with JWT. A `null` or blank JWT throws `NCWEventError.MissingJWT`. See [Reauthorization Success](#reauthorization-success). |
+| `NetomiEventType.REAUTHORIZATION_SUCCESS` | ✅ Required | Must provide a valid JWT if the session started with JWT. Without one, the SDK reports reauthorization as failed. See [Reauthorization Success](#reauthorization-success). |
 | `NetomiEventType.REAUTHORIZATION_FAILURE` | ❌ Optional | You can omit the JWT. |
 | Other events | ❌ Optional | The JWT is ignored if not applicable. |
 
@@ -119,8 +119,8 @@ NCWChatSdk.getEventUpdatesFromSDK = { eventJson ->
             }
 
             NCWPublicEventKeys.ERROR.key -> {
-                // Initialization failures carry event_sub_type "initialization_error".
-                // See "Initialization error events" below.
+                // Some errors carry event_sub_type, such as "initialization_error", "missing_jwt" or "invalid_payload".
+                // See "Initialization error events", "Reauthorization Success" and "Parameters" below.
                 Log.e("ChatSDK", "SDK error: ${eventData?.optString("error_details")}")
             }
 
@@ -147,7 +147,7 @@ if (eventType == NCWPublicEventKeys.ERROR.key &&
 
 | Key (inside `event_data`) | Description |
 | --- | --- |
-| `event_sub_type` | Always `initialization_error` for these events. Other `error` events don't carry this key. |
+| `event_sub_type` | Always `initialization_error` for these events. Other `error` events carry a different value, such as `missing_jwt` or `invalid_payload`, or don't carry this key. |
 | `event_payload` | Object with `type`, `statusCode`, `statusMessage`, `error` and `exceptionCode` (plus `message` when the server sends one). Fields without a value are omitted. |
 | `error_details` | One readable summary string, for example `Code: 403 \| Bot reference ID is invalid or not found. \| Access Denied \| Exception: INVALID_BOT_REFERENCE_ID`. |
 
@@ -165,20 +165,49 @@ Use `sendEventToSdk(type, eventName?, jwtToken?, data)` when the SDK expects a r
 try {
     NCWChatSdk.sendEventToSdk(
         type = NetomiEventType.REAUTHORIZATION_SUCCESS,
-        jwtToken = "eyJhbGciOi...",   // Required: must not be null or blank
+        jwtToken = "eyJhbGciOi...",   // Required for reauthorization success
         data = mapOf("userId" to "1234")
-    )
-} catch (e: NCWEventError.MissingJWT) {
-    NCWChatSdk.sendEventToSdk(
-        type = NetomiEventType.REAUTHORIZATION_FAILURE,
-        data = mapOf("reason" to "No JWT available")
     )
 } catch (e: Exception) {
     Log.e("ChatSDK", "Failed: ${e.message}", e)
 }
 ```
 
-If `jwtToken` is `null`, empty or only whitespace, `sendEventToSdk` throws `NCWEventError.MissingJWT` and sends nothing to the chat. The chat keeps waiting for your response with the message input disabled, so don't just log the error. Call `sendEventToSdk` again with a valid JWT, or send `REAUTHORIZATION_FAILURE` as shown above. Upgrading from an SDK version that accepted a blank JWT? See the [Migration Guide](migration.md#reauthorization_success-without-a-jwt-now-throws).
+If `jwtToken` is `null`, empty or only whitespace, `sendEventToSdk` doesn't throw. Instead the SDK:
+
+- emits an `error` event on the main thread. Its `event_data` has `event_sub_type` `missing_jwt`, and `error_details` explains the problem.
+- tells the chat that reauthorization failed, as if you had sent `REAUTHORIZATION_FAILURE`. The `data` you passed is sent along, with an added `auth_failure_reason`.
+
+If the chat session has already timed out from inactivity, the SDK only emits the `error` event and tells the chat nothing, as for any event sent after the timeout. No reauthorization takes place. To retry, call `sendEventToSdk` again with a valid JWT. To spot a missing JWT in your event handler:
+
+**Kotlin**
+
+```kotlin
+if (eventType == NCWPublicEventKeys.ERROR.key &&
+    eventData?.optString("event_sub_type") == "missing_jwt"
+) {
+    Log.w("ChatSDK", "Reauthorization sent without a JWT: ${eventData.optString("error_details")}")
+}
+```
+
+**Java**
+
+```java
+NCWChatSdk.setGetEventUpdatesFromSDK(eventJson -> {
+    try {
+        JSONObject event = new JSONObject(eventJson);
+        JSONObject eventData = event.optJSONObject("event_data");
+        if ("error".equals(event.optString("event_type"))
+                && eventData != null
+                && "missing_jwt".equals(eventData.optString("event_sub_type"))) {
+            Log.w("ChatSDK", "Reauthorization sent without a JWT: " + eventData.optString("error_details"));
+        }
+    } catch (JSONException e) {
+        Log.e("ChatSDK", "Error parsing event: " + e.getMessage());
+    }
+    return Unit.INSTANCE;
+});
+```
 
 #### Reauthorization Failure
 
@@ -215,13 +244,14 @@ try {
 - `type`: Event category sent to the SDK.
 - `eventName`: Required only when `type` is `NetomiEventType.CUSTOM`.
   - Must not be empty once leading and trailing spaces are removed.
-  - Must not be exactly `custom`, `reauthorization_success`, or `reauthorization_failure`. The check is case-sensitive.
+  - Must not use reserved SDK event names: `reauthorization_success`, `reauthorization_failure`, `custom` or `none`. The check ignores case and leading and trailing spaces, so `Custom` is reserved too.
 - `jwtToken`: An **optional JSON Web Token**.
-  - Required for `REAUTHORIZATION_SUCCESS`. A `null` or blank value throws `NCWEventError.MissingJWT`.
+  - Required for `REAUTHORIZATION_SUCCESS`. A missing JWT doesn't throw; see [Reauthorization Success](#reauthorization-success).
   - Ignored if not applicable.
-- `data`: A map of extra details for the event. Required; pass `emptyMap()` if you have none.
-  - Every value, including values inside nested maps and lists, must be a JSON value: a `String`, a `Boolean`, a number such as `Int`, `Long` or `BigDecimal` (`Double` and `Float` must be finite), `null`, a map with `String` keys, a list, set or array, or a `JSONObject` / `JSONArray`.
-  - Anything else, such as an enum, a `Char`, a `Date`, a `UUID` or one of your own classes, throws `NCWEventError.InvalidPayload`, and so does a map or list that contains itself. Convert such values first, for example `status.name`, `date.time` or `uuid.toString()`.
+- `data`: A JSON-serializable map for additional payload. Required; pass `emptyMap()` if you have none.
+  - Use only strings, booleans, finite numbers, `null`, and maps with `String` keys, lists or arrays of these.
+  - A `NaN` or `Infinity` number doesn't throw. The SDK emits an `error` event with `event_sub_type` `invalid_payload` and still sends the event, but the bot may not receive it.
+  - A `data` map that contains itself, directly or through nested maps or lists, throws `InvalidPayload`.
 
 #### Errors thrown by `sendEventToSdk`
 
@@ -229,13 +259,11 @@ If its input is invalid, `sendEventToSdk` throws an `NCWEventError` and sends no
 
 | Error | Thrown when |
 | --- | --- |
-| `NCWEventError.InvalidPayload` | A value in `data`, at any level, isn't a JSON value. The message is `Payload must be JSON-serializable.` |
+| `NCWEventError.InvalidPayload` | `data` can't be converted to a JSON object, because a key isn't a `String` or `data` contains itself. |
 | `NCWEventError.MissingCustomEventName` | `type` is `CUSTOM` and `eventName` is `null` or blank. |
 | `NCWEventError.ReservedCustomEventName` | `type` is `CUSTOM` and `eventName` is a reserved name. The error's `eventName` holds the trimmed name. |
 
-`data` is checked first, so if both `data` and `eventName` are invalid you get `InvalidPayload`. Check the error type, not its message. From Java, catch `Exception` and use `instanceof`, because `sendEventToSdk` doesn't declare these exceptions.
-
-> 🔄 **Upgrading from 3.x?** `data` is now checked at every level, and reserved names are matched exactly. See the [Migration Guide](migration.md#upgrading-from-3x).
+`data` is checked first, so if both `data` and `eventName` are invalid you get `InvalidPayload`. Check the error type, not its message. `NCWEventError.MissingJWT` is never thrown. From Java, catch `Exception` and use `instanceof`, because `sendEventToSdk` doesn't declare these exceptions.
 
 ### 📚 Supported Event Types
 
@@ -249,7 +277,7 @@ If its input is invalid, `sendEventToSdk` throws an `NCWEventError` and sends no
 | `END_CHAT_CONFIRMED` | User confirmed ending the chat. |
 | `TRANSCRIPT_DOWNLOADED` | Chat transcript downloaded. |
 | `CUSTOM_EVENT` | Vendor/bot-defined callback event. The bot-defined name is nested under `event_data.event_type`, not the outer `event_type`. |
-| `error` | An SDK error. Details are in `event_data.error_details`. Initialization failures also carry `event_sub_type` and `event_payload`; see [Initialization error events](#initialization-error-events). |
+| `error` | An SDK error. Details are in `event_data.error_details`. Initialization failures also carry `event_sub_type` and `event_payload`; see [Initialization error events](#initialization-error-events). `REAUTHORIZATION_SUCCESS` sent without a JWT carries `event_sub_type` `missing_jwt`; see [Reauthorization Success](#reauthorization-success). Event data with a `NaN` or `Infinity` number carries `invalid_payload`; see [Parameters](#parameters). |
 
 #### Event types you can send
 
